@@ -92,7 +92,8 @@ async function controle(page: Page) {
     };
     Object.defineProperty(navigator, 'getGamepads', { value: () => [g] });
     (window as unknown as { __apertar: (i: number, v: boolean) => void }).__apertar = (i, v) => {
-      botoes[i]!.pressed = v;
+      const b = botoes[i];
+      if (b) b.pressed = v;
     };
   });
   await page.reload();
