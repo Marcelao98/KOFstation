@@ -73,3 +73,18 @@ Pra abrir o app no navegador (com o backend de teste, sem Rust):
 ```bash
 pnpm dev
 ```
+
+## Gerar o app (um executável só, com o front dentro)
+
+```bash
+pnpm build && cargo build --release -p kof-app
+```
+
+Sai em `target/release/kofstation`. Pro Windows, daqui do Linux (precisa do `mingw-w64` e do alvo do Rust):
+
+```bash
+rustup target add x86_64-pc-windows-gnu && cargo build --release -p kof-app --target x86_64-pc-windows-gnu
+```
+
+Sai em `target/x86_64-pc-windows-gnu/release/kofstation.exe`. Pra testar sem abrir navegador:
+`kofstation --sem-navegador` (mostra o endereço com o token).

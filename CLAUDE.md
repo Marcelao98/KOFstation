@@ -4,6 +4,8 @@
 - **31/10: F3, F4a, F4b e M1 feitos** (ele pediu "segue até o M1, depois a gente testa"): ⏸ esperando o Marcelo
   testar no Linux dele e aprovar a D2 = **opção B** (Rust local + Chromium; o Tauri no Linux não tem WebRTC nem
   SharedArrayBuffer: `docs/SPIKE_D2.md`). Depois: apagar o protótipo que perdeu (F4b.5) e seguir pro **M2**.
+- **App de verdade (opção B):** `crates/kof-app` = executável `kofstation` (serve o `apps/desktop/dist` embutido em
+  127.0.0.1 com token, abre o Chromium em modo app, fecha junto). Pacotes M1 entregues ao Marcelo em 31/10.
 - Rodar: `pnpm install`, `pnpm dev` (app no navegador com backend de teste), `pnpm check:tudo`, `pnpm e2e`.
 - Telas que ainda não existem estão em `screens/Pendente` e as ações avisam a etapa (`app/acoes.ts`, `ETAPA`).
 - O repositório antigo é `Marcelao98/kofstation-old` (o produto atual; NÃO mexer nele nesta migração).

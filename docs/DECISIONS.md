@@ -34,6 +34,11 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   e COOP/COEP e abre o navegador Chromium instalado em modo app, com perfil próprio.
 - **Consequências:** precisa de um Chromium/Chrome/Edge/Brave instalado (igual ao app antigo; no Windows o Edge já vem);
   o canal app ↔ Rust é HTTP/WebSocket local com token e conferência de `Origin`; os crates não mudam.
+- **Empacotamento (pergunta do Marcelo, 31/10):** com a opção B o app é **um executável só** (`kofstation`, ~3 MB no
+  Linux e ~4,5 MB no Windows, com o front embutido), feito pelo crate `kof-app`. Pacotes `.zip`/`.tar.gz`, AppImage,
+  `.deb`/`.rpm` e instalador do Windows saem desse executável (M15, com `cargo-packager` ou `cargo-deb`), e a
+  atualização assinada vem do D12. O que o Tauri dá a mais (instalador e atualizador prontos) se faz com essas
+  ferramentas; o que ele tiraria no Linux (WebRTC e isolamento) não tem conserto.
 - **Alternativas:** Tauri só no Windows (duas cascas pra manter); Electron (leva o Chromium junto, +~100 MB, sem
   dependência do navegador instalado; reavaliar se algum usuário não tiver Chromium).
 
