@@ -4,3 +4,8 @@ export * from './escala';
 export * from './libretro';
 export * from './nucleos';
 export * from './quadro';
+export * from './anel';
+export * from './jogo';
+export * from './mensagens';
+export * from './reamostrador';
+export * from './video';

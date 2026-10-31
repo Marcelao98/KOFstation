@@ -2,6 +2,7 @@
 // outras avisam em que etapa do roadmap chegam (docs/ROADMAP.md). Assim os menus ficam completos desde o M1 e nada
 // some sem aviso.
 import { usarAvisos } from '../stores/avisos';
+import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
@@ -22,15 +23,11 @@ const TELAS: Partial<Record<string, TelaId>> = {
 /** Etapa em que cada ação ainda não feita chega. */
 export const ETAPA: Readonly<Record<string, string>> = {
   pasta: 'M3',
-  abrir: 'M2',
   traducao: 'M10',
   'exportar-saves': 'M4',
   'importar-saves': 'M4',
   'controle-celular': 'M13',
-  reiniciar: 'M2',
-  pausar: 'M2',
   'nucleo-snes': 'M11',
-  rapido: 'M2',
   'salvar-estado': 'M5',
   'carregar-ultimo': 'M5',
   'auto-toggle': 'M5',
@@ -39,17 +36,12 @@ export const ETAPA: Readonly<Record<string, string>> = {
   visual: 'M7',
   'visual-temas': 'M7',
   sofa: 'M3',
-  'vol-menos': 'M2',
-  'vol-mais': 'M2',
-  mudo: 'M2',
-  'pausa-auto': 'M2',
   'musica-inicio': 'M9',
   'guardar-musica': 'M9',
   'boas-vindas': 'M9',
   bug: 'M10',
   'cacador-toggle': 'M10',
   atualizacao: 'M15',
-  'voltar-jogo': 'M2',
   biblioteca: 'M3',
   estados: 'M5',
   jukebox: 'M9',
@@ -58,8 +50,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   'bios-tela': 'M11',
   aparelhos: 'M13',
   jogadores: 'M8',
-  escala: 'M2',
-  prop: 'M2',
   moldura: 'M7',
   filtro: 'M7',
   'paleta-gb': 'M7',
@@ -82,9 +72,63 @@ function telaCheia() {
   }
 }
 
-/** Executa uma ação de menu. Devolve false se ela ainda não existe (e avisa). */
-export function acao(nome: string): boolean {
+const semJogo = () => {
+  usarAvisos.getState().avisar('nenhum jogo aberto: abra uma ROM (Ctrl+O)');
+  return true;
+};
+
+/** Executa uma ação de menu (`valor` = o dado do botão, ex.: escala 2). Devolve false se ainda não existe (e avisa). */
+export function acao(nome: string, valor?: string): boolean {
   const telas = usarTelas.getState();
+  const j = usarJogo.getState();
+  switch (nome) {
+    case 'abrir':
+      document.getElementById('arquivo')?.click();
+      return true;
+    case 'voltar-jogo':
+      if (!j.jogo) return semJogo();
+      telas.abrir('jogo');
+      return true;
+    case 'pausar':
+      if (!j.jogo) return semJogo();
+      j.alternarPausa();
+      return true;
+    case 'reiniciar':
+      if (!j.jogo) return semJogo();
+      j.reiniciar();
+      return true;
+    case 'rapido':
+      if (!j.jogo) return semJogo();
+      if (j.rapidoAberto) j.fecharRapido();
+      else {
+        telas.abrir('jogo');
+        j.abrirRapido();
+      }
+      return true;
+    case 'mudo':
+      j.alternarMudo();
+      return true;
+    case 'vol-menos':
+      j.mudarVolume(-10);
+      return true;
+    case 'vol-mais':
+      j.mudarVolume(10);
+      return true;
+    case 'desempenho':
+      j.alternarDesempenho();
+      return true;
+    case 'escala':
+      j.mudarEscala(Number(valor ?? 0));
+      return true;
+    case 'prop': {
+      const alvo = valor ?? '43';
+      for (let i = 0; i < 3 && usarJogo.getState().proporcao !== alvo; i++) usarJogo.getState().mudarProporcao(1);
+      return true;
+    }
+    case 'pausa-auto':
+      usarAvisos.getState().avisar('pausar ao sair da janela: sempre ligado por enquanto (a opção chega no M4)', 3000);
+      return true;
+  }
   const tela = TELAS[nome];
   if (tela) {
     telas.abrir(tela);

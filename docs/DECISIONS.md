@@ -106,3 +106,13 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 
 ## D20. Lista em janela feita em casa — **aceita**
 - ≈100 linhas; se não ficar fluida com 3.000 itens na CPU limitada a 4x, avaliar `@tanstack/react-virtual`.
+
+## D21. Núcleos embutidos no executável (por enquanto) — **aceita** (M2, 31/10)
+- Os 5 núcleos do M2 (~11 MB) vão dentro do `kofstation` (14,7 MB no Linux, 16 MB no Windows): abre sem baixar nada.
+- Quando entrarem os pesados (FBNeo, PCSX, Mupen64, Play!: +~22 MB) ou no M15, reavaliar: baixar sob demanda, como o
+  lançador do antigo fazia (`nucleo=` no versao.txt), ou deixar tudo dentro.
+
+## D22. O som dita o ritmo do jogo — **aceita** (M2, 31/10)
+- O núcleo roda num Web Worker e mantém ~60 ms de som num anel de memória compartilhada; o AudioWorklet consome no
+  relógio da placa de som. Sem som (sem isolamento ou placa), um relógio pelo fps do núcleo. É o "motor novo" que
+  estava planejado no antigo. Medido no M2: 60 fps e 0 falta de som, também com a CPU limitada a 4x.

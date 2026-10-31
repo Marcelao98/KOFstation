@@ -1,0 +1,137 @@
+// Menu rápido (#rapido) no meio do jogo: F2, botão direito ou Select+Start. Mesmos itens do antigo (ITENS_RAPIDO); o que
+// ainda não chegou no app novo avisa a etapa. ↑↓ escolhe, ◀▶ ajusta, Enter/A confirma, Esc/B fecha.
+import { nomeDoTema, TODOS_TEMAS } from '@kof/domain';
+import { useEffect, useState } from 'react';
+import { acao } from '../app/acoes';
+import { PROPORCOES, usarJogo } from '../stores/jogo';
+import { usarPrefs } from '../stores/prefs';
+
+interface Item {
+  t: string;
+  f?: () => void;
+  v?: () => string;
+  aj?: (d: number) => void;
+}
+
+const fechar = () => usarJogo.getState().fecharRapido();
+const depois = (f: () => void) => () => {
+  fechar();
+  f();
+};
+
+function itens(): Item[] {
+  const j = usarJogo.getState();
+  const p = usarPrefs.getState();
+  return [
+    { t: '▶ Continuar', f: fechar },
+    { t: '💾 Salvar estado', f: depois(() => acao('salvar-estado')) },
+    { t: '⟲ Carregar último estado', f: depois(() => acao('carregar-ultimo')) },
+    { t: '🎵 Guardar esta música', f: depois(() => acao('guardar-musica')) },
+    { t: '🐞 Reportar bug', f: depois(() => acao('bug')) },
+    { t: '🗂 Estados salvos', f: depois(() => acao('estados')) },
+    { t: '☕ Biblioteca', f: depois(() => acao('biblioteca')) },
+    { t: '🎮 Jogadores (2 a 4)', f: depois(() => acao('jogadores')) },
+    { t: '⌨ Controles e teclas', f: depois(() => acao('teclas')) },
+    {
+      t: '📈 Painel de desempenho',
+      v: () => (j.desempenho ? 'ligado' : 'desligado'),
+      aj: () => j.alternarDesempenho(),
+      f: depois(() => j.alternarDesempenho()),
+    },
+    { t: '🎮 Modo', v: () => 'Normal', aj: () => acao('emu-opcoes'), f: depois(() => acao('emu-opcoes')) },
+    {
+      t: '🎨 Tema',
+      v: () => nomeDoTema(p.tema) ?? p.tema,
+      aj: (d) => {
+        const i = TODOS_TEMAS.findIndex(([k]) => k === usarPrefs.getState().tema);
+        const novo = TODOS_TEMAS[(i + d + TODOS_TEMAS.length) % TODOS_TEMAS.length];
+        if (novo) usarPrefs.getState().escolherTema(novo[0]);
+      },
+      f: depois(() => acao('temas')),
+    },
+    { t: 'Filtro', v: () => 'Original', aj: () => acao('filtro') },
+    { t: 'Proporção', v: () => PROPORCOES.find(([k]) => k === j.proporcao)?.[1] ?? '', aj: (d) => j.mudarProporcao(d) },
+    { t: '🎛 Painel de imagem', f: depois(() => acao('visual')) },
+    { t: 'Moldura', v: () => 'Sem moldura', aj: () => acao('moldura') },
+    { t: 'Volume', v: () => (j.mudo ? 'mudo' : `${j.volume}%`), aj: (d) => j.mudarVolume(d * 10) },
+    { t: '⛶ Tela cheia', f: () => acao('cheia') },
+    { t: '↺ Reiniciar', f: depois(() => acao('reiniciar')) },
+  ];
+}
+
+/** Teclas do menu rápido (também usadas pelo controle). Devolve true se tratou. */
+export const teclaDoRapido: { tratar: ((code: string) => boolean) | null } = { tratar: null };
+
+export function MenuRapido() {
+  const aberto = usarJogo((j) => j.rapidoAberto);
+  usarJogo((j) => [j.volume, j.mudo, j.proporcao, j.desempenho].join()); // redesenha quando os valores mudam
+  usarPrefs((p) => p.tema);
+  const [sel, setSel] = useState(0);
+  const lista = itens();
+
+  useEffect(() => {
+    if (!aberto) return;
+    setSel(0);
+    teclaDoRapido.tratar = (code) => {
+      const l = itens();
+      if (code === 'ArrowDown') setSel((s) => (s + 1) % l.length);
+      else if (code === 'ArrowUp') setSel((s) => (s - 1 + l.length) % l.length);
+      else if (code === 'ArrowLeft' || code === 'ArrowRight')
+        setSel((s) => {
+          l[s]?.aj?.(code === 'ArrowLeft' ? -1 : 1);
+          return s;
+        });
+      else if (code === 'Enter' || code === 'Space')
+        setSel((s) => {
+          const it = l[s];
+          if (it?.f) it.f();
+          else it?.aj?.(1);
+          return s;
+        });
+      else if (code === 'Escape' || code === 'Backspace' || code === 'F2') fechar();
+      else return false;
+      return true;
+    };
+    return () => {
+      teclaDoRapido.tratar = null;
+    };
+  }, [aberto]);
+
+  if (!aberto) return <section id="rapido" hidden />;
+  return (
+    <section id="rapido">
+      <div className="titulo-j">☕ Menu rápido</div>
+      <ul id="rapido-lista">
+        {lista.map((it, i) => (
+          <li key={it.t} className={i === sel ? 'sel' : undefined} onClick={() => (setSel(i), it.f?.())}>
+            <span>{it.t}</span>
+            {it.aj && (
+              <span className="ajuste">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSel(i);
+                    it.aj?.(-1);
+                  }}
+                >
+                  ◀
+                </button>
+                <b>{it.v?.()}</b>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSel(i);
+                    it.aj?.(1);
+                  }}
+                >
+                  ▶
+                </button>
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="dica so-pc">↑↓ escolhe · ◀▶ ajusta · Enter/A confirma · Esc/B fecha · botão direito abre e fecha</p>
+    </section>
+  );
+}

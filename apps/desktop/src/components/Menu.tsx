@@ -45,7 +45,7 @@ export function Menu() {
                     className={it.pc ? 'so-pc' : undefined}
                     onClick={() => {
                       setAberto(null);
-                      acao(it.a);
+                      acao(it.a, it.v);
                     }}
                   >
                     {it.t}

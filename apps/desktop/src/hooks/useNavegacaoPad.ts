@@ -5,6 +5,8 @@ import { BOTAO } from '@kof/domain';
 import { bitsDeTodos, controlesDoNavegador } from '@kof/engine';
 import { useEffect } from 'react';
 import { acao } from '../app/acoes';
+import { teclaDoRapido } from '../components/MenuRapido';
+import { usarJogo } from '../stores/jogo';
 import { maisPerto, REPETE_MS, REPETE_PRIMEIRA_MS } from '../app/foco';
 import { usarTelas } from '../stores/telas';
 
@@ -62,6 +64,28 @@ export function useNavegacaoPad() {
     let dirAntes = 0;
     let proxima = 0;
     const parar = observarControle({ ler: () => bitsDeTodos(controlesDoNavegador()) }, (b, novos) => {
+      if (usarJogo.getState().rapidoAberto) {
+        // menu rápido: o direcional anda e ajusta, A confirma, B fecha (com repetição segurando, como nas telas)
+        const dirR = b & (BOTAO.Cima | BOTAO.Baixo | BOTAO.Esquerda | BOTAO.Direita);
+        const agoraR = performance.now();
+        if (!dirR) dirAntes = 0;
+        else if (dirR !== dirAntes || agoraR >= proxima) {
+          proxima = agoraR + (dirR !== dirAntes ? REPETE_PRIMEIRA_MS : REPETE_MS);
+          dirAntes = dirR;
+          const code =
+            dirR & BOTAO.Baixo
+              ? 'ArrowDown'
+              : dirR & BOTAO.Cima
+                ? 'ArrowUp'
+                : dirR & BOTAO.Esquerda
+                  ? 'ArrowLeft'
+                  : 'ArrowRight';
+          teclaDoRapido.tratar?.(code);
+        }
+        if (novos & BOTAO.A) teclaDoRapido.tratar?.('Enter');
+        if (novos & BOTAO.B) teclaDoRapido.tratar?.('Escape');
+        return;
+      }
       const tela = telaDeCima();
       if (!tela) return soltarFoco();
       if (atual && !tela.contains(atual)) soltarFoco();

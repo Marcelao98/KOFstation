@@ -1,5 +1,5 @@
 // A barra de menus do antigo (pagina.html, #menu), item por item. `a` = ação, `k` = tecla mostrada.
-export type ItemMenu = { a: string; t: string; k?: string; pc?: boolean } | 'hr';
+export type ItemMenu = { a: string; t: string; k?: string; pc?: boolean; v?: string } | 'hr';
 export interface Menu {
   titulo: string;
   acao?: string;
@@ -45,14 +45,14 @@ export const MENUS: Menu[] = [
   {
     titulo: 'Imagem',
     itens: [
-      { a: 'escala', t: 'Escala 2×' },
-      { a: 'escala', t: 'Escala 3×' },
-      { a: 'escala', t: 'Escala 4×' },
-      { a: 'escala', t: 'Encaixar na janela' },
+      { a: 'escala', t: 'Escala 2×', v: '2' },
+      { a: 'escala', t: 'Escala 3×', v: '3' },
+      { a: 'escala', t: 'Escala 4×', v: '4' },
+      { a: 'escala', t: 'Encaixar na janela', v: '0' },
       'hr',
-      { a: 'prop', t: 'Proporção 4:3 (como na TV)' },
-      { a: 'prop', t: 'Pixel perfeito (8:7)' },
-      { a: 'prop', t: 'Esticar' },
+      { a: 'prop', t: 'Proporção 4:3 (como na TV)', v: '43' },
+      { a: 'prop', t: 'Pixel perfeito (8:7)', v: '87' },
+      { a: 'prop', t: 'Esticar', v: 'esticar' },
       'hr',
       { a: 'molduras', t: '🖼 Galeria de molduras…' },
       { a: 'moldura', t: 'Sem moldura' },
@@ -79,6 +79,8 @@ export const MENUS: Menu[] = [
   {
     titulo: 'Som',
     itens: [
+      { a: 'vol-menos', t: 'Volume −', k: '−' },
+      { a: 'vol-mais', t: 'Volume +', k: '=' },
       { a: 'mudo', t: 'Mudo', k: 'M' },
       'hr',
       { a: 'pausa-auto', t: 'Pausar ao sair da janela: ligado' },
@@ -108,6 +110,7 @@ export const MENUS: Menu[] = [
 export const LATERAL = [
   { a: 'home', i: '🏠', t: 'Início', tela: 'home', dica: 'Início (tecla Home)' },
   { a: 'voltar', i: '←', t: 'Voltar', dica: 'Voltar (Alt+←)' },
+  { a: 'voltar-jogo', i: '🎮', t: 'Voltar ao jogo', tela: 'jogo', dica: 'Voltar ao jogo', soComJogo: true },
   'hr',
   { a: 'biblioteca', i: '📚', t: 'Biblioteca', tela: 'biblioteca', dica: 'Biblioteca (Ctrl+L)' },
   { a: 'jukebox', i: '🎵', t: 'Jukebox', tela: 'jukebox', dica: 'Jukebox' },

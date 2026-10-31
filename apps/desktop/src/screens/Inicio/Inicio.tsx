@@ -1,8 +1,9 @@
 // O Início (#home) do antigo, por enquanto no estado "primeira vez" (sem jogos: a biblioteca chega no M3).
 import { DICAS_PC, FRASES, LOGOS, TODOS_TEMAS, saudacao } from '@kof/domain';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { acao } from '../../app/acoes';
 import { usarApp } from '../../stores/app';
+import { ultimoQuadro, usarJogo } from '../../stores/jogo';
 import { usarPrefs } from '../../stores/prefs';
 
 const sortearDica = (antes: number): number => {
@@ -42,7 +43,25 @@ const ATALHOS: { a: string; i: string; b: string; s: React.ReactNode; id?: strin
   { a: 'bios-tela', i: '🔑', b: 'BIOS', s: 'guarde a BIOS dos consoles (PS2, Neo Geo...)', id: 'hm-bios' },
 ];
 
+/** A foto do jogo pausado (o último quadro), como o print do "Jogando agora" do antigo. */
+function FotoDoJogo() {
+  const c = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const el = c.current;
+    const q = ultimoQuadro;
+    if (!el || !q.pixels) return;
+    el.width = q.largura;
+    el.height = q.altura;
+    const img = new ImageData(q.largura, q.altura);
+    img.data.set(new Uint8Array(q.pixels.buffer, q.pixels.byteOffset, q.largura * q.altura * 4));
+    el.getContext('2d')?.putImageData(img, 0, 0);
+  }, []);
+  return <canvas ref={c} style={{ width: '100%', imageRendering: 'pixelated' }} />;
+}
+
 export function Inicio() {
+  const jogo = usarJogo((j) => j.jogo);
+  const nomeDoJogo = usarJogo((j) => j.nome);
   const tema = usarPrefs((p) => p.temaNaTela);
   const info = usarApp((a) => a.info);
   const [dica, setDica] = useState(() => sortearDica(-1));
@@ -69,23 +88,44 @@ export function Inicio() {
       </header>
       <div className="hm-corpo">
         <article className="hm-destaque" id="hm-destaque">
-          <div className="hm-print">{logo}</div>
-          <div className="hm-info">
-            <small className="hm-rotulo">👋 Primeira vez por aqui?</small>
-            <h2>Vamos começar</h2>
-            <p className="dica">
-              Escolha a pasta onde ficam suas ROMs (uma vez só) ou arraste uma ROM pra esta janela.
-            </p>
-            <button className="grande" data-acao="pasta" onClick={() => acao('pasta')}>
-              📁 Escolher pasta de ROMs
-            </button>
-            <button className="grande sec" data-acao="abrir" onClick={() => acao('abrir')}>
-              ＋ Abrir uma ROM
-            </button>
-            <button className="grande sec" data-acao="guia" onClick={() => acao('guia')}>
-              📖 Ver o guia
-            </button>
-          </div>
+          {jogo ? (
+            <>
+              <div className="hm-print">
+                <FotoDoJogo />
+              </div>
+              <div className="hm-info">
+                <small className="hm-rotulo">🎮 Jogando agora</small>
+                <h2>{nomeDoJogo}</h2>
+                <p className="dica">O jogo está pausado esperando você.</p>
+                <button className="grande" data-acao="voltar-jogo" onClick={() => acao('voltar-jogo')}>
+                  ▶ Voltar ao jogo
+                </button>
+                <button className="grande sec" data-acao="salvar-estado" onClick={() => acao('salvar-estado')}>
+                  💾 Salvar estado
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="hm-print">{logo}</div>
+              <div className="hm-info">
+                <small className="hm-rotulo">👋 Primeira vez por aqui?</small>
+                <h2>Vamos começar</h2>
+                <p className="dica">
+                  Escolha a pasta onde ficam suas ROMs (uma vez só) ou arraste uma ROM pra esta janela.
+                </p>
+                <button className="grande" data-acao="pasta" onClick={() => acao('pasta')}>
+                  📁 Escolher pasta de ROMs
+                </button>
+                <button className="grande sec" data-acao="abrir" onClick={() => acao('abrir')}>
+                  ＋ Abrir uma ROM
+                </button>
+                <button className="grande sec" data-acao="guia" onClick={() => acao('guia')}>
+                  📖 Ver o guia
+                </button>
+              </div>
+            </>
+          )}
         </article>
         <div className="hm-atalhos">
           {ATALHOS.map((x) => (

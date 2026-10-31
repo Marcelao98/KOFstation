@@ -73,3 +73,21 @@ export function semOpostos(b: number): number {
     b &= ~(BOTAO.Esquerda | BOTAO.Direita);
   return b;
 }
+
+/** Teclas padrão do jogo (o BOTOES_SNES do antigo): código da tecla → bit. */
+export const TECLAS_PADRAO: Readonly<Record<string, number>> = {
+  ArrowUp: BOTAO.Cima,
+  ArrowDown: BOTAO.Baixo,
+  ArrowLeft: BOTAO.Esquerda,
+  ArrowRight: BOTAO.Direita,
+  KeyZ: BOTAO.B,
+  KeyX: BOTAO.A,
+  KeyA: BOTAO.Y,
+  KeyS: BOTAO.X,
+  KeyQ: BOTAO.L,
+  KeyW: BOTAO.R,
+  Enter: BOTAO.Start,
+  ShiftLeft: BOTAO.Select,
+  KeyE: BOTAO.L2,
+  KeyR: BOTAO.R2,
+};

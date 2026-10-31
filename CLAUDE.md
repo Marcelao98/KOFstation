@@ -1,6 +1,10 @@
 # KOFstation (novo) — contexto pra próxima sessão
 
 ## ⏩ ONDE PAROU
+- **31/10 (2): M2 feito, ⏸ esperando o Marcelo jogar** (D2 aceita, spike apagado). Núcleos: `pnpm nucleos` (manifesto em
+  `third_party/cores/`), paridade com o antigo em `packages/engine/test/` (gerar a referência: `KOF_ANTIGO=<old>`).
+  Engine: `SessaoLibretro` (libretro.ts) num Worker (worker.ts), som por anel + AudioWorklet (anel.ts), `Jogo` (jogo.ts).
+  Binários de teste: branch órfã `teste-binarios` (um commit só, substituído a cada versão).
 - **31/10: F3, F4a, F4b e M1 feitos** (ele pediu "segue até o M1, depois a gente testa"): ⏸ esperando o Marcelo
   testar no Linux dele e aprovar a D2 = **opção B** (Rust local + Chromium; o Tauri no Linux não tem WebRTC nem
   SharedArrayBuffer: `docs/SPIKE_D2.md`). Depois: apagar o protótipo que perdeu (F4b.5) e seguir pro **M2**.

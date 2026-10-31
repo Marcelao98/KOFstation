@@ -51,8 +51,8 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | F4b.1 | Protótipo A (Tauri): janela abre o app, `app.info` vai e volta, erro de comunicação tratado | print/vídeo no Linux; você roda | ✅ |
 | F4b.2 | Protótipo B (Rust local + Chromium em modo app, com token) com o mesmo fluxo | idem | ✅ |
 | F4b.3 | Nos dois: Snes9x wasm (o mesmo do antigo) num Worker + AudioWorklet + WebGL, ROM gerada | tabela de fps, engasgos e falta de som | ✅ |
-| F4b.4 | Nos dois: núcleos pesados (PS1, N64, Neo Geo), Gamepad, WebRTC, SharedArrayBuffer, instalação no Fedora e no Ubuntu | relatório `docs/SPIKE_D2.md`; **você roda os dois no teu Linux com o teu controle** | ⏸ |
-| F4b.5 | Decisão D2 e remoção do protótipo que perdeu | **você aprova a decisão** | ⏸ |
+| F4b.4 | Nos dois: núcleos pesados (PS1, N64, Neo Geo), Gamepad, WebRTC, SharedArrayBuffer, instalação no Fedora e no Ubuntu | relatório `docs/SPIKE_D2.md`; **você roda os dois no teu Linux com o teu controle** | ✅ |
+| F4b.5 | Decisão D2 e remoção do protótipo que perdeu | **você aprova a decisão** | ✅ |
 
 ## M1 — Casca (sem jogo ainda)
 
@@ -68,11 +68,11 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M2.1 | `CoreSession` + `WasmLibretroCore` no Node: ROMs geradas de NES/MD/GB/SNES, N quadros | hash da imagem e do som **igual ao antigo** | ⬜ |
-| M2.2 | Worker + laço + som pelo AudioWorklet | você ouve uma ROM de teste com som | ⬜ |
-| M2.3 | Vídeo WebGL (escala, proporção, resolução dinâmica, corte do NES), sem filtros ainda | print antigo × novo pixel a pixel | ⬜ |
-| M2.4 | Entrada do J1 (teclado e controle no mapa padrão), pausa, F1, turbo, volume, mudo | você joga uma ROM de teste | ⬜ |
-| M2.5 | Abrir arquivo, tela do jogo, menu rápido básico, painel de desempenho (F3) | **você joga um jogo teu no app novo** | ⬜ |
+| M2.1 | `CoreSession` + `WasmLibretroCore` no Node: ROMs geradas de NES/MD/GB/SNES, N quadros | hash da imagem e do som **igual ao antigo** | ⏸ |
+| M2.2 | Worker + laço + som pelo AudioWorklet | você ouve uma ROM de teste com som | ⏸ |
+| M2.3 | Vídeo WebGL (escala, proporção, resolução dinâmica, corte do NES), sem filtros ainda | print antigo × novo pixel a pixel | ⏸ |
+| M2.4 | Entrada do J1 (teclado e controle no mapa padrão), pausa, F1, turbo, volume, mudo | você joga uma ROM de teste | ⏸ |
+| M2.5 | Abrir arquivo, tela do jogo, menu rápido básico, painel de desempenho (F3) | **você joga um jogo teu no app novo** | ⏸ |
 
 ## M3 — Biblioteca e Kof Games
 

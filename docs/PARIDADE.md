@@ -9,18 +9,18 @@
 ## Atalhos de teclado (PC) — `app.js` ≈ 1080–1135
 | Tecla | Faz | Etapa | Estado |
 |---|---|---|---|
-| F1 | reiniciar o jogo | M2 | ⬜ |
-| F2 | menu rápido (abre/fecha) | M2 | ⬜ |
-| F3 | painel de desempenho | M10 | ⬜ |
+| F1 | reiniciar o jogo | M2 | ✅ |
+| F2 | menu rápido (abre/fecha) | M2 | ✅ |
+| F3 | painel de desempenho | M2 | ✅ |
 | F4 | painel de imagem | M7 | ⬜ |
 | F5 / F6 / F8 | salvar estado / tela de estados / carregar o último | M5 | ⬜ |
 | F7 | guardar a música (jukebox) | M9 | ⬜ |
 | F9 | reportar bug (caçador de bugs) | M10 | ⬜ |
 | F11 | tela cheia | M1 | 🟨 |
-| Esc / P | pausar; Esc fecha painel/tela aberta e volta ao jogo | M1/M2 | ⬜ |
-| M | mudo | M2 | ⬜ |
-| − / = (e numérico) | volume −10 / +10 | M2 | ⬜ |
-| Tab (segurar) | turbo | M2 | ⬜ |
+| Esc / P | pausar; Esc fecha painel/tela aberta e volta ao jogo | M1/M2 | ✅ |
+| M | mudo | M2 | ✅ |
+| − / = (e numérico) | volume −10 / +10 | M2 | ✅ |
+| Tab (segurar) | turbo | M2 | 🟨 |
 | Backspace (segurar) / Select+Y | rebobinar | M6 | ⬜ |
 | Ctrl+O / Ctrl+L | abrir arquivo / biblioteca | M3 | ⬜ |
 | Home | Início | M1 | ✅ |
@@ -32,7 +32,7 @@
 ## Navegação e telas — [home, direito, foco, menu]
 - ⬜ Todas as telas do antigo existem (Início, Biblioteca, Estados, Jukebox, Estatísticas, Guia, Controles e teclas,
   Temas, Painel de imagem, Molduras, BIOS, Aparelhos, Jogadores, Modo de jogo, Abertura, Espaço usado, Bug).
-- 🟨 O jogo pausa com qualquer tela aberta e volta ao fechar (regra pronta em `jogoPausadoPorTela`; liga no M2).
+- ✅ O jogo pausa com qualquer tela aberta, com o menu rápido e ao sair da janela, e volta ao fechar. [e2e jogo]
 - ✅ Voltar anda pelo histórico; botão direito nas telas = Voltar. [e2e casca]
 - ⬜ Menu rápido com todos os itens (`ITENS_RAPIDO`), ◀▶ ajustam, itens só de certos sistemas (`so:`).
 - ✅ Navegação por controle fora do jogo (`navegarPad`): direcional move o foco pro botão mais perto, segurar repete,
@@ -64,13 +64,13 @@
 
 ## Emulação, vídeo e som — [teste, nucleos, nucleo-snes, matriz, dk, erro]
 - ⬜ Os mesmos sistemas: SNES (Snes9x; Kof opcional quando liberado), GB/GBC, NES, MD, SMS, GG, GBA, Neo Geo, PS1, N64, PS2.
-- ⬜ Núcleo carregado só ao abrir um jogo daquele console; aviso "faltou baixar o núcleo".
+- 🟨 Núcleo carregado só ao abrir um jogo daquele console (no Worker); o aviso de núcleo faltando vira erro claro do Worker.
 - ⬜ Resolução dinâmica (Sega, PS1), corte do NES (256x224), proporção 4:3 "como na TV", 10:9 GB/GG, 3:2 GBA.
 - ⬜ Paletas do GB (automática, verde, cinza) e do NES (3).
-- ⬜ Volume, mudo, aviso de mudo ao abrir jogo e na jukebox.
+- 🟨 Volume, mudo e aviso de mudo ao abrir jogo ✅; na jukebox: M9.
 - ⬜ Pular quadros quando atrasa (PS1 `frameskip auto`); turbo.
 - ⬜ Estado salvo com outro núcleo de SNES reabre no núcleo certo.
-- ⬜ Mesmos pixels e mesmas amostras do antigo, quadro a quadro (comparação automática).
+- ✅ Mesmos pixels e mesmas amostras do antigo, quadro a quadro, em SNES, NES, MD, GB e GBA (comparação automática, `packages/engine/test/paridade.test.ts`).
 
 ## Painel de imagem e molduras — [filtros, visual-*, molduras]
 - ⬜ 61 ajustes, 42 predefinições, categorias/grupos, custo leve/médio/pesado, comparar (lado a lado, piscar),
