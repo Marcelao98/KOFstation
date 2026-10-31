@@ -18,7 +18,8 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "e2e": "pnpm --filter @kof/desktop e2e",
     "check:rust": "cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
-    "check:tudo": "pnpm check && pnpm check:rust"
+    "check:tudo": "pnpm check && pnpm check:rust",
+    "nucleos": "node tools/baixar-nucleos.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

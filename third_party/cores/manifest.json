@@ -1,0 +1,30 @@
+{
+  "origem": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/main/publicado/nucleos/",
+  "nucleos": {
+    "fceumm": {
+      "arquivo": "fceumm-2517ed8e.js",
+      "tamanho": 1563407,
+      "sha256": "2517ed8ee70b83c27d1a9f3dd2510a5d8ac63a3ad26468238b607ac7281555b8"
+    },
+    "gambatte": {
+      "arquivo": "gambatte-5f110e7c.js",
+      "tamanho": 873703,
+      "sha256": "5f110e7c4cf50fa6055b43531b738d4875fd97cf709a43428c08d04294cb77f5"
+    },
+    "genplus": {
+      "arquivo": "genplus-68464cca.js",
+      "tamanho": 3778979,
+      "sha256": "68464cca44b5bb9d986737bcbfe66e0168ae3a37f984b7249c3e4a680897a5f5"
+    },
+    "mgba": {
+      "arquivo": "mgba-5ed1b987.js",
+      "tamanho": 1331613,
+      "sha256": "5ed1b9872a762e4cec94c04321e92ac996ed37a93e2080f324ce715505710751"
+    },
+    "snes9x": {
+      "arquivo": "snes9x-ab8ba810.js",
+      "tamanho": 4105029,
+      "sha256": "ab8ba810287b4e89e525ccfc584f0b865a9b9c85037c5da593aec797e7f7c800"
+    }
+  }
+}

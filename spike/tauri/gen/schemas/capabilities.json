@@ -1,1 +1,9 @@
-{"padrao":{"identifier":"padrao","description":"","local":true,"windows":["main"],"permissions":["core:default"]}}
+{
+  "padrao": {
+    "identifier": "padrao",
+    "description": "",
+    "local": true,
+    "windows": ["main"],
+    "permissions": ["core:default"]
+  }
+}

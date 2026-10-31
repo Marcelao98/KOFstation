@@ -1,0 +1,67 @@
+{
+  "snes": {
+    "largura": 256,
+    "altura": 224,
+    "fps": 60.099,
+    "taxaAudio": 32040,
+    "quadros": {
+      "30": "a0379dc5",
+      "90": "a0379dc5",
+      "179": "a0379dc5"
+    },
+    "som": "a7f69325",
+    "amostras": 191772
+  },
+  "nes": {
+    "largura": 256,
+    "altura": 224,
+    "fps": 60.1,
+    "taxaAudio": 48000,
+    "quadros": {
+      "30": "c7cb9dc5",
+      "90": "c7cb9dc5",
+      "179": "c7cb9dc5"
+    },
+    "som": "c632fb35",
+    "amostras": 287502
+  },
+  "md": {
+    "largura": 256,
+    "altura": 224,
+    "fps": 59.923,
+    "taxaAudio": 44100,
+    "quadros": {
+      "30": "8ac25dc5",
+      "90": "8ac25dc5",
+      "179": "8ac25dc5"
+    },
+    "som": "95f7502d",
+    "amostras": 264940
+  },
+  "gb": {
+    "largura": 160,
+    "altura": 144,
+    "fps": 59.728,
+    "taxaAudio": 32768,
+    "quadros": {
+      "30": "7c387685",
+      "90": "7c387685",
+      "179": "7c387685"
+    },
+    "som": "a0cbd0dd",
+    "amostras": 197436
+  },
+  "gba": {
+    "largura": 240,
+    "altura": 160,
+    "fps": 59.728,
+    "taxaAudio": 65536,
+    "quadros": {
+      "30": "c0c36dc5",
+      "90": "c0c36dc5",
+      "179": "c0c36dc5"
+    },
+    "som": "6e13fd45",
+    "amostras": 393136
+  }
+}

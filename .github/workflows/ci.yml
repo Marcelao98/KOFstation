@@ -22,6 +22,8 @@ jobs:
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - run: pnpm install --frozen-lockfile
+      - name: Núcleos (do kofstation-old, conferidos por SHA-256)
+        run: pnpm nucleos
       - name: TypeScript (formato, lint, tipos, testes)
         run: pnpm check
       - name: Rust (formato, clippy, testes)
