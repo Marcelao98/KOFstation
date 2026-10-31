@@ -1,0 +1,7 @@
+node_modules
+dist
+target
+pnpm-lock.yaml
+LICENSE
+*.md
+apps/desktop/src/styles/antigo/

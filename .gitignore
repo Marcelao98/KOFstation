@@ -1,0 +1,29 @@
+node_modules/
+dist/
+target/
+coverage/
+test-results/
+playwright-report/
+*.log
+.vite/
+# ROMs, BIOS e saves nunca vão pro git
+*.sfc
+*.smc
+*.nes
+*.gb
+*.gbc
+*.gba
+*.md.rom
+*.gen
+*.sms
+*.gg
+*.bin
+*.cue
+*.iso
+*.chd
+*.srm
+*.state
+# núcleos (binários por hash, baixados pelo manifesto)
+third_party/cores/*.js
+third_party/cores/*.so
+third_party/cores/*.dll
