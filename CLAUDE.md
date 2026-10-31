@@ -1,7 +1,8 @@
 # KOFstation (novo) — contexto pra próxima sessão
 
 ## ⏩ ONDE PAROU
-- **F2 (arquitetura) feita, esperando o Marcelo aprovar** (31/10/2026). Próximo: F3 (ambiente). Ver `docs/ROADMAP.md`.
+- **F2 aprovada (31/10/2026).** Roadmap com 76 passos e checkpoint em CADA passo (`docs/ROADMAP.md`): parar e esperar
+  o "segue" do Marcelo. Próximo: **F3.1** (monorepo). Como o front é feito: `docs/FRONTEND.md`.
 - O repositório antigo é `Marcelao98/kofstation-old` (o produto atual; NÃO mexer nele nesta migração).
 
 ## Como trabalhar aqui

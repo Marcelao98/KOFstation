@@ -1,54 +1,207 @@
-# Roadmap e como o plano é executado
+# Roadmap passo a passo (com checkpoint em cada passo)
 
-> Estado de cada etapa: ⬜ não começou · 🟨 em andamento · ✅ fechada (com teste e paridade verificada) · ⏸ esperando o Marcelo.
-> Detalhe de cada etapa (o que reaproveita do antigo, linhas do código): [auditoria/PLANO_DETALHADO.md §4](auditoria/PLANO_DETALHADO.md).
+> Estado: ⬜ não começou · 🟨 em andamento · ⏸ esperando o Marcelo · ✅ aprovado.
+> Cada passo termina num **checkpoint**: eu paro, mostro e espero você dizer "segue" (ou pedir mudança). Se quiser
+> andar mais rápido, pode aprovar vários de uma vez ("segue até o M1.3").
+> Onde está cada coisa no app antigo: [auditoria/PLANO_DETALHADO.md §4](auditoria/PLANO_DETALHADO.md) e
+> [auditoria/FEATURE_INVENTORY.md](auditoria/FEATURE_INVENTORY.md). Como o front é feito: [FRONTEND.md](FRONTEND.md).
 
-## Etapas
+## Como é cada checkpoint
 
-| # | Etapa | Estado | Checkpoint do Marcelo |
+1. **Resumo curto** do que foi feito e do que ficou de fora.
+2. **Pra ver:** print ou vídeo antigo × novo (quando tem tela), números (quando é desempenho), ou o resultado dos testes.
+3. **Pra fazer (opcional):** o comando pra você rodar no teu Linux e o que conferir.
+4. **Link do commit** no GitHub.
+5. Linha atualizada aqui e no `CLAUDE.md` ("onde parou").
+
+## Como cada passo é feito
+
+Ler só o trecho do antigo daquele passo → marcar os itens no [PARIDADE.md](PARIDADE.md) → implementar na camada certa
+com teste junto → comparar com o antigo → registrar decisão/contrato novo → commit e push → checkpoint.
+
+---
+
+## F2 — Arquitetura ✅ (aprovada pelo Marcelo em 31/10/2026)
+
+## F3 — Ambiente
+
+| Passo | O que faço | Checkpoint (o que você vê / faz) | Estado |
 |---|---|---|---|
-| F2 | Documentos da arquitetura, licença, paridade | 🟨 | **aprova a arquitetura** |
-| F3 | Ambiente: pnpm + Cargo workspaces, lockfiles, CI Linux/Windows, guia de instalação | ⬜ | instala no Linux dele |
-| F4a | Esqueleto React → Rust → React, logs, testes | ⬜ | — |
-| F4b | Spike Tauri × Rust + Chromium (decide D2) | ⬜ | **aprova a decisão D2** |
-| M1 | Casca: telas, Voltar, 126 temas, Início, foco por controle | ⬜ | — |
-| M2 | Engine: núcleo wasm no Worker, WebGL, AudioWorklet, J1 | ⬜ | **joga um jogo no app novo** |
-| M3 | Biblioteca + Kof Games + busca + capas | ⬜ | — |
-| M4 | Configurações em camadas + importar/exportar `.kofsave` | ⬜ | — |
-| M5 | Saves, savestates, automático, modos de jogo | ⬜ | — |
-| M6 | Rebobinar | ⬜ | — |
-| M7 | Painel de imagem e molduras | ⬜ | confere os filtros |
-| M8 | Controles e teclas, jogadores 2–4 | ⬜ | — |
-| M9 | Jukebox e músicas | ⬜ | — |
-| M10 | Estatísticas, patches, caçador de bugs, desempenho, avisos | ⬜ | — |
-| M11 | BIOS, GBA, Neo Geo, PS1, N64 | ⬜ | testa com jogos dele |
-| M12 | PS2 nativo (kofnativo supervisionado pelo Rust) | ⬜ | — |
-| M13 | Rede, celular como controle, Jogar no PC | ⬜ | testa com o celular |
-| M15 | Distribuição: pacotes Linux/Windows, atualizador assinado | ⬜ | **instala a beta** |
-| M14 | Celular (casca Java servindo o app novo) | ⬜ | testa no celular |
-| — | Troca: o app antigo avisa e leva pro novo | ⬜ | **decide a troca** |
+| F3.1 | Monorepo: `package.json`, `pnpm-workspace.yaml`, `tsconfig` estrito, Cargo workspace, `rust-toolchain.toml`, `.gitignore`, `.editorconfig` | árvore de pastas e `pnpm install` + `cargo build` passando | ⬜ |
+| F3.2 | Qualidade: ESLint (com a regra de camadas), Prettier, rustfmt, clippy, um comando `pnpm check` que roda tudo | eu mostro um import proibido (tela → engine) sendo barrado | ⬜ |
+| F3.3 | CI no GitHub (Linux e Windows) rodando `pnpm check` e `cargo test` a cada envio | link do CI verde | ⬜ |
+| F3.4 | `docs/INSTALAR.md`: Fedora, Ubuntu e Windows | **você instala no teu Linux** e roda `pnpm check` | ⬜ |
 
-## Como cada etapa é executada
+## F4a — Esqueleto
 
-1. **Abrir:** ler o `CLAUDE.md` ("onde parou") e a linha da etapa aqui. Nada de reler o projeto todo.
-2. **Estudar o antigo só no trecho da etapa:** as fichas do [FEATURE_INVENTORY](auditoria/FEATURE_INVENTORY.md) dizem os
-   arquivos e as linhas em `Marcelao98/kofstation-old`.
-3. **Marcar no [PARIDADE.md](PARIDADE.md)** os itens que a etapa cobre.
-4. **Implementar** na camada certa (domain → app-core → engine → backend → tela), com testes junto.
-5. **Comparar com o antigo:** mesma ROM + estado + botões → mesmos pixels/som; mesmos arquivos lidos e gravados nos dois
-   sentidos. Item de paridade só vira ✅ com teste.
-6. **Registrar:** decisão nova vai pro [DECISIONS.md](DECISIONS.md); contrato novo pro [API_CONTRACTS.md](API_CONTRACTS.md);
-   o que foi feito no `CLAUDE.md` ("onde parou") e aqui.
-7. **Enviar:** commit em português, push na branch de trabalho. Juntar na `main` (PR) quando o Marcelo pedir.
-8. **Checkpoint:** nas etapas marcadas acima, parar e esperar o Marcelo antes da seguinte.
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| F4a.1 | `packages/domain`, `app-core`, `engine`, `contracts` com uma função e um teste cada | `pnpm test` verde | ⬜ |
+| F4a.2 | App React mínimo com o backend `teste` (sem Rust), tema Café do antigo | print + você abre com `pnpm dev` | ⬜ |
+| F4a.3 | Crate `kof-core`: `app.info`, erros tipados, log em arquivo (`tracing`), `cargo test` | saída dos testes + o arquivo de log | ⬜ |
+| F4a.4 | Contrato `app.info` e de erro com o mesmo exemplo JSON testado no TS e no Rust | eu mudo um campo de um lado e o teste falha | ⬜ |
 
-Economia de tokens: uma etapa por sessão (duas nas grandes), leitura do antigo por trecho, núcleos já publicados (sem
-recompilar), só os testes da etapa (a suíte inteira roda no CI), ROMs geradas pelos testes.
+## F4b — Teste da casca no Linux (decide Tauri ou não)
 
-## Regras que não mudam (herdadas do projeto antigo)
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| F4b.1 | Protótipo A (Tauri): janela abre o app, `app.info` vai e volta, erro de comunicação tratado | print/vídeo no Linux; você roda | ⬜ |
+| F4b.2 | Protótipo B (Rust local + Chromium em modo app, com token) com o mesmo fluxo | idem | ⬜ |
+| F4b.3 | Nos dois: Snes9x wasm (o mesmo do antigo) num Worker + AudioWorklet + WebGL, ROM gerada | tabela de fps, engasgos e falta de som | ⬜ |
+| F4b.4 | Nos dois: núcleos pesados (PS1, N64, Neo Geo), Gamepad, WebRTC, SharedArrayBuffer, instalação no Fedora e no Ubuntu | relatório `docs/SPIKE_D2.md`; **você roda os dois no teu Linux com o teu controle** | ⬜ |
+| F4b.5 | Decisão D2 e remoção do protótipo que perdeu | **você aprova a decisão** | ⬜ |
 
-- **Nunca** commitar, distribuir ou indicar onde baixar ROM, BIOS ou jogo (nem em teste ou doc).
-- O repositório antigo (`kofstation-old`) não é alterado por esta migração; ele continua sendo o produto até a troca.
-- **Nunca criar um repositório chamado `KOFSnes`**: os atualizadores antigos baixam por esse nome (redireciona pro
-  `kofstation-old`).
-- Commits em português, sem nome de modelo de IA.
+## M1 — Casca (sem jogo ainda)
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M1.1 | Temas: `estilo.css` do antigo inteiro, `data-tema`, teste de contraste dos 126 | prints de 6 temas antigo × novo | ⬜ |
+| M1.2 | Pilha de telas, Voltar (botão, botão direito, Esc, Alt+←), atalhos globais (F2, F11, Home) | você navega entre telas vazias | ⬜ |
+| M1.3 | Foco por controle (direcional, A, B, Start, segurar repete) | **você navega com o teu controle** | ⬜ |
+| M1.4 | Início (sem jogos), menu lateral, menu Arquivo, avisos | print antigo × novo | ⬜ |
+| M1.5 | Galeria de temas (busca sem acento, categorias, showcase lento/rápido) e Guia | você usa a galeria | ⬜ |
+
+## M2 — Rodar um jogo
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M2.1 | `CoreSession` + `WasmLibretroCore` no Node: ROMs geradas de NES/MD/GB/SNES, N quadros | hash da imagem e do som **igual ao antigo** | ⬜ |
+| M2.2 | Worker + laço + som pelo AudioWorklet | você ouve uma ROM de teste com som | ⬜ |
+| M2.3 | Vídeo WebGL (escala, proporção, resolução dinâmica, corte do NES), sem filtros ainda | print antigo × novo pixel a pixel | ⬜ |
+| M2.4 | Entrada do J1 (teclado e controle no mapa padrão), pausa, F1, turbo, volume, mudo | você joga uma ROM de teste | ⬜ |
+| M2.5 | Abrir arquivo, tela do jogo, menu rápido básico, painel de desempenho (F3) | **você joga um jogo teu no app novo** | ⬜ |
+
+## M3 — Biblioteca e Kof Games
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M3.1 | `domain`: detectar sistema, CRC No-Intro, ler zip e .cue (sem DOM) | testes com arquivos gerados | ⬜ |
+| M3.2 | Rust `kof-files`: escopos, árvore da Kof Games, varredura com progresso | você aponta pra tua Kof Games e vê a contagem | ⬜ |
+| M3.3 | Organizar (mostra o plano antes, depois aplica) | você confere o plano numa **cópia** da pasta | ⬜ |
+| M3.4 | Tela da biblioteca: lista em janela, ficha, abrir jogo, arrastar arquivo | 3.000 jogos sem travar (vídeo) | ⬜ |
+| M3.5 | Busca, `campo:valor`, facetas, ordenar, base de jogos | as mesmas buscas dão o mesmo resultado no antigo e no novo | ⬜ |
+| M3.6 | Capas (baixadas pelo Rust, com cache) | tua biblioteca com capas | ⬜ |
+
+## M4 — Configurações e dados
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M4.1 | Esquema de configurações com camadas (geral → console → jogo) gravado em arquivo | testes + o arquivo de config legível | ⬜ |
+| M4.2 | Importar `.kofsave` | **o teu backup de verdade do antigo entra no novo** | ⬜ |
+| M4.3 | Exportar `.kofsave` | o antigo abre o backup feito no novo | ⬜ |
+
+## M5 — Saves, estados e modos
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M5.1 | Save de bateria em arquivo (formato do antigo) | um save teu continua de onde parou | ⬜ |
+| M5.2 | Savestates, tela de Estados, F5/F6/F8 | um estado salvo no antigo abre no novo | ⬜ |
+| M5.3 | Salvar automático e Continuar | você fecha no meio e continua | ⬜ |
+| M5.4 | Modos alegria/normal/raiz/hardcore, pergunta ao abrir, Opções de emulação | você testa as regras de cada modo | ⬜ |
+
+## M6 — Rebobinar
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M6.1 | Rebobinador dentro do Worker | teste: volta bit a bit igual ao antigo | ⬜ |
+| M6.2 | Backspace/Select+Y, preto e branco, ampulheta de 30 s, limite por modo | **você rebobina** | ⬜ |
+
+## M7 — Painel de imagem e molduras
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M7.1 | `visual.js` portado + shader sob medida | pixels iguais ao antigo nas 42 predefinições | ⬜ |
+| M7.2 | Passadas NTSC, Scale4x, bloom | prints antigo × novo | ⬜ |
+| M7.3 | Painel Simples (F4): categorias, cartões com prévia, intensidade | você usa | ⬜ |
+| M7.4 | Avançado, ⭐ meus, `.kofvisual`, por console e por jogo, comparar | um `.kofvisual` do antigo abre no novo | ⬜ |
+| M7.5 | Molduras (SVG, animação, PNG própria), paletas do GB e do NES | **você confere os filtros e as molduras** | ⬜ |
+
+## M8 — Controles
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M8.1 | Mapa de entrada com camadas (`domain`), teclas reservadas | testes | ⬜ |
+| M8.2 | Tela Controles e teclas (abas, escopo, captura de tecla e de botão) | você remapeia | ⬜ |
+| M8.3 | Analógico no teclado, L2/R2 | você testa num jogo de PS1/N64 | ⬜ |
+| M8.4 | Jogadores 2 a 4 e a tela Jogadores | você joga com 2 controles | ⬜ |
+
+## M9 — Jukebox e música
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M9.1 | Tocador numa 2ª instância do núcleo, guardar música (F7) | você guarda e toca uma música | ⬜ |
+| M9.2 | Tela da jukebox com barras e capa, `.spc` (importar/exportar) | um `.spc` do antigo toca igual | ⬜ |
+| M9.3 | Ondas, Mudo/Solo, notas, sincronia, exportar `.wav` | `.wav` igual ao do antigo | ⬜ |
+| M9.4 | Trilha FM, 8 bits, Air em violino, música do Início | você ouve | ⬜ |
+| M9.5 | Abertura da primeira vez | print/vídeo antigo × novo | ⬜ |
+
+## M10 — Estatísticas e extras
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M10.1 | Estatísticas (por dia/mês/hora/aparelho) e a tela | as tuas estatísticas importadas aparecem iguais | ⬜ |
+| M10.2 | Espaço usado | você vê | ⬜ |
+| M10.3 | Patches de tradução IPS/BPS/UPS | um jogo traduzido abre com o selo 🇧🇷 | ⬜ |
+| M10.4 | Caçador de bugs (F9) e replay | um pacote do antigo reproduz no novo | ⬜ |
+| M10.5 | Avisos de atualização e de mudo | você vê | ⬜ |
+
+## M11 — Sistemas com BIOS
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M11.1 | Tela de BIOS e importação (por nome, tamanho e conteúdo) | tuas BIOS reconhecidas | ⬜ |
+| M11.2 | GBA | você joga | ⬜ |
+| M11.3 | Neo Geo (zip inteiro + pai, AES) | você joga KOF | ⬜ |
+| M11.4 | PS1 em wasm (CD sem cópia) | você joga | ⬜ |
+| M11.5 | N64 em wasm | você joga | ⬜ |
+| M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ⬜ |
+
+## M12 — PS2 nativo
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M12.1 | `kof-process`: abre, vigia e religa o kofnativo | teste com um programa falso | ⬜ |
+| M12.2 | Canal com token e protocolo tipado | teste: conexão sem token é recusada | ⬜ |
+| M12.3 | Modo página com filtros, disco lido aos pedaços | DVD de teste roda | ⬜ |
+| M12.4 | Cartão de memória, savestate, pausa | você joga PS2 (quando quiser) | ⬜ |
+
+## M13 — Rede e celular como controle
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M13.1 | `kof-net` (usa o `kofrede.c` do antigo) | testes do protocolo passando | ⬜ |
+| M13.2 | Tela Aparelhos, código e QR | **teu celular (APK atual) pareia com o PC novo** | ⬜ |
+| M13.3 | Celular como controle (antigo e pela rede), jogadores pela rede | você joga com o celular | ⬜ |
+| M13.4 | Jogar no PC, Controle total, Modo Switch, Levar pro celular | você joga no celular com o PC processando | ⬜ |
+
+## M15 — Distribuição
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M15.1 | Manifesto assinado e atualizador | teste: arquivo alterado é recusado | ⬜ |
+| M15.2 | Pacote do Linux | **você instala no teu Linux** | ⬜ |
+| M15.3 | Pacote do Windows | você instala num Windows | ⬜ |
+| M15.4 | Versão de teste lado a lado com o app antigo | você usa as duas | ⬜ |
+
+## M14 — Celular
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M14.1 | A casca Java atual serve o app novo (adaptador `android`) | APK abre o app novo | ⬜ |
+| M14.2 | Controle de toque (6 modelos), layout do celular | você joga no celular | ⬜ |
+| M14.3 | Pasta de ROMs e biblioteca do celular | tua pasta no celular | ⬜ |
+| M14.4 | PS1 e N64 nativos | você joga | ⬜ |
+| M14.5 | Atualizador do APK | atualiza sozinho | ⬜ |
+
+## Troca
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| T.1 | Conferir o PARIDADE.md 100% verificado | lista completa | ⬜ |
+| T.2 | O app antigo publica uma última versão que avisa e leva pro novo | **você decide quando** | ⬜ |
+
+---
+
+**Total: 76 passos.** Parar em cada um custa um pouco mais de token (cada retomada relê o contexto): calculo uns 10–15%
+a mais que a estimativa do PLANO_DETALHADO, ou seja, algo como 2,8–5 milhões de tokens escritos no total. Aprovar em
+lote ("segue até...") economiza isso.
