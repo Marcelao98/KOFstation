@@ -3,6 +3,7 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 const proibir = (...grupos) => ({
   'no-restricted-imports': ['error', { patterns: grupos.map(([group, message]) => ({ group, message })) }],
@@ -15,6 +16,11 @@ export default tseslint.config(
   {
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: { 'no-empty': ['error', { allowEmptyCatch: false }] },
+  },
+  {
+    files: ['apps/desktop/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: { 'react-hooks/rules-of-hooks': 'error', 'react-hooks/exhaustive-deps': 'error' },
   },
   {
     files: ['packages/domain/**'],

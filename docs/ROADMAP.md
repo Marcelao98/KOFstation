@@ -23,43 +23,46 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 ## F2 — Arquitetura ✅ (aprovada pelo Marcelo em 31/10/2026)
 
+> **31/10:** F3 → M1 feitos de uma vez (o Marcelo pediu "segue até o M1"); todos ⏸ esperando ele testar.
+> F4b.4/F4b.5: a bancada rodou no container; falta ele rodar no Linux dele e aprovar a D2 (opção B, ver SPIKE_D2.md).
+
 ## F3 — Ambiente
 
 | Passo | O que faço | Checkpoint (o que você vê / faz) | Estado |
 |---|---|---|---|
-| F3.1 | Monorepo: `package.json`, `pnpm-workspace.yaml`, `tsconfig` estrito, Cargo workspace, `rust-toolchain.toml`, `.gitignore`, `.editorconfig` | árvore de pastas e `pnpm install` + `cargo build` passando | ⬜ |
-| F3.2 | Qualidade: ESLint (com a regra de camadas), Prettier, rustfmt, clippy, um comando `pnpm check` que roda tudo | eu mostro um import proibido (tela → engine) sendo barrado | ⬜ |
-| F3.3 | CI no GitHub (Linux e Windows) rodando `pnpm check` e `cargo test` a cada envio | link do CI verde | ⬜ |
-| F3.4 | `docs/INSTALAR.md`: Fedora, Ubuntu e Windows | **você instala no teu Linux** e roda `pnpm check` | ⬜ |
+| F3.1 | Monorepo: `package.json`, `pnpm-workspace.yaml`, `tsconfig` estrito, Cargo workspace, `rust-toolchain.toml`, `.gitignore`, `.editorconfig` | árvore de pastas e `pnpm install` + `cargo build` passando | ⏸ |
+| F3.2 | Qualidade: ESLint (com a regra de camadas), Prettier, rustfmt, clippy, um comando `pnpm check` que roda tudo | eu mostro um import proibido (tela → engine) sendo barrado | ⏸ |
+| F3.3 | CI no GitHub (Linux e Windows) rodando `pnpm check` e `cargo test` a cada envio | link do CI verde | ⏸ |
+| F3.4 | `docs/INSTALAR.md`: Fedora, Ubuntu e Windows | **você instala no teu Linux** e roda `pnpm check` | ⏸ |
 
 ## F4a — Esqueleto
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| F4a.1 | `packages/domain`, `app-core`, `engine`, `contracts` com uma função e um teste cada | `pnpm test` verde | ⬜ |
-| F4a.2 | App React mínimo com o backend `teste` (sem Rust), tema Café do antigo | print + você abre com `pnpm dev` | ⬜ |
-| F4a.3 | Crate `kof-core`: `app.info`, erros tipados, log em arquivo (`tracing`), `cargo test` | saída dos testes + o arquivo de log | ⬜ |
-| F4a.4 | Contrato `app.info` e de erro com o mesmo exemplo JSON testado no TS e no Rust | eu mudo um campo de um lado e o teste falha | ⬜ |
+| F4a.1 | `packages/domain`, `app-core`, `engine`, `contracts` com uma função e um teste cada | `pnpm test` verde | ⏸ |
+| F4a.2 | App React mínimo com o backend `teste` (sem Rust), tema Café do antigo | print + você abre com `pnpm dev` | ⏸ |
+| F4a.3 | Crate `kof-core`: `app.info`, erros tipados, log em arquivo (`tracing`), `cargo test` | saída dos testes + o arquivo de log | ⏸ |
+| F4a.4 | Contrato `app.info` e de erro com o mesmo exemplo JSON testado no TS e no Rust | eu mudo um campo de um lado e o teste falha | ⏸ |
 
 ## F4b — Teste da casca no Linux (decide Tauri ou não)
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| F4b.1 | Protótipo A (Tauri): janela abre o app, `app.info` vai e volta, erro de comunicação tratado | print/vídeo no Linux; você roda | ⬜ |
-| F4b.2 | Protótipo B (Rust local + Chromium em modo app, com token) com o mesmo fluxo | idem | ⬜ |
-| F4b.3 | Nos dois: Snes9x wasm (o mesmo do antigo) num Worker + AudioWorklet + WebGL, ROM gerada | tabela de fps, engasgos e falta de som | ⬜ |
-| F4b.4 | Nos dois: núcleos pesados (PS1, N64, Neo Geo), Gamepad, WebRTC, SharedArrayBuffer, instalação no Fedora e no Ubuntu | relatório `docs/SPIKE_D2.md`; **você roda os dois no teu Linux com o teu controle** | ⬜ |
-| F4b.5 | Decisão D2 e remoção do protótipo que perdeu | **você aprova a decisão** | ⬜ |
+| F4b.1 | Protótipo A (Tauri): janela abre o app, `app.info` vai e volta, erro de comunicação tratado | print/vídeo no Linux; você roda | ⏸ |
+| F4b.2 | Protótipo B (Rust local + Chromium em modo app, com token) com o mesmo fluxo | idem | ⏸ |
+| F4b.3 | Nos dois: Snes9x wasm (o mesmo do antigo) num Worker + AudioWorklet + WebGL, ROM gerada | tabela de fps, engasgos e falta de som | ⏸ |
+| F4b.4 | Nos dois: núcleos pesados (PS1, N64, Neo Geo), Gamepad, WebRTC, SharedArrayBuffer, instalação no Fedora e no Ubuntu | relatório `docs/SPIKE_D2.md`; **você roda os dois no teu Linux com o teu controle** | ⏸ |
+| F4b.5 | Decisão D2 e remoção do protótipo que perdeu | **você aprova a decisão** | ⏸ |
 
 ## M1 — Casca (sem jogo ainda)
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M1.1 | Temas: `estilo.css` do antigo inteiro, `data-tema`, teste de contraste dos 126 | prints de 6 temas antigo × novo | ⬜ |
-| M1.2 | Pilha de telas, Voltar (botão, botão direito, Esc, Alt+←), atalhos globais (F2, F11, Home) | você navega entre telas vazias | ⬜ |
-| M1.3 | Foco por controle (direcional, A, B, Start, segurar repete) | **você navega com o teu controle** | ⬜ |
-| M1.4 | Início (sem jogos), menu lateral, menu Arquivo, avisos | print antigo × novo | ⬜ |
-| M1.5 | Galeria de temas (busca sem acento, categorias, showcase lento/rápido) e Guia | você usa a galeria | ⬜ |
+| M1.1 | Temas: `estilo.css` do antigo inteiro, `data-tema`, teste de contraste dos 126 | prints de 6 temas antigo × novo | ⏸ |
+| M1.2 | Pilha de telas, Voltar (botão, botão direito, Esc, Alt+←), atalhos globais (F2, F11, Home) | você navega entre telas vazias | ⏸ |
+| M1.3 | Foco por controle (direcional, A, B, Start, segurar repete) | **você navega com o teu controle** | ⏸ |
+| M1.4 | Início (sem jogos), menu lateral, menu Arquivo, avisos | print antigo × novo | ⏸ |
+| M1.5 | Galeria de temas (busca sem acento, categorias, showcase lento/rápido) e Guia | você usa a galeria | ⏸ |
 
 ## M2 — Rodar um jogo
 

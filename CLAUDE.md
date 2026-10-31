@@ -1,8 +1,11 @@
 # KOFstation (novo) — contexto pra próxima sessão
 
 ## ⏩ ONDE PAROU
-- **F2 aprovada (31/10/2026).** Roadmap com 76 passos e checkpoint em CADA passo (`docs/ROADMAP.md`): parar e esperar
-  o "segue" do Marcelo. Próximo: **F3.1** (monorepo). Como o front é feito: `docs/FRONTEND.md`.
+- **31/10: F3, F4a, F4b e M1 feitos** (ele pediu "segue até o M1, depois a gente testa"): ⏸ esperando o Marcelo
+  testar no Linux dele e aprovar a D2 = **opção B** (Rust local + Chromium; o Tauri no Linux não tem WebRTC nem
+  SharedArrayBuffer: `docs/SPIKE_D2.md`). Depois: apagar o protótipo que perdeu (F4b.5) e seguir pro **M2**.
+- Rodar: `pnpm install`, `pnpm dev` (app no navegador com backend de teste), `pnpm check:tudo`, `pnpm e2e`.
+- Telas que ainda não existem estão em `screens/Pendente` e as ações avisam a etapa (`app/acoes.ts`, `ETAPA`).
 - O repositório antigo é `Marcelao98/kofstation-old` (o produto atual; NÃO mexer nele nesta migração).
 
 ## Como trabalhar aqui

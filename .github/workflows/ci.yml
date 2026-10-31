@@ -26,3 +26,8 @@ jobs:
         run: pnpm check
       - name: Rust (formato, clippy, testes)
         run: pnpm check:rust
+      - name: Testes de fluxo (Playwright, só no Linux)
+        if: runner.os == 'Linux'
+        run: |
+          pnpm --filter @kof/desktop exec playwright install --with-deps chromium
+          pnpm e2e

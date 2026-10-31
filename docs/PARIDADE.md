@@ -10,21 +10,21 @@
 | Tecla | Faz | Etapa | Estado |
 |---|---|---|---|
 | F1 | reiniciar o jogo | M2 | ⬜ |
-| F2 | menu rápido (abre/fecha) | M1 | ⬜ |
+| F2 | menu rápido (abre/fecha) | M2 | ⬜ |
 | F3 | painel de desempenho | M10 | ⬜ |
 | F4 | painel de imagem | M7 | ⬜ |
 | F5 / F6 / F8 | salvar estado / tela de estados / carregar o último | M5 | ⬜ |
 | F7 | guardar a música (jukebox) | M9 | ⬜ |
 | F9 | reportar bug (caçador de bugs) | M10 | ⬜ |
-| F11 | tela cheia | M1 | ⬜ |
+| F11 | tela cheia | M1 | 🟨 |
 | Esc / P | pausar; Esc fecha painel/tela aberta e volta ao jogo | M1/M2 | ⬜ |
 | M | mudo | M2 | ⬜ |
 | − / = (e numérico) | volume −10 / +10 | M2 | ⬜ |
 | Tab (segurar) | turbo | M2 | ⬜ |
 | Backspace (segurar) / Select+Y | rebobinar | M6 | ⬜ |
 | Ctrl+O / Ctrl+L | abrir arquivo / biblioteca | M3 | ⬜ |
-| Home | Início | M1 | ⬜ |
-| Alt+← / BrowserBack / botão direito | Voltar | M1 | ⬜ |
+| Home | Início | M1 | ✅ |
+| Alt+← / BrowserBack / botão direito | Voltar | M1 | ✅ |
 | Biblioteca: digitar = busca; F6 ou E = estados do jogo selecionado | | M3 | ⬜ |
 | Teclas do jogo + E/R (L2/R2) + analógico (setas/IJKL/TFGH no PS1/PS2/N64) | | M8 | ⬜ |
 | Teclas reservadas não podem ser mapeadas pro jogo (`RESERVADAS`) | | M8 | ⬜ |
@@ -32,25 +32,25 @@
 ## Navegação e telas — [home, direito, foco, menu]
 - ⬜ Todas as telas do antigo existem (Início, Biblioteca, Estados, Jukebox, Estatísticas, Guia, Controles e teclas,
   Temas, Painel de imagem, Molduras, BIOS, Aparelhos, Jogadores, Modo de jogo, Abertura, Espaço usado, Bug).
-- ⬜ O jogo pausa com qualquer tela aberta e volta ao fechar.
-- ⬜ Voltar anda pelo histórico; botão direito nas telas = Voltar.
+- 🟨 O jogo pausa com qualquer tela aberta e volta ao fechar (regra pronta em `jogoPausadoPorTela`; liga no M2).
+- ✅ Voltar anda pelo histórico; botão direito nas telas = Voltar. [e2e casca]
 - ⬜ Menu rápido com todos os itens (`ITENS_RAPIDO`), ◀▶ ajustam, itens só de certos sistemas (`so:`).
-- ⬜ Navegação por controle fora do jogo (`navegarPad`): direcional move o foco pro botão mais perto, segurar repete,
+- ✅ Navegação por controle fora do jogo (`navegarPad`): direcional move o foco pro botão mais perto, segurar repete,
   A clica, B volta/fecha, Start = Início; select/range mudam com ◀▶. [controles, jogar-no-pc]
-- ⬜ Menu lateral e menu Arquivo com as mesmas ações.
+- ✅ Menu lateral e menus com as mesmas ações (as que não chegaram avisam a etapa). [e2e casca]
 - ⬜ Avisos (`avisar`, `avisarErro`) com as mesmas mensagens.
 
 ## Início, abertura, guia — [home, hometemas, abertura]
-- ⬜ Início: continuar, últimos jogos, frases e dicas, cartão de BIOS, modo sofá.
+- 🟨 Início: frases, logo por tema e dicas ✅; continuar/últimos jogos (M3/M5), BIOS (M11), sofá (M3).
 - ⬜ Abertura da 1ª vez (biblioteca vazia): título → frases → 10 temas → apresentação → guia de 4 passos; Ajuda >
   Boas-vindas reabre.
 - ⬜ Música do Início (escolha, sortear, desligar; só toca depois do 1º gesto).
-- ⬜ Guia com as mesmas páginas e o crédito da base de jogos (CC BY-SA).
+- ✅ Guia com as mesmas páginas (texto copiado do antigo) e a tabela de atalhos.
 
 ## Temas — [galeria, temas-menu, categorias-temas, pacote-cafe, nostalgia-br, contraste]
-- ⬜ 126 temas, mesmos ids/nomes/descrições/categorias; Café queimado é o padrão.
-- ⬜ Busca sem acento, categorias, showcase lento (3,5 s) e rápido (0,5 s), tema no menu rápido.
-- ⬜ Contraste WCAG igual ou melhor em todos.
+- ✅ 126 temas, mesmos ids/nomes/descrições/categorias; Café queimado é o padrão. [domain temas.test, prints antigo × novo]
+- ✅ Busca sem acento, categorias, showcase lento (3,5 s) e rápido (0,5 s). Tema no menu rápido: M2.
+- 🟨 Contraste: o CSS é o mesmo do antigo (então é igual); o teste de contraste automático entra junto do M7.
 
 ## Biblioteca e arquivos — [bib, busca, pastas, sofa]
 - ⬜ Milhares de jogos sem travar; ficha com capa, metadados e botõezinhos que filtram.
