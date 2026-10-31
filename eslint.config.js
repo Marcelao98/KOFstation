@@ -10,7 +10,7 @@ const proibir = (...grupos) => ({
 });
 
 export default tseslint.config(
-  { ignores: ['**/node_modules/**', '**/dist/**', 'target/**', 'spike/**', 'apps/desktop/src/styles/antigo/**'] },
+  { ignores: ['**/node_modules/**', '**/dist/**', 'target/**', 'apps/desktop/public/nucleos/**', 'apps/desktop/src/styles/antigo/**'] },
   js.configs.recommended,
   ...tseslint.configs.strict,
   {

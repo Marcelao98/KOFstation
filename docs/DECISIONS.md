@@ -26,7 +26,7 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - **Consequências:** nada de emulação é reescrito; o build dos núcleos continua no antigo até migrar pra CI.
 - **Alternativas:** RetroArch como processo externo — perde as funcionalidades acima (viola D0).
 
-## D2. Casca desktop: Rust local + Chromium (opção B) — **proposta pelo spike, falta o Marcelo aprovar (F4b.5)**
+## D2. Casca desktop: Rust local + Chromium (opção B) — **aceita** (Marcelo, 31/10: "vai até o M2" depois da recomendação)
 - **Contexto:** Linux e Windows com a mesma prioridade (D0). Spike de 31/10 ([SPIKE_D2.md](SPIKE_D2.md)).
 - **Medido:** no Linux, o Tauri (WebKitGTK) não tem WebRTC nem isolamento (`SharedArrayBuffer`), mesmo com os
   cabeçalhos certos e o WebRTC ligado nas configurações. O Chromium passa em tudo.

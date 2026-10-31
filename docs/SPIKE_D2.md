@@ -41,23 +41,10 @@ O que fica pro Marcelo conferir na máquina dele (checkpoint F4b.4/F4b.5):
 - rodar a bancada nas duas cascas (comandos abaixo) com o controle ligado e a placa de vídeo de verdade;
 - confirmar se o WebKitGTK do Fedora também vem sem WebRTC (esperado).
 
-## Como rodar
+## Os protótipos
 
-```bash
-spike/preparar.sh ~/caminho/do/kofstation-old
-```
-
-Casca B (abre o navegador; o resultado aparece na página):
-
-```bash
-cd spike/local && cargo run --release -- ../web chromium-browser
-```
-
-Casca A (precisa das bibliotecas do Tauri, ver docs/INSTALAR.md):
-
-```bash
-cd spike/tauri && cargo run --release
-```
+Apagados no F4b.5 (31/10, D2 aprovada pelo Marcelo). O código deles está no histórico do git (commit `2cb036e`, pasta
+`spike/`). A casca B de verdade é o `crates/kof-app`.
 
 ## Achados que valem pras próximas etapas
 
