@@ -1,0 +1,5 @@
+/* O #raiz do React não pode virar uma caixa: os filhos dele participam do layout do <body> que o estilo.css do antigo
+   define (grade com menu lateral, barra e tela). */
+#raiz {
+  display: contents;
+}
