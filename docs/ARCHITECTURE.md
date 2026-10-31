@@ -20,7 +20,7 @@ flowchart TB
   DM["packages/domain<br/>regras puras: sistemas, jogo, config em camadas, modos, busca, patch, saves"]
   EN["packages/engine<br/>CoreSession, Worker, AudioWorklet, WebGL + visual, rebobinar, jukebox"]
   CT["packages/contracts<br/>tipos dos comandos/eventos/erros do backend"]
-  PL["platform adapters<br/>tauri | local (WS com token) | android (KOFnesApk) | test"]
+  PL["platform adapters<br/>local (HTTP com token) | android (KOFnesApk) | teste"]
   RS["crates/ (Rust)<br/>kof-files, kof-process, kof-net, kof-update, kof-core"]
   CO[("núcleos (binários por hash)<br/>wasm · kofnativo+LRPS2 · .so Android")]
   UI --> ST --> AC
