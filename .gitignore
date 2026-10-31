@@ -27,3 +27,6 @@ playwright-report/
 third_party/cores/*.js
 third_party/cores/*.so
 third_party/cores/*.dll
+spike/web/nucleos/
+spike/**/target/
+spike/**/gen/

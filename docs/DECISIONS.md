@@ -26,14 +26,16 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - **Consequências:** nada de emulação é reescrito; o build dos núcleos continua no antigo até migrar pra CI.
 - **Alternativas:** RetroArch como processo externo — perde as funcionalidades acima (viola D0).
 
-## D2. Casca desktop: Tauri 2 × Rust local + Chromium — **pendente (spike F4b)**
-- **Contexto:** Windows usa WebView2 (Chromium, o motor de hoje). Linux usa WebKitGTK, que precisa provar wasm pesado,
-  WebGL com passadas, Gamepad, AudioWorklet, WebRTC e SharedArrayBuffer. Linux tem prioridade igual (D0).
-- **Decisão:** decidir pelos 7 critérios do [PLANO_DETALHADO §5](auditoria/PLANO_DETALHADO.md#5-spike-do-tauri-no-linux-f4b-critérios-objetivos).
-  Falhou qualquer um no Linux → opção B (backend Rust serve o app num endereço local com token e abre o Chromium em
-  modo app).
-- **Consequências:** os crates de backend não podem depender do Tauri; a casca é uma camada fina e trocável.
-- **Alternativas:** Electron (motor igual em tudo, +~100 MB e um Node que não usamos); continuar com `file://` (não).
+## D2. Casca desktop: Rust local + Chromium (opção B) — **proposta pelo spike, falta o Marcelo aprovar (F4b.5)**
+- **Contexto:** Linux e Windows com a mesma prioridade (D0). Spike de 31/10 ([SPIKE_D2.md](SPIKE_D2.md)).
+- **Medido:** no Linux, o Tauri (WebKitGTK) não tem WebRTC nem isolamento (`SharedArrayBuffer`), mesmo com os
+  cabeçalhos certos e o WebRTC ligado nas configurações. O Chromium passa em tudo.
+- **Decisão proposta:** opção B no Linux e no Windows: o backend Rust serve o app em `127.0.0.1` com token aleatório
+  e COOP/COEP e abre o navegador Chromium instalado em modo app, com perfil próprio.
+- **Consequências:** precisa de um Chromium/Chrome/Edge/Brave instalado (igual ao app antigo; no Windows o Edge já vem);
+  o canal app ↔ Rust é HTTP/WebSocket local com token e conferência de `Origin`; os crates não mudam.
+- **Alternativas:** Tauri só no Windows (duas cascas pra manter); Electron (leva o Chromium junto, +~100 MB, sem
+  dependência do navegador instalado; reavaliar se algum usuário não tiver Chromium).
 
 ## D3. Emulação no frontend (wasm em Worker); nativo só onde já é nativo — **aceita**
 - Núcleos wasm rodam num Web Worker com áudio por AudioWorklet; o PS2 continua nativo (kofnativo), supervisionado pelo

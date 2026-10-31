@@ -1,0 +1,195 @@
+<!-- Conteúdo do Guia, copiado do pagina.html do kofstation-old (HTML fixo, escrito por nós). -->
+<div data-pagina="comecar">
+  <h3>Bem-vindo ao KOFstation 👋</h3>
+  <p>
+    O KOFstation junta <b>Super Nintendo, NES, Game Boy, GBA, Mega Drive, Master System, Game Gear e Neo Geo</b> numa
+    janela leve que se atualiza sozinha. O Super Nintendo do PC foi escrito em Kof, uma linguagem brasileira parceira do
+    projeto; os outros consoles usam núcleos abertos da comunidade (libretro). A ideia é simples: abrir, escolher o jogo
+    e jogar. <button class="hm-link" data-acao="boas-vindas">✨ ver as boas-vindas de novo</button>
+  </p>
+  <ol>
+    <li>
+      <b>Traga seus jogos.</b> Em <b>Biblioteca → 📁 Pasta Kof Games</b> você aponta a pasta <b>Kof Games</b> uma vez
+      só: os jogos ficam em <b>Games/&lt;console&gt;</b> (snes, nes, gba, megadrive, psx, ps2…) e o que você soltar em
+      <b>Novos</b> vai sozinho pro lugar certo. Também dá pra arrastar uma ROM (.sfc, .smc, .nes, .gb, .gbc, .gba, .md,
+      .sms, .gg, .zip ou, de PlayStation, o .cue junto com os .bin, .chd ou .pbp) pra janela.
+    </li>
+    <li>
+      <b>Escolha e jogue.</b> Enter ou clique duplo. Na próxima vez, o jogo aparece no <b>Início</b> com
+      <b>Continuar</b>.
+    </li>
+    <li>
+      <b>Controles:</b> setas = direcional · Z/X = B/A · A/S = Y/X · Q/W = L/R · Enter = Start · Shift = Select.
+      Controle USB, Xbox ou 8BitDo funciona sozinho.
+    </li>
+  </ol>
+  <p class="dica">
+    O menu da esquerda leva pra qualquer lugar: 🏠 Início, ← Voltar, 📚 Biblioteca, 🎵 Jukebox, 📊 Estatísticas, 🎨 Tema
+    e este guia.
+  </p>
+</div>
+<div data-pagina="biblioteca" hidden>
+  <h3>📚 Biblioteca</h3>
+  <ul>
+    <li>
+      <b>Pasta de ROMs:</b> lida uma vez por sessão, em segundo plano. Colocou jogos novos? <b>🔄 Reler pasta</b>.
+    </li>
+    <li>
+      <b>Busca:</b> digite qualquer pedaço do nome, em qualquer ordem, sem se preocupar com acento ("mario super" acha
+      "Super Mario World").
+    </li>
+    <li>
+      <b>🧹 Só os principais:</b> esconde hacks e cópias ruins dos pacotes de ROMs ([h], [b], [o]…) e deixa as traduções
+      [T+Por].
+    </li>
+    <li><b>Capas oficiais:</b> baixadas do acervo aberto do RetroArch e guardadas pra funcionar sem internet.</li>
+    <li>
+      <b>Busca por gênero, empresa e ano:</b> a lista de jogos vem junto com o app e funciona sem internet. Os dados são
+      do <b>libretro-database</b> (github.com/libretro/libretro-database, a mesma base do RetroArch), licença
+      <b>CC BY-SA 4.0</b>; juntamos as versões de cada jogo e traduzimos os gêneros.
+    </li>
+    <li>
+      <b>🛋 Modo sofá:</b> a biblioteca vira uma grade de capas em tela cheia, feita pro controle (A joga, X estados,
+      Select liga/desliga).
+    </li>
+  </ul>
+</div>
+<div data-pagina="jogando" hidden>
+  <h3>🎮 Jogando</h3>
+  <ul>
+    <li>
+      <b>Menu rápido:</b> botão direito do mouse, F2 ou Select+Start no controle. Salvar, carregar, filtro, moldura,
+      volume… sem sair do jogo.
+    </li>
+    <li>
+      <b>Savestates:</b> F5 salva, F8 carrega o último, F6 abre a galeria com o print de cada momento (no controle:
+      Select+L e Select+R).
+    </li>
+    <li>
+      <b>Continuar de onde parou:</b> o salvar automático guarda o jogo sozinho; no Início é só clicar em Continuar.
+    </li>
+    <li>
+      <b>📱 Celular como controle:</b> no celular, abra o KOFstation → <b>Controles</b> →
+      <b>Usar este celular como controle do PC</b>; aparecem um endereço e uma senha. No PC,
+      <b>Arquivo → 📱 Celular como controle</b> e digite os dois. Precisa estar na mesma Wi-Fi; nada passa pela
+      internet.
+    </li>
+    <li><b>Turbo:</b> segure Tab. <b>Pausa:</b> P ou Esc. Sair da janela também pausa (dá pra desligar em Som).</li>
+  </ul>
+</div>
+<div data-pagina="backup" hidden>
+  <h3>💾 Saves e backup</h3>
+  <p>
+    O KOFstation guarda sozinho o save de cada jogo (a "bateria" do cartucho, o cartão de memória), comprimido, ocupando
+    quase nada. O <b>backup</b> é um arquivo <b>.kofsave</b> com tudo o que é seu: saves, estatísticas e, se quiser,
+    savestates e configurações. ROM nunca vai junto.
+  </p>
+  <p class="gu-botoes">
+    <button class="hm-link" data-acao="exportar-saves">💾 Fazer backup agora</button>
+    <button class="hm-link" data-acao="importar-saves">📥 Trazer um backup</button>
+    <button class="hm-link" data-acao="estatisticas">📊 Abrir Estatísticas</button>
+  </p>
+  <h4>Fazer um backup</h4>
+  <ol>
+    <li>
+      Abra <b>📊 Estatísticas</b> (menu da esquerda, ou <span class="so-pc">Arquivo → </span
+      ><b>💾 Backup dos saves</b>).
+    </li>
+    <li>Se quiser levar também os savestates ou o seu tema e configurações, marque <b>com savestates</b>.</li>
+    <li>
+      Toque em <b>💾 Fazer backup (.kofsave)</b>. <span class="so-pc">O arquivo vai pra pasta de downloads.</span
+      ><span class="so-cel">O Android pergunta onde guardar.</span>
+    </li>
+  </ol>
+  <h4>Levar pro outro aparelho (PC ↔ celular)</h4>
+  <ol>
+    <li>Mande o arquivo .kofsave pro outro aparelho: WhatsApp, e-mail, pendrive, Google Drive…</li>
+    <li>
+      No outro aparelho, abra o arquivo no KOFstation: <b>📥 Trazer backup</b> nas Estatísticas,
+      <span class="so-pc">arrastar pra janela</span><span class="so-cel">ou escolher em Abrir uma ROM</span>.
+    </li>
+    <li>Pronto. Marque <b>trazer configurações</b> antes, se quiser o mesmo tema e controles dos dois lados.</li>
+  </ol>
+  <h4>O que acontece quando os dois têm o mesmo jogo</h4>
+  <ul>
+    <li><b>Saves:</b> fica o mais novo. O outro <b>não é apagado</b>: vira uma cópia guardada.</li>
+    <li>
+      <b>Estatísticas:</b> somam. Cada aparelho conta a sua parte, então trazer o mesmo backup duas vezes não conta em
+      dobro.
+    </li>
+    <li><b>Savestates:</b> só os que ainda não existem entram. No máximo 20 por jogo: o mais antigo sai.</li>
+    <li>Mudo e volume nunca viajam: cada aparelho fica com o seu.</li>
+  </ul>
+  <h4>Espaço usado</h4>
+  <p>
+    Em Estatísticas → <b>🗄 Espaço usado</b> você vê quanto ocupa cada coisa e pode apagar as capas (elas baixam de novo)
+    e os estados automáticos.
+  </p>
+  <p class="dica">
+    💡 Faça um backup de vez em quando: se o navegador ou o celular apagar os dados do app, é ele que salva os seus
+    jogos. Em breve: o celular sincronizando sozinho com o PC na mesma Wi-Fi.
+  </p>
+</div>
+<div data-pagina="tempo" hidden>
+  <h3>⏪ Voltar no tempo</h3>
+  <p>
+    Segure <b>Backspace</b> (ou <b>Select+Y</b>) e o jogo volta no tempo, até mais ou menos um minuto e meio. Soltou,
+    continua dali.
+  </p>
+  <p>
+    <b>O truque:</b> pause (P), segure Backspace até o momento exato e aperte <b>F5</b>. Pronto: um savestate daquele
+    instante, com print, na galeria.
+  </p>
+  <p class="dica">No menu rápido também tem "Voltar 5 segundos".</p>
+</div>
+<div data-pagina="imagem" hidden>
+  <h3>🖼 Imagem e som</h3>
+  <ul>
+    <li><b>Filtros:</b> nítido, suave, TV de tubo (CRT), fliperama, Game Boy, café (sépia) e LCD.</li>
+    <li><b>Proporção:</b> 4:3 como na TV de antigamente, pixel perfeito (8:7) ou esticar.</li>
+    <li><b>Molduras:</b> TV de madeira dos anos 80, TV de tubo dos anos 90 ou fliperama.</li>
+    <li><b>Tela cheia:</b> F11 ou duplo clique no jogo. O cursor some sozinho; encoste no topo pra ver o menu.</li>
+    <li><b>Volume:</b> teclas - e =, ou no menu Som.</li>
+  </ul>
+</div>
+<div data-pagina="jukebox" hidden>
+  <h3>🎵 Jukebox</h3>
+  <p>
+    A música do Super Nintendo roda num chip separado. Por isso dá pra <b>guardar a música</b> que está tocando (F7) e
+    ouvir depois, sem o jogo.
+  </p>
+  <ul>
+    <li>Abra arquivos <b>.spc</b> (o formato das trilhas de SNES) ou exporte as suas.</li>
+    <li>As <b>8 vozes</b> do chip aparecem ao vivo: clique numa pra silenciar e ouvir só o baixo, só a percussão…</li>
+    <li>Fechou a janela, a música continua no mini-player da barra de baixo. P volta pro jogo.</li>
+  </ul>
+</div>
+<div data-pagina="temas" hidden>
+  <h3>🎨 Temas e o Início</h3>
+  <p>
+    São <span class="n-temas">28</span> temas: café (do Espresso ao Café com canela), consoles, computador e internet
+    antiga, anime e bem brasileiro. Use a busca e as categorias da galeria. Clique em <b>🎨 Tema</b>, passe o mouse pra
+    experimentar e clique pra escolher. A tela de Início muda junto, até a frase de boas-vindas.
+  </p>
+  <p>
+    O <b>Início</b> mostra o que você jogou por último, com o print de onde parou, os jogados recentemente e uma dica do
+    dia.
+  </p>
+</div>
+<div data-pagina="bugs" hidden>
+  <h3>🐞 Bugs e atualizações</h3>
+  <p>
+    O KOFstation é jovem, e cada bug encontrado ajuda o KOFstation (e, no Super Nintendo, a linguagem Kof). Aperte
+    <b>F9</b>: a issue abre no GitHub já preenchida e um pacote é baixado pra reproduzir o bug quadro a quadro. É só
+    arrastar ele pra dentro da issue.
+  </p>
+  <p>
+    Se o emulador quebrar, ele mesmo oferece reportar. E ele <b>se atualiza sozinho</b>: ao abrir o KOFnes.exe, a versão
+    nova já vem (Ajuda → Procurar atualização).
+  </p>
+</div>
+<div data-pagina="atalhos" hidden>
+  <h3>⌨️ Atalhos e controles</h3>
+  <table id="tab-ajuda"></table>
+  <p class="dica">Pra mudar as teclas: <b>Emulação → Controles e teclas…</b></p>
+</div>
