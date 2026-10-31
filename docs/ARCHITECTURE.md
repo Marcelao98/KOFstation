@@ -1,6 +1,7 @@
 # Arquitetura do KOFstation (novo)
 
-> Estado: **proposta da F2**, esperando aprovação do Marcelo. Decisões em [DECISIONS.md](DECISIONS.md), contratos em
+> Estado: **aprovada** (31/10/2026). A casca é a opção B (D2: Rust local + Chromium); o que já está construído aparece
+> com diagramas no [README](../README.md#a-arquitetura-hoje), e o histórico no [JORNAL](JORNAL.md). Decisões em [DECISIONS.md](DECISIONS.md), contratos em
 > [API_CONTRACTS.md](API_CONTRACTS.md), análise do sistema antigo em [auditoria/](auditoria/).
 
 ## 1. Ideia em uma frase
@@ -51,7 +52,7 @@ kofstation/
 ├── apps/desktop/src/{app,screens,components,stores,platform,styles}
 ├── packages/{domain,app-core,engine,contracts}/src
 ├── crates/{kof-core,kof-files,kof-process,kof-net,kof-update}
-├── src-tauri/  (só se D2 = Tauri)   ou   crates/kof-service/ (se D2 = Rust + Chromium)
+├── crates/kof-app/                    (a casca: servidor local + abre o navegador; D2)
 ├── third_party/cores/manifest.json   (núcleos por hash; binários fora do git)
 ├── tests/e2e/                         (Playwright)
 ├── tools/                             (Python: base de jogos, trilha FM, geradores de ROM de teste)
@@ -92,8 +93,7 @@ Adaptadores: `WasmLibretroCore` (mesmos `nucleos/*.js` e `ponte.cpp` do antigo),
 
 ## 5. Comunicação com o backend
 
-- O app-core fala com uma **porta** `Backend` (interface TS). Cada plataforma tem um adaptador: `tauri` (`invoke` +
-  eventos), `local` (WebSocket em 127.0.0.1 com token aleatório gerado na abertura e conferência de `Origin`),
+- O app-core fala com uma **porta** `Backend` (interface TS). Cada plataforma tem um adaptador: `local` (WebSocket em 127.0.0.1 com token aleatório gerado na abertura e conferência de `Origin`),
   `android` (ponte `KOFnesApk`), `test` (em memória, pros testes).
 - Mensagens: `{id, cmd, args}` → `{id, ok: true, data}` ou `{id, ok: false, error: {code, message, details}}`; eventos
   `{event, data}`. Tudo descrito em [API_CONTRACTS.md](API_CONTRACTS.md).
