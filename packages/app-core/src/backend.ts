@@ -1,0 +1,34 @@
+// A porta Backend: o que o app-core precisa do backend, sem saber se é Tauri, WebSocket local, Android ou teste.
+// Cada plataforma implementa isso em apps/desktop/src/platform/.
+import { ehContractError, type ContractError } from '@kof/contracts';
+
+export interface Backend {
+  /** Chama um comando do contrato. Resolve com `data` ou rejeita com `BackendError`. */
+  chamar<T>(cmd: string, args?: Record<string, unknown>): Promise<T>;
+}
+
+/** Erro do backend com o código do contrato (nunca um erro genérico). */
+export class BackendError extends Error {
+  readonly code: string;
+  readonly details: Record<string, unknown> | undefined;
+  constructor(e: ContractError) {
+    super(e.message);
+    this.name = 'BackendError';
+    this.code = e.code;
+    this.details = e.details;
+  }
+}
+
+/** Códigos que o próprio app gera quando a comunicação falha (não vêm do Rust). */
+export const ERRO_COMUNICACAO = 'BACKEND_UNREACHABLE';
+export const ERRO_RESPOSTA_INVALIDA = 'BACKEND_BAD_RESPONSE';
+
+/** Transforma o que veio do outro lado num BackendError, sem esconder a causa. */
+export function paraBackendError(v: unknown): BackendError {
+  if (v instanceof BackendError) return v;
+  if (ehContractError(v)) return new BackendError(v);
+  return new BackendError({
+    code: ERRO_COMUNICACAO,
+    message: v instanceof Error ? v.message : String(v),
+  });
+}
