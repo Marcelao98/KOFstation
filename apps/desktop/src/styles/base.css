@@ -39,3 +39,21 @@
 #organizar-tela .bib-botoes {
   padding: 0 16px;
 }
+
+/* M4: janela do backup */
+#backup-tela {
+  position: absolute;
+  inset: 12% 20% auto;
+  z-index: 6;
+  padding-bottom: 12px;
+}
+#backup-tela .dica,
+#backup-tela .bk-ops,
+#backup-tela .bib-botoes {
+  padding: 0 16px;
+}
+#backup-tela .bk-ops {
+  display: flex;
+  gap: 18px;
+  margin: 10px 0;
+}

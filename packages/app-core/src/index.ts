@@ -10,3 +10,5 @@ export * from './jogos';
 export * from './basejogos';
 export * from './capas';
 export * from './config';
+export * from './saves';
+export * from './backup';

@@ -60,7 +60,7 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | `cover.get` | `{acervo, chave, nomes[], guardada?}` → PNG (só de `raw.githubusercontent.com/libretro-thumbnails/`; cache em `<dados>/cache/capas`, falha lembrada 7 dias) | `NOT_FOUND`, `NETWORK` | ✅ M3.6 |
 | `config.read` | `{doc: "config"}` → `{versao: 1, valores: {chave: texto}}` (arquivo ilegível vira `.estragado` e começa do zero) | `SCHEMA_TOO_NEW`, `INVALID_ARGS` | ✅ M4.1 |
 | `config.write` | `{doc, data: {versao, valores}}` → `null` (valores só texto; gravação atômica, JSON indentado) | `SCHEMA_TOO_NEW`, `INVALID_ARGS` | ✅ M4.1 |
-| `backup.import` / `backup.export` | `{token}` → resumo / `{options}` → `{token}` | `NOT_A_KOFSAVE`, `CORRUPT` | M4 |
+| `backup.import` / `backup.export` | **no TS** (`app-core/backup.ts`, formato em `domain/guarda.ts`), sobre `store.*` e `config.*`: o `.kofsave` é lido/montado no app (o arquivo vem do seletor/arrastar e sai como download) | `NOT_A_KOFSAVE` (mensagem) | ✅ M4.2/M4.3 |
 | `saves.read` / `saves.write` / `saves.list` | `{key}` → binário + `{when}` | `NOT_FOUND` | M5 |
 | `states.list` / `.save` / `.load` / `.delete` | `{game, slot?}` | `NOT_FOUND`, `DISK_FULL` | M5 |
 | `bios.list` / `bios.import` | `{token}` → `BiosInfo[]` | `UNKNOWN_BIOS` | M11 |

@@ -1,5 +1,5 @@
 import { mensagemDoErro, obterInfo, paraBackendError, type Backend } from '@kof/app-core';
-import { EXTENSOES } from '@kof/domain';
+import { EXTENSOES, ehPacote } from '@kof/domain';
 import { useEffect, useRef } from 'react';
 import { Aviso } from '../components/Aviso';
 import { Desempenho } from '../components/Desempenho';
@@ -11,6 +11,7 @@ import { useEntradaDoJogo } from '../hooks/useEntradaDoJogo';
 import { mover, telaDeCima, useNavegacaoPad } from '../hooks/useNavegacaoPad';
 import { usePausa } from '../hooks/usePausa';
 import { useTelaDoJogo } from '../hooks/useTelaDoJogo';
+import { Backup } from '../screens/Backup/Backup';
 import { Biblioteca } from '../screens/Biblioteca/Biblioteca';
 import { PedirPasta, PlanoDeOrganizacao } from '../screens/Biblioteca/Dialogos';
 import { Guia } from '../screens/Guia/Guia';
@@ -19,6 +20,7 @@ import { Pendente } from '../screens/Pendente/Pendente';
 import { BarraShowcase, Temas } from '../screens/Temas/Temas';
 import { usarApp } from '../stores/app';
 import { usarAvisos } from '../stores/avisos';
+import { usarBackup } from '../stores/backup';
 import { usarCapas } from '../stores/capas';
 import { usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
@@ -33,7 +35,17 @@ const SETAS: Record<string, [number, number]> = {
   ArrowDown: [0, 1],
   ArrowUp: [0, -1],
 };
-const ACEITA = ['zip', ...EXTENSOES].map((e) => '.' + e).join(',');
+const ACEITA = ['zip', 'kofsave', ...EXTENSOES].map((e) => '.' + e).join(',');
+
+/** Arquivo aberto ou arrastado: .kofsave traz o backup; o resto é jogo. */
+async function abrirQualquer(f: File) {
+  const cab = new Uint8Array(await f.slice(0, 16).arrayBuffer());
+  if (/\.kofsave$/i.test(f.name) || ehPacote(new Uint8Array([...cab, 0]))) {
+    await usarBackup.getState().importar(new Uint8Array(await f.arrayBuffer()), false);
+    return;
+  }
+  await usarJogo.getState().abrirArquivo(f);
+}
 
 function teclaGlobal(e: KeyboardEvent) {
   const t = usarTelas.getState();
@@ -112,7 +124,7 @@ export function App({ backend }: { backend: Backend }) {
     const soltar = (e: DragEvent) => {
       e.preventDefault();
       const f = e.dataTransfer?.files[0];
-      if (f) void usarJogo.getState().abrirArquivo(f);
+      if (f) void abrirQualquer(f);
     };
     const arrastando = (e: DragEvent) => e.preventDefault();
     addEventListener('contextmenu', direito);
@@ -156,6 +168,7 @@ export function App({ backend }: { backend: Backend }) {
         </div>
         {temasAberto && <Temas />}
         <PedirPasta />
+        <Backup />
         <PlanoDeOrganizacao />
         <MenuRapido />
         <Aviso />
@@ -172,7 +185,7 @@ export function App({ backend }: { backend: Backend }) {
         onChange={(e) => {
           const f = e.target.files?.[0];
           e.target.value = '';
-          if (f) void usarJogo.getState().abrirArquivo(f);
+          if (f) void abrirQualquer(f);
         }}
       />
     </>

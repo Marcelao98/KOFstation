@@ -13,3 +13,4 @@ export * from './basejogos';
 export * from './busca';
 export * from './capas';
 export * from './config';
+export * from './guarda';

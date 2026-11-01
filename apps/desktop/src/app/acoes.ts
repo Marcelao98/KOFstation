@@ -2,6 +2,7 @@
 // outras avisam em que etapa do roadmap chegam (docs/ROADMAP.md). Assim os menus ficam completos desde o M1 e nada
 // some sem aviso.
 import { usarAvisos } from '../stores/avisos';
+import { usarBackup } from '../stores/backup';
 import { usarBiblioteca } from '../stores/biblioteca';
 import { usarCapas } from '../stores/capas';
 import { usarJogo } from '../stores/jogo';
@@ -25,8 +26,6 @@ const TELAS: Partial<Record<string, TelaId>> = {
 /** Etapa em que cada ação ainda não feita chega. */
 export const ETAPA: Readonly<Record<string, string>> = {
   traducao: 'M10',
-  'exportar-saves': 'M4',
-  'importar-saves': 'M4',
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
   'salvar-estado': 'M5',
@@ -134,6 +133,10 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     case 'fechar-biblioteca':
       telas.sair();
+      return true;
+    case 'exportar-saves':
+    case 'importar-saves':
+      usarBackup.getState().abrir();
       return true;
     case 'capas':
       usarCapas.getState().alternarCapas();
