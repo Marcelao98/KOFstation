@@ -17,6 +17,8 @@ export interface ConfigNucleo {
   opcoes?: Readonly<Record<string, string>>;
   /** extensão usada no nome que o núcleo recebe */
   ext: string;
+  /** sem rebobinar (estado grande demais: PS1/PS2) */
+  semRebob?: boolean;
 }
 
 /** Sistemas que já rodam no app novo (M2). PS1, N64, Neo Geo e PS2 chegam no M11/M12. */

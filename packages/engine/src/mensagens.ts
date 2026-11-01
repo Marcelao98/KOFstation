@@ -16,6 +16,12 @@ export type ParaWorker =
       opcoes?: Record<string, string>;
     }
   | { tipo: 'sram-escrever'; bytes: Uint8Array }
+  /** regras do rebobinar do modo de jogo (desligado: ligado=false) */
+  | { tipo: 'rebob-config'; ligado: boolean; limite: number; recargaX: number }
+  /** segurando o botão de voltar no tempo */
+  | { tipo: 'rebobinar'; sim: boolean }
+  /** recomeçou (estado carregado, outro modo): o rebobinar zera */
+  | { tipo: 'rebob-zerar' }
   | { tipo: 'pedido'; id: number; pedido: Pedido; bytes?: Uint8Array }
   | { tipo: 'pad'; jogador: number; bits: number }
   | { tipo: 'pausar'; sim: boolean }
@@ -46,4 +52,18 @@ export type DoWorker =
   | { tipo: 'erro'; mensagem: string; log: string[] }
   /** a bateria mudou (conferido 1x por segundo) */
   | { tipo: 'sram'; bytes: Uint8Array }
-  | { tipo: 'resposta'; id: number; ok: boolean; bytes?: Uint8Array; erro?: string };
+  | { tipo: 'resposta'; id: number; ok: boolean; bytes?: Uint8Array; erro?: string }
+  | { tipo: 'rebob'; r: SituacaoRebob };
+
+/** Como está o rebobinar (pra ampulheta e o preto e branco). */
+export interface SituacaoRebob {
+  ligado: boolean;
+  /** voltando agora */
+  rebobinando: boolean;
+  /** segundos guardados (fotos / 30) */
+  segundos: number;
+  limite: number;
+  /** quadros de jogo que faltam pra recarregar (0 = pronto) */
+  recarga: number;
+  recargaTotal: number;
+}

@@ -3,13 +3,15 @@
 import type { SistemaId } from '@kof/domain';
 import { CODIGO_WORKLET } from './anel';
 import type { InfoDoJogo } from './libretro';
-import type { DoWorker, Medicao, ParaWorker, Pedido } from './mensagens';
+import type { DoWorker, Medicao, ParaWorker, Pedido, SituacaoRebob } from './mensagens';
 import { NUCLEOS } from './nucleos';
 
 export interface EventosDoJogo {
   quadro?: (pixels: Uint32Array, largura: number, altura: number) => void;
   /** a bateria do jogo mudou (save) */
   sram?: (bytes: Uint8Array) => void;
+  /** situação do rebobinar (ampulheta, preto e branco) */
+  rebob?: (r: SituacaoRebob) => void;
   medicao?: (m: Medicao) => void;
   erro?: (mensagem: string, log: string[]) => void;
 }
@@ -118,6 +120,7 @@ export class Jogo {
     else if (m.tipo === 'medicao') this.eventos.medicao?.(m.m);
     else if (m.tipo === 'erro') this.eventos.erro?.(m.mensagem, m.log);
     else if (m.tipo === 'sram') this.eventos.sram?.(m.bytes);
+    else if (m.tipo === 'rebob') this.eventos.rebob?.(m.r);
     else if (m.tipo === 'resposta') {
       const p = this.esperando.get(m.id);
       this.esperando.delete(m.id);
@@ -151,6 +154,14 @@ export class Jogo {
 
   lerSram(): Promise<Uint8Array | null> {
     return this.pedir('sram-ler');
+  }
+
+  configurarRebobinar(ligado: boolean, limite: number, recargaX: number) {
+    this.mandar({ tipo: 'rebob-config', ligado, limite, recargaX });
+  }
+
+  rebobinar(sim: boolean) {
+    this.mandar({ tipo: 'rebobinar', sim });
   }
 
   escreverSram(bytes: Uint8Array) {

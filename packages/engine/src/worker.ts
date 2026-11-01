@@ -5,6 +5,7 @@ import { criarAnel, escrever, ocupacao, type Anel } from './anel';
 import { SessaoLibretro, type FabricaDeNucleo } from './libretro';
 import type { DoWorker, ParaWorker } from './mensagens';
 import { Reamostrador } from './reamostrador';
+import { Rebobinador } from './rebobinador';
 import { criarRelogio, MAX_QUADROS_POR_PASSO, type Relogio } from './tempo';
 
 const eu = self as unknown as {
@@ -25,6 +26,76 @@ let ultimoPasso = 0;
 let parado = false;
 const med = { quadros: 0, nucleo: 0, atrasos: 0, desde: 0, faltasAntes: 0 };
 let sramAntes: Uint8Array | null = null;
+
+// ---------- rebobinar (app.js 1845–1875 do antigo, agora junto do núcleo) ----------
+const rb = {
+  ligado: true,
+  limite: 5,
+  recargaX: 6,
+  r: null as Rebobinador | null,
+  querendo: false,
+  rebobinou: 0,
+  recarga: 0,
+  recargaTotal: 1,
+  desdeFoto: 0,
+  acumulado: 0,
+  avisado: '',
+};
+function novoRebob(s: SessaoLibretro | null) {
+  // ~30 fotos por segundo, no máximo 48 MB (PS1 fica sem: o estado tem ~4 MB)
+  rb.r = rb.ligado && rb.limite > 0 && s && !s.config.semRebob ? new Rebobinador(s, 48 << 20, rb.limite * 30) : null;
+  rb.desdeFoto = 0;
+  rb.recarga = 0;
+  rb.rebobinou = 0;
+  avisarRebob(true);
+}
+const prontoPraVoltar = () => !!rb.r && rb.recarga <= 0 && rb.r.quantas > 0;
+function avisarRebob(forcar = false) {
+  const r = {
+    ligado: !!rb.r,
+    rebobinando: rb.rebobinou > 0,
+    segundos: rb.r ? Math.round((rb.r.quantas / 30) * 10) / 10 : 0,
+    limite: rb.limite,
+    recarga: rb.recarga,
+    recargaTotal: rb.recargaTotal,
+  };
+  const chave = `${r.ligado}|${r.rebobinando}|${r.rebobinando ? r.segundos : ''}|${Math.ceil(r.recarga / 60)}`;
+  if (!forcar && chave === rb.avisado) return;
+  rb.avisado = chave;
+  enviar({ tipo: 'rebob', r });
+}
+function terminarRebobinar() {
+  if (rb.rebobinou && rb.r && rb.recargaX) {
+    rb.r.limpar(); // usou: zera e recarrega (Só alegria: continua)
+    rb.recargaTotal = rb.recarga = rb.limite * rb.recargaX * 60;
+  }
+  rb.rebobinou = 0;
+  rb.desdeFoto = 0;
+  relogio = sessao ? criarRelogio(sessao.info.fps) : null; // o tempo voltando não vira quadros atrasados
+  avisarRebob();
+}
+/** Um passo pra trás (no ritmo de 60 por segundo). false = não deu (acabou o tempo). */
+function passoPraTras(s: SessaoLibretro): boolean {
+  if (!rb.r?.voltar()) return false;
+  rb.rebobinou++;
+  s.pad[0] = 0;
+  s.rodar(); // um quadro pra ter a imagem daquele momento (o som desse quadro não sai)
+  mandarQuadro(s);
+  avisarRebob();
+  return true;
+}
+function depoisDeRodar(vezes: number) {
+  rb.desdeFoto += vezes;
+  if (rb.r && rb.desdeFoto >= 2) {
+    rb.r.gravar();
+    rb.desdeFoto = 0;
+  }
+  if (rb.recarga > 0) {
+    rb.recarga -= vezes;
+    if (rb.recarga < 0) rb.recarga = 0;
+    avisarRebob();
+  }
+}
 let sramQuando = 0;
 
 /** A bateria mudou desde a última vez? (1x por segundo, como o salvarSram do antigo) */
@@ -87,6 +158,20 @@ function passo() {
   const dt = Math.min(agora - ultimoPasso, 100);
   ultimoPasso = agora;
   if (!s || pausado) return;
+  if (rb.querendo && rb.r && (rb.rebobinou || prontoPraVoltar())) {
+    rb.acumulado += dt;
+    for (let k = 0; rb.acumulado >= 1000 / 60 && k < 4; k++) {
+      rb.acumulado -= 1000 / 60;
+      if (!passoPraTras(s)) {
+        terminarRebobinar();
+        rb.querendo = false; // acabou o tempo: só volta a rebobinar soltando e apertando de novo
+        break;
+      }
+    }
+    return;
+  }
+  rb.acumulado = 0;
+  if (rb.rebobinou) terminarRebobinar();
   let vezes = 0;
   if (turbo) {
     for (; vezes < MAX_QUADROS_POR_PASSO; vezes++) umQuadro(s, false);
@@ -100,6 +185,7 @@ function passo() {
     const n = relogio.passo(dt);
     for (; vezes < n; vezes++) umQuadro(s, true);
   }
+  if (vezes) depoisDeRodar(vezes);
   if (vezes > 1) med.atrasos += vezes - 1;
   if (vezes) mandarQuadro(s);
   conferirSram(s, agora);
@@ -131,6 +217,7 @@ eu.onmessage = async ({ data: m }) => {
           s.reiniciar();
         }
         sramAntes = s.tamanhoSram ? s.lerSram() : null;
+        novoRebob(s);
         sessao = s;
         taxaSaida = m.taxaSaida;
         anel = m.sab ? criarAnel((m.sab.byteLength - 16) / 8, m.sab) : null;
@@ -158,6 +245,17 @@ eu.onmessage = async ({ data: m }) => {
       break;
     case 'reiniciar':
       sessao?.reiniciar();
+      novoRebob(sessao);
+      break;
+    case 'rebob-config':
+      Object.assign(rb, { ligado: m.ligado, limite: m.limite, recargaX: m.recargaX });
+      novoRebob(sessao);
+      break;
+    case 'rebob-zerar':
+      novoRebob(sessao);
+      break;
+    case 'rebobinar':
+      rb.querendo = m.sim;
       break;
     case 'sram-escrever':
       if (sessao?.tamanhoSram) {
@@ -176,6 +274,7 @@ eu.onmessage = async ({ data: m }) => {
       else if (m.pedido === 'estado-carregar')
         responder(m.id, () => {
           s.carregarEstado(m.bytes ?? new Uint8Array(0));
+          novoRebob(s);
           s.rodar(); // um quadro já com o estado, pra imagem certa na tela
           mandarQuadro(s);
           return undefined;
