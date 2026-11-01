@@ -29,7 +29,11 @@ commits citados pelo hash curto quando ajudarem.
 pnpm). Branch de trabalho juntada na `main` (avanço direto, `8af2c0b`). Comando de instalação por `curl` da branch
 `teste-binarios` (precisa do repositório público).
 **Medido / conferido:** o Marcelo rodou um jogo dele no app novo: "funcionou, deu certo". **M2 aprovado.**
-**Onde parou:** escolher o próximo lote (ele quer "colocar muita coisa de uma vez").
+**Decidido:** o Marcelo aprovou fazer **o Lote A (M3, M4, M5, M6) e o Lote B (M7, M8) inteiros**, sem parar nos
+checkpoints do meio: um pacote só no fim pra ele testar tudo. Cada passo continua sendo um commit próprio com o nome da
+etapa (ex.: "M3.2: …"), pra achar e desfazer só o que der errado. Entram junto: `docs/EXPANDIR.md` (como adicionar e
+debugar) e o log dos erros da tela indo pro arquivo do Rust (comando `log.write`).
+**Onde parou:** começar o **M3.1** numa sessão nova (o contexto desta ficou grande).
 
 ---
 

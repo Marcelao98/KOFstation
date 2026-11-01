@@ -74,6 +74,9 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | M2.4 | Entrada do J1 (teclado e controle no mapa padrão), pausa, F1, turbo, volume, mudo | você joga uma ROM de teste | ✅ |
 | M2.5 | Abrir arquivo, tela do jogo, menu rápido básico, painel de desempenho (F3) | **você joga um jogo teu no app novo** | ✅ |
 
+> **01/11:** Lotes A (M3–M6) e B (M7–M8) aprovados de uma vez: fazer tudo e parar só no fim, com um pacote pro
+> Marcelo testar. Cada passo = um commit com o nome da etapa.
+
 ## M3 — Biblioteca e Kof Games
 
 | Passo | O que faço | Checkpoint | Estado |
