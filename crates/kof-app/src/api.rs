@@ -8,12 +8,44 @@ use std::path::PathBuf;
 /// O que um comando devolve: JSON ou bytes (arquivo, save, estado).
 pub enum Saida {
     Json(Value),
-    #[allow(dead_code)] // os comandos binários (file.read, saves) chegam no M3.2
     Bin(Vec<u8>),
 }
 
 pub struct Estado {
     pub pasta_dados: PathBuf,
+    /// onde está o executável (a raiz Kof Games pode vir pela posição dele)
+    pub exe: Option<PathBuf>,
+    /// pasta do usuário (sugestão da Kof Games)
+    pub casa: Option<PathBuf>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsRaiz {
+    path: String,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsVarrer {
+    exts: Vec<String>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsCrc {
+    items: Vec<kof_files::biblioteca::PedidoCrc>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsLer {
+    scope: String,
+    path: String,
+    #[serde(default)]
+    offset: u64,
+    #[serde(default)]
+    length: Option<u64>,
 }
 
 pub fn args<T: DeserializeOwned>(v: Value) -> Result<T, KofError> {
@@ -22,7 +54,38 @@ pub fn args<T: DeserializeOwned>(v: Value) -> Result<T, KofError> {
 
 impl Estado {
     pub fn novo(pasta_dados: PathBuf) -> Self {
-        Self { pasta_dados }
+        let casa = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" }).map(PathBuf::from);
+        Self {
+            pasta_dados,
+            exe: std::env::current_exe().ok(),
+            casa,
+        }
+    }
+
+    fn raiz(&self) -> Result<PathBuf, KofError> {
+        let r = kof_files::raiz::atual(&self.pasta_dados, self.exe.as_deref())
+            .ok_or_else(|| KofError::RaizFaltando("(não escolhida)".into()))?;
+        if !r.is_dir() {
+            return Err(KofError::RaizFaltando(r.display().to_string()));
+        }
+        Ok(r)
+    }
+
+    /// A base de um escopo do contrato.
+    fn escopo(&self, nome: &str) -> Result<PathBuf, KofError> {
+        match nome {
+            "kof-games" => self.raiz(),
+            outro => Err(KofError::argumento("scope", format!("escopo desconhecido: {outro}"))),
+        }
+    }
+
+    fn info_raiz(&self) -> Value {
+        serde_json::to_value(kof_files::raiz::info(
+            &self.pasta_dados,
+            self.exe.as_deref(),
+            self.casa.as_deref(),
+        ))
+        .expect("json")
     }
 
     /// `corpo`: os bytes que vieram junto (comandos que gravam binário); vazio nos outros.
@@ -33,6 +96,30 @@ impl Estado {
             "log.write" => {
                 kof_core::log::escrever(&args(a)?)?;
                 json(Value::Null)
+            }
+            "library.root.get" => json(self.info_raiz()),
+            "library.root.set" => {
+                let a: ArgsRaiz = args(a)?;
+                kof_files::raiz::escolher(&self.pasta_dados, &a.path)?;
+                json(self.info_raiz())
+            }
+            "library.scan" => {
+                let a: ArgsVarrer = args(a)?;
+                let r = self.raiz()?;
+                kof_files::raiz::garantir_arvore(&r)?;
+                let exts = a.exts.into_iter().map(|e| e.to_lowercase()).collect();
+                let files = kof_files::biblioteca::varrer(&r, &exts)?;
+                json(serde_json::json!({ "root": r.display().to_string(), "files": files }))
+            }
+            "library.crc" => {
+                let a: ArgsCrc = args(a)?;
+                let c = kof_files::biblioteca::crcs(&self.pasta_dados, &self.raiz()?, &a.items)?;
+                json(serde_json::json!({ "crcs": c }))
+            }
+            "file.read" => {
+                let a: ArgsLer = args(a)?;
+                let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
+                Ok(Saida::Bin(kof_files::escopo::ler(&p, a.offset, a.length)?))
             }
             outro => Err(KofError::ComandoDesconhecido(outro.to_string())),
         }
@@ -46,6 +133,12 @@ mod testes {
     #[test]
     fn log_write_e_comando_desconhecido() {
         let e = Estado::novo(std::env::temp_dir());
+        let r = e.chamar(
+            "file.read",
+            serde_json::json!({"scope": "sistema", "path": "x"}),
+            vec![],
+        );
+        assert_eq!(r.err().map(|e| e.codigo()), Some("INVALID_ARGS"));
         let r = e.chamar(
             "log.write",
             serde_json::json!({"level": "error", "target": "tela", "message": "oi"}),

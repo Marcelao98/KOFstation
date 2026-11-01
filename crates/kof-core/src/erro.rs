@@ -26,6 +26,8 @@ pub enum KofError {
     NaoEncontrado(String),
     #[error("a pasta Kof Games ainda não foi escolhida ou sumiu: {0}")]
     RaizFaltando(String),
+    #[error("essa é uma pasta de dentro da Kof Games (escolha a de cima): {0}")]
+    PastaDeDentro(String),
     #[error("isso não é uma pasta: {0}")]
     NaoEPasta(String),
     #[error("sem permissão: {0}")]
@@ -58,6 +60,7 @@ impl KofError {
             KofError::NaoEncontrado(_) => "NOT_FOUND",
             KofError::RaizFaltando(_) => "ROOT_MISSING",
             KofError::NaoEPasta(_) => "NOT_A_DIRECTORY",
+            KofError::PastaDeDentro(_) => "INNER_FOLDER",
             KofError::SemPermissao(_) => "PERMISSION_DENIED",
             KofError::Conflito(_) => "CONFLICT",
             KofError::DiscoCheio(_) => "DISK_FULL",
@@ -97,6 +100,7 @@ impl From<&KofError> for ContractError {
             | KofError::NaoEncontrado(p)
             | KofError::RaizFaltando(p)
             | KofError::NaoEPasta(p)
+            | KofError::PastaDeDentro(p)
             | KofError::SemPermissao(p)
             | KofError::Conflito(p)
             | KofError::DiscoCheio(p) => um("path", p.clone()),

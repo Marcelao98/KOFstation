@@ -4,3 +4,4 @@ export * from './info';
 export * from './controle';
 export * from './arquivo';
 export * from './log';
+export * from './kofgames';

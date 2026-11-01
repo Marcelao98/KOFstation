@@ -43,12 +43,14 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 |---|---|---|---|
 | `app.info` | — → `{version, contractVersion, os, arch, dataDir}` | — | F4a |
 | `log.write` | `{level: error\|warn\|info\|debug, target, message, fields?}` → `null` (texto cortado em 8 KB; vai pro log do dia com `target=tela`) | `INVALID_LEVEL`, `INVALID_ARGS` | ✅ M3 (pendente do F4a) |
-| `dialog.pick` | `{kind: file\|files\|dir, filters?}` → `{token, names[]}` \| `null` | — | M2 |
-| `file.read` | `{scope, path, offset?, length?}` → binário | `NOT_FOUND`, `OUT_OF_RANGE`, `PATH_OUTSIDE_SCOPE` | M2 |
-| `library.root.get` / `.set` | `{token?}` → `{path, ok, missing[]}` | `NOT_A_DIRECTORY`, `PERMISSION_DENIED` | M3 |
-| `library.scan` | `{}` → `{files: RomFile[]}` + eventos `library.scan.progress` | `ROOT_MISSING` | M3 |
-| `library.organize.plan` | `{}` → `{moves: Move[]}` | `ROOT_MISSING` | M3 |
-| `library.organize.apply` | `{moves}` → `{done, failed: {move, code}[]}` | `CONFLICT` | M3 |
+| `dialog.pick` | (adiado: no navegador em modo app não há diálogo nativo de pasta com caminho; a pasta é digitada/colada, ver D23) | — | — |
+| `library.root.get` | — → `{path: string\|null, ok, missing[], sugestao}` (sem escolha: a raiz pela posição do executável em `<Kof Games>/KOFstation/`) | — | ✅ M3.2 |
+| `library.root.set` | `{path}` (caminho completo; criada se o pai existe) → igual ao `get`; cria a árvore | `INVALID_ARGS`, `INNER_FOLDER`, `NOT_A_DIRECTORY`, `NOT_FOUND`, `PERMISSION_DENIED` | ✅ M3.2 |
+| `library.scan` | `{exts[]}` → `{root, files: RomFile[]}` (Games até 2 níveis; `.zip` traz o diretório; `.bin/.img/.iso` trazem `cd`) | `ROOT_MISSING` | ✅ M3.2 (sem eventos de progresso: a varredura não lê os arquivos inteiros) |
+| `library.crc` | `{items: {path, sistema}[]}` → `{crcs: {path: crc}}` (No-Intro; cache em `<dados>/cache/crc.json`) | `ROOT_MISSING`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
+| `file.read` | `{scope: "kof-games", path, offset?, length?}` → binário | `NOT_FOUND`, `INVALID_ARGS`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
+| `library.organize.plan` | (no TS: `domain/organizar.ts`, sobre o resultado do `library.scan` da raiz) | — | M3.3 |
+| `library.organize.apply` | `{moves}` → `{done, failed: {move, code}[]}` | `CONFLICT` | M3.3 |
 | `library.import` | `{token}` → `{stored: RomFile[]}` | `UNKNOWN_SYSTEM`, `CONFLICT` | M3 |
 | `config.read` / `config.write` | `{doc}` → JSON / `{doc, data, version}` → — | `INVALID_VALUE`, `SCHEMA_TOO_NEW` | M4 |
 | `backup.import` / `backup.export` | `{token}` → resumo / `{options}` → `{token}` | `NOT_A_KOFSAVE`, `CORRUPT` | M4 |
@@ -67,7 +69,8 @@ Eventos previstos: `library.scan.progress`, `native.ps2.state`, `native.ps2.fram
 
 ```ts
 type SystemId = 'snes' | 'gb' | 'nes' | 'md' | 'sms' | 'gg' | 'gba' | 'neogeo' | 'ps1' | 'n64' | 'ps2';
-interface RomFile { path: string; size: number; system: SystemId | null; modified: number }
+interface RomFile { path: string; size: number; modified: number; zip?: {nome, tamanho, crc}[]; cd?: 'ps1' | 'ps2' | null }
+// o sistema NÃO vem do Rust: o TS decide pelos fatos (domain/deteccao.ts `sistemaDoArquivo`)
 interface Move { from: string; to: string; reason: 'novo' | 'solto' | 'pasta-errada' | 'faixa-do-cd' }
 interface BiosInfo { system: SystemId; file: string; sha256: string; size: number; ok: boolean }
 interface ContractError { code: string; message: string; details?: Record<string, unknown> }
