@@ -3,3 +3,7 @@ export * from './temas';
 export * from './controle';
 export * from './inicio';
 export * from './zip';
+export * from './rom';
+export * from './cd';
+export * from './neogeo';
+export * from './deteccao';
