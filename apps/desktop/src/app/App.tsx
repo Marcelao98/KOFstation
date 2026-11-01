@@ -18,6 +18,7 @@ import { Estados } from '../screens/Estados/Estados';
 import { Guia } from '../screens/Guia/Guia';
 import { ModoTela } from '../screens/Modo/ModoTela';
 import { Visual } from '../screens/Visual/Visual';
+import { Teclas } from '../screens/Teclas/Teclas';
 import { Molduras } from '../screens/Molduras/Molduras';
 import { Inicio } from '../screens/Inicio/Inicio';
 import { Pendente } from '../screens/Pendente/Pendente';
@@ -29,6 +30,7 @@ import '../stores/modo';
 import { ampulheta, usarRebob } from '../stores/rebob';
 import { usarBackup } from '../stores/backup';
 import { usarCapas } from '../stores/capas';
+import { usarEntrada } from '../stores/entrada';
 import { usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarShowcase } from '../stores/showcase';
@@ -55,6 +57,7 @@ async function abrirQualquer(f: File) {
 }
 
 function teclaGlobal(e: KeyboardEvent) {
+  if (usarEntrada.getState().capturando) return; // a tela Controles está esperando uma tecla
   const t = usarTelas.getState();
   const j = usarJogo.getState();
   const digitando = (e.target as Element | null)?.closest?.('input, textarea, select');
@@ -170,7 +173,10 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'guia' && <Guia />}
         {atual === 'biblioteca' && <Biblioteca />}
         {atual === 'estados' && <Estados />}
-        {!['home', 'guia', 'jogo', 'biblioteca', 'estados'].includes(atual) && <Pendente tela={atual as TelaId} />}
+        {atual === 'teclas' && <Teclas />}
+        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas'].includes(atual) && (
+          <Pendente tela={atual as TelaId} />
+        )}
         <div id="moldura" hidden={atual !== 'jogo'}>
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>
         </div>

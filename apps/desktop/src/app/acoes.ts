@@ -40,7 +40,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   atualizacao: 'M15',
   jukebox: 'M9',
   estatisticas: 'M10',
-  teclas: 'M8',
   'bios-tela': 'M11',
   aparelhos: 'M13',
   jogadores: 'M8',
@@ -156,6 +155,9 @@ export function acao(nome: string, valor?: string): boolean {
       usarAvisos.getState().avisar('Pausar ao sair da janela: ' + (liga ? 'ligado' : 'desligado'));
       return true;
     }
+    case 'fechar-teclas':
+      telas.sair();
+      return true;
     case 'fechar-estados':
       telas.sair();
       return true;

@@ -1,8 +1,9 @@
 // Botões do jogador 1 no jogo: teclado (teclas padrão do antigo) + todos os controles. Tab segurado = turbo.
 // Select+Start = menu rápido (combinação do emulador: não chega no jogo); Backspace ou Select+Y = rebobinar.
-import { BOTAO, TECLAS_PADRAO, semOpostos } from '@kof/domain';
+import { BOTAO, semOpostos } from '@kof/domain';
 import { bitsDeTodos, controlesDoNavegador } from '@kof/engine';
 import { useEffect } from 'react';
+import { usarEntrada } from '../stores/entrada';
 import { usarJogo } from '../stores/jogo';
 import { usarModo } from '../stores/modo';
 import { conferirRebobinar, usarRebob } from '../stores/rebob';
@@ -27,7 +28,9 @@ export function useEntradaDoJogo() {
         usarRebob.setState({ tecla: true });
         return;
       }
-      if (TECLAS_PADRAO[e.code] !== undefined) {
+      if (usarEntrada.getState().capturando) return; // a tela Controles está esperando essa tecla
+      const { teclas, teclasEixo } = usarEntrada.getState().entrada;
+      if (teclas[e.code] !== undefined || teclasEixo[e.code] !== undefined) {
         e.preventDefault();
         apertadas.add(e.code);
       }
@@ -47,8 +50,9 @@ export function useEntradaDoJogo() {
       if (!jogo) return;
       conferirRebobinar(noJogo());
       if (!noJogo()) return jogo.botoesDo(0, 0);
-      let b = bitsDeTodos(controlesDoNavegador());
-      for (const k of apertadas) b |= TECLAS_PADRAO[k] ?? 0;
+      const { teclas, botoes } = usarEntrada.getState().entrada;
+      let b = bitsDeTodos(controlesDoNavegador(), botoes);
+      for (const k of apertadas) b |= teclas[k] ?? 0;
       b = semOpostos(b);
       const selY = BOTAO.Select | BOTAO.Y; // Select+Y segurado = rebobinar (como no antigo)
       const padVolta = (b & selY) === selY;
