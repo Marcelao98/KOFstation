@@ -135,14 +135,19 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
       registrar('warn', 'biblioteca', `sem o registro dos jogos: ${textoDoErro(e)}`);
     }
     const atual = usarJogo.getState().registro?.id;
+    const chave = (r: ItemBiblioteca | undefined) => (r ? (r.jogo?.id ?? '') + '|' + (r.pasta?.path ?? '') : '');
+    let primeira = true;
     const juntar = () => {
-      const antes = get().visiveis[get().selecionada];
+      const antes = chave(get().visiveis[get().selecionada]);
       const itens = juntarItens(jogos, get().pasta ?? []);
       set({ itens });
       get().montarLista();
-      const k = antes ? get().visiveis.indexOf(antes) : -1;
+      // a seleção continua no mesmo jogo; na primeira montagem, o jogo aberto vem selecionado
+      const k = primeira ? -1 : get().visiveis.findIndex((r) => chave(r) === antes);
       const j = get().visiveis.findIndex((r) => r.jogo?.id === atual);
-      if (k < 0 && j >= 0) set({ selecionada: j });
+      if (k >= 0) set({ selecionada: k });
+      else if (primeira && j >= 0) set({ selecionada: j });
+      primeira = false;
     };
     set({ texto: '', selecionada: 0, filtros: {} });
     juntar();
@@ -188,8 +193,9 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
     if (!r) return;
     const { backend, armazem } = servicos();
     try {
-      void doZero; // "começar do zero" só muda alguma coisa com o Continuar (M5.3)
-      if (r.jogo) {
+      const { autoLigado, continuar } = await import('./auto');
+      if (r.jogo && autoLigado() && r.jogo.temAuto && !doZero) await continuar(r.jogo);
+      else if (r.jogo) {
         const aberto = await bytesDoJogo(backend, armazem, r.jogo);
         await usarJogo.getState().abrirJogo(aberto, r.jogo.path ? { path: r.jogo.path } : {});
       } else if (r.pasta) {

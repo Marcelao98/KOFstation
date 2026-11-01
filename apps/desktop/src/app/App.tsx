@@ -21,6 +21,7 @@ import { Pendente } from '../screens/Pendente/Pendente';
 import { BarraShowcase, Temas } from '../screens/Temas/Temas';
 import { usarApp } from '../stores/app';
 import { usarAvisos } from '../stores/avisos';
+import '../stores/auto';
 import { usarBackup } from '../stores/backup';
 import { usarCapas } from '../stores/capas';
 import { usarJogo } from '../stores/jogo';

@@ -37,6 +37,12 @@ export const ultimoQuadro: { pixels: Uint32Array | null; largura: number; altura
   novo: false,
 };
 
+/** Chamados antes de trocar de jogo ou fechar (salvar automático: M5.3). */
+export const antesDeTrocarJogo = new Set<() => Promise<void>>();
+const antesDeTrocar = async () => {
+  for (const f of antesDeTrocarJogo) await f().catch(() => undefined); // nunca impede de abrir o outro jogo
+};
+
 /** De onde veio o jogo que está abrindo. */
 export interface Origem {
   /** caminho na Kof Games (veio da biblioteca/pasta) */
@@ -107,6 +113,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     if (get().abrindo) return false;
     set({ abrindo: true });
     try {
+      if (get().jogo) await antesDeTrocar();
       get().jogo?.fechar();
       const { volume, mudo } = get();
       const ident = identidade(aberto.sistema, aberto.rom, aberto.nome);
@@ -165,6 +172,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     }
   },
   fechar: () => {
+    void antesDeTrocar();
     get().jogo?.fechar();
     ultimoQuadro.pixels = null;
     set({ jogo: null, nome: '', registro: null, info: null, medicao: null, rapidoAberto: false });

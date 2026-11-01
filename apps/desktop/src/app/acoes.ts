@@ -28,7 +28,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   traducao: 'M10',
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
-  'auto-toggle': 'M5',
   'emu-opcoes': 'M5',
   molduras: 'M7',
   visual: 'M7',
@@ -149,6 +148,9 @@ export function acao(nome: string, valor?: string): boolean {
       void usarEstados.getState().mostrar(r?.jogo?.id ?? null, 'estados');
       return true;
     }
+    case 'auto-toggle':
+      void import('../stores/auto').then((m) => m.alternarAuto());
+      return true;
     case 'fechar-estados':
       telas.sair();
       return true;

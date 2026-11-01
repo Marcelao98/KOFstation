@@ -3,6 +3,7 @@
 // guarda o print do momento (capa). Na loja `estados`, a chave é "<jogoId>/<quando>".
 import { gz, ungz } from '@kof/domain';
 import type { Armazem } from './armazem';
+import { mudarJogo } from './jogos';
 import { chaveDoEstado, type MetaEstado } from './saves';
 
 export const LIMITES_ESTADOS = [10, 20, 50, 100, 0] as const;
@@ -87,4 +88,35 @@ export async function lerEstado(arm: Armazem, key: string): Promise<EstadoDoNucl
   const dados = await arm.pegar('estados', key);
   if (!dados) throw new Error('esse estado não existe mais');
   return JSON.parse(await descomprimirTexto(dados)) as EstadoDoNucleo;
+}
+
+// ---------- salvar automático (o "suspender" do console) ----------
+// Um estado por jogo na loja `autos` (chave = jogoId; bytes = o JSON do estado, como o antigo guardava), e no
+// registro do jogo: temAuto, autoQuando, autoCapa.
+
+export const AUTO_SEG = [15, 30, 60] as const;
+
+export async function guardarAuto(
+  arm: Armazem,
+  jogo: string,
+  nucleo: string,
+  estado: Uint8Array,
+  capa: string,
+): Promise<number> {
+  const quando = Date.now();
+  await arm.por('autos', jogo, { quando }, new TextEncoder().encode(JSON.stringify(capturado(nucleo, estado))));
+  await mudarJogo(arm, jogo, (j) => ({
+    ...j,
+    temAuto: true,
+    autoQuando: quando,
+    autoCapa: capa,
+    capa,
+    ultimo: quando,
+  }));
+  return quando;
+}
+
+export async function lerAuto(arm: Armazem, jogo: string): Promise<EstadoDoNucleo | null> {
+  const b = await arm.pegar('autos', jogo);
+  return b ? (JSON.parse(new TextDecoder().decode(b)) as EstadoDoNucleo) : null;
 }

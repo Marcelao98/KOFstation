@@ -35,10 +35,10 @@ test('telas e Voltar: lateral, Alt+←, botão direito e Esc', async ({ page }) 
 test('menus completos; o que ainda não existe avisa a etapa', async ({ page }) => {
   await page.click('#menu .m:nth-child(1) > button');
   await expect(page.locator('#menu .m.aberto .sub button')).toHaveCount(13);
-  await page.click('#menu .m.aberto [data-acao="exportar-saves"]');
-  await expect(page.locator('#aviso')).toContainText('etapa M4');
+  await page.click('#menu .m.aberto [data-acao="traducao"]');
+  await expect(page.locator('#aviso')).toContainText('etapa M10');
   await page.keyboard.press('F5');
-  await expect(page.locator('#aviso')).toContainText('etapa M5');
+  await expect(page.locator('#aviso')).toContainText('abra um jogo primeiro');
 });
 
 test('Guia: páginas e tabela de atalhos', async ({ page }) => {

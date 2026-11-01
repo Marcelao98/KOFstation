@@ -1,6 +1,6 @@
 // M5: save de bateria, estados, salvar automático e modos de jogo.
 import { expect, test, type Page } from '@playwright/test';
-import { romGbComSave } from './roms';
+import { romGbComSave, romVermelha } from './roms';
 
 const erros: string[] = [];
 test.beforeEach(async ({ page }) => {
@@ -66,4 +66,34 @@ test('F5 salva estado com print, F6 mostra, clicar carrega, F8 carrega o último
   await expect(page.locator('#estados')).toBeHidden();
   await page.keyboard.press('F8');
   await expect(page.locator('#aviso')).toContainText('carregado');
+});
+
+test('salvar automático ao trocar de jogo; Continuar na biblioteca, no Início e nos estados', async ({ page }) => {
+  await page.setInputFiles('#arquivo', {
+    name: 'Save.gb',
+    mimeType: 'application/octet-stream',
+    buffer: romGbComSave(),
+  });
+  await expect(page.locator('#st-jogo')).toHaveText('Save');
+  await page.waitForTimeout(400);
+  await page.setInputFiles('#arquivo', {
+    name: 'Vermelho.md',
+    mimeType: 'application/octet-stream',
+    buffer: romVermelha(),
+  });
+  await expect(page.locator('#st-jogo')).toHaveText('Vermelho');
+  await expect.poll(async () => (await loja(page, 'autos')).map((a) => a.k)).toEqual(['KOFSAVE|32768']);
+  await page.keyboard.press('Home');
+  await expect(page.locator('#hm-bloco-recentes .hm-cartao')).toHaveCount(1);
+  await page.keyboard.press('Control+KeyL');
+  await page.fill('#filtro', 'save');
+  await expect(page.locator('#roms li')).toHaveCount(1);
+  await expect(page.locator('#info-nome')).toHaveText('Save');
+  await expect(page.locator('[data-acao="jogar"]')).toHaveText('▶ Continuar');
+  await expect(page.locator('[data-acao="do-zero"]')).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#aviso')).toContainText('continuando de');
+  await expect(page.locator('#st-jogo')).toHaveText('Save');
+  await page.keyboard.press('F6');
+  await expect(page.locator('#grade-estados .cartao.auto')).toHaveCount(1);
 });

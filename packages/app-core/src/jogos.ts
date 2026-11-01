@@ -11,6 +11,18 @@ import { lerDaKofGames } from './kofgames';
 const GRANDES: SistemaId[] = ['ps1', 'ps2', 'neogeo'];
 const MAX_COPIA = 64 << 20;
 
+// gravações do registro de um jogo, uma de cada vez (abrir e salvar automático podem chegar juntos: um não pode
+// apagar o que o outro escreveu)
+const filas = new Map<string, Promise<unknown>>();
+export function naFila<T>(id: string, f: () => Promise<T>): Promise<T> {
+  const antes = filas.get(id) ?? Promise.resolve();
+  const p = antes.then(f, f);
+  const fim = p.catch(() => undefined);
+  filas.set(id, fim);
+  void fim.then(() => filas.get(id) === fim && filas.delete(id));
+  return p;
+}
+
 /** Identidade do jogo aberto (as mesmas chaves do antigo). */
 export function identidade(sistema: SistemaId, rom: Uint8Array, nome: string) {
   const titulo = tituloInterno(rom, sistema).trim();
@@ -24,6 +36,16 @@ export async function registrarJogo(
   extra: { path?: string; semCopia?: boolean } = {},
 ): Promise<RegistroJogo> {
   const { titulo, id } = identidade(aberto.sistema, aberto.rom, aberto.nome);
+  return naFila(id, () => registrarJogoJa(arm, aberto, extra, titulo, id));
+}
+
+async function registrarJogoJa(
+  arm: Armazem,
+  aberto: JogoAberto,
+  extra: { path?: string; semCopia?: boolean },
+  titulo: string,
+  id: string,
+): Promise<RegistroJogo> {
   const antigo = await arm.meta<RegistroJogo>('jogos', id);
   const novo: RegistroJogo = {
     ...(antigo ?? {}),
@@ -44,12 +66,14 @@ export async function registrarJogo(
 }
 
 /** Muda campos do registro (capa, automático...). */
-export async function mudarJogo(arm: Armazem, id: string, f: (j: RegistroJogo) => RegistroJogo | null) {
-  const j = await arm.meta<RegistroJogo>('jogos', id);
-  if (!j) return null;
-  const n = f({ ...j });
-  if (n) await arm.por('jogos', id, n);
-  return n;
+export function mudarJogo(arm: Armazem, id: string, f: (j: RegistroJogo) => RegistroJogo | null) {
+  return naFila(id, async () => {
+    const j = await arm.meta<RegistroJogo>('jogos', id);
+    if (!j) return null;
+    const n = f({ ...j });
+    if (n) await arm.por('jogos', id, n);
+    return n;
+  });
 }
 
 export async function listarJogos(arm: Armazem): Promise<RegistroJogo[]> {

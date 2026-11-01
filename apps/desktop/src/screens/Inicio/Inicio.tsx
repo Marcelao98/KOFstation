@@ -1,10 +1,17 @@
-// O Início (#home) do antigo, por enquanto no estado "primeira vez" (sem jogos: a biblioteca chega no M3).
-import { DICAS_PC, FRASES, LOGOS, TODOS_TEMAS, saudacao } from '@kof/domain';
+// O Início (#home) do antigo: jogando agora / continuar de onde parou / primeira vez, os atalhos e os jogados
+// recentemente (montarHome do antigo).
+import { listarJogos } from '@kof/app-core';
+import { DICAS_PC, FRASES, LOGOS, TODOS_TEMAS, quando, saudacao, type RegistroJogo } from '@kof/domain';
 import { useEffect, useRef, useState } from 'react';
 import { acao } from '../../app/acoes';
 import { usarApp } from '../../stores/app';
 import { ultimoQuadro, usarJogo } from '../../stores/jogo';
 import { usarPrefs } from '../../stores/prefs';
+import { autoLigado, continuar } from '../../stores/auto';
+import { usarAvisos } from '../../stores/avisos';
+import { usarBiblioteca } from '../../stores/biblioteca';
+import { servicos } from '../../stores/servicos';
+import { srcCapa } from '../Biblioteca/Capas';
 
 const sortearDica = (antes: number): number => {
   let i: number;
@@ -59,8 +66,35 @@ function FotoDoJogo() {
   return <canvas ref={c} style={{ width: '100%', imageRendering: 'pixelated' }} />;
 }
 
+const abrir = (j: RegistroJogo, doZero = false) =>
+  void (
+    autoLigado() && j.temAuto && !doZero
+      ? continuar(j)
+      : usarBiblioteca.getState().jogar(true, { nome: j.nome, chave: j.nome, jogo: j })
+  ).catch((e: unknown) => usarAvisos.getState().avisarErro(e instanceof Error ? e.message : String(e)));
+
+function useJogosRecentes(): RegistroJogo[] {
+  const [l, setL] = useState<RegistroJogo[]>([]);
+  const aberto = usarJogo((j) => j.registro?.id);
+  useEffect(() => {
+    let vivo = true;
+    listarJogos(servicos().armazem).then(
+      (js) => vivo && setL(js.sort((a, b) => b.ultimo - a.ultimo)),
+      () => undefined, // sem a loja: o Início fica no "primeira vez"
+    );
+    return () => {
+      vivo = false;
+    };
+  }, [aberto]);
+  return l;
+}
+
 export function Inicio() {
   const jogo = usarJogo((j) => j.jogo);
+  const idAberto = usarJogo((j) => j.registro?.id);
+  const jogos = useJogosRecentes();
+  const ultimo = jogos[0];
+  const continuarAuto = !!ultimo?.temAuto && autoLigado();
   const nomeDoJogo = usarJogo((j) => j.nome);
   const tema = usarPrefs((p) => p.temaNaTela);
   const info = usarApp((a) => a.info);
@@ -105,6 +139,35 @@ export function Inicio() {
                 </button>
               </div>
             </>
+          ) : ultimo ? (
+            <>
+              <div className="hm-print">
+                {(() => {
+                  const src =
+                    ultimo.autoCapa || ultimo.capa || srcCapa({ nome: ultimo.nome, chave: ultimo.nome, jogo: ultimo });
+                  return src ? <img src={src} alt="" /> : logo;
+                })()}
+              </div>
+              <div className="hm-info">
+                <small className="hm-rotulo">
+                  {continuarAuto ? '⟳ Continuar de onde parou' : '🕹 Jogado por último'}
+                </small>
+                <h2>{ultimo.nome}</h2>
+                <p className="dica">
+                  {continuarAuto && ultimo.autoQuando
+                    ? 'parou em ' + quando(ultimo.autoQuando)
+                    : 'jogado ' + quando(ultimo.ultimo)}
+                </p>
+                <button className="grande" data-acao="hm-continuar" onClick={() => abrir(ultimo)}>
+                  {continuarAuto ? '▶ Continuar' : '▶ Jogar'}
+                </button>
+                {continuarAuto && (
+                  <button className="grande sec" data-acao="hm-zero" onClick={() => abrir(ultimo, true)}>
+                    ↺ Começar do zero
+                  </button>
+                )}
+              </div>
+            </>
           ) : (
             <>
               <div className="hm-print">{logo}</div>
@@ -137,10 +200,7 @@ export function Inicio() {
           ))}
         </div>
       </div>
-      <section className="hm-bloco" id="hm-bloco-recentes" hidden>
-        <h3>Jogados recentemente</h3>
-        <div className="hm-recentes" id="hm-recentes"></div>
-      </section>
+      <Recentes jogos={jogos.filter((j) => (jogo ? j.id !== idAberto : j !== ultimo)).slice(0, 6)} />
       <div className="hm-dica">
         <span>💡</span>
         {/* dicas são HTML fixo nosso (só <b>), copiadas do antigo */}
@@ -163,6 +223,25 @@ export function Inicio() {
           🎵 Se Essa Rua
         </button>
       </footer>
+    </section>
+  );
+}
+
+function Recentes({ jogos }: { jogos: RegistroJogo[] }) {
+  return (
+    <section className="hm-bloco" id="hm-bloco-recentes" hidden={!jogos.length}>
+      <h3>Jogados recentemente</h3>
+      <div className="hm-recentes" id="hm-recentes">
+        {jogos.map((j) => {
+          const src = srcCapa({ nome: j.nome, chave: j.nome, jogo: j });
+          return (
+            <button key={j.id} className="hm-cartao" title={'jogado ' + quando(j.ultimo)} onClick={() => abrir(j)}>
+              <div className="hm-capa">{src ? <img src={src} alt="" loading="lazy" /> : '🎮'}</div>
+              <span>{j.nome}</span>
+            </button>
+          );
+        })}
+      </div>
     </section>
   );
 }

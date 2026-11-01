@@ -33,13 +33,17 @@ describe.skipIf(!antigo)('savestate entre o antigo e o novo', () => {
     };
     vm.createContext(ctx);
     const carregar = (f: string) => vm.runInContext(readFileSync(f, 'utf8'), ctx, { filename: f });
-    for (const f of readdirSync(PASTA_NUCLEOS)) if (f.endsWith('.js') && f !== 'jogos.js') carregar(join(PASTA_NUCLEOS, f));
+    for (const f of readdirSync(PASTA_NUCLEOS))
+      if (f.endsWith('.js') && f !== 'jogos.js') carregar(join(PASTA_NUCLEOS, f));
     carregar(join(antigo as string, 'web/estado.js'));
     vm.runInContext('globalThis.KofEstado = KofEstado;', ctx);
     carregar(join(antigo as string, 'web/nucleo.js'));
     vm.runInContext('globalThis.KofLibretro = KofLibretro;', ctx);
     const K = ctx.KofLibretro as { criar(rom: Uint8Array, nome: string): Promise<Consolinho> };
-    const E = ctx.KofEstado as { capturar(s: Consolinho): EstadoAntigo; restaurar(s: Consolinho, o: EstadoAntigo): void };
+    const E = ctx.KofEstado as {
+      capturar(s: Consolinho): EstadoAntigo;
+      restaurar(s: Consolinho, o: EstadoAntigo): void;
+    };
     for (const c of CASOS) {
       const velho = await K.criar(c.rom(), c.arquivo);
       for (let i = 0; i < 30; i++) {
