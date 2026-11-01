@@ -33,23 +33,12 @@ import type { Plano } from '@kof/domain';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { usarJogo } from './jogo';
+import { config } from './config';
 import { servicos } from './servicos';
 import { usarTelas } from './telas';
 
-const lerConfig = (k: string) => {
-  try {
-    return localStorage.getItem('kofstation.' + k);
-  } catch {
-    return null;
-  }
-};
-const guardarConfig = (k: string, v: string) => {
-  try {
-    localStorage.setItem('kofstation.' + k, v);
-  } catch {
-    // sem armazenamento: vale até fechar
-  }
-};
+const lerConfig = (k: string) => config().ler(k);
+const guardarConfig = (k: string, v: string) => config().guardar(k, v);
 
 export interface Biblioteca {
   itens: ItemBiblioteca[];

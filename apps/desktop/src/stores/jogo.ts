@@ -14,24 +14,12 @@ import { fatosDe, SISTEMAS, type RegistroJogo } from '@kof/domain';
 import { Jogo, type InfoDoJogo, type Medicao, type Proporcao } from '@kof/engine';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
+import { config } from './config';
 import { servicos } from './servicos';
 import { usarTelas } from './telas';
 
-const lerNum = (k: string, padrao: number) => {
-  try {
-    const v = localStorage.getItem(k);
-    return v === null ? padrao : Number(v);
-  } catch {
-    return padrao;
-  }
-};
-const guardar = (k: string, v: string) => {
-  try {
-    localStorage.setItem(k, v);
-  } catch {
-    // sem armazenamento: vale até fechar
-  }
-};
+const lerNum = (k: string, padrao: number) => config().numero(k, padrao);
+const guardar = (k: string, v: string) => config().guardar(k, v);
 
 export const PROPORCOES: [Proporcao, string][] = [
   ['43', '4:3 (como na TV)'],
@@ -93,11 +81,11 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   pausaManual: false,
   rapidoAberto: false,
   medicao: null,
-  desempenho: lerNum('kofstation.desempenho', 0) === 1,
-  volume: lerNum('kofstation.volume', 100),
-  mudo: lerNum('kofstation.mudo', 0) === 1,
-  proporcao: PROPORCOES[Math.max(0, lerNum('kofstation.proporcaoIdx', 0))]?.[0] ?? '43',
-  escala: lerNum('kofstation.escala', 0),
+  desempenho: lerNum('desempenho', 0) === 1,
+  volume: lerNum('volume', 100),
+  mudo: lerNum('mudo', 0) === 1,
+  proporcao: ((p) => (PROPORCOES.some(([k]) => k === p) ? p : '43') as Proporcao)(config().ler('proporcao')),
+  escala: lerNum('escala', 0),
 
   abrirArquivo: async (arquivo) => {
     const av = usarAvisos.getState();
@@ -171,15 +159,15 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   },
   mudarVolume: (d) => {
     const volume = Math.max(0, Math.min(100, get().volume + d));
-    guardar('kofstation.volume', String(volume));
+    guardar('volume', String(volume));
     set({ volume, mudo: false });
-    guardar('kofstation.mudo', '0');
+    guardar('mudo', '0');
     get().jogo?.ajustarVolume(volume / 100, false);
     usarAvisos.getState().avisar(`🔊 volume ${volume}%`);
   },
   alternarMudo: () => {
     const mudo = !get().mudo;
-    guardar('kofstation.mudo', mudo ? '1' : '0');
+    guardar('mudo', mudo ? '1' : '0');
     set({ mudo });
     get().jogo?.ajustarVolume(get().volume / 100, mudo);
     usarAvisos.getState().avisar(mudo ? '🔇 mudo' : `🔊 som ligado (${get().volume}%)`);
@@ -187,16 +175,16 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   mudarProporcao: (d) => {
     const i = PROPORCOES.findIndex(([k]) => k === get().proporcao);
     const p = PROPORCOES[(i + d + PROPORCOES.length) % PROPORCOES.length]?.[0] ?? '43';
-    guardar('kofstation.proporcaoIdx', String(PROPORCOES.findIndex(([k]) => k === p)));
+    guardar('proporcao', p);
     set({ proporcao: p });
   },
   mudarEscala: (escala) => {
-    guardar('kofstation.escala', String(escala));
+    guardar('escala', String(escala));
     set({ escala });
   },
   alternarDesempenho: () => {
     const desempenho = !get().desempenho;
-    guardar('kofstation.desempenho', desempenho ? '1' : '0');
+    guardar('desempenho', desempenho ? '1' : '0');
     set({ desempenho });
   },
   abrirRapido: () => {

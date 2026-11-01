@@ -1,16 +1,11 @@
-// Preferências da interface. Por enquanto o tema fica no armazenamento do navegador (conveniência deste aparelho); no
-// M4 as configurações passam pro arquivo em Kof Games/Config, pelo backend.
+// Preferências da interface (o tema), no arquivo de configurações (chave `tema`, a mesma do antigo).
 import { TEMA_PADRAO, TODOS_TEMAS } from '@kof/domain';
 import { create } from 'zustand';
+import { config } from './config';
 
-const CHAVE = 'kofstation.tema';
 const ler = (): string => {
-  try {
-    const t = localStorage.getItem(CHAVE);
-    return t && TODOS_TEMAS.some(([id]) => id === t) ? t : TEMA_PADRAO;
-  } catch {
-    return TEMA_PADRAO; // armazenamento bloqueado (janela anônima): fica o padrão
-  }
+  const t = config().ler('tema');
+  return t && TODOS_TEMAS.some(([id]) => id === t) ? t : TEMA_PADRAO;
 };
 
 export interface Prefs {
@@ -29,11 +24,7 @@ export const usarPrefs = create<Prefs>()((set, get) => {
     tema,
     temaNaTela: tema,
     escolherTema: (id) => {
-      try {
-        localStorage.setItem(CHAVE, id);
-      } catch {
-        // sem armazenamento: o tema vale só até fechar (o aviso não é necessário, nada se perde)
-      }
+      config().guardar('tema', id);
       set({ tema: id, temaNaTela: id });
     },
     experimentarTema: (id) => set({ temaNaTela: id }),

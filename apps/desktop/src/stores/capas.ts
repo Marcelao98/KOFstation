@@ -1,22 +1,11 @@
 // Capas oficiais e modo sofá (grade de capas em tela cheia, feita pro controle).
 import { criarCapas, type Capas } from '@kof/app-core';
 import { create } from 'zustand';
+import { config } from './config';
 import { servicos } from './servicos';
 
-const ler = (k: string) => {
-  try {
-    return localStorage.getItem('kofstation.' + k);
-  } catch {
-    return null;
-  }
-};
-const guardar = (k: string, v: string) => {
-  try {
-    localStorage.setItem('kofstation.' + k, v);
-  } catch {
-    // sem armazenamento: vale até fechar
-  }
-};
+const ler = (k: string) => config().ler(k);
+const guardar = (k: string, v: string) => config().guardar(k, v);
 
 export interface EstadoCapas {
   /** muda quando chega uma capa (as telas redesenham) */

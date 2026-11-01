@@ -9,3 +9,4 @@ export * from './armazem';
 export * from './jogos';
 export * from './basejogos';
 export * from './capas';
+export * from './config';

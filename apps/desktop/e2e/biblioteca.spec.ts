@@ -7,6 +7,7 @@ test.beforeEach(async ({ page }) => {
   erros.length = 0;
   page.on('pageerror', (e) => erros.push(e.message));
   await page.goto('/');
+  await expect(page.locator('#home')).toBeVisible();
 });
 test.afterEach(() => expect(erros).toEqual([]));
 
@@ -130,7 +131,7 @@ test('capa oficial na ficha e modo sofá com a grade de capas', async ({ page })
   await page.keyboard.press('Control+KeyL');
   await expect(page.locator('#roms li')).toHaveCount(2);
   await expect(page.locator('#capa-img.oficial')).toBeVisible();
-  await page.keyboard.press('ArrowDown');
+  await page.locator('#roms li').nth(1).click();
   await expect(page.locator('#info-nome')).toHaveText('Sem Capa (USA)');
   await expect(page.locator('#capa-img')).toBeHidden();
   await expect(page.locator('#capa-vazia')).toBeVisible();

@@ -136,6 +136,27 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       t.arquivos.set(p, dados.slice());
       return { stored: p };
     },
+    // a configuração do backend de teste sobrevive ao recarregar a página (como o arquivo do Rust)
+    'config.read': (a) => {
+      if (a.doc !== 'config') throw erro('INVALID_ARGS', `documento desconhecido: ${String(a.doc)}`);
+      try {
+        return JSON.parse(sessionStorage.getItem('kofstation-teste.config') ?? 'null') ?? { versao: 1, valores: {} };
+      } catch {
+        return { versao: 1, valores: {} };
+      }
+    },
+    'config.write': (a) => {
+      const d = a.data as { versao?: number; valores?: Record<string, unknown> };
+      if ((d.versao ?? 1) > 1) throw erro('SCHEMA_TOO_NEW', 'config');
+      if (!d.valores || Object.values(d.valores).some((v) => typeof v !== 'string'))
+        throw erro('INVALID_ARGS', 'valores têm que ser texto');
+      try {
+        sessionStorage.setItem('kofstation-teste.config', JSON.stringify({ versao: 1, valores: d.valores }));
+      } catch {
+        // sem sessionStorage: a configuração vale só até recarregar
+      }
+      return null;
+    },
     'store.list': (a) =>
       [...loja(a)]
         .filter(([k]) => !a.prefix || k.startsWith(String(a.prefix)))

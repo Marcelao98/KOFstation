@@ -87,6 +87,14 @@ struct ArgsCapa {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
+struct ArgsConfig {
+    doc: String,
+    #[serde(default)]
+    data: Option<Value>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ArgsLer {
     scope: String,
     path: String,
@@ -179,6 +187,16 @@ impl Estado {
                 let a: ArgsGuardar = args(a)?;
                 let r = kof_files::organizar::guardar(&self.raiz()?, &a.pasta, &a.nome, &corpo)?;
                 json(serde_json::json!({ "stored": r }))
+            }
+            "config.read" => {
+                let a: ArgsConfig = args(a)?;
+                json(kof_files::config::ler(&self.pasta_dados, &a.doc)?)
+            }
+            "config.write" => {
+                let a: ArgsConfig = args(a)?;
+                let d = a.data.ok_or_else(|| KofError::argumento("data", "faltou"))?;
+                kof_files::config::gravar(&self.pasta_dados, &a.doc, &d)?;
+                json(Value::Null)
             }
             "store.list" => {
                 let a: ArgsLoja = args(a)?;
