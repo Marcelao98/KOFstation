@@ -11,6 +11,8 @@ import { useEntradaDoJogo } from '../hooks/useEntradaDoJogo';
 import { mover, telaDeCima, useNavegacaoPad } from '../hooks/useNavegacaoPad';
 import { usePausa } from '../hooks/usePausa';
 import { useTelaDoJogo } from '../hooks/useTelaDoJogo';
+import { Biblioteca } from '../screens/Biblioteca/Biblioteca';
+import { PedirPasta, PlanoDeOrganizacao } from '../screens/Biblioteca/Dialogos';
 import { Guia } from '../screens/Guia/Guia';
 import { Inicio } from '../screens/Inicio/Inicio';
 import { Pendente } from '../screens/Pendente/Pendente';
@@ -20,7 +22,7 @@ import { usarAvisos } from '../stores/avisos';
 import { usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarShowcase } from '../stores/showcase';
-import { usarTelas } from '../stores/telas';
+import { usarTelas, type TelaId } from '../stores/telas';
 import { acao } from './acoes';
 import { atalhoDe } from './atalhos';
 
@@ -142,11 +144,14 @@ export function App({ backend }: { backend: Backend }) {
       <main id="palco">
         {atual === 'home' && <Inicio />}
         {atual === 'guia' && <Guia />}
-        {atual !== 'home' && atual !== 'guia' && atual !== 'jogo' && <Pendente tela={atual} />}
+        {atual === 'biblioteca' && <Biblioteca />}
+        {!['home', 'guia', 'jogo', 'biblioteca'].includes(atual) && <Pendente tela={atual as TelaId} />}
         <div id="moldura" hidden={atual !== 'jogo'}>
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>
         </div>
         {temasAberto && <Temas />}
+        <PedirPasta />
+        <PlanoDeOrganizacao />
         <MenuRapido />
         <Aviso />
         <BarraShowcase />

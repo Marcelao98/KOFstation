@@ -13,6 +13,7 @@ pub enum Saida {
 
 pub struct Estado {
     pub pasta_dados: PathBuf,
+    pub lojas: kof_files::loja::Lojas,
     /// onde está o executável (a raiz Kof Games pode vir pela posição dele)
     pub exe: Option<PathBuf>,
     /// pasta do usuário (sugestão da Kof Games)
@@ -54,6 +55,26 @@ struct ArgsGuardar {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
+struct ArgsLoja {
+    store: String,
+    #[serde(default)]
+    key: Option<String>,
+    #[serde(default)]
+    prefix: Option<String>,
+    #[serde(default)]
+    meta: Option<Value>,
+}
+
+impl ArgsLoja {
+    fn chave(&self) -> Result<&str, KofError> {
+        self.key
+            .as_deref()
+            .ok_or_else(|| KofError::argumento("key", "faltou a chave"))
+    }
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ArgsLer {
     scope: String,
     path: String,
@@ -71,6 +92,7 @@ impl Estado {
     pub fn novo(pasta_dados: PathBuf) -> Self {
         let casa = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" }).map(PathBuf::from);
         Self {
+            lojas: kof_files::loja::Lojas::nova(pasta_dados.join("lojas")),
             pasta_dados,
             exe: std::env::current_exe().ok(),
             casa,
@@ -145,6 +167,38 @@ impl Estado {
                 let a: ArgsGuardar = args(a)?;
                 let r = kof_files::organizar::guardar(&self.raiz()?, &a.pasta, &a.nome, &corpo)?;
                 json(serde_json::json!({ "stored": r }))
+            }
+            "store.list" => {
+                let a: ArgsLoja = args(a)?;
+                json(serde_json::to_value(self.lojas.listar(&a.store, a.prefix.as_deref())?).expect("json"))
+            }
+            "store.get" => {
+                let a: ArgsLoja = args(a)?;
+                Ok(Saida::Bin(self.lojas.pegar(&a.store, a.chave()?)?))
+            }
+            "store.meta" => {
+                let a: ArgsLoja = args(a)?;
+                json(self.lojas.meta(&a.store, a.chave()?)?)
+            }
+            "store.put" => {
+                let a: ArgsLoja = args(a)?;
+                let meta = a.meta.clone().unwrap_or(Value::Null);
+                self.lojas.por(&a.store, a.chave()?, &meta, &corpo)?;
+                json(Value::Null)
+            }
+            "store.delete" => {
+                let a: ArgsLoja = args(a)?;
+                self.lojas.apagar(&a.store, a.chave()?)?;
+                json(Value::Null)
+            }
+            "store.space" => {
+                let l: Vec<Value> = self
+                    .lojas
+                    .espaco()
+                    .into_iter()
+                    .map(|(store, bytes, items)| serde_json::json!({"store": store, "bytes": bytes, "items": items}))
+                    .collect();
+                json(Value::Array(l))
             }
             "file.read" => {
                 let a: ArgsLer = args(a)?;

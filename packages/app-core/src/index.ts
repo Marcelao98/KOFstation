@@ -5,3 +5,5 @@ export * from './controle';
 export * from './arquivo';
 export * from './log';
 export * from './kofgames';
+export * from './armazem';
+export * from './jogos';

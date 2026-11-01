@@ -4,6 +4,8 @@ import { NUCLEOS } from '@kof/engine';
 
 export interface JogoAberto {
   nome: string;
+  /** nome do arquivo da ROM (o de dentro, num zip) */
+  arquivo: string;
   sistema: SistemaId;
   rom: Uint8Array;
 }
@@ -48,12 +50,17 @@ export async function lerArquivoDeJogo(nome: string, bytes: Uint8Array): Promise
     if (e.metodo === 0) rom = dados.slice();
     else if (e.metodo === 8) rom = await inflar(dados);
     else throw new ErroDeArquivo('BAD_ZIP', `o zip usa uma compressão que eu não conheço (método ${e.metodo})`);
-    return { nome: semExtensao(e.nome), sistema: sistemaPorExtensao(e.nome) as SistemaId, rom };
+    return {
+      nome: semExtensao(e.nome),
+      arquivo: e.nome.split(/[\\/]/).pop() ?? e.nome,
+      sistema: sistemaPorExtensao(e.nome) as SistemaId,
+      rom,
+    };
   }
   const s = sistemaPorExtensao(nome);
   if (!s) throw new ErroDeArquivo('NOT_A_GAME', `${nome} não parece um jogo (extensão .${extensao(nome) || '?'})`);
   if (!roda(s)) throw naoAinda(s);
-  return { nome: semExtensao(nome), sistema: s, rom: bytes };
+  return { nome: semExtensao(nome), arquivo: nome.split(/[\\/]/).pop() ?? nome, sistema: s, rom: bytes };
 }
 
 function naoAinda(s: SistemaId): ErroDeArquivo {

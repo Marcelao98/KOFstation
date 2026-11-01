@@ -141,10 +141,15 @@ export interface ResultadoOrganizar {
 export const aplicarPlano = (b: Backend, p: Plano) =>
   b.chamar<ResultadoOrganizar>('library.organize.apply', { moves: p.moves, limpar: p.limpar });
 
-/** Jogo aberto de fora: guarda uma cópia em Kof Games/Games/<console> (o original fica). null = já estava lá. */
-export async function guardarNaKofGames(b: Backend, fato: FatoDeArquivo, bytes: Uint8Array): Promise<string | null> {
+/** Jogo aberto de fora: guarda uma cópia em Kof Games/Games/<console> (o original fica). `novo` = copiou agora
+ *  (false = já estava lá com o mesmo tamanho); null = não é jogo que tenha pasta. */
+export async function guardarNaKofGames(
+  b: Backend,
+  fato: FatoDeArquivo,
+  bytes: Uint8Array,
+): Promise<{ path: string; novo: boolean } | null> {
   const pasta = pastaDoArquivo(fato);
   if (!pasta) return null;
   const r = await b.enviarBinario<{ stored: string | null }>('library.import', { pasta, nome: fato.nome }, bytes);
-  return r.stored;
+  return { path: r.stored ?? `Games/${pasta}/${fato.nome}`, novo: !!r.stored };
 }

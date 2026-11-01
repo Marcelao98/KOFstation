@@ -1,17 +1,6 @@
 // M2: abrir uma ROM (gerada aqui: Mega Drive que pinta o fundo de vermelho) e jogar no app novo.
 import { expect, test, type Page } from '@playwright/test';
-
-function romVermelha(): Buffer {
-  const r = Buffer.alloc(0x400);
-  r.writeUInt32BE(0xfffe00, 0);
-  r.writeUInt32BE(0x200, 4);
-  r.write('SEGA MEGA DRIVE ', 0x100);
-  [
-    0x33fc, 0x8004, 0x00c0, 0x0004, 0x33fc, 0x8144, 0x00c0, 0x0004, 0x33fc, 0x8700, 0x00c0, 0x0004, 0x23fc, 0xc000,
-    0x0000, 0x00c0, 0x0004, 0x33fc, 0x000e, 0x00c0, 0x0000, 0x60fe,
-  ].forEach((w, i) => r.writeUInt16BE(w, 0x200 + 2 * i));
-  return r;
-}
+import { romVermelha } from './roms';
 
 const corDoMeio = (page: Page) =>
   page.evaluate(() => {

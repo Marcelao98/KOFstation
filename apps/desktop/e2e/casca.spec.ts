@@ -21,7 +21,7 @@ test('telas e Voltar: lateral, Alt+←, botão direito e Esc', async ({ page }) 
   await page.click('#lateral [data-acao="guia"]');
   await expect(page.locator('#guia')).toBeVisible();
   await page.click('#lateral [data-acao="biblioteca"]');
-  await expect(page.locator('#biblioteca')).toContainText('etapa M3');
+  await expect(page.locator('#biblioteca .titulo-j')).toContainText('Biblioteca');
   await page.keyboard.press('Alt+ArrowLeft');
   await expect(page.locator('#guia')).toBeVisible();
   await page.mouse.click(600, 400, { button: 'right' });
@@ -128,8 +128,9 @@ test('controle: A no Início faz a ação principal, direcional anda, B volta, S
   await expect(page.locator('#guia .gu-menu .ativo')).toHaveText(alvo);
   await apertar(0); // B: fecha a janela (×)
   await expect(page.locator('#home')).toBeVisible();
-  await apertar(9); // Start no Início = ação principal (escolher pasta → avisa a etapa)
-  await expect(page.locator('#aviso')).toContainText('etapa M3');
+  await apertar(9); // Start no Início = ação principal (escolher a pasta Kof Games)
+  await expect(page.locator('#pasta-tela')).toBeVisible();
+  await page.click('#pasta-tela .x');
   await apertar(15); // direita: anda pelos botões do Início
   await expect(page.locator('#home .foco-pad')).toHaveCount(1);
 });

@@ -8,15 +8,31 @@ export type ComandoTeste = (args: Record<string, unknown>, dados: Uint8Array) =>
 const NIVEIS = ['error', 'warn', 'info', 'debug'];
 const erro = (code: string, message: string) => ({ code, message });
 
+const LOJAS = ['jogos', 'saves', 'estados', 'autos', 'stats', 'musicas', 'capas', 'visual', 'roms'];
+
 export interface KofTeste {
   /** arquivos da Kof Games falsa (caminho relativo à raiz → bytes) */
   arquivos: Map<string, Uint8Array>;
   raiz: string | null;
   log: unknown[];
+  /** lojas: loja → chave → [meta, bytes] */
+  lojas: Map<string, Map<string, [unknown, Uint8Array]>>;
 }
 
 export function criarComandosTeste(): Record<string, ComandoTeste> {
-  const t: KofTeste = { arquivos: new Map(), raiz: null, log: [] };
+  const t: KofTeste = { arquivos: new Map(), raiz: null, log: [], lojas: new Map() };
+  const loja = (a: Record<string, unknown>) => {
+    const n = String(a.store);
+    if (!LOJAS.includes(n)) throw erro('INVALID_ARGS', `loja desconhecida: ${n}`);
+    let m = t.lojas.get(n);
+    if (!m) t.lojas.set(n, (m = new Map()));
+    return m;
+  };
+  const registro = (a: Record<string, unknown>) => {
+    const r = loja(a).get(String(a.key));
+    if (!r) throw erro('NOT_FOUND', `${String(a.store)}/${String(a.key)}`);
+    return r;
+  };
   (globalThis as { __kofTeste?: KofTeste }).__kofTeste = t;
   const infoRaiz = () => ({
     path: t.raiz,
@@ -118,6 +134,28 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       t.arquivos.set(p, dados.slice());
       return { stored: p };
     },
+    'store.list': (a) =>
+      [...loja(a)]
+        .filter(([k]) => !a.prefix || k.startsWith(String(a.prefix)))
+        .sort(([x], [y]) => (x < y ? -1 : x > y ? 1 : 0))
+        .map(([key, [meta, b]]) => ({ key, meta: structuredClone(meta), size: b.length })),
+    'store.get': (a) => registro(a)[1].slice(),
+    'store.meta': (a) => structuredClone(registro(a)[0]),
+    'store.put': (a, dados) => {
+      loja(a).set(String(a.key), [structuredClone(a.meta ?? null), dados.slice()]);
+      return null;
+    },
+    'store.delete': (a) => {
+      loja(a).delete(String(a.key));
+      return null;
+    },
+    'store.space': () =>
+      LOJAS.map((store) => {
+        const m = t.lojas.get(store) ?? new Map<string, [unknown, Uint8Array]>();
+        let bytes = 0;
+        for (const [, [meta, b]] of m) bytes += b.length + JSON.stringify(meta).length;
+        return { store, bytes, items: m.size };
+      }),
     'file.read': (a) => {
       if (a.scope !== 'kof-games') throw erro('INVALID_ARGS', `escopo desconhecido: ${String(a.scope)}`);
       precisaRaiz();

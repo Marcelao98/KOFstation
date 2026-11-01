@@ -1,10 +1,20 @@
 // O jogo aberto: a sessão da engine e o que a interface mostra (nome, pausa, volume, medições). O laço de imagem não
 // passa por aqui: os quadros vão direto pro canvas (hooks/useTelaDoJogo).
-import { ErroDeArquivo, lerArquivoDeJogo } from '@kof/app-core';
-import { SISTEMAS } from '@kof/domain';
+import {
+  ErroDeArquivo,
+  guardarNaKofGames,
+  identidade,
+  lerArquivoDeJogo,
+  registrar,
+  registrarJogo,
+  textoDoErro,
+  type JogoAberto,
+} from '@kof/app-core';
+import { fatosDe, SISTEMAS, type RegistroJogo } from '@kof/domain';
 import { Jogo, type InfoDoJogo, type Medicao, type Proporcao } from '@kof/engine';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
+import { servicos } from './servicos';
 import { usarTelas } from './telas';
 
 const lerNum = (k: string, padrao: number) => {
@@ -37,9 +47,19 @@ export const ultimoQuadro: { pixels: Uint32Array | null; largura: number; altura
   novo: false,
 };
 
+/** De onde veio o jogo que está abrindo. */
+export interface Origem {
+  /** caminho na Kof Games (veio da biblioteca/pasta) */
+  path?: string;
+  /** o arquivo de fora (aberto/arrastado): ganha uma cópia na Kof Games */
+  arquivoDeFora?: File;
+}
+
 export interface EstadoJogo {
   jogo: Jogo | null;
   nome: string;
+  /** registro do jogo aberto (id = "título|tamanho", as chaves do antigo) */
+  registro: RegistroJogo | null;
   info: InfoDoJogo | null;
   abrindo: boolean;
   pausaManual: boolean;
@@ -51,6 +71,7 @@ export interface EstadoJogo {
   proporcao: Proporcao;
   escala: number;
   abrirArquivo: (f: File) => Promise<void>;
+  abrirJogo: (aberto: JogoAberto, origem?: Origem) => Promise<boolean>;
   fechar: () => void;
   alternarPausa: () => void;
   reiniciar: () => void;
@@ -66,6 +87,7 @@ export interface EstadoJogo {
 export const usarJogo = create<EstadoJogo>()((set, get) => ({
   jogo: null,
   nome: '',
+  registro: null,
   info: null,
   abrindo: false,
   pausaManual: false,
@@ -79,10 +101,19 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
 
   abrirArquivo: async (arquivo) => {
     const av = usarAvisos.getState();
-    if (get().abrindo) return;
-    set({ abrindo: true });
     try {
       const aberto = await lerArquivoDeJogo(arquivo.name, new Uint8Array(await arquivo.arrayBuffer()));
+      await get().abrirJogo(aberto, { arquivoDeFora: arquivo });
+    } catch (e) {
+      if (e instanceof ErroDeArquivo) av.avisar(e.message, 5000);
+      else av.avisarErro(`não consegui abrir ${arquivo.name}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  },
+  abrirJogo: async (aberto, origem = {}) => {
+    const av = usarAvisos.getState();
+    if (get().abrindo) return false;
+    set({ abrindo: true });
+    try {
       get().jogo?.fechar();
       const { volume, mudo } = get();
       const jogo = await Jogo.abrir(
@@ -102,7 +133,15 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           },
         },
       );
-      set({ jogo, nome: aberto.nome, info: jogo.info, pausaManual: false, medicao: null });
+      const provisorio: RegistroJogo = {
+        ...identidade(aberto.sistema, aberto.rom, aberto.nome),
+        nome: aberto.nome,
+        arquivo: aberto.arquivo,
+        sistema: aberto.sistema,
+        tamanho: aberto.rom.length,
+        ultimo: Date.now(),
+      };
+      set({ jogo, nome: aberto.nome, registro: provisorio, info: jogo.info, pausaManual: false, medicao: null });
       const telas = usarTelas.getState();
       usarTelas.setState({ temJogo: true });
       telas.abrir('jogo');
@@ -110,9 +149,11 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       av.avisar(`▶ ${aberto.nome} (${sis})`);
       if (mudo) av.avisar('o som está desligado: aperte M pra ligar', 3000);
       else if (!jogo.comSom) av.avisar('sem som: o navegador não liberou o áudio (o jogo roda mudo)', 4000);
+      void guardarNaBiblioteca(aberto, origem).then((r) => r && get().registro?.id === r.id && set({ registro: r }));
+      return true;
     } catch (e) {
-      if (e instanceof ErroDeArquivo) av.avisar(e.message, 5000);
-      else av.avisarErro(`não consegui abrir ${arquivo.name}: ${e instanceof Error ? e.message : String(e)}`);
+      av.avisarErro(`não consegui abrir ${aberto.arquivo}: ${e instanceof Error ? e.message : String(e)}`);
+      return false;
     } finally {
       set({ abrindo: false });
     }
@@ -120,7 +161,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   fechar: () => {
     get().jogo?.fechar();
     ultimoQuadro.pixels = null;
-    set({ jogo: null, nome: '', info: null, medicao: null, rapidoAberto: false });
+    set({ jogo: null, nome: '', registro: null, info: null, medicao: null, rapidoAberto: false });
     usarTelas.setState({ temJogo: false });
   },
   alternarPausa: () => set({ pausaManual: !get().pausaManual }),
@@ -163,3 +204,31 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   },
   fecharRapido: () => set({ rapidoAberto: false }),
 }));
+
+/** Depois de abrir: registra na biblioteca e, se veio de fora, guarda uma cópia na Kof Games (o original fica). */
+async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<RegistroJogo | null> {
+  const { backend, armazem } = servicos();
+  let path = origem.path;
+  const f = origem.arquivoDeFora;
+  if (!path && f) {
+    try {
+      const fato = await fatosDe(f.name, f.size, async (o, n) => new Uint8Array(await f.slice(o, o + n).arrayBuffer()));
+      const bytes = new Uint8Array(await f.arrayBuffer());
+      const guardado = await guardarNaKofGames(backend, fato, bytes);
+      path = guardado?.path;
+      if (guardado?.novo)
+        usarAvisos
+          .getState()
+          .avisar(`📁 ${f.name} guardado em Kof Games/${guardado.path.split('/').slice(0, -1).join('/')}`, 3500);
+    } catch (e) {
+      // sem a Kof Games escolhida (ROOT_MISSING) a ROM fica guardada na loja `roms`
+      if ((e as { code?: string }).code !== 'ROOT_MISSING') registrar('warn', 'kofgames', textoDoErro(e));
+    }
+  }
+  try {
+    return await registrarJogo(armazem, aberto, path ? { path } : {});
+  } catch (e) {
+    registrar('error', 'biblioteca', `não registrei ${aberto.nome}: ${textoDoErro(e)}`);
+    return null;
+  }
+}

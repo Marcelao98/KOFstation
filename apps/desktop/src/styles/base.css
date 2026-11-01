@@ -3,3 +3,39 @@
 #raiz {
   display: contents;
 }
+
+/* M3: janelas da pasta Kof Games (usam as cores do tema do estilo.css antigo) */
+#pasta-tela,
+#organizar-tela {
+  position: absolute;
+  inset: 10% 15% auto;
+  z-index: 6;
+  max-height: 80%;
+  overflow: auto;
+  padding-bottom: 12px;
+}
+#pasta-tela form,
+#pasta-tela .dica,
+#organizar-tela .dica {
+  padding: 0 16px;
+}
+#pasta-caminho {
+  width: 100%;
+  margin: 8px 0 12px;
+}
+#organizar-lista {
+  list-style: none;
+  margin: 0 16px 12px;
+  padding: 0;
+  max-height: 50vh;
+  overflow: auto;
+  font-size: 0.9em;
+}
+#organizar-lista li {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--borda);
+  word-break: break-all;
+}
+#organizar-tela .bib-botoes {
+  padding: 0 16px;
+}

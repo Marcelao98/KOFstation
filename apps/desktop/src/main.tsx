@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
 import { escolherBackend } from './platform/escolher';
+import { ligarServicos } from './stores/servicos';
 import './styles/antigo/estilo.css';
 import './styles/base.css';
 
@@ -10,6 +11,7 @@ const raiz = document.getElementById('raiz');
 if (!raiz) throw new Error('index.html sem o #raiz');
 const backend = escolherBackend(new URL(location.href));
 ligarLog(backend);
+ligarServicos(backend);
 addEventListener('error', (e) =>
   registrar('error', 'tela', textoDoErro(e.error ?? e.message), { arquivo: e.filename }),
 );

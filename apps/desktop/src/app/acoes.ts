@@ -2,6 +2,7 @@
 // outras avisam em que etapa do roadmap chegam (docs/ROADMAP.md). Assim os menus ficam completos desde o M1 e nada
 // some sem aviso.
 import { usarAvisos } from '../stores/avisos';
+import { usarBiblioteca } from '../stores/biblioteca';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 
@@ -22,7 +23,6 @@ const TELAS: Partial<Record<string, TelaId>> = {
 
 /** Etapa em que cada ação ainda não feita chega. */
 export const ETAPA: Readonly<Record<string, string>> = {
-  pasta: 'M3',
   traducao: 'M10',
   'exportar-saves': 'M4',
   'importar-saves': 'M4',
@@ -35,14 +35,15 @@ export const ETAPA: Readonly<Record<string, string>> = {
   molduras: 'M7',
   visual: 'M7',
   'visual-temas': 'M7',
-  sofa: 'M3',
+  sofa: 'M3.6',
+  capas: 'M3.6',
+  'estados-do-sel': 'M5',
   'musica-inicio': 'M9',
   'guardar-musica': 'M9',
   'boas-vindas': 'M9',
   bug: 'M10',
   'cacador-toggle': 'M10',
   atualizacao: 'M15',
-  biblioteca: 'M3',
   estados: 'M5',
   jukebox: 'M9',
   estatisticas: 'M10',
@@ -125,6 +126,16 @@ export function acao(nome: string, valor?: string): boolean {
       for (let i = 0; i < 3 && usarJogo.getState().proporcao !== alvo; i++) usarJogo.getState().mudarProporcao(1);
       return true;
     }
+    case 'pasta':
+      usarBiblioteca.getState().abrirPedirPasta();
+      return true;
+    case 'reler-pasta':
+      telas.abrir('biblioteca');
+      void usarBiblioteca.getState().mostrar(true);
+      return true;
+    case 'fechar-biblioteca':
+      telas.sair();
+      return true;
     case 'pausa-auto':
       usarAvisos.getState().avisar('pausar ao sair da janela: sempre ligado por enquanto (a opção chega no M4)', 3000);
       return true;
