@@ -13,3 +13,4 @@ export * from './config';
 export * from './saves';
 export * from './backup';
 export * from './bateria';
+export * from './estados';

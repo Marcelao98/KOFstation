@@ -39,3 +39,31 @@ test('o save da bateria vai pra loja com a chave do antigo (rascunho primeiro, d
     .poll(() => page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('kofstation-rascunho.'))))
     .toEqual([]);
 });
+
+test('F5 salva estado com print, F6 mostra, clicar carrega, F8 carrega o último, 🗑 apaga', async ({ page }) => {
+  await page.setInputFiles('#arquivo', {
+    name: 'Save.gb',
+    mimeType: 'application/octet-stream',
+    buffer: romGbComSave(),
+  });
+  await expect(page.locator('#st-jogo')).toHaveText('Save');
+  await page.waitForTimeout(500);
+  await page.keyboard.press('F5');
+  await expect(page.locator('#aviso')).toContainText('estado salvo');
+  await page.keyboard.press('F5');
+  await expect.poll(async () => (await loja(page, 'estados')).length).toBe(2);
+  const [e] = await loja(page, 'estados');
+  expect(e?.k).toMatch(/^KOFSAVE\|32768\/\d+$/);
+  expect(String(e?.meta.capa)).toMatch(/^data:image\/(webp|png)/);
+  await page.keyboard.press('F6');
+  await expect(page.locator('#estados')).toBeVisible();
+  await expect(page.locator('#grade-estados .cartao')).toHaveCount(2);
+  await expect(page.locator('#estados-jogo')).toHaveValue('KOFSAVE|32768');
+  await page.locator('#grade-estados .cartao .x').first().click();
+  await expect(page.locator('#grade-estados .cartao')).toHaveCount(1);
+  await page.locator('#grade-estados .cartao').first().click();
+  await expect(page.locator('#aviso')).toContainText('carregado');
+  await expect(page.locator('#estados')).toBeHidden();
+  await page.keyboard.press('F8');
+  await expect(page.locator('#aviso')).toContainText('carregado');
+});

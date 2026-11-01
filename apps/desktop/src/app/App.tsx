@@ -14,6 +14,7 @@ import { useTelaDoJogo } from '../hooks/useTelaDoJogo';
 import { Backup } from '../screens/Backup/Backup';
 import { Biblioteca } from '../screens/Biblioteca/Biblioteca';
 import { PedirPasta, PlanoDeOrganizacao } from '../screens/Biblioteca/Dialogos';
+import { Estados } from '../screens/Estados/Estados';
 import { Guia } from '../screens/Guia/Guia';
 import { Inicio } from '../screens/Inicio/Inicio';
 import { Pendente } from '../screens/Pendente/Pendente';
@@ -162,7 +163,8 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'home' && <Inicio />}
         {atual === 'guia' && <Guia />}
         {atual === 'biblioteca' && <Biblioteca />}
-        {!['home', 'guia', 'jogo', 'biblioteca'].includes(atual) && <Pendente tela={atual as TelaId} />}
+        {atual === 'estados' && <Estados />}
+        {!['home', 'guia', 'jogo', 'biblioteca', 'estados'].includes(atual) && <Pendente tela={atual as TelaId} />}
         <div id="moldura" hidden={atual !== 'jogo'}>
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>
         </div>

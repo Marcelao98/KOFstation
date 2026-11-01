@@ -5,6 +5,7 @@ import { usarAvisos } from '../stores/avisos';
 import { usarBackup } from '../stores/backup';
 import { usarBiblioteca } from '../stores/biblioteca';
 import { usarCapas } from '../stores/capas';
+import { usarEstados } from '../stores/estados';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 
@@ -12,7 +13,6 @@ import { usarTelas, type TelaId } from '../stores/telas';
 const TELAS: Partial<Record<string, TelaId>> = {
   home: 'home',
   biblioteca: 'biblioteca',
-  estados: 'estados',
   jukebox: 'jukebox',
   estatisticas: 'estatisticas',
   guia: 'guia',
@@ -28,21 +28,17 @@ export const ETAPA: Readonly<Record<string, string>> = {
   traducao: 'M10',
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
-  'salvar-estado': 'M5',
-  'carregar-ultimo': 'M5',
   'auto-toggle': 'M5',
   'emu-opcoes': 'M5',
   molduras: 'M7',
   visual: 'M7',
   'visual-temas': 'M7',
-  'estados-do-sel': 'M5',
   'musica-inicio': 'M9',
   'guardar-musica': 'M9',
   'boas-vindas': 'M9',
   bug: 'M10',
   'cacador-toggle': 'M10',
   atualizacao: 'M15',
-  estados: 'M5',
   jukebox: 'M9',
   estatisticas: 'M10',
   teclas: 'M8',
@@ -137,6 +133,24 @@ export function acao(nome: string, valor?: string): boolean {
     case 'exportar-saves':
     case 'importar-saves':
       usarBackup.getState().abrir();
+      return true;
+    case 'salvar-estado':
+      void usarEstados.getState().salvar();
+      return true;
+    case 'carregar-ultimo':
+      void usarEstados.getState().carregarUltimo();
+      return true;
+    case 'estados':
+      void usarEstados.getState().mostrar(null, 'estados');
+      return true;
+    case 'estados-do-sel': {
+      const b = usarBiblioteca.getState();
+      const r = b.visiveis[b.selecionada];
+      void usarEstados.getState().mostrar(r?.jogo?.id ?? null, 'estados');
+      return true;
+    }
+    case 'fechar-estados':
+      telas.sair();
       return true;
     case 'capas':
       usarCapas.getState().alternarCapas();
