@@ -74,3 +74,35 @@ test('jogo aberto de fora ganha uma cópia na Kof Games e fica na biblioteca', a
   await expect(page.locator('#roms li')).toHaveCount(1);
   await expect(page.locator('#roms li').first()).toContainText('Fora');
 });
+
+test('busca com a base de jogos: campo:valor, facetas com contagem e ficha com botõezinhos', async ({ page }) => {
+  await page.evaluate(() => {
+    const t = (globalThis as unknown as { __kofTeste: { raiz: string; arquivos: Map<string, Uint8Array> } }).__kofTeste;
+    t.raiz = '/home/teste/Kof Games';
+    for (const n of ['Super Mario World (USA)', 'Chrono Trigger (USA)', 'Donkey Kong Country (USA)'])
+      t.arquivos.set(`Games/snes/${n}.sfc`, new Uint8Array(4));
+  });
+  await page.keyboard.press('Control+KeyL');
+  await expect(page.locator('#roms li')).toHaveCount(3);
+  await expect(page.locator('#bib-filtros')).toBeVisible();
+  await page.fill('#filtro', 'empresa:square');
+  await expect(page.locator('#roms li')).toHaveCount(1);
+  await expect(page.locator('#roms li').first()).toContainText('Chrono Trigger');
+  await page.fill('#filtro', '');
+  await expect(page.locator('#roms li')).toHaveCount(3);
+  await page.click('[data-faceta="empresa"]');
+  await expect(page.locator('#bib-pop button[data-v="Nintendo"] small')).toHaveText('2');
+  await page.click('#bib-pop button[data-v="Nintendo"]');
+  await expect(page.locator('#roms li')).toHaveCount(2);
+  await expect(page.locator('[data-faceta="empresa"]')).toContainText('Empresa: Nintendo ✕');
+  await page.click('[data-faceta="empresa"]');
+  await expect(page.locator('#roms li')).toHaveCount(3);
+  // ordem por nome
+  await page.click('[data-faceta="ordem"]');
+  await page.click('#bib-pop button[data-v="nome"]');
+  await expect(page.locator('#roms li').first()).toContainText('Chrono');
+  // ficha: os botõezinhos filtram
+  await expect(page.locator('#info-meta .chip').first()).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#biblioteca')).toBeHidden();
+});

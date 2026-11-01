@@ -9,3 +9,5 @@ export * from './neogeo';
 export * from './deteccao';
 export * from './organizar';
 export * from './biblioteca';
+export * from './basejogos';
+export * from './busca';

@@ -61,8 +61,8 @@ export function Biblioteca() {
         acao('estados-do-sel');
       } else if (!naBusca && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) filtro.current?.focus();
     };
-    addEventListener('keydown', tecla);
-    return () => removeEventListener('keydown', tecla);
+    addEventListener('keydown', tecla, true); // antes do atalho global (o Esc com o menu aberto só fecha o menu)
+    return () => removeEventListener('keydown', tecla, true);
   }, []);
 
   const rolar = (e: React.UIEvent<HTMLUListElement>) => {

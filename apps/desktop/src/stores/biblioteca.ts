@@ -15,7 +15,20 @@ import {
   type ArquivoKof,
   type InfoRaiz,
 } from '@kof/app-core';
-import { juntarItens, normal, type ItemBiblioteca, type RegistroJogo } from '@kof/domain';
+import { carregarBaseDeJogos } from '@kof/app-core';
+import {
+  consulta,
+  juntarItens,
+  ordenar,
+  ORDENS,
+  passa,
+  type BaseDeJogos,
+  type FacetaId,
+  type Filtros,
+  type ItemBiblioteca,
+  type Ordem,
+  type RegistroJogo,
+} from '@kof/domain';
 import type { Plano } from '@kof/domain';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
@@ -54,6 +67,11 @@ export interface Biblioteca {
   contagem: Record<string, number>;
   plano: Plano | null;
   pedirPasta: boolean;
+  base: BaseDeJogos | null;
+  filtros: Filtros;
+  ordem: Ordem;
+  mudarFiltro: (id: FacetaId, v: string) => void;
+  mudarOrdem: (o: Ordem) => void;
   mostrar: (relerPasta?: boolean) => Promise<void>;
   filtrar: (texto: string) => void;
   selecionar: (i: number) => void;
@@ -71,16 +89,6 @@ export interface Biblioteca {
 let organizado = false;
 let lendoPasta: Promise<void> | null = null;
 
-/** Filtro da busca (M3.5 completa com campo:valor e facetas). */
-export let passaNaBusca = (r: ItemBiblioteca, texto: string): boolean => {
-  const ws = normal(texto).split(' ').filter(Boolean);
-  const t = r.busca ?? r.chave;
-  return ws.every((w) => t.includes(w));
-};
-export function trocarBusca(f: typeof passaNaBusca) {
-  passaNaBusca = f;
-}
-
 export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
   itens: [],
   visiveis: [],
@@ -95,18 +103,32 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
   contagem: {},
   plano: null,
   pedirPasta: false,
+  base: null,
+  filtros: {},
+  ordem: ((o) => (ORDENS.some(([k]) => k === o) ? o : 'padrao') as Ordem)(lerConfig('bibOrdem')),
+  mudarFiltro: (id, v) => {
+    set({ filtros: { ...get().filtros, [id]: v }, selecionada: 0 });
+    get().montarLista();
+  },
+  mudarOrdem: (ordem) => {
+    guardarConfig('bibOrdem', ordem);
+    set({ ordem, selecionada: 0 });
+    get().montarLista();
+  },
 
   montarLista: () => {
-    const { itens, texto, soPrincipais } = get();
+    const { itens, texto, soPrincipais, filtros, base, ordem } = get();
+    const q = consulta(texto);
     let escondidas = 0;
     const visiveis = itens.filter((r) => {
-      if (!passaNaBusca(r, texto)) return false;
+      if (!passa(r, q, filtros, base)) return false;
       if (soPrincipais && r.variante) {
         escondidas++;
         return false;
       }
       return true;
     });
+    ordenar(visiveis, ordem);
     const selecionada = Math.max(0, Math.min(get().selecionada, visiveis.length - 1));
     set({ visiveis, escondidas, selecionada });
   },
@@ -133,8 +155,14 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
       const j = get().visiveis.findIndex((r) => r.jogo?.id === atual);
       if (k < 0 && j >= 0) set({ selecionada: j });
     };
-    set({ texto: '', selecionada: 0 });
+    set({ texto: '', selecionada: 0, filtros: {} });
     juntar();
+    if (!get().base)
+      void carregarBaseDeJogos(new URL('nucleos/jogos.js', document.baseURI)).then((base) => {
+        if (!base) return;
+        set({ base });
+        juntar();
+      });
     if (get().pasta && !relerPasta) return;
     if (lendoPasta) return lendoPasta;
     lendoPasta = (async () => {

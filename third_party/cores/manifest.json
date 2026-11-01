@@ -25,6 +25,12 @@
       "arquivo": "snes9x-ab8ba810.js",
       "tamanho": 4105029,
       "sha256": "ab8ba810287b4e89e525ccfc584f0b865a9b9c85037c5da593aec797e7f7c800"
+    },
+    "jogos": {
+      "arquivo": "jogos-371590f5.js",
+      "tamanho": 824997,
+      "sha256": "371590f5c4435065f87e2d244b41c33c9ffba840a8d4a0d9972c3cebaf99931f",
+      "nota": "base de jogos (libretro-database, CC BY-SA 4.0): não é núcleo, vem pelo mesmo caminho"
     }
   }
 }

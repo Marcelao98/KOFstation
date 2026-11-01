@@ -7,3 +7,4 @@ export * from './log';
 export * from './kofgames';
 export * from './armazem';
 export * from './jogos';
+export * from './basejogos';
