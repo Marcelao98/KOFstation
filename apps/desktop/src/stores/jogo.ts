@@ -43,6 +43,9 @@ const antesDeTrocar = async () => {
   for (const f of antesDeTrocarJogo) await f().catch(() => undefined); // nunca impede de abrir o outro jogo
 };
 
+/** Chamados depois que um jogo abriu (perguntar o modo: M5.4; controles do jogo: M8). */
+export const depoisDeAbrirJogo = new Set<() => void>();
+
 /** De onde veio o jogo que está abrindo. */
 export interface Origem {
   /** caminho na Kof Games (veio da biblioteca/pasta) */
@@ -162,6 +165,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       av.avisar(`▶ ${aberto.nome} (${sis})`);
       if (mudo) av.avisar('o som está desligado: aperte M pra ligar', 3000);
       else if (!jogo.comSom) av.avisar('sem som: o navegador não liberou o áudio (o jogo roda mudo)', 4000);
+      depoisDeAbrirJogo.forEach((f) => f());
       void guardarNaBiblioteca(aberto, origem).then((r) => r && get().registro?.id === r.id && set({ registro: r }));
       return true;
     } catch (e) {

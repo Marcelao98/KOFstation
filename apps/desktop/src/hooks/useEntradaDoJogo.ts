@@ -4,6 +4,7 @@ import { BOTAO, TECLAS_PADRAO, semOpostos } from '@kof/domain';
 import { bitsDeTodos, controlesDoNavegador } from '@kof/engine';
 import { useEffect } from 'react';
 import { usarJogo } from '../stores/jogo';
+import { usarModo } from '../stores/modo';
 import { usarTelas } from '../stores/telas';
 
 export function useEntradaDoJogo() {
@@ -17,7 +18,7 @@ export function useEntradaDoJogo() {
       if ((e.target as Element | null)?.closest?.('input, textarea, select')) return;
       if (e.code === 'Tab') {
         e.preventDefault();
-        usarJogo.getState().jogo?.turbo(true);
+        if (usarModo.getState().regras.turbo) usarJogo.getState().jogo?.turbo(true);
         return;
       }
       if (TECLAS_PADRAO[e.code] !== undefined) {

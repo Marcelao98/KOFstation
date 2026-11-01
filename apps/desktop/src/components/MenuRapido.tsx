@@ -1,10 +1,11 @@
 // Menu rápido (#rapido) no meio do jogo: F2, botão direito ou Select+Start. Mesmos itens do antigo (ITENS_RAPIDO); o que
 // ainda não chegou no app novo avisa a etapa. ↑↓ escolhe, ◀▶ ajusta, Enter/A confirma, Esc/B fecha.
-import { nomeDoTema, TODOS_TEMAS } from '@kof/domain';
+import { nomeDoTema, TODOS_TEMAS, MODOS, nomeModo } from '@kof/domain';
 import { useEffect, useState } from 'react';
 import { acao } from '../app/acoes';
 import { PROPORCOES, usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
+import { usarModo } from '../stores/modo';
 
 interface Item {
   t: string;
@@ -38,7 +39,16 @@ function itens(): Item[] {
       aj: () => j.alternarDesempenho(),
       f: depois(() => j.alternarDesempenho()),
     },
-    { t: '🎮 Modo', v: () => 'Normal', aj: () => acao('emu-opcoes'), f: depois(() => acao('emu-opcoes')) },
+    {
+      t: '🎮 Modo',
+      v: () => nomeModo(usarModo.getState().modo),
+      aj: (d) => {
+        const i = MODOS.findIndex(([k]) => k === usarModo.getState().modo);
+        const novo = MODOS[(i + d + MODOS.length) % MODOS.length];
+        if (novo) usarModo.getState().mudar(novo[0]);
+      },
+      f: depois(() => acao('emu-opcoes')),
+    },
     {
       t: '🎨 Tema',
       v: () => nomeDoTema(p.tema) ?? p.tema,

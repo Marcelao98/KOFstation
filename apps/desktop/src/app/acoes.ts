@@ -5,6 +5,7 @@ import { usarAvisos } from '../stores/avisos';
 import { usarBackup } from '../stores/backup';
 import { usarBiblioteca } from '../stores/biblioteca';
 import { usarCapas } from '../stores/capas';
+import { config } from '../stores/config';
 import { usarEstados } from '../stores/estados';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
@@ -28,7 +29,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   traducao: 'M10',
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
-  'emu-opcoes': 'M5',
   molduras: 'M7',
   visual: 'M7',
   'visual-temas': 'M7',
@@ -151,6 +151,15 @@ export function acao(nome: string, valor?: string): boolean {
     case 'auto-toggle':
       void import('../stores/auto').then((m) => m.alternarAuto());
       return true;
+    case 'emu-opcoes':
+      void usarEstados.getState().mostrar(null, 'emu');
+      return true;
+    case 'pausa-auto': {
+      const liga = config().ler('pausaAuto') === '0';
+      config().guardar('pausaAuto', liga ? '1' : '0');
+      usarAvisos.getState().avisar('Pausar ao sair da janela: ' + (liga ? 'ligado' : 'desligado'));
+      return true;
+    }
     case 'fechar-estados':
       telas.sair();
       return true;
@@ -161,9 +170,6 @@ export function acao(nome: string, valor?: string): boolean {
     case 'sofa':
       usarCapas.getState().alternarSofa();
       if (usarCapas.getState().sofa) telas.abrir('biblioteca');
-      return true;
-    case 'pausa-auto':
-      usarAvisos.getState().avisar('pausar ao sair da janela: sempre ligado por enquanto (a opção chega no M4)', 3000);
       return true;
   }
   const tela = TELAS[nome];

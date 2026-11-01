@@ -16,12 +16,14 @@ import { Biblioteca } from '../screens/Biblioteca/Biblioteca';
 import { PedirPasta, PlanoDeOrganizacao } from '../screens/Biblioteca/Dialogos';
 import { Estados } from '../screens/Estados/Estados';
 import { Guia } from '../screens/Guia/Guia';
+import { ModoTela } from '../screens/Modo/ModoTela';
 import { Inicio } from '../screens/Inicio/Inicio';
 import { Pendente } from '../screens/Pendente/Pendente';
 import { BarraShowcase, Temas } from '../screens/Temas/Temas';
 import { usarApp } from '../stores/app';
 import { usarAvisos } from '../stores/avisos';
 import '../stores/auto';
+import '../stores/modo';
 import { usarBackup } from '../stores/backup';
 import { usarCapas } from '../stores/capas';
 import { usarJogo } from '../stores/jogo';
@@ -170,6 +172,7 @@ export function App({ backend }: { backend: Backend }) {
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>
         </div>
         {temasAberto && <Temas />}
+        <ModoTela />
         <PedirPasta />
         <Backup />
         <PlanoDeOrganizacao />

@@ -97,3 +97,37 @@ test('salvar automático ao trocar de jogo; Continuar na biblioteca, no Início 
   await page.keyboard.press('F6');
   await expect(page.locator('#grade-estados .cartao.auto')).toHaveCount(1);
 });
+
+test('modos: pergunta ao abrir, Hardcore sem estados, opções de emulação e não perguntar mais', async ({ page }) => {
+  await page.evaluate(() => ((window as unknown as { __kofModo: boolean }).__kofModo = true));
+  await page.setInputFiles('#arquivo', {
+    name: 'Save.gb',
+    mimeType: 'application/octet-stream',
+    buffer: romGbComSave(),
+  });
+  await expect(page.locator('#modo-tela')).toBeVisible();
+  await expect(page.locator('#modo-jogo')).toHaveText('Save');
+  await expect(page.locator('#modo-ops .modo-op')).toHaveCount(4);
+  await page.click('[data-modo="hardcore"]');
+  await expect(page.locator('#modo-tela')).toBeHidden();
+  await expect(page.locator('#aviso')).toContainText('modo 💀 Hardcore');
+  await page.keyboard.press('F5');
+  await expect(page.locator('#aviso')).toContainText('Hardcore: sem estados');
+  await page.keyboard.press('F2');
+  await page.click('#menu >> text=Emulação');
+  await page.click('#menu [data-acao="emu-opcoes"]');
+  await expect(page.locator('#emu-modo')).toHaveValue('hardcore');
+  await page.selectOption('#emu-modo', 'alegria');
+  await page.selectOption('#emu-modoPerguntar', '0');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('F5');
+  await expect(page.locator('#aviso')).toContainText('estado salvo');
+  // reabrir outro jogo não pergunta mais
+  await page.setInputFiles('#arquivo', {
+    name: 'Outro.gb',
+    mimeType: 'application/octet-stream',
+    buffer: romGbComSave(0x11),
+  });
+  await expect(page.locator('#st-jogo')).toHaveText('Outro');
+  await expect(page.locator('#modo-tela')).toBeHidden();
+});

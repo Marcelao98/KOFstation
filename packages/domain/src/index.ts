@@ -14,3 +14,4 @@ export * from './busca';
 export * from './capas';
 export * from './config';
 export * from './guarda';
+export * from './modos';
