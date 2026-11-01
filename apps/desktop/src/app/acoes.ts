@@ -42,7 +42,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   estatisticas: 'M10',
   'bios-tela': 'M11',
   aparelhos: 'M13',
-  jogadores: 'M8',
 };
 
 export const avisoEtapa = (acao: string): string =>
@@ -155,6 +154,7 @@ export function acao(nome: string, valor?: string): boolean {
       usarAvisos.getState().avisar('Pausar ao sair da janela: ' + (liga ? 'ligado' : 'desligado'));
       return true;
     }
+    case 'jogadores-fechar':
     case 'fechar-teclas':
       telas.sair();
       return true;

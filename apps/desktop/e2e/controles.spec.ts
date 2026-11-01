@@ -65,3 +65,40 @@ test('analógico no teclado vai pro núcleo: em PS1/PS2/N64 as setas são o anal
   await page.click('#ct-abas button:has-text("N64")');
   await expect(page.locator('[data-ct-tecla="AD→"]')).toHaveCount(0);
 });
+
+test('jogadores: dois controles pegam J1 e J2, a luz acende e a escolha fica guardada pelo nome', async ({ page }) => {
+  await page.addInitScript(() => {
+    const pad = (id: string, index: number) => ({
+      id,
+      index,
+      connected: true,
+      mapping: 'standard',
+      axes: [0, 0, 0, 0],
+      buttons: Array.from({ length: 17 }, () => ({ pressed: false, touched: false, value: 0 })),
+      timestamp: 0,
+    });
+    const pads = [pad('Xbox Wireless Controller (STANDARD GAMEPAD)', 0), pad('8BitDo Pro 2', 1)];
+    Object.defineProperty(navigator, 'getGamepads', { value: () => pads });
+    (window as unknown as { __pads: typeof pads }).__pads = pads;
+  });
+  await page.reload();
+  await expect(page.locator('#home')).toBeVisible();
+  await page.click('#menu >> text=Arquivo');
+  await page.click('#menu [data-acao="jogadores"]');
+  await expect(page.locator('#jog-lista li')).toHaveCount(3);
+  const li = (n: number) => page.locator('#jog-lista li').nth(n);
+  await expect(li(0)).toContainText('Teclado');
+  await expect(li(0).locator('button.ativo')).toHaveText('J1');
+  await expect(li(1).locator('button.ativo')).toHaveText('J1');
+  await expect(li(2).locator('button.ativo')).toHaveText('J2');
+  await page.evaluate(() => {
+    const b = (window as unknown as { __pads: { buttons: { pressed: boolean }[] }[] }).__pads[1]?.buttons[4]; // LB (o B fecharia a janela, como no antigo)
+    if (b) b.pressed = true;
+  });
+  await expect(li(2)).toHaveClass(/apertando/);
+  await li(1).locator('button', { hasText: 'J3' }).click();
+  await expect(li(1).locator('button.ativo')).toHaveText('J3');
+  await expect
+    .poll(async () => (await page.evaluate(() => sessionStorage.getItem('kofstation-teste.config'))) ?? '')
+    .toContain('pad:Xbox Wireless Controller (STANDARD GAMEPAD)');
+});

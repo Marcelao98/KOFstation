@@ -16,3 +16,4 @@ export * from './config';
 export * from './guarda';
 export * from './modos';
 export * from './entrada';
+export * from './jogadores';

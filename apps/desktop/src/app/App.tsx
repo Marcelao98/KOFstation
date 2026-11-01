@@ -19,6 +19,7 @@ import { Guia } from '../screens/Guia/Guia';
 import { ModoTela } from '../screens/Modo/ModoTela';
 import { Visual } from '../screens/Visual/Visual';
 import { Teclas } from '../screens/Teclas/Teclas';
+import { Jogadores } from '../screens/Jogadores/Jogadores';
 import { Molduras } from '../screens/Molduras/Molduras';
 import { Inicio } from '../screens/Inicio/Inicio';
 import { Pendente } from '../screens/Pendente/Pendente';
@@ -174,7 +175,8 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'biblioteca' && <Biblioteca />}
         {atual === 'estados' && <Estados />}
         {atual === 'teclas' && <Teclas />}
-        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas'].includes(atual) && (
+        {atual === 'jogadores' && <Jogadores />}
+        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas', 'jogadores'].includes(atual) && (
           <Pendente tela={atual as TelaId} />
         )}
         <div id="moldura" hidden={atual !== 'jogo'}>

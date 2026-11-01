@@ -1,7 +1,10 @@
-// Botões do jogador 1 no jogo: teclado (teclas padrão do antigo) + todos os controles. Tab segurado = turbo.
+// Botões dos jogadores 1 a 4 no jogo: o teclado (pelo mapa da tela Controles) é o J1 e cada controle pega a sua vaga
+// (escolha guardada pelo nome). Tab segurado = turbo.
 // Select+Start = menu rápido (combinação do emulador: não chega no jogo); Backspace ou Select+Y = rebobinar.
-import { ANALOGICO, BOTAO, eixosDoTeclado, semOpostos, tecladoBits } from '@kof/domain';
-import { bitsDeTodos, controlesDoNavegador } from '@kof/engine';
+import { ANALOGICO, BOTAO, eixosDoTeclado, juntarJogadores, semOpostos, tecladoBits } from '@kof/domain';
+import { aparelhosDeControle } from '../app/aparelhos';
+import { usarAvisos } from '../stores/avisos';
+import { vagas, vistos } from '../stores/jogadores';
 import { useEffect } from 'react';
 import { usarEntrada } from '../stores/entrada';
 import { usarJogo } from '../stores/jogo';
@@ -9,22 +12,22 @@ import { usarModo } from '../stores/modo';
 import { conferirRebobinar, usarRebob } from '../stores/rebob';
 import { usarTelas } from '../stores/telas';
 
-/** Analógicos do 1º controle ligado (zona morta de 15%), como o eixoPad do antigo. */
-function eixosDoControle(): number[] | null {
-  for (const g of controlesDoNavegador()) {
-    if (!g) continue;
-    const e = [0, 1, 2, 3].map((i) => {
-      const v = g.axes[i] ?? 0;
-      return Math.abs(v) < 0.15 ? 0 : Math.round(Math.max(-1, Math.min(1, v)) * 32767);
-    });
-    if (e.some((x) => x)) return e;
-  }
-  return null;
+let apertadasAgora: Set<string> = new Set();
+
+/** Os aparelhos ligados agora, com o teclado pelo mapa (a tela Jogadores usa, com ou sem jogo). */
+export function lerAparelhosAgora() {
+  const { teclas, teclasEixo, botoes } = usarEntrada.getState().entrada;
+  const analog = ANALOGICO[usarJogo.getState().info?.sistema ?? 'snes'];
+  let teclado = 0;
+  for (const k of apertadasAgora) teclado |= teclas[k] ?? 0;
+  const eixos = eixosDoTeclado(apertadasAgora, teclasEixo);
+  return aparelhosDeControle({ b: tecladoBits(teclado, eixos, analog), e: eixos }, botoes, analog === 'puro');
 }
 
 export function useEntradaDoJogo() {
   useEffect(() => {
     const apertadas = new Set<string>();
+    apertadasAgora = apertadas;
     let combo = false;
     const noJogo = () =>
       usarTelas.getState().atual === 'jogo' && !usarTelas.getState().temasAberto && !usarJogo.getState().rapidoAberto;
@@ -62,26 +65,43 @@ export function useEntradaDoJogo() {
       const jogo = usarJogo.getState().jogo;
       if (!jogo) return;
       conferirRebobinar(noJogo());
-      if (!noJogo()) return jogo.botoesDo(0, 0);
+      if (!noJogo()) {
+        for (let n = 0; n < 4; n++) jogo.botoesDo(n, 0);
+        return;
+      }
       const { teclas, teclasEixo, botoes } = usarEntrada.getState().entrada;
       const sis = usarJogo.getState().info?.sistema ?? 'snes';
       const analog = ANALOGICO[sis];
       let teclado = 0;
       for (const k of apertadas) teclado |= teclas[k] ?? 0;
       const eixos = eixosDoTeclado(apertadas, teclasEixo); // analógico no teclado (PS1/PS2/N64)
-      let b = bitsDeTodos(controlesDoNavegador(), botoes, analog === 'puro') | tecladoBits(teclado, eixos, analog);
-      jogo.eixosDo(0, eixos ?? eixosDoControle());
-      b = semOpostos(b);
+      // cada aparelho vai pro seu jogador (o teclado é o J1); o que vale pros atalhos é tudo junto
+      const aparelhos = aparelhosDeControle(
+        { b: tecladoBits(teclado, eixos, analog), e: eixos },
+        botoes,
+        analog === 'puro',
+      );
+      const r = juntarJogadores(aparelhos, vagas);
+      aparelhos.forEach((a, n) => {
+        if (a.k === 'teclado' || vistos.has(a.k)) return;
+        vistos.add(a.k);
+        usarAvisos.getState().avisar(`🎮 ${a.nome} = Jogador ${(r.j[n] ?? 0) + 1}`, 2500);
+      });
+      const todos = semOpostos(r.b.reduce((x, y) => x | y, 0));
       const selY = BOTAO.Select | BOTAO.Y; // Select+Y segurado = rebobinar (como no antigo)
-      const padVolta = (b & selY) === selY;
+      const padVolta = (todos & selY) === selY;
       if (padVolta !== usarRebob.getState().pad) usarRebob.setState({ pad: padVolta });
       const selStart = BOTAO.Select | BOTAO.Start;
-      if ((b & selStart) === selStart) {
+      if ((todos & selStart) === selStart) {
         if (!combo) usarJogo.getState().abrirRapido();
         combo = true;
-        b &= ~selStart;
-      } else if (!(b & selStart)) combo = false;
-      jogo.botoesDo(0, b);
+      } else if (!(todos & selStart)) combo = false;
+      for (let n = 0; n < 4; n++) {
+        let b = semOpostos(r.b[n] ?? 0);
+        if (combo) b &= ~selStart;
+        jogo.botoesDo(n, b);
+        jogo.eixosDo(n, r.e[n] ?? null);
+      }
     }, 8);
     addEventListener('keydown', desce);
     addEventListener('keyup', sobe);
