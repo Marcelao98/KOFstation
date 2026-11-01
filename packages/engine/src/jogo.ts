@@ -183,6 +183,16 @@ export class Jogo {
     this.mandar({ tipo: 'pad', jogador, bits });
   }
 
+  private eixosAntes = ['', '', '', ''];
+  /** Analógicos do jogador (só manda quando muda). */
+  eixosDo(jogador: number, e: readonly number[] | null) {
+    const v = e ? e.slice(0, 4) : [0, 0, 0, 0];
+    const k = v.join(',');
+    if (this.eixosAntes[jogador] === k) return;
+    this.eixosAntes[jogador] = k;
+    this.mandar({ tipo: 'eixos', jogador, e: v });
+  }
+
   pausar(sim: boolean) {
     this.mandar({ tipo: 'pausar', sim });
     if (this.ctx) void (sim ? this.ctx.suspend() : this.ctx.resume()).catch(() => undefined);

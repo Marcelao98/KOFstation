@@ -50,3 +50,18 @@ test('remapear: tecla nova, reservada recusada, troca com quem tinha, só este j
   await expect(page.locator('#aviso')).toContainText('este jogo volta a usar os controles do console');
   await expect(page.locator('[data-ct-tecla="Start"]')).toHaveText('Enter');
 });
+
+test('analógico no teclado vai pro núcleo: em PS1/PS2/N64 as setas são o analógico (unidade em domain/entrada)', async ({
+  page,
+}) => {
+  // os núcleos de PS1/N64 chegam no M11; aqui confere que a aba mostra o analógico e as teclas padrão do antigo
+  await page.click('#menu >> text=Emulação');
+  await page.click('#menu [data-acao="teclas"]');
+  await page.click('#ct-abas button:has-text("PS1")');
+  await expect(page.locator('[data-ct-tecla="AE↑"]')).toHaveText('↑');
+  await expect(page.locator('[data-ct-tecla="Cima"]')).toHaveText('T');
+  await expect(page.locator('[data-ct-tecla="L2"]')).toHaveText('E');
+  await expect(page.locator('[data-ct-tecla="AD→"]')).toHaveText('L');
+  await page.click('#ct-abas button:has-text("N64")');
+  await expect(page.locator('[data-ct-tecla="AD→"]')).toHaveCount(0);
+});

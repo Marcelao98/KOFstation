@@ -18,6 +18,7 @@ export interface ModuloLibretro {
   _lr_pad(m: number): void;
   _lr_pad_n?(j: number, m: number): void;
   _lr_eixos_n?(j: number, lx: number, ly: number, rx: number, ry: number): void;
+  _lr_eixos?(lx: number, ly: number, rx: number, ry: number): void;
   _lr_fb(): number;
   _lr_w(): number;
   _lr_h(): number;
@@ -171,6 +172,8 @@ export class SessaoLibretro {
   rodar(): { audio: Int16Array; mudouTamanho: boolean } {
     const m = this.mod;
     m._lr_pad(mascaraLibretro(this.pad[0] ?? 0));
+    const e0 = this.eixos[0] ?? [0, 0, 0, 0];
+    if (m._lr_eixos) m._lr_eixos(e0[0] ?? 0, e0[1] ?? 0, e0[2] ?? 0, e0[3] ?? 0); // analógico do jogador 1
     if (m._lr_pad_n && m._lr_eixos_n)
       for (let j = 1; j < 4; j++) {
         m._lr_pad_n(j, mascaraLibretro(this.pad[j] ?? 0));

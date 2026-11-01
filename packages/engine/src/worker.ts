@@ -233,6 +233,9 @@ eu.onmessage = async ({ data: m }) => {
     case 'pad':
       if (sessao) sessao.pad[m.jogador] = m.bits;
       break;
+    case 'eixos':
+      if (sessao) sessao.eixos[m.jogador] = m.e.slice(0, 4);
+      break;
     case 'pausar':
       pausado = m.sim;
       if (!pausado) relogio = sessao ? criarRelogio(sessao.info.fps) : null; // voltou: sem correr atrás do tempo parado

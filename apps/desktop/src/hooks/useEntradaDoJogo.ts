@@ -1,6 +1,6 @@
 // Botões do jogador 1 no jogo: teclado (teclas padrão do antigo) + todos os controles. Tab segurado = turbo.
 // Select+Start = menu rápido (combinação do emulador: não chega no jogo); Backspace ou Select+Y = rebobinar.
-import { BOTAO, semOpostos } from '@kof/domain';
+import { ANALOGICO, BOTAO, eixosDoTeclado, semOpostos, tecladoBits } from '@kof/domain';
 import { bitsDeTodos, controlesDoNavegador } from '@kof/engine';
 import { useEffect } from 'react';
 import { usarEntrada } from '../stores/entrada';
@@ -8,6 +8,19 @@ import { usarJogo } from '../stores/jogo';
 import { usarModo } from '../stores/modo';
 import { conferirRebobinar, usarRebob } from '../stores/rebob';
 import { usarTelas } from '../stores/telas';
+
+/** Analógicos do 1º controle ligado (zona morta de 15%), como o eixoPad do antigo. */
+function eixosDoControle(): number[] | null {
+  for (const g of controlesDoNavegador()) {
+    if (!g) continue;
+    const e = [0, 1, 2, 3].map((i) => {
+      const v = g.axes[i] ?? 0;
+      return Math.abs(v) < 0.15 ? 0 : Math.round(Math.max(-1, Math.min(1, v)) * 32767);
+    });
+    if (e.some((x) => x)) return e;
+  }
+  return null;
+}
 
 export function useEntradaDoJogo() {
   useEffect(() => {
@@ -50,9 +63,14 @@ export function useEntradaDoJogo() {
       if (!jogo) return;
       conferirRebobinar(noJogo());
       if (!noJogo()) return jogo.botoesDo(0, 0);
-      const { teclas, botoes } = usarEntrada.getState().entrada;
-      let b = bitsDeTodos(controlesDoNavegador(), botoes);
-      for (const k of apertadas) b |= teclas[k] ?? 0;
+      const { teclas, teclasEixo, botoes } = usarEntrada.getState().entrada;
+      const sis = usarJogo.getState().info?.sistema ?? 'snes';
+      const analog = ANALOGICO[sis];
+      let teclado = 0;
+      for (const k of apertadas) teclado |= teclas[k] ?? 0;
+      const eixos = eixosDoTeclado(apertadas, teclasEixo); // analógico no teclado (PS1/PS2/N64)
+      let b = bitsDeTodos(controlesDoNavegador(), botoes, analog === 'puro') | tecladoBits(teclado, eixos, analog);
+      jogo.eixosDo(0, eixos ?? eixosDoControle());
       b = semOpostos(b);
       const selY = BOTAO.Select | BOTAO.Y; // Select+Y segurado = rebobinar (como no antigo)
       const padVolta = (b & selY) === selY;

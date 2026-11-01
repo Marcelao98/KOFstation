@@ -25,6 +25,8 @@ export type ParaWorker =
   | { tipo: 'rebob-zerar' }
   | { tipo: 'pedido'; id: number; pedido: Pedido; bytes?: Uint8Array }
   | { tipo: 'pad'; jogador: number; bits: number }
+  /** analógicos (-32767..32767: esquerdo x, y, direito x, y) */
+  | { tipo: 'eixos'; jogador: number; e: number[] }
   | { tipo: 'pausar'; sim: boolean }
   | { tipo: 'turbo'; sim: boolean }
   | { tipo: 'som'; tocando: boolean }

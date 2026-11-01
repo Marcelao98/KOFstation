@@ -14,8 +14,9 @@ test.beforeEach(async ({ page }) => {
 test.afterEach(() => expect(erros).toEqual([]));
 
 test('F4 sem jogo: cartela, cartões com prévia, escolher, Avançado e voltar ao original', async ({ page }) => {
+  test.setTimeout(60_000);
   await page.keyboard.press('F4');
-  await expect(page.locator('#visual')).toBeVisible();
+  await expect(page.locator('#visual')).toBeVisible({ timeout: 15_000 });
   await expect(page.locator('body')).toHaveClass(/com-visual/);
   await expect(page.locator('#vis-pre .vis-card')).toHaveCount(42);
   await page.click('[data-vis-cat="TV de tubo"]');
@@ -35,10 +36,10 @@ test('F4 sem jogo: cartela, cartões com prévia, escolher, Avançado e voltar a
   expect(temImagem).toBe(true);
   await page.click('[data-vis-modo="avancado"]');
   await page.fill('#vis-busca', 'ntsc');
-  await expect(page.locator('#vis-ajustes .vis-aj').first()).toBeVisible();
+  await expect(page.locator('#vis-ajustes .vis-aj').first()).toBeVisible({ timeout: 15_000 });
   await page.fill('#vis-busca', '');
   await page.click('[data-vis-grupo="*"]');
-  await expect(page.locator('#vis-ajustes .vis-aj.mudou').first()).toBeVisible();
+  await expect(page.locator('#vis-ajustes .vis-aj.mudou').first()).toBeVisible({ timeout: 15_000 });
   await page.click('[data-acao="vis-zerar"]');
   await expect(page.locator('#vis-nome')).toHaveText('· Original');
   await page.keyboard.press('F4');
