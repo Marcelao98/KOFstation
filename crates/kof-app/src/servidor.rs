@@ -1,10 +1,15 @@
 //! Serve o app web embutido em 127.0.0.1 e responde os comandos em /api/<cmd>.
 //! Segurança (D8/D11): só 127.0.0.1, token aleatório por abertura no cabeçalho `X-Kof-Token`, e `Origin` (quando vem)
 //! tem que ser o próprio endereço. COOP/COEP ligam o isolamento (SharedArrayBuffer) sem flag do navegador.
+use crate::api::{Estado, Saida};
 use include_dir::{include_dir, Dir};
 use kof_core::{ContractError, KofError};
+use std::io::Read;
 use std::path::PathBuf;
 use tiny_http::{Header, Method, Request, Response, Server};
+
+/// Maior corpo aceito num pedido (um savestate de PS1 tem ~5 MB; com folga).
+const MAX_CORPO: u64 = 256 << 20;
 
 static APP: Dir<'_> = include_dir!("$KOF_DIST");
 
@@ -42,6 +47,23 @@ fn json(status: u16, v: &serde_json::Value) -> Resp {
         .with_header(cabecalho("Cache-Control", "no-store"))
 }
 
+fn binario(dados: Vec<u8>) -> Resp {
+    isolado(Response::from_data(dados))
+        .with_header(cabecalho("Content-Type", "application/octet-stream"))
+        .with_header(cabecalho("Cache-Control", "no-store"))
+}
+
+/// Status HTTP de cada código (o app olha o código, o status é só pra quem lê o log do navegador).
+fn status_de(e: &KofError) -> u16 {
+    match e.codigo() {
+        "NOT_FOUND" | "ROOT_MISSING" => 404,
+        "CONFLICT" => 409,
+        "PERMISSION_DENIED" | "PATH_OUTSIDE_SCOPE" => 403,
+        "IO_ERROR" | "DISK_FULL" | "NETWORK" | "DATA_DIR_UNAVAILABLE" | "LOG_UNAVAILABLE" => 500,
+        _ => 400,
+    }
+}
+
 fn erro(status: u16, e: &KofError) -> Resp {
     json(
         status,
@@ -53,7 +75,7 @@ pub struct Servidor {
     srv: Server,
     pub token: String,
     pub porta: u16,
-    pasta_dados: PathBuf,
+    estado: Estado,
 }
 
 impl Servidor {
@@ -71,7 +93,7 @@ impl Servidor {
             srv,
             token,
             porta,
-            pasta_dados,
+            estado: Estado::novo(pasta_dados),
         })
     }
 
@@ -81,15 +103,15 @@ impl Servidor {
 
     /// Atende pra sempre (o processo termina quando o navegador fecha).
     pub fn atender(&self) {
-        for req in self.srv.incoming_requests() {
-            let resp = self.responder(&req);
+        for mut req in self.srv.incoming_requests() {
+            let resp = self.responder(&mut req);
             if let Err(e) = req.respond(resp) {
                 tracing::debug!("resposta não entregue: {e}");
             }
         }
     }
 
-    fn responder(&self, req: &Request) -> Resp {
+    fn responder(&self, req: &mut Request) -> Resp {
         let caminho = req.url().split('?').next().unwrap_or("/").to_string();
         if let Some(cmd) = caminho.strip_prefix("/api/") {
             return self.api(req, cmd);
@@ -105,7 +127,7 @@ impl Servidor {
         }
     }
 
-    fn api(&self, req: &Request, cmd: &str) -> Resp {
+    fn api(&self, req: &mut Request, cmd: &str) -> Resp {
         let h = |nome: &'static str| -> Option<String> {
             req.headers()
                 .iter()
@@ -126,12 +148,57 @@ impl Servidor {
                 &serde_json::json!({"code": "FORBIDDEN", "message": "token ou origem inválidos"}),
             );
         }
-        match cmd {
-            "app.info" => json(
-                200,
-                &serde_json::to_value(kof_core::info::app_info(&self.pasta_dados)).expect("info"),
-            ),
-            outro => erro(400, &KofError::ComandoDesconhecido(outro.to_string())),
+        let binario_veio = h("Content-Type").is_some_and(|t| t.starts_with("application/octet-stream"));
+        let args_cab = h("X-Kof-Args");
+        let mut corpo = Vec::new();
+        if let Err(e) = req.as_reader().take(MAX_CORPO).read_to_end(&mut corpo) {
+            return erro(400, &KofError::argumento("corpo", e.to_string()));
+        }
+        // binário: os argumentos vêm no cabeçalho X-Kof-Args (JSON em percent-encoding); senão, o corpo é o JSON
+        let texto_args = if binario_veio {
+            args_cab.map(|a| decodificar(&a)).unwrap_or_else(|| "{}".into())
+        } else {
+            String::from_utf8_lossy(&corpo).into_owned()
+        };
+        let args: serde_json::Value = if texto_args.trim().is_empty() {
+            serde_json::json!({})
+        } else {
+            match serde_json::from_str(&texto_args) {
+                Ok(v) => v,
+                Err(e) => return erro(400, &KofError::argumento("args", e.to_string())),
+            }
+        };
+        if !binario_veio {
+            corpo.clear();
+        }
+        match self.estado.chamar(cmd, args, corpo) {
+            Ok(Saida::Json(v)) => json(200, &v),
+            Ok(Saida::Bin(b)) => binario(b),
+            Err(e) => {
+                if e.codigo() != "NOT_FOUND" {
+                    tracing::warn!(cmd, codigo = e.codigo(), "{e}");
+                }
+                erro(status_de(&e), &e)
+            }
         }
     }
+}
+
+/// Desfaz o percent-encoding (encodeURIComponent) do cabeçalho de argumentos.
+fn decodificar(s: &str) -> String {
+    let b = s.as_bytes();
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        if b[i] == b'%' && i + 2 < b.len() {
+            if let Ok(v) = u8::from_str_radix(&s[i + 1..i + 3], 16) {
+                out.push(v);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(b[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
 }

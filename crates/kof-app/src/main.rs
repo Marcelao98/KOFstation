@@ -2,6 +2,7 @@
 //! janela. Uso: `kofstation` (normal) ou `kofstation --sem-navegador` (só mostra o endereço; pra testes).
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
+mod api;
 mod navegador;
 mod servidor;
 

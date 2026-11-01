@@ -5,6 +5,10 @@ import { ehContractError, type ContractError } from '@kof/contracts';
 export interface Backend {
   /** Chama um comando do contrato. Resolve com `data` ou rejeita com `BackendError`. */
   chamar<T>(cmd: string, args?: Record<string, unknown>): Promise<T>;
+  /** Comando que devolve bytes (arquivo, save, estado). */
+  lerBinario(cmd: string, args?: Record<string, unknown>): Promise<Uint8Array>;
+  /** Comando que leva bytes junto (gravar save, estado, arquivo). */
+  enviarBinario<T>(cmd: string, args: Record<string, unknown>, dados: Uint8Array): Promise<T>;
 }
 
 /** Erro do backend com o código do contrato (nunca um erro genérico). */

@@ -19,8 +19,11 @@
 
 - `id`: inteiro crescente por conexão. Resposta sempre com o mesmo `id`.
 - `error.code`: MAIÚSCULAS_COM_SUBLINHADO, estável (o app traduz pela tabela de mensagens). `message` é só pra log.
-- Binário (pedaço de arquivo, quadro do PS2, savestate grande): canal binário da casca (Tauri: `Response`/`ipc::Channel`;
-  local: frame binário do WebSocket com cabeçalho `id u32`). Nunca base64 em JSON.
+- Binário (pedaço de arquivo, save, savestate): **casca local (D2 = B), implementado:** `POST /api/<cmd>` com corpo
+  `application/octet-stream` e os argumentos em JSON no cabeçalho `X-Kof-Args` (percent-encoding); resposta binária
+  vem como `application/octet-stream`. Nunca base64 em JSON. No TS: `Backend.lerBinario` / `Backend.enviarBinario`.
+- Na casca local o envelope é o próprio HTTP: corpo = `args`, resposta 200 = `data`, resposta de erro = `ContractError`
+  (o status HTTP é só informativo; o app olha o `code`).
 - Versão: `app.info` devolve `contractVersion`; app e backend recusam versões incompatíveis com `CONTRACT_MISMATCH`.
 
 ## 2. Escopos de caminho
@@ -39,7 +42,7 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | Comando | Args → Data | Erros | Etapa |
 |---|---|---|---|
 | `app.info` | — → `{version, contractVersion, os, arch, dataDir}` | — | F4a |
-| `log.write` | `{level, target, message, fields?}` → — | `INVALID_LEVEL` | F4a |
+| `log.write` | `{level: error\|warn\|info\|debug, target, message, fields?}` → `null` (texto cortado em 8 KB; vai pro log do dia com `target=tela`) | `INVALID_LEVEL`, `INVALID_ARGS` | ✅ M3 (pendente do F4a) |
 | `dialog.pick` | `{kind: file\|files\|dir, filters?}` → `{token, names[]}` \| `null` | — | M2 |
 | `file.read` | `{scope, path, offset?, length?}` → binário | `NOT_FOUND`, `OUT_OF_RANGE`, `PATH_OUTSIDE_SCOPE` | M2 |
 | `library.root.get` / `.set` | `{token?}` → `{path, ok, missing[]}` | `NOT_A_DIRECTORY`, `PERMISSION_DENIED` | M3 |

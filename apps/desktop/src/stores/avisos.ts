@@ -1,4 +1,5 @@
 // O #aviso do antigo: uma linha que some sozinha (1,8 s) ou um erro que fica até fechar.
+import { registrar } from '@kof/app-core';
 import { create } from 'zustand';
 
 export interface Avisos {
@@ -20,6 +21,7 @@ export const usarAvisos = create<Avisos>()((set, get) => ({
     relogio = setTimeout(() => set({ texto: null }), ms);
   },
   avisarErro: (texto) => {
+    registrar('error', 'aviso', texto); // todo erro mostrado na tela também vai pro log em arquivo
     clearTimeout(relogio);
     set({ texto, erro: true });
     relogio = setTimeout(() => set({ texto: null, erro: false }), 120000);

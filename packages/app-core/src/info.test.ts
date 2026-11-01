@@ -4,7 +4,7 @@ import { mensagemDoErro } from './erros';
 import { obterInfo } from './info';
 
 const info = { version: '0.1.0', contractVersion: 1, os: 'linux', arch: 'x86_64', dataDir: '/tmp/kof' };
-const backend = (r: () => Promise<unknown>): Backend => ({ chamar: <T>() => r() as Promise<T> });
+const backend = (r: () => Promise<unknown>): Backend => ({ chamar: <T>() => r() as Promise<T> }) as unknown as Backend;
 
 describe('obterInfo', () => {
   it('devolve a info do backend', async () => {
