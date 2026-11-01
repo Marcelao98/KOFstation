@@ -24,6 +24,31 @@ let somTocando = false;
 let ultimoPasso = 0;
 let parado = false;
 const med = { quadros: 0, nucleo: 0, atrasos: 0, desde: 0, faltasAntes: 0 };
+let sramAntes: Uint8Array | null = null;
+let sramQuando = 0;
+
+/** A bateria mudou desde a última vez? (1x por segundo, como o salvarSram do antigo) */
+function conferirSram(s: SessaoLibretro, agora: number) {
+  if (agora - sramQuando < 1000 || !s.tamanhoSram) return;
+  sramQuando = agora;
+  const b = s.lerSram();
+  if (sramAntes && b.length === sramAntes.length && b.every((x, i) => x === sramAntes?.[i])) return;
+  const primeira = !sramAntes;
+  sramAntes = b;
+  if (primeira) return; // o que acabou de carregar não é mudança
+  const copia = b.slice();
+  enviar({ tipo: 'sram', bytes: copia }, [copia.buffer]);
+}
+
+function responder(id: number, f: () => Uint8Array | undefined) {
+  try {
+    const bytes = f();
+    if (bytes) enviar({ tipo: 'resposta', id, ok: true, bytes }, [bytes.buffer as ArrayBuffer]);
+    else enviar({ tipo: 'resposta', id, ok: true });
+  } catch (e) {
+    enviar({ tipo: 'resposta', id, ok: false, erro: e instanceof Error ? e.message : String(e) });
+  }
+}
 
 const enviar = (m: DoWorker, t?: Transferable[]) => eu.postMessage(m, t);
 
@@ -77,6 +102,7 @@ function passo() {
   }
   if (vezes > 1) med.atrasos += vezes - 1;
   if (vezes) mandarQuadro(s);
+  conferirSram(s, agora);
   if (agora - med.desde >= 1000) {
     const faltas = anel ? Atomics.load(anel.ctl, 2) : 0;
     enviar({
@@ -98,8 +124,13 @@ eu.onmessage = async ({ data: m }) => {
     case 'iniciar':
       try {
         const s = new SessaoLibretro(m.sistema);
-        await s.iniciar(await carregarNucleo(m.urlNucleo, s.config.nucleo));
+        await s.iniciar(await carregarNucleo(m.urlNucleo, s.config.nucleo), m.opcoes ?? {});
         const info = s.carregar(m.rom);
+        if (m.sram && s.tamanhoSram) {
+          s.escreverSram(m.sram); // o save vai antes do 1º quadro, e o jogo recomeça com ele (como no antigo)
+          s.reiniciar();
+        }
+        sramAntes = s.tamanhoSram ? s.lerSram() : null;
         sessao = s;
         taxaSaida = m.taxaSaida;
         anel = m.sab ? criarAnel((m.sab.byteLength - 16) / 8, m.sab) : null;
@@ -128,6 +159,29 @@ eu.onmessage = async ({ data: m }) => {
     case 'reiniciar':
       sessao?.reiniciar();
       break;
+    case 'sram-escrever':
+      if (sessao?.tamanhoSram) {
+        sessao.escreverSram(m.bytes);
+        sramAntes = sessao.lerSram();
+      }
+      break;
+    case 'pedido': {
+      const s = sessao;
+      if (!s) {
+        enviar({ tipo: 'resposta', id: m.id, ok: false, erro: 'nenhum jogo aberto' });
+        break;
+      }
+      if (m.pedido === 'estado-salvar') responder(m.id, () => s.salvarEstado());
+      else if (m.pedido === 'sram-ler') responder(m.id, () => s.lerSram());
+      else if (m.pedido === 'estado-carregar')
+        responder(m.id, () => {
+          s.carregarEstado(m.bytes ?? new Uint8Array(0));
+          s.rodar(); // um quadro já com o estado, pra imagem certa na tela
+          mandarQuadro(s);
+          return undefined;
+        });
+      break;
+    }
     case 'parar':
       parado = true;
       sessao = null;

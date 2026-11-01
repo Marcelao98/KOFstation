@@ -25,11 +25,11 @@ export function lerKofsave(b: Buffer): Record<string, unknown> {
   if (b.subarray(0, 8).toString('latin1') !== 'KOFSAVE1') throw new Error('não é .kofsave');
   const n = b.readUInt32LE(8);
   const base = 12 + n;
-  return JSON.parse(gunzipSync(b.subarray(12, base)).toString(), (_k, v: unknown) =>
-    v && typeof v === 'object' && '$b' in v
-      ? b.subarray(base + (v as { $b: number }).$b, base + (v as { $b: number; n: number }).$b + (v as { n: number }).n)
-      : v,
-  ) as Record<string, unknown>;
+  return JSON.parse(gunzipSync(b.subarray(12, base)).toString(), (_k, v: unknown) => {
+    if (!v || typeof v !== 'object' || !('$b' in v)) return v;
+    const x = v as { $b: number; n: number };
+    return b.subarray(base + x.$b, base + x.$b + x.n);
+  }) as Record<string, unknown>;
 }
 
 /** Um save do jeito do KofGuarda: gzip sem o fim 0xFF, hash CRC32 da parte com conteúdo. */

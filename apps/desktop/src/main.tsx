@@ -20,6 +20,8 @@ addEventListener('unhandledrejection', (e) => registrar('error', 'promessa', tex
 // (o App é importado depois: as stores leem a configuração quando são criadas)
 await carregarConfig(backend).catch((e: unknown) => registrar('error', 'config', textoDoErro(e)));
 const { App } = await import('./app/App');
+const { assentarSobras } = await import('./stores/bateria');
+setTimeout(assentarSobras, 1500);
 createRoot(raiz).render(
   <StrictMode>
     <App backend={backend} />

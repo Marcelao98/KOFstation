@@ -12,3 +12,4 @@ export * from './capas';
 export * from './config';
 export * from './saves';
 export * from './backup';
+export * from './bateria';

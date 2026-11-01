@@ -3,11 +3,13 @@
 import type { SistemaId } from '@kof/domain';
 import { CODIGO_WORKLET } from './anel';
 import type { InfoDoJogo } from './libretro';
-import type { DoWorker, Medicao, ParaWorker } from './mensagens';
+import type { DoWorker, Medicao, ParaWorker, Pedido } from './mensagens';
 import { NUCLEOS } from './nucleos';
 
 export interface EventosDoJogo {
   quadro?: (pixels: Uint32Array, largura: number, altura: number) => void;
+  /** a bateria do jogo mudou (save) */
+  sram?: (bytes: Uint8Array) => void;
   medicao?: (m: Medicao) => void;
   erro?: (mensagem: string, log: string[]) => void;
 }
@@ -19,6 +21,10 @@ export interface OpcoesDoJogo {
   baseNucleos: URL;
   volume: number;
   mudo: boolean;
+  /** save da bateria pra pôr antes do 1º quadro */
+  sram?: Uint8Array | null;
+  /** opções do núcleo (paletas...) */
+  opcoes?: Record<string, string>;
 }
 
 export class Jogo {
@@ -32,6 +38,8 @@ export class Jogo {
   private volume: number;
   private mudo: boolean;
   private acordar = () => void this.ctx?.resume();
+  private proximoId = 1;
+  private esperando = new Map<number, { ok: (b: Uint8Array | null) => void; falhou: (e: Error) => void }>();
 
   private constructor(
     private eventos: EventosDoJogo,
@@ -61,6 +69,8 @@ export class Jogo {
       urlNucleo: new URL(`${c.nucleo}.js`, opcoes.baseNucleos).href,
       sab,
       taxaSaida: j.ctx?.sampleRate ?? 48000,
+      sram: opcoes.sram ?? null,
+      opcoes: opcoes.opcoes ?? {},
     });
     try {
       j.info = await pronto;
@@ -107,6 +117,44 @@ export class Jogo {
     if (m.tipo === 'quadro') this.eventos.quadro?.(new Uint32Array(m.pixels), m.largura, m.altura);
     else if (m.tipo === 'medicao') this.eventos.medicao?.(m.m);
     else if (m.tipo === 'erro') this.eventos.erro?.(m.mensagem, m.log);
+    else if (m.tipo === 'sram') this.eventos.sram?.(m.bytes);
+    else if (m.tipo === 'resposta') {
+      const p = this.esperando.get(m.id);
+      this.esperando.delete(m.id);
+      if (!p) return;
+      if (m.ok) p.ok(m.bytes ?? null);
+      else p.falhou(new Error(m.erro ?? 'o núcleo não respondeu'));
+    }
+  }
+
+  /** Pede algo ao núcleo e espera a resposta (estado, bateria). */
+  pedir(pedido: Pedido, bytes?: Uint8Array): Promise<Uint8Array | null> {
+    const id = this.proximoId++;
+    return new Promise((ok, falhou) => {
+      this.esperando.set(id, { ok, falhou });
+      const m: ParaWorker = { tipo: 'pedido', id, pedido };
+      if (bytes) m.bytes = bytes;
+      this.mandar(m);
+    });
+  }
+
+  salvarEstado(): Promise<Uint8Array> {
+    return this.pedir('estado-salvar').then((b) => {
+      if (!b) throw new Error('o núcleo não devolveu o estado');
+      return b;
+    });
+  }
+
+  async carregarEstado(e: Uint8Array): Promise<void> {
+    await this.pedir('estado-carregar', e);
+  }
+
+  lerSram(): Promise<Uint8Array | null> {
+    return this.pedir('sram-ler');
+  }
+
+  escreverSram(bytes: Uint8Array) {
+    this.mandar({ tipo: 'sram-escrever', bytes });
   }
 
   private mandar(m: ParaWorker) {
@@ -144,6 +192,8 @@ export class Jogo {
   }
 
   fechar() {
+    for (const p of this.esperando.values()) p.falhou(new Error('o jogo fechou'));
+    this.esperando.clear();
     this.mandar({ tipo: 'parar' });
     this.worker.terminate();
     removeEventListener('pointerdown', this.acordar, true);

@@ -10,13 +10,22 @@ export type ParaWorker =
       urlNucleo: string;
       sab: SharedArrayBuffer | null;
       taxaSaida: number;
+      /** save da bateria pra pôr antes do 1º quadro */
+      sram?: Uint8Array | null;
+      /** opções do núcleo (paleta do GB/NES...) */
+      opcoes?: Record<string, string>;
     }
+  | { tipo: 'sram-escrever'; bytes: Uint8Array }
+  | { tipo: 'pedido'; id: number; pedido: Pedido; bytes?: Uint8Array }
   | { tipo: 'pad'; jogador: number; bits: number }
   | { tipo: 'pausar'; sim: boolean }
   | { tipo: 'turbo'; sim: boolean }
   | { tipo: 'som'; tocando: boolean }
   | { tipo: 'reiniciar' }
   | { tipo: 'parar' };
+
+/** Pedidos que esperam resposta (o Worker responde com o mesmo id). */
+export type Pedido = 'estado-salvar' | 'estado-carregar' | 'sram-ler';
 
 export interface Medicao {
   fps: number;
@@ -34,4 +43,7 @@ export type DoWorker =
   | { tipo: 'pronto'; info: InfoDoJogo }
   | { tipo: 'quadro'; pixels: ArrayBuffer; largura: number; altura: number }
   | { tipo: 'medicao'; m: Medicao }
-  | { tipo: 'erro'; mensagem: string; log: string[] };
+  | { tipo: 'erro'; mensagem: string; log: string[] }
+  /** a bateria mudou (conferido 1x por segundo) */
+  | { tipo: 'sram'; bytes: Uint8Array }
+  | { tipo: 'resposta'; id: number; ok: boolean; bytes?: Uint8Array; erro?: string };

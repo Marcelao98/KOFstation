@@ -10,10 +10,12 @@ import {
   textoDoErro,
   type JogoAberto,
 } from '@kof/app-core';
-import { fatosDe, SISTEMAS, type RegistroJogo } from '@kof/domain';
+import { chaveSramDe, fatosDe, SISTEMAS, type RegistroJogo } from '@kof/domain';
 import { Jogo, type InfoDoJogo, type Medicao, type Proporcao } from '@kof/engine';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
+import { aoTrazerSaves } from './backup';
+import { guardarBateria, saveDoJogo } from './bateria';
 import { config } from './config';
 import { servicos } from './servicos';
 import { usarTelas } from './telas';
@@ -48,6 +50,8 @@ export interface EstadoJogo {
   nome: string;
   /** registro do jogo aberto (id = "título|tamanho", as chaves do antigo) */
   registro: RegistroJogo | null;
+  /** chave do save de bateria (sram.<título>.<tamanho>) */
+  chaveSram: string;
   info: InfoDoJogo | null;
   abrindo: boolean;
   pausaManual: boolean;
@@ -76,6 +80,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   jogo: null,
   nome: '',
   registro: null,
+  chaveSram: '',
   info: null,
   abrindo: false,
   pausaManual: false,
@@ -104,6 +109,9 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     try {
       get().jogo?.fechar();
       const { volume, mudo } = get();
+      const ident = identidade(aberto.sistema, aberto.rom, aberto.nome);
+      const chaveSram = chaveSramDe(ident.titulo || aberto.nome, aberto.rom.length);
+      const sram = await saveDoJogo(chaveSram);
       const jogo = await Jogo.abrir(
         {
           sistema: aberto.sistema,
@@ -111,10 +119,12 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           baseNucleos: new URL('nucleos/', document.baseURI),
           volume: volume / 100,
           mudo,
+          sram,
         },
         {
           quadro: (pixels, largura, altura) => Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true }),
           medicao: (medicao) => set({ medicao }),
+          sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
           erro: (m) => {
             set({ pausaManual: true });
             usarAvisos.getState().avisarErro(`erro no emulador: ${m}`);
@@ -122,14 +132,22 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         },
       );
       const provisorio: RegistroJogo = {
-        ...identidade(aberto.sistema, aberto.rom, aberto.nome),
+        ...ident,
         nome: aberto.nome,
         arquivo: aberto.arquivo,
         sistema: aberto.sistema,
         tamanho: aberto.rom.length,
         ultimo: Date.now(),
       };
-      set({ jogo, nome: aberto.nome, registro: provisorio, info: jogo.info, pausaManual: false, medicao: null });
+      set({
+        jogo,
+        nome: aberto.nome,
+        registro: provisorio,
+        chaveSram,
+        info: jogo.info,
+        pausaManual: false,
+        medicao: null,
+      });
       const telas = usarTelas.getState();
       usarTelas.setState({ temJogo: true });
       telas.abrir('jogo');
@@ -220,3 +238,10 @@ async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<
     return null;
   }
 }
+
+// backup trazido com o save do jogo aberto: ele passa a usar o save trazido já (como no antigo)
+aoTrazerSaves.add((chaves) => {
+  const { jogo, chaveSram } = usarJogo.getState();
+  if (!jogo || !chaves.includes(chaveSram)) return;
+  void saveDoJogo(chaveSram).then((b) => b && jogo.escreverSram(b));
+});
