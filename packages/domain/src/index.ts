@@ -7,3 +7,4 @@ export * from './rom';
 export * from './cd';
 export * from './neogeo';
 export * from './deteccao';
+export * from './organizar';

@@ -39,6 +39,21 @@ struct ArgsCrc {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
+struct ArgsAplicar {
+    moves: Vec<kof_files::organizar::Movimento>,
+    #[serde(default)]
+    limpar: Vec<String>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsGuardar {
+    pasta: String,
+    nome: String,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ArgsLer {
     scope: String,
     path: String,
@@ -89,7 +104,7 @@ impl Estado {
     }
 
     /// `corpo`: os bytes que vieram junto (comandos que gravam binário); vazio nos outros.
-    pub fn chamar(&self, cmd: &str, a: Value, _corpo: Vec<u8>) -> Result<Saida, KofError> {
+    pub fn chamar(&self, cmd: &str, a: Value, corpo: Vec<u8>) -> Result<Saida, KofError> {
         let json = |v: Value| Ok(Saida::Json(v));
         match cmd {
             "app.info" => json(serde_json::to_value(kof_core::info::app_info(&self.pasta_dados)).expect("info")),
@@ -115,6 +130,21 @@ impl Estado {
                 let a: ArgsCrc = args(a)?;
                 let c = kof_files::biblioteca::crcs(&self.pasta_dados, &self.raiz()?, &a.items)?;
                 json(serde_json::json!({ "crcs": c }))
+            }
+            "library.inventory" => {
+                let r = self.raiz()?;
+                kof_files::raiz::garantir_arvore(&r)?;
+                json(serde_json::to_value(kof_files::organizar::inventario(&r)?).expect("json"))
+            }
+            "library.organize.apply" => {
+                let a: ArgsAplicar = args(a)?;
+                let r = kof_files::organizar::aplicar(&self.raiz()?, &a.moves, &a.limpar);
+                json(serde_json::to_value(r).expect("json"))
+            }
+            "library.import" => {
+                let a: ArgsGuardar = args(a)?;
+                let r = kof_files::organizar::guardar(&self.raiz()?, &a.pasta, &a.nome, &corpo)?;
+                json(serde_json::json!({ "stored": r }))
             }
             "file.read" => {
                 let a: ArgsLer = args(a)?;

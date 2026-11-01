@@ -6,10 +6,15 @@ import {
   extensao,
   normal,
   numFaixa,
+  pastaDoArquivo,
+  planejarOrganizacao,
   sistemaDoArquivo,
   VARIANTE,
   type FatoDeArquivo,
+  type ItemDoInventario,
   type ItemDoZip,
+  type Movimento,
+  type Plano,
   type SistemaId,
 } from '@kof/domain';
 import type { Backend } from './backend';
@@ -105,3 +110,41 @@ export async function crcsDaKofGames(b: Backend, items: { path: string; sistema:
 }
 
 export { baseCd };
+
+// ---------- organizar (M3.3) ----------
+
+interface ItemInventarioRust extends ArquivoDoRust {
+  cue?: string[];
+}
+
+/** O plano de organização da Kof Games (nada muda até `aplicarPlano`). */
+export async function planejarKofGames(b: Backend): Promise<Plano> {
+  const inv = await b.chamar<{ files: ItemInventarioRust[]; dirs: string[] }>('library.inventory');
+  return planejarOrganizacao({
+    dirs: inv.dirs,
+    files: inv.files.map((f) => {
+      const i: ItemDoInventario = { path: f.path, nome: f.path.split('/').pop() ?? f.path, tamanho: f.size };
+      if (f.zip) i.zip = f.zip;
+      if (f.cd !== undefined) i.cd = f.cd;
+      if (f.cue) i.cue = f.cue;
+      return i;
+    }),
+  });
+}
+
+export interface ResultadoOrganizar {
+  done: Movimento[];
+  failed: { move: Movimento; code: string; message: string }[];
+  removed: string[];
+}
+
+export const aplicarPlano = (b: Backend, p: Plano) =>
+  b.chamar<ResultadoOrganizar>('library.organize.apply', { moves: p.moves, limpar: p.limpar });
+
+/** Jogo aberto de fora: guarda uma cópia em Kof Games/Games/<console> (o original fica). null = já estava lá. */
+export async function guardarNaKofGames(b: Backend, fato: FatoDeArquivo, bytes: Uint8Array): Promise<string | null> {
+  const pasta = pastaDoArquivo(fato);
+  if (!pasta) return null;
+  const r = await b.enviarBinario<{ stored: string | null }>('library.import', { pasta, nome: fato.nome }, bytes);
+  return r.stored;
+}

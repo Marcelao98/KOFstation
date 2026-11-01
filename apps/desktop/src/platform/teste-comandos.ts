@@ -74,6 +74,50 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
         crcs[i.path] = crcRom(i.sistema, pegar(i.path));
       return { crcs };
     },
+    'library.inventory': async () => {
+      precisaRaiz();
+      const files = [];
+      const dirs = new Set<string>();
+      for (const [path, b] of t.arquivos) {
+        if (!/^(Games|Novos)\//.test(path)) continue;
+        const partes = path.split('/');
+        for (let i = 2; i < partes.length; i++) dirs.add(partes.slice(0, i).join('/'));
+        const f: Record<string, unknown> = { path, size: b.length, modified: 1 };
+        if (extensao(path) === 'zip') f.zip = itensDoZipInteiro(b);
+        if (extensao(path) === 'cue')
+          f.cue = [...new TextDecoder().decode(b).matchAll(/FILE\s+"([^"]+)"/gi)].map((m) => m[1]);
+        files.push(f);
+      }
+      return { files, dirs: [...dirs] };
+    },
+    'library.organize.apply': (a) => {
+      precisaRaiz();
+      const done = [];
+      const failed = [];
+      for (const m of a.moves as { from: string; to: string }[]) {
+        const lista = [...t.arquivos.keys()].filter((k) => k === m.from || k.startsWith(m.from + '/'));
+        if (!lista.length) {
+          failed.push({ move: m, code: 'NOT_FOUND', message: m.from });
+          continue;
+        }
+        const base = m.from.slice(0, m.from.lastIndexOf('/') + 1);
+        for (const k of lista) {
+          let novo = m.to + '/' + k.slice(base.length);
+          for (let i = 2; t.arquivos.has(novo); i++) novo = novo.replace(/( \(\d+\))?(\.[^./]+)?$/, ` (${i})$2`);
+          t.arquivos.set(novo, t.arquivos.get(k) as Uint8Array);
+          t.arquivos.delete(k);
+        }
+        done.push(m);
+      }
+      return { done, failed, removed: [] };
+    },
+    'library.import': (a, dados) => {
+      precisaRaiz();
+      const p = `Games/${String(a.pasta)}/${String(a.nome)}`;
+      if (t.arquivos.get(p)?.length === dados.length) return { stored: null };
+      t.arquivos.set(p, dados.slice());
+      return { stored: p };
+    },
     'file.read': (a) => {
       if (a.scope !== 'kof-games') throw erro('INVALID_ARGS', `escopo desconhecido: ${String(a.scope)}`);
       precisaRaiz();

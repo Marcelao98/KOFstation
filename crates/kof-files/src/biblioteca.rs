@@ -122,7 +122,7 @@ pub fn varrer(raiz: &Path, exts: &HashSet<String>) -> Result<Vec<Arquivo>, KofEr
     }
     let mut saida = Vec::new();
     varrer_em(raiz, &games, 0, exts, &mut saida);
-    saida.sort_by(|a, b| a.path.to_lowercase().cmp(&b.path.to_lowercase()));
+    saida.sort_by_key(|a| a.path.to_lowercase());
     Ok(saida)
 }
 

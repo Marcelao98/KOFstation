@@ -49,9 +49,10 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | `library.scan` | `{exts[]}` → `{root, files: RomFile[]}` (Games até 2 níveis; `.zip` traz o diretório; `.bin/.img/.iso` trazem `cd`) | `ROOT_MISSING` | ✅ M3.2 (sem eventos de progresso: a varredura não lê os arquivos inteiros) |
 | `library.crc` | `{items: {path, sistema}[]}` → `{crcs: {path: crc}}` (No-Intro; cache em `<dados>/cache/crc.json`) | `ROOT_MISSING`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
 | `file.read` | `{scope: "kof-games", path, offset?, length?}` → binário | `NOT_FOUND`, `INVALID_ARGS`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
-| `library.organize.plan` | (no TS: `domain/organizar.ts`, sobre o resultado do `library.scan` da raiz) | — | M3.3 |
-| `library.organize.apply` | `{moves}` → `{done, failed: {move, code}[]}` | `CONFLICT` | M3.3 |
-| `library.import` | `{token}` → `{stored: RomFile[]}` | `UNKNOWN_SYSTEM`, `CONFLICT` | M3 |
+| `library.inventory` | — → `{files: (RomFile & {cue?: string[]})[], dirs[]}` (tudo de Games e Novos, até 6 níveis) | `ROOT_MISSING` | ✅ M3.3 |
+| `library.organize.plan` | **no TS** (`domain/organizar.ts` `planejarOrganizacao`, sobre o `library.inventory`): `{moves: Move[], limpar[]}` | — | ✅ M3.3 |
+| `library.organize.apply` | `{moves, limpar?}` → `{done, failed: {move, code, message}[], removed[]}` (nome repetido vira "nome (2).ext"; pasta inteira junta com a que já existe) | por movimento: `NOT_FOUND`, `PATH_OUTSIDE_SCOPE`, `IO_ERROR` | ✅ M3.3 |
+| `library.import` | `{pasta, nome}` + binário → `{stored: path\|null}` (null = já estava lá com o mesmo tamanho) | `ROOT_MISSING`, `PATH_OUTSIDE_SCOPE` | ✅ M3.3 |
 | `config.read` / `config.write` | `{doc}` → JSON / `{doc, data, version}` → — | `INVALID_VALUE`, `SCHEMA_TOO_NEW` | M4 |
 | `backup.import` / `backup.export` | `{token}` → resumo / `{options}` → `{token}` | `NOT_A_KOFSAVE`, `CORRUPT` | M4 |
 | `saves.read` / `saves.write` / `saves.list` | `{key}` → binário + `{when}` | `NOT_FOUND` | M5 |
@@ -71,7 +72,7 @@ Eventos previstos: `library.scan.progress`, `native.ps2.state`, `native.ps2.fram
 type SystemId = 'snes' | 'gb' | 'nes' | 'md' | 'sms' | 'gg' | 'gba' | 'neogeo' | 'ps1' | 'n64' | 'ps2';
 interface RomFile { path: string; size: number; modified: number; zip?: {nome, tamanho, crc}[]; cd?: 'ps1' | 'ps2' | null }
 // o sistema NÃO vem do Rust: o TS decide pelos fatos (domain/deteccao.ts `sistemaDoArquivo`)
-interface Move { from: string; to: string; reason: 'novo' | 'solto' | 'pasta-errada' | 'faixa-do-cd' }
+interface Move { from: string; to: string /* pasta de destino */; reason: 'novo' | 'solto' | 'pasta-errada' | 'faixa-do-cd' | 'cd' }
 interface BiosInfo { system: SystemId; file: string; sha256: string; size: number; ok: boolean }
 interface ContractError { code: string; message: string; details?: Record<string, unknown> }
 ```
