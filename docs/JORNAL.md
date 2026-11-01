@@ -21,6 +21,18 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-01 · Checkpoint do M2 · aprovado
+
+**Pedido:** instalar em `~/Programas/Kof Games/KOFstation` (só o executável; o antigo foi renomeado pra
+"KOFstation old"), juntar tudo na `main`.
+**Feito:** `rodar.sh` corrigido (não baixava os núcleos: o executável saía sem emuladores; testado num clone limpo sem
+pnpm). Branch de trabalho juntada na `main` (avanço direto, `8af2c0b`). Comando de instalação por `curl` da branch
+`teste-binarios` (precisa do repositório público).
+**Medido / conferido:** o Marcelo rodou um jogo dele no app novo: "funcionou, deu certo". **M2 aprovado.**
+**Onde parou:** escolher o próximo lote (ele quer "colocar muita coisa de uma vez").
+
+---
+
 ## 2026-10-31 · M2 · O app novo roda jogo
 
 **Pedido:** "vai até o M2" (depois de aprovar o M1 como "ficou excelente"); entendido também como aprovação da opção B.

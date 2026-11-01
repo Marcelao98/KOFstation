@@ -68,11 +68,11 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M2.1 | `CoreSession` + `WasmLibretroCore` no Node: ROMs geradas de NES/MD/GB/SNES, N quadros | hash da imagem e do som **igual ao antigo** | ⏸ |
-| M2.2 | Worker + laço + som pelo AudioWorklet | você ouve uma ROM de teste com som | ⏸ |
-| M2.3 | Vídeo WebGL (escala, proporção, resolução dinâmica, corte do NES), sem filtros ainda | print antigo × novo pixel a pixel | ⏸ |
-| M2.4 | Entrada do J1 (teclado e controle no mapa padrão), pausa, F1, turbo, volume, mudo | você joga uma ROM de teste | ⏸ |
-| M2.5 | Abrir arquivo, tela do jogo, menu rápido básico, painel de desempenho (F3) | **você joga um jogo teu no app novo** | ⏸ |
+| M2.1 | `CoreSession` + `WasmLibretroCore` no Node: ROMs geradas de NES/MD/GB/SNES, N quadros | hash da imagem e do som **igual ao antigo** | ✅ |
+| M2.2 | Worker + laço + som pelo AudioWorklet | você ouve uma ROM de teste com som | ✅ |
+| M2.3 | Vídeo WebGL (escala, proporção, resolução dinâmica, corte do NES), sem filtros ainda | print antigo × novo pixel a pixel | ✅ |
+| M2.4 | Entrada do J1 (teclado e controle no mapa padrão), pausa, F1, turbo, volume, mudo | você joga uma ROM de teste | ✅ |
+| M2.5 | Abrir arquivo, tela do jogo, menu rápido básico, painel de desempenho (F3) | **você joga um jogo teu no app novo** | ✅ |
 
 ## M3 — Biblioteca e Kof Games
 
