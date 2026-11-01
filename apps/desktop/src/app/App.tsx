@@ -18,6 +18,7 @@ import { Estados } from '../screens/Estados/Estados';
 import { Guia } from '../screens/Guia/Guia';
 import { ModoTela } from '../screens/Modo/ModoTela';
 import { Visual } from '../screens/Visual/Visual';
+import { Molduras } from '../screens/Molduras/Molduras';
 import { Inicio } from '../screens/Inicio/Inicio';
 import { Pendente } from '../screens/Pendente/Pendente';
 import { BarraShowcase, Temas } from '../screens/Temas/Temas';
@@ -176,6 +177,7 @@ export function App({ backend }: { backend: Backend }) {
         {temasAberto && <Temas />}
         <ModoTela />
         <Visual />
+        <Molduras />
         <PedirPasta />
         <Backup />
         <PlanoDeOrganizacao />

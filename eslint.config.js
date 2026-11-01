@@ -19,6 +19,7 @@ export default tseslint.config(
       'apps/desktop/src/styles/antigo/**',
       // cópias sem mudança do app antigo (conferidas por teste): o estilo do código é o de lá
       'packages/engine/src/visual/kofvisual.js',
+      'packages/engine/src/molduras/kofmolduras.js',
     ],
   },
   js.configs.recommended,

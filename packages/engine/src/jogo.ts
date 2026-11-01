@@ -156,6 +156,10 @@ export class Jogo {
     return this.pedir('sram-ler');
   }
 
+  mudarOpcoes(opcoes: Record<string, string>) {
+    this.mandar({ tipo: 'opcoes', opcoes });
+  }
+
   configurarRebobinar(ligado: boolean, limite: number, recargaX: number) {
     this.mandar({ tipo: 'rebob-config', ligado, limite, recargaX });
   }

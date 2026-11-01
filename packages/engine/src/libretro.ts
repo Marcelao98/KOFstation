@@ -77,6 +77,17 @@ export class SessaoLibretro {
     this.config = c;
   }
 
+  /** Muda opções do núcleo com o jogo rodando (paleta do GB/NES): o núcleo lê na próxima vez que perguntar. */
+  mudarOpcoes(op: Record<string, string>): void {
+    for (const [k, v] of Object.entries(op)) {
+      const pk = texto(this.mod, k);
+      const pv = texto(this.mod, v);
+      this.mod._lr_var(pk, pv);
+      this.mod._free(pk);
+      this.mod._free(pv);
+    }
+  }
+
   async iniciar(fabrica: FabricaDeNucleo, opcoesExtras: Record<string, string> = {}): Promise<void> {
     const anotar = (s: string) => {
       this.log.push(String(s));

@@ -10,3 +10,5 @@ export * from './mensagens';
 export * from './reamostrador';
 export * from './rebobinador';
 export * from './visual';
+export * from './molduras';
+export * from './paletas';

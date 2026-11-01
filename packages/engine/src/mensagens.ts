@@ -16,6 +16,7 @@ export type ParaWorker =
       opcoes?: Record<string, string>;
     }
   | { tipo: 'sram-escrever'; bytes: Uint8Array }
+  | { tipo: 'opcoes'; opcoes: Record<string, string> }
   /** regras do rebobinar do modo de jogo (desligado: ligado=false) */
   | { tipo: 'rebob-config'; ligado: boolean; limite: number; recargaX: number }
   /** segurando o botão de voltar no tempo */

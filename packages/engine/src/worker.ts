@@ -247,6 +247,9 @@ eu.onmessage = async ({ data: m }) => {
       sessao?.reiniciar();
       novoRebob(sessao);
       break;
+    case 'opcoes':
+      sessao?.mudarOpcoes(m.opcoes);
+      break;
     case 'rebob-config':
       Object.assign(rb, { ligado: m.ligado, limite: m.limite, recargaX: m.recargaX });
       novoRebob(sessao);

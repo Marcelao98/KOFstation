@@ -11,6 +11,7 @@ import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 import { usarVisual } from '../stores/visual';
 import { usarPainel } from '../stores/painel';
+import { usarMoldura } from '../stores/moldura';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
 const TELAS: Partial<Record<string, TelaId>> = {
@@ -31,7 +32,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   traducao: 'M10',
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
-  molduras: 'M7',
   'musica-inicio': 'M9',
   'guardar-musica': 'M9',
   'boas-vindas': 'M9',
@@ -44,9 +44,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   'bios-tela': 'M11',
   aparelhos: 'M13',
   jogadores: 'M8',
-  moldura: 'M7',
-  'paleta-gb': 'M7',
-  'paleta-nes': 'M7',
 };
 
 export const avisoEtapa = (acao: string): string =>
@@ -171,6 +168,22 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     case 'fechar-visual':
       usarPainel.getState().fechar();
+      return true;
+    case 'molduras':
+      usarJogo.getState().fecharRapido();
+      usarMoldura.getState().set({ galeria: true });
+      return true;
+    case 'fechar-molduras':
+      usarMoldura.getState().set({ galeria: false });
+      return true;
+    case 'moldura':
+      usarMoldura.getState().mudar(valor ?? 'nenhuma');
+      return true;
+    case 'paleta-gb':
+      usarMoldura.getState().mudarPaletaGb(valor ?? 'auto');
+      return true;
+    case 'paleta-nes':
+      usarMoldura.getState().mudarPaletaNes(valor ?? 'default');
       return true;
     case 'filtro':
       usarVisual.getState().filtro(valor ?? 'original');

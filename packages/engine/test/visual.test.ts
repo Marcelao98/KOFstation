@@ -26,3 +26,15 @@ describe('KofVisual (cópia do antigo)', () => {
     expect(KofVisual.passos(KofVisual.valores('pixelhd'), 256, 224).map((p) => p.w)).toEqual([512, 1024]);
   });
 });
+
+describe('KofMolduras (cópia do antigo)', () => {
+  it('o miolo é o molduras.js do antigo, byte a byte', () => {
+    const t = readFileSync(new URL('../src/molduras/kofmolduras.js', import.meta.url), 'utf8');
+    const ini = t.indexOf('// Molduras do KOFstation');
+    const fim = t.lastIndexOf('export { KofMolduras };');
+    const antigo = t.slice(ini, fim) + "if (typeof module !== 'undefined') module.exports = KofMolduras;\n";
+    expect(createHash('sha256').update(antigo).digest('hex')).toBe(
+      '9c404b973a9fa97508da0ab26945701fda26d94b2ae24240233ba9e2cebae208',
+    );
+  });
+});

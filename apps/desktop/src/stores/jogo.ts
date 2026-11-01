@@ -46,6 +46,12 @@ const antesDeTrocar = async () => {
 /** Situação do rebobinar vinda do Worker (stores/rebob). */
 export const aoMudarRebob = new Set<(r: SituacaoRebob) => void>();
 
+/** Opções do núcleo pro jogo que vai abrir (paletas: M7.5). */
+let opcoesDoNucleo: (sistema: string) => Record<string, string> = () => ({});
+export function trocarOpcoesDoNucleo(f: typeof opcoesDoNucleo) {
+  opcoesDoNucleo = f;
+}
+
 /** Chamados depois que um jogo abriu (perguntar o modo: M5.4; controles do jogo: M8). */
 export const depoisDeAbrirJogo = new Set<() => void>();
 
@@ -133,6 +139,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           volume: volume / 100,
           mudo,
           sram,
+          opcoes: opcoesDoNucleo(aberto.sistema),
         },
         {
           quadro: (pixels, largura, altura) => Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true }),

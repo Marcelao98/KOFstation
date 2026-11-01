@@ -6,13 +6,26 @@ import { acao } from '../app/acoes';
 import { PROPORCOES, usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarModo } from '../stores/modo';
+import { MOLDURAS, usarMoldura } from '../stores/moldura';
+import { FILTROS, usarVisual } from '../stores/visual';
+import { PALETAS_GB, PALETAS_NES } from '@kof/app-core';
 
 interface Item {
   t: string;
   f?: () => void;
   v?: () => string;
   aj?: (d: number) => void;
+  /** só aparece quando (ex.: cores do GB só no Game Boy) */
+  so?: () => boolean;
 }
+
+const ciclar = (l: [string, string][], atual: string, d: number) => {
+  const i = Math.max(
+    0,
+    l.findIndex(([k]) => k === atual),
+  );
+  return l[(i + d + l.length) % l.length]?.[0] ?? atual;
+};
 
 const fechar = () => usarJogo.getState().fecharRapido();
 const depois = (f: () => void) => () => {
@@ -23,7 +36,7 @@ const depois = (f: () => void) => () => {
 function itens(): Item[] {
   const j = usarJogo.getState();
   const p = usarPrefs.getState();
-  return [
+  const l: Item[] = [
     { t: '▶ Continuar', f: fechar },
     { t: '💾 Salvar estado', f: depois(() => acao('salvar-estado')) },
     { t: '⟲ Carregar último estado', f: depois(() => acao('carregar-ultimo')) },
@@ -59,14 +72,47 @@ function itens(): Item[] {
       },
       f: depois(() => acao('temas')),
     },
-    { t: 'Filtro', v: () => 'Original', aj: () => acao('filtro') },
+    {
+      t: 'Filtro',
+      v: () => FILTROS.find(([k]) => k === usarVisual.getState().pre)?.[1] ?? 'Meu jeito',
+      aj: (d) => {
+        const pre = usarVisual.getState().pre;
+        usarVisual.getState().filtro(ciclar(FILTROS, FILTROS.some(([k]) => k === pre) ? pre : 'original', d));
+      },
+    },
+    {
+      t: 'Cores do Game Boy',
+      so: () => j.info?.sistema === 'gb',
+      v: () => PALETAS_GB.find(([k]) => k === usarMoldura.getState().paletaGb)?.[1] ?? '',
+      aj: (d) => usarMoldura.getState().mudarPaletaGb(ciclar(PALETAS_GB, usarMoldura.getState().paletaGb, d)),
+    },
+    {
+      t: 'Cores do NES',
+      so: () => j.info?.sistema === 'nes',
+      v: () => PALETAS_NES.find(([k]) => k === usarMoldura.getState().paletaNes)?.[1] ?? '',
+      aj: (d) => usarMoldura.getState().mudarPaletaNes(ciclar(PALETAS_NES, usarMoldura.getState().paletaNes, d)),
+    },
     { t: 'Proporção', v: () => PROPORCOES.find(([k]) => k === j.proporcao)?.[1] ?? '', aj: (d) => j.mudarProporcao(d) },
     { t: '🎛 Painel de imagem', f: depois(() => acao('visual')) },
-    { t: 'Moldura', v: () => 'Sem moldura', aj: () => acao('moldura') },
+    {
+      t: 'Moldura',
+      v: () => MOLDURAS.find(([k]) => k === usarMoldura.getState().moldura)?.[1] ?? '',
+      aj: (d) => {
+        const m = usarMoldura.getState();
+        m.mudar(
+          ciclar(
+            MOLDURAS.filter(([k]) => k !== 'propria' || m.propria),
+            m.moldura,
+            d,
+          ),
+        );
+      },
+    },
     { t: 'Volume', v: () => (j.mudo ? 'mudo' : `${j.volume}%`), aj: (d) => j.mudarVolume(d * 10) },
     { t: '⛶ Tela cheia', f: () => acao('cheia') },
     { t: '↺ Reiniciar', f: depois(() => acao('reiniciar')) },
   ];
+  return l.filter((it) => !it.so || it.so());
 }
 
 /** Teclas do menu rápido (também usadas pelo controle). Devolve true se tratou. */
