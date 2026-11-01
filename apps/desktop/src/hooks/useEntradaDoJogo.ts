@@ -1,10 +1,11 @@
 // Botões do jogador 1 no jogo: teclado (teclas padrão do antigo) + todos os controles. Tab segurado = turbo.
-// Select+Start = menu rápido (combinação do emulador: não chega no jogo). Jogadores 2–4 e teclas trocáveis: M8.
+// Select+Start = menu rápido (combinação do emulador: não chega no jogo); Backspace ou Select+Y = rebobinar.
 import { BOTAO, TECLAS_PADRAO, semOpostos } from '@kof/domain';
 import { bitsDeTodos, controlesDoNavegador } from '@kof/engine';
 import { useEffect } from 'react';
 import { usarJogo } from '../stores/jogo';
 import { usarModo } from '../stores/modo';
+import { conferirRebobinar, usarRebob } from '../stores/rebob';
 import { usarTelas } from '../stores/telas';
 
 export function useEntradaDoJogo() {
@@ -21,6 +22,11 @@ export function useEntradaDoJogo() {
         if (usarModo.getState().regras.turbo) usarJogo.getState().jogo?.turbo(true);
         return;
       }
+      if (e.code === 'Backspace') {
+        e.preventDefault();
+        usarRebob.setState({ tecla: true });
+        return;
+      }
       if (TECLAS_PADRAO[e.code] !== undefined) {
         e.preventDefault();
         apertadas.add(e.code);
@@ -28,19 +34,25 @@ export function useEntradaDoJogo() {
     };
     const sobe = (e: KeyboardEvent) => {
       if (e.code === 'Tab') usarJogo.getState().jogo?.turbo(false);
+      if (e.code === 'Backspace') usarRebob.setState({ tecla: false });
       apertadas.delete(e.code);
     };
     const soltarTudo = () => {
       apertadas.clear();
+      usarRebob.setState({ tecla: false, pad: false });
       usarJogo.getState().jogo?.turbo(false);
     };
     const t = setInterval(() => {
       const jogo = usarJogo.getState().jogo;
       if (!jogo) return;
+      conferirRebobinar(noJogo());
       if (!noJogo()) return jogo.botoesDo(0, 0);
       let b = bitsDeTodos(controlesDoNavegador());
       for (const k of apertadas) b |= TECLAS_PADRAO[k] ?? 0;
       b = semOpostos(b);
+      const selY = BOTAO.Select | BOTAO.Y; // Select+Y segurado = rebobinar (como no antigo)
+      const padVolta = (b & selY) === selY;
+      if (padVolta !== usarRebob.getState().pad) usarRebob.setState({ pad: padVolta });
       const selStart = BOTAO.Select | BOTAO.Start;
       if ((b & selStart) === selStart) {
         if (!combo) usarJogo.getState().abrirRapido();

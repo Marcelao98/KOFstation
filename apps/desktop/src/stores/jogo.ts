@@ -11,7 +11,7 @@ import {
   type JogoAberto,
 } from '@kof/app-core';
 import { chaveSramDe, fatosDe, SISTEMAS, type RegistroJogo } from '@kof/domain';
-import { Jogo, type InfoDoJogo, type Medicao, type Proporcao } from '@kof/engine';
+import { Jogo, type InfoDoJogo, type Medicao, type Proporcao, type SituacaoRebob } from '@kof/engine';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { aoTrazerSaves } from './backup';
@@ -42,6 +42,9 @@ export const antesDeTrocarJogo = new Set<() => Promise<void>>();
 const antesDeTrocar = async () => {
   for (const f of antesDeTrocarJogo) await f().catch(() => undefined); // nunca impede de abrir o outro jogo
 };
+
+/** Situação do rebobinar vinda do Worker (stores/rebob). */
+export const aoMudarRebob = new Set<(r: SituacaoRebob) => void>();
 
 /** Chamados depois que um jogo abriu (perguntar o modo: M5.4; controles do jogo: M8). */
 export const depoisDeAbrirJogo = new Set<() => void>();
@@ -135,6 +138,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           quadro: (pixels, largura, altura) => Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true }),
           medicao: (medicao) => set({ medicao }),
           sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
+          rebob: (r) => aoMudarRebob.forEach((f) => f(r)),
           erro: (m) => {
             set({ pausaManual: true });
             usarAvisos.getState().avisarErro(`erro no emulador: ${m}`);
@@ -177,6 +181,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   },
   fechar: () => {
     void antesDeTrocar();
+    document.body.classList.remove('rebobinando');
     get().jogo?.fechar();
     ultimoQuadro.pixels = null;
     set({ jogo: null, nome: '', registro: null, info: null, medicao: null, rapidoAberto: false });

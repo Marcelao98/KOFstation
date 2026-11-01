@@ -24,6 +24,7 @@ import { usarApp } from '../stores/app';
 import { usarAvisos } from '../stores/avisos';
 import '../stores/auto';
 import '../stores/modo';
+import { ampulheta, usarRebob } from '../stores/rebob';
 import { usarBackup } from '../stores/backup';
 import { usarCapas } from '../stores/capas';
 import { usarJogo } from '../stores/jogo';
@@ -176,6 +177,7 @@ export function App({ backend }: { backend: Backend }) {
         <PedirPasta />
         <Backup />
         <PlanoDeOrganizacao />
+        <Ampulheta />
         <MenuRapido />
         <Aviso />
         <BarraShowcase />
@@ -195,5 +197,15 @@ export function App({ backend }: { backend: Backend }) {
         }}
       />
     </>
+  );
+}
+
+/** A ampulheta do rebobinar (#ampulheta do antigo). */
+function Ampulheta() {
+  const { texto, enche } = ampulheta(usarRebob((r) => r.r));
+  return (
+    <div id="ampulheta" hidden={!texto} style={{ '--enche': Math.round(enche * 100) + '%' } as React.CSSProperties}>
+      <span>{texto}</span>
+    </div>
   );
 }
