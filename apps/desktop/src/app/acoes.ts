@@ -10,6 +10,7 @@ import { usarEstados } from '../stores/estados';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 import { usarVisual } from '../stores/visual';
+import { usarPainel } from '../stores/painel';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
 const TELAS: Partial<Record<string, TelaId>> = {
@@ -31,8 +32,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
   molduras: 'M7',
-  visual: 'M7',
-  'visual-temas': 'M7',
   'musica-inicio': 'M9',
   'guardar-musica': 'M9',
   'boas-vindas': 'M9',
@@ -162,6 +161,16 @@ export function acao(nome: string, valor?: string): boolean {
     }
     case 'fechar-estados':
       telas.sair();
+      return true;
+    case 'visual':
+      usarPainel.getState().alternar();
+      return true;
+    case 'visual-temas':
+      telas.fecharTemas();
+      usarPainel.getState().abrir();
+      return true;
+    case 'fechar-visual':
+      usarPainel.getState().fechar();
       return true;
     case 'filtro':
       usarVisual.getState().filtro(valor ?? 'original');
