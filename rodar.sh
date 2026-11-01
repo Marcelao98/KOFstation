@@ -27,11 +27,13 @@ fi
 PNPM="npx --yes pnpm@10.28.0"
 command -v pnpm >/dev/null 2>&1 && PNPM=pnpm
 
-echo "== 1/3 dependências do app"
+echo "== 1/4 dependências do app"
 $PNPM install --frozen-lockfile
-echo "== 2/3 app web"
+echo "== 2/4 núcleos dos emuladores (do kofstation-old, conferidos por SHA-256)"
+node tools/baixar-nucleos.mjs
+echo "== 3/4 app web"
 $PNPM build
-echo "== 3/3 executável (a primeira vez demora uns minutos)"
+echo "== 4/4 executável (a primeira vez demora uns minutos)"
 cargo build --release -p kof-app
 echo "== abrindo: target/release/kofstation"
 exec ./target/release/kofstation "$@"
