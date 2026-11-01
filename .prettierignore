@@ -7,3 +7,4 @@ LICENSE
 apps/desktop/src/styles/antigo/
 apps/desktop/public/nucleos/
 packages/domain/src/dados/
+packages/engine/src/visual/kofvisual.js

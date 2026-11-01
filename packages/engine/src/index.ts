@@ -8,5 +8,5 @@ export * from './anel';
 export * from './jogo';
 export * from './mensagens';
 export * from './reamostrador';
-export * from './video';
 export * from './rebobinador';
+export * from './visual';

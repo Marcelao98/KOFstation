@@ -1,29 +1,35 @@
 // Liga o canvas #tela à engine: desenha o último quadro a cada quadro do monitor e acerta o tamanho (escala inteira na
 // janela, o maior possível em tela cheia), como o ajustarEscala() do antigo.
-import { ehDeTv, TelaDoJogo, tamanhoNaTela } from '@kof/engine';
+import { registrar } from '@kof/app-core';
+import { ehDeTv, RenderizadorVisual, tamanhoNaTela } from '@kof/engine';
 import { useEffect, useRef } from 'react';
+import { usarAvisos } from '../stores/avisos';
 import { ultimoQuadro, usarJogo } from '../stores/jogo';
+import { usarRender } from '../stores/visual';
 
 export function useTelaDoJogo(canvas: React.RefObject<HTMLCanvasElement | null>) {
-  const tela = useRef<TelaDoJogo | null>(null);
+  const tela = useRef<RenderizadorVisual | null>(null);
   const { info, proporcao, escala, jogo } = usarJogo();
 
   useEffect(() => {
     const c = canvas.current;
-    if (!c || !jogo) return;
-    try {
-      tela.current = new TelaDoJogo(c);
-    } catch {
-      tela.current = null; // sem WebGL2: o aviso aparece pelo jogo (M7 traz o canvas 2D de reserva)
-      return;
-    }
+    if (!c) return;
+    // um renderizador só por canvas (o WebGL não pode ser pedido duas vezes com outro tipo)
+    tela.current ??= new RenderizadorVisual(c, {
+      avisar: (t, ms) => usarAvisos.getState().avisar(t, ms),
+      anotar: (t) => registrar('warn', 'imagem', t),
+    });
+    usarRender(tela.current);
+    if (jogo) tela.current.ligaIni = performance.now();
     let pedido = 0;
     const laco = () => {
       pedido = requestAnimationFrame(laco);
-      if (ultimoQuadro.novo && ultimoQuadro.pixels && tela.current) {
+      const t = tela.current;
+      if (!t) return;
+      if (ultimoQuadro.novo && ultimoQuadro.pixels) {
         ultimoQuadro.novo = false;
-        tela.current.desenhar(ultimoQuadro.pixels, ultimoQuadro.largura, ultimoQuadro.altura);
-      }
+        t.desenhar(ultimoQuadro.pixels, ultimoQuadro.largura, ultimoQuadro.altura);
+      } else if (t.animado()) t.pintar(false); // chiado/fita mexendo mesmo parado
     };
     pedido = requestAnimationFrame(laco);
     return () => cancelAnimationFrame(pedido);

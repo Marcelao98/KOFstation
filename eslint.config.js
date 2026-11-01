@@ -17,6 +17,8 @@ export default tseslint.config(
       'target/**',
       'apps/desktop/public/nucleos/**',
       'apps/desktop/src/styles/antigo/**',
+      // cópias sem mudança do app antigo (conferidas por teste): o estilo do código é o de lá
+      'packages/engine/src/visual/kofvisual.js',
     ],
   },
   js.configs.recommended,

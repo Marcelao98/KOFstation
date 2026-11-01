@@ -9,6 +9,7 @@ import { config } from '../stores/config';
 import { usarEstados } from '../stores/estados';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
+import { usarVisual } from '../stores/visual';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
 const TELAS: Partial<Record<string, TelaId>> = {
@@ -45,7 +46,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   aparelhos: 'M13',
   jogadores: 'M8',
   moldura: 'M7',
-  filtro: 'M7',
   'paleta-gb': 'M7',
   'paleta-nes': 'M7',
 };
@@ -162,6 +162,9 @@ export function acao(nome: string, valor?: string): boolean {
     }
     case 'fechar-estados':
       telas.sair();
+      return true;
+    case 'filtro':
+      usarVisual.getState().filtro(valor ?? 'original');
       return true;
     case 'capas':
       usarCapas.getState().alternarCapas();
