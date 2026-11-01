@@ -3,6 +3,7 @@
 // some sem aviso.
 import { usarAvisos } from '../stores/avisos';
 import { usarBiblioteca } from '../stores/biblioteca';
+import { usarCapas } from '../stores/capas';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 
@@ -35,8 +36,6 @@ export const ETAPA: Readonly<Record<string, string>> = {
   molduras: 'M7',
   visual: 'M7',
   'visual-temas': 'M7',
-  sofa: 'M3.6',
-  capas: 'M3.6',
   'estados-do-sel': 'M5',
   'musica-inicio': 'M9',
   'guardar-musica': 'M9',
@@ -135,6 +134,14 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     case 'fechar-biblioteca':
       telas.sair();
+      return true;
+    case 'capas':
+      usarCapas.getState().alternarCapas();
+      usarAvisos.getState().avisar(`🖼 capas oficiais ${usarCapas.getState().ligadas ? 'ligadas' : 'desligadas'}`);
+      return true;
+    case 'sofa':
+      usarCapas.getState().alternarSofa();
+      if (usarCapas.getState().sofa) telas.abrir('biblioteca');
       return true;
     case 'pausa-auto':
       usarAvisos.getState().avisar('pausar ao sair da janela: sempre ligado por enquanto (a opção chega no M4)', 3000);

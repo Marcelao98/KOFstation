@@ -17,10 +17,12 @@ export interface KofTeste {
   log: unknown[];
   /** lojas: loja → chave → [meta, bytes] */
   lojas: Map<string, Map<string, [unknown, Uint8Array]>>;
+  /** capas oficiais de mentira (nome do jogo → png) */
+  capas: Map<string, Uint8Array>;
 }
 
 export function criarComandosTeste(): Record<string, ComandoTeste> {
-  const t: KofTeste = { arquivos: new Map(), raiz: null, log: [], lojas: new Map() };
+  const t: KofTeste = { arquivos: new Map(), raiz: null, log: [], lojas: new Map(), capas: new Map() };
   const loja = (a: Record<string, unknown>) => {
     const n = String(a.store);
     if (!LOJAS.includes(n)) throw erro('INVALID_ARGS', `loja desconhecida: ${n}`);
@@ -156,6 +158,11 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
         for (const [, [meta, b]] of m) bytes += b.length + JSON.stringify(meta).length;
         return { store, bytes, items: m.size };
       }),
+    'cover.get': (a) => {
+      const png = t.capas.get(String(a.chave));
+      if (!png) throw erro('NOT_FOUND', `capa ${String(a.chave)}`);
+      return png.slice();
+    },
     'file.read': (a) => {
       if (a.scope !== 'kof-games') throw erro('INVALID_ARGS', `escopo desconhecido: ${String(a.scope)}`);
       precisaRaiz();

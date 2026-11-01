@@ -19,6 +19,7 @@ import { Pendente } from '../screens/Pendente/Pendente';
 import { BarraShowcase, Temas } from '../screens/Temas/Temas';
 import { usarApp } from '../stores/app';
 import { usarAvisos } from '../stores/avisos';
+import { usarCapas } from '../stores/capas';
 import { usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarShowcase } from '../stores/showcase';
@@ -83,6 +84,10 @@ export function App({ backend }: { backend: Backend }) {
   useEffect(() => {
     document.documentElement.dataset.tema = tema;
   }, [tema]);
+
+  useEffect(() => {
+    document.body.classList.toggle('sofa', usarCapas.getState().sofa);
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle('vazio', !temJogo); // sem jogo: a tela do jogo fica escondida

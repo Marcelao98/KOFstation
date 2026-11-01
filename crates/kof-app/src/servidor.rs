@@ -103,12 +103,17 @@ impl Servidor {
 
     /// Atende pra sempre (o processo termina quando o navegador fecha).
     pub fn atender(&self) {
-        for mut req in self.srv.incoming_requests() {
-            let resp = self.responder(&mut req);
-            if let Err(e) = req.respond(resp) {
-                tracing::debug!("resposta não entregue: {e}");
+        // uma linha por pedido: baixar uma capa (rede) não pode segurar o save do jogo que chega junto
+        std::thread::scope(|s| {
+            for mut req in self.srv.incoming_requests() {
+                s.spawn(move || {
+                    let resp = self.responder(&mut req);
+                    if let Err(e) = req.respond(resp) {
+                        tracing::debug!("resposta não entregue: {e}");
+                    }
+                });
             }
-        }
+        });
     }
 
     fn responder(&self, req: &mut Request) -> Resp {

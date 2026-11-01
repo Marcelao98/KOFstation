@@ -75,6 +75,18 @@ impl ArgsLoja {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
+struct ArgsCapa {
+    acervo: String,
+    chave: String,
+    #[serde(default)]
+    nomes: Vec<String>,
+    /// só olha o que já está guardado (sem rede)
+    #[serde(default)]
+    guardada: bool,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ArgsLer {
     scope: String,
     path: String,
@@ -199,6 +211,16 @@ impl Estado {
                     .map(|(store, bytes, items)| serde_json::json!({"store": store, "bytes": bytes, "items": items}))
                     .collect();
                 json(Value::Array(l))
+            }
+            "cover.get" => {
+                let a: ArgsCapa = args(a)?;
+                let r = if a.guardada {
+                    kof_files::capas::guardada(&self.pasta_dados, &a.acervo, &a.chave)?
+                } else {
+                    kof_files::capas::buscar(&self.pasta_dados, &a.acervo, &a.chave, &a.nomes)?
+                };
+                r.map(Saida::Bin)
+                    .ok_or_else(|| KofError::NaoEncontrado(format!("capa {}", a.chave)))
             }
             "file.read" => {
                 let a: ArgsLer = args(a)?;

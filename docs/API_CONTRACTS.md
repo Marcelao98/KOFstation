@@ -53,6 +53,11 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | `library.organize.plan` | **no TS** (`domain/organizar.ts` `planejarOrganizacao`, sobre o `library.inventory`): `{moves: Move[], limpar[]}` | — | ✅ M3.3 |
 | `library.organize.apply` | `{moves, limpar?}` → `{done, failed: {move, code, message}[], removed[]}` (nome repetido vira "nome (2).ext"; pasta inteira junta com a que já existe) | por movimento: `NOT_FOUND`, `PATH_OUTSIDE_SCOPE`, `IO_ERROR` | ✅ M3.3 |
 | `library.import` | `{pasta, nome}` + binário → `{stored: path\|null}` (null = já estava lá com o mesmo tamanho) | `ROOT_MISSING`, `PATH_OUTSIDE_SCOPE` | ✅ M3.3 |
+| `store.list` | `{store, prefix?}` → `{key, meta, size}[]` (lojas: jogos, saves, estados, autos, stats, musicas, capas, visual, roms) | `INVALID_ARGS` | ✅ M3.4 |
+| `store.get` / `store.meta` | `{store, key}` → binário / JSON | `NOT_FOUND` | ✅ M3.4 |
+| `store.put` | `{store, key, meta}` + binário (pode ser vazio) → `null` (gravação atômica) | `DISK_FULL`, `IO_ERROR` | ✅ M3.4 |
+| `store.delete` / `store.space` | `{store, key}` → `null` / — → `{store, bytes, items}[]` | — | ✅ M3.4 |
+| `cover.get` | `{acervo, chave, nomes[], guardada?}` → PNG (só de `raw.githubusercontent.com/libretro-thumbnails/`; cache em `<dados>/cache/capas`, falha lembrada 7 dias) | `NOT_FOUND`, `NETWORK` | ✅ M3.6 |
 | `config.read` / `config.write` | `{doc}` → JSON / `{doc, data, version}` → — | `INVALID_VALUE`, `SCHEMA_TOO_NEW` | M4 |
 | `backup.import` / `backup.export` | `{token}` → resumo / `{options}` → `{token}` | `NOT_A_KOFSAVE`, `CORRUPT` | M4 |
 | `saves.read` / `saves.write` / `saves.list` | `{key}` → binário + `{when}` | `NOT_FOUND` | M5 |

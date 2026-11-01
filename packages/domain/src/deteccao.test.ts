@@ -101,3 +101,13 @@ describe('CD (cue, faixas)', () => {
     );
   });
 });
+
+import { nomesCapa } from './capas';
+describe('nomes da capa (nomesCapa do antigo)', () => {
+  it('GoodTools vira No-Intro', () => {
+    const n = nomesCapa('Super Mario World (U) (V1.1) [!]');
+    expect(n[0]).toBe('Super Mario World (USA) (Rev 1)');
+    expect(n).toContain('Super Mario World (USA)');
+    expect(n).toContain('Super Mario World (USA) (En,Fr)');
+  });
+});

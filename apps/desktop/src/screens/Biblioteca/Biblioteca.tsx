@@ -6,7 +6,8 @@ import { acao } from '../../app/acoes';
 import { usarBiblioteca } from '../../stores/biblioteca';
 import { usarTelas } from '../../stores/telas';
 import { FiltrosDaBiblioteca, MetaDoJogo, popAberto, teclaDoPop } from './Filtros';
-import { Capa, srcCapa } from './Capas';
+import { Capa, Mini, srcCapa } from './Capas';
+import { usarCapas } from '../../stores/capas';
 
 const LOTE = 150;
 
@@ -18,8 +19,21 @@ function detalhe(r: ItemBiblioteca, n: number): string {
   return t;
 }
 
+const sofaAgora = () => usarCapas.getState().sofa;
+/** Quantas capas cabem numa linha no sofá (1 na lista). */
+function colunas(): number {
+  if (!sofaAgora()) return 1;
+  const lis = document.getElementById('roms')?.children;
+  if (!lis || lis.length < 2) return 1;
+  const y = (lis[0] as HTMLElement).offsetTop;
+  let n = 0;
+  while (n < lis.length && (lis[n] as HTMLElement).offsetTop === y) n++;
+  return Math.max(1, n);
+}
+
 export function Biblioteca() {
   const b = usarBiblioteca();
+  const { sofa, ligadas } = usarCapas();
   const [mostrando, setMostrando] = useState(LOTE);
   const ul = useRef<HTMLUListElement>(null);
   const filtro = useRef<HTMLInputElement>(null);
@@ -50,9 +64,15 @@ export function Biblioteca() {
       if (popAberto()) return void teclaDoPop(e);
       const s = usarBiblioteca.getState();
       const naBusca = e.target === filtro.current;
-      if (e.code === 'ArrowDown' || e.code === 'ArrowUp') {
+      const passo = {
+        ArrowDown: colunas(),
+        ArrowUp: -colunas(),
+        ArrowRight: sofaAgora() ? 1 : 0,
+        ArrowLeft: sofaAgora() ? -1 : 0,
+      }[e.code];
+      if (passo) {
         e.preventDefault();
-        s.selecionar(s.selecionada + (e.code === 'ArrowDown' ? 1 : -1));
+        s.selecionar(s.selecionada + passo);
       } else if (e.code === 'Enter') {
         e.preventDefault();
         void s.jogar(e.shiftKey);
@@ -134,6 +154,7 @@ export function Biblioteca() {
                   className={i === b.selecionada ? 'sel' : undefined}
                   onClick={() => (i === b.selecionada ? void b.jogar() : b.selecionar(i))}
                 >
+                  {sofa && <Mini item={r} texto="☕" />}
                   <span>{r.nome}</span>
                   {sis !== 'snes' && <small className="sis-tag">{curtoDoSistema(sis)}</small>}
                   {r.jogo?.traducao && (
@@ -216,7 +237,7 @@ export function Biblioteca() {
           🔄 Reler e organizar
         </button>
         <button className="sec" data-acao="capas" onClick={() => acao('capas')}>
-          🖼 Capas oficiais: {capasLigadas() ? 'ligadas' : 'desligadas'}
+          🖼 Capas oficiais: {ligadas ? 'ligadas' : 'desligadas'}
         </button>
         <span className="dica so-pc">
           setas navegam · Enter joga · Shift+Enter do zero · E estados · controle: A joga, X estados, Select sofá
@@ -224,12 +245,4 @@ export function Biblioteca() {
       </div>
     </section>
   );
-}
-
-function capasLigadas() {
-  try {
-    return localStorage.getItem('kofstation.capas') !== '0';
-  } catch {
-    return true;
-  }
 }

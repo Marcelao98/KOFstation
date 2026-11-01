@@ -106,3 +106,37 @@ test('busca com a base de jogos: campo:valor, facetas com contagem e ficha com b
   await page.keyboard.press('Escape');
   await expect(page.locator('#biblioteca')).toBeHidden();
 });
+
+test('capa oficial na ficha e modo sofá com a grade de capas', async ({ page }) => {
+  await page.evaluate(async () => {
+    const t = (
+      globalThis as unknown as {
+        __kofTeste: { raiz: string; arquivos: Map<string, Uint8Array>; capas: Map<string, Uint8Array> };
+      }
+    ).__kofTeste;
+    t.raiz = '/home/teste/Kof Games';
+    t.arquivos.set('Games/snes/Jogo Azul (USA).sfc', new Uint8Array(4));
+    t.arquivos.set('Games/snes/Sem Capa (USA).sfc', new Uint8Array(4));
+    const c = document.createElement('canvas');
+    c.width = c.height = 8;
+    const g = c.getContext('2d');
+    if (g) {
+      g.fillStyle = '#00f';
+      g.fillRect(0, 0, 8, 8);
+    }
+    const blob = await new Promise<Blob | null>((ok) => c.toBlob(ok, 'image/png'));
+    t.capas.set('Jogo Azul (USA)', new Uint8Array(await (blob as Blob).arrayBuffer()));
+  });
+  await page.keyboard.press('Control+KeyL');
+  await expect(page.locator('#roms li')).toHaveCount(2);
+  await expect(page.locator('#capa-img.oficial')).toBeVisible();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#info-nome')).toHaveText('Sem Capa (USA)');
+  await expect(page.locator('#capa-img')).toBeHidden();
+  await expect(page.locator('#capa-vazia')).toBeVisible();
+  await page.click('#biblioteca [data-acao="sofa"]');
+  await expect(page.locator('body')).toHaveClass(/sofa/);
+  await expect(page.locator('#roms li .mini img')).toHaveCount(1);
+  await page.click('#biblioteca [data-acao="capas"]');
+  await expect(page.locator('#roms li .mini img')).toHaveCount(0);
+});

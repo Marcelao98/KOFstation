@@ -8,3 +8,4 @@ export * from './kofgames';
 export * from './armazem';
 export * from './jogos';
 export * from './basejogos';
+export * from './capas';
