@@ -19,3 +19,16 @@ export function fabricaNode(nucleo: string): FabricaDeNucleo {
     vm.runInContext(readFileSync(`${PASTA_NUCLEOS}${nucleo}.js`, 'utf8'), ctx, { filename: `${nucleo}.js` });
   return vm.runInContext(nome, ctx) as FabricaDeNucleo;
 }
+
+/** Um núcleo de um arquivo qualquer, num contexto só dele (dois Snes9x diferentes no mesmo teste). */
+export function fabricaDoArquivo(arquivo: string, nucleo: string): FabricaDeNucleo {
+  const c = vm.createContext({
+    console,
+    setTimeout,
+    atob: (s: string) => Buffer.from(s, 'base64').toString('binary'),
+    btoa: (s: string) => Buffer.from(s, 'binary').toString('base64'),
+    module: { exports: {} },
+  });
+  vm.runInContext(readFileSync(arquivo, 'utf8'), c, { filename: arquivo });
+  return vm.runInContext(`Nucleo_${nucleo}`, c) as FabricaDeNucleo;
+}

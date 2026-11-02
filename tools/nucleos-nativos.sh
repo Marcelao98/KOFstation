@@ -4,7 +4,7 @@
 # cartões de memória abrirem nos dois. Saída: third_party/cores/nativos/<plataforma>/ (fora do git).
 # Uso: sh tools/nucleos-nativos.sh [linux-x64] [windows-x64]   (sem argumento: os dois)
 # Precisa: git, make, gcc; pro Windows, o mingw-w64 (apt install mingw-w64 / dnf install mingw64-gcc).
-# Quem publica: o workflow .github/workflows/nucleos-nativos.yml (anexos da Release; o manifesto guarda o SHA-256).
+# Quem publica: o workflow .github/workflows/nucleos.yml (anexos da Release; o manifesto guarda o SHA-256).
 set -eu
 cd "$(dirname "$0")/.."
 PCSX_COMMIT=c8816799b50388e61cfe237fe2cdbb7d8175f20a

@@ -1,0 +1,49 @@
+# Compila os núcleos que o KOFstation novo compila ele mesmo e publica como anexos da Release `nucleos-<VERSAO>`:
+# os nativos (tools/nucleos-nativos.sh: PCSX-ReARMed Linux e Windows) e os wasm com remendo nosso (tools/nucleos-wasm.sh:
+# Snes9x com a sonda da jukebox). O manifesto (third_party/cores/manifest.json) guarda o SHA-256 de cada anexo; o
+# `pnpm nucleos` baixa e confere. Publica uma vez por VERSAO (recompilar daria outros bytes): mudou um núcleo, sobe ela.
+name: Núcleos compilados
+on:
+  push:
+    paths:
+      - tools/nucleos-nativos.sh
+      - tools/nucleos-wasm.sh
+      - tools/remendos/**
+      - .github/workflows/nucleos.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+env:
+  VERSAO: '2'
+jobs:
+  compilar:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Já publicado?
+        id: ja
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "nucleos-$VERSAO" >/dev/null 2>&1; then echo "sim=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Compiladores (gcc, mingw-w64, emscripten 3.1.6 do Ubuntu, o mesmo do antigo)
+        if: steps.ja.outputs.sim != '1'
+        run: sudo apt-get update -q && sudo apt-get install -y -q mingw-w64 emscripten
+      - name: Compilar
+        if: steps.ja.outputs.sim != '1'
+        run: |
+          sh tools/nucleos-nativos.sh
+          sh tools/nucleos-wasm.sh
+      - name: Publicar na Release
+        if: steps.ja.outputs.sim != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p saida
+          cp third_party/cores/nativos/linux-x64/pcsx_rearmed_libretro.so saida/pcsx_rearmed_libretro-linux-x64.so
+          cp third_party/cores/nativos/windows-x64/pcsx_rearmed_libretro.dll saida/pcsx_rearmed_libretro-windows-x64.dll
+          cp third_party/cores/wasm/snes9x-sonda.js saida/snes9x-sonda.js
+          (cd saida && sha256sum * > SHA256SUMS && cat SHA256SUMS && ls -l)
+          gh release create "nucleos-$VERSAO" --target "$GITHUB_SHA" --prerelease --title "Núcleos compilados ($VERSAO)" \
+            --notes "PCSX-ReARMed (GPL-2.0, github.com/libretro/pcsx_rearmed) nativo e Snes9x com a sonda da jukebox (licença do Snes9x: só uso não comercial, github.com/libretro/snes9x), compilados por tools/nucleos-nativos.sh e tools/nucleos-wasm.sh. Baixados e conferidos pelo pnpm nucleos (SHA-256 no manifesto)."
+          gh release upload "nucleos-$VERSAO" saida/*
