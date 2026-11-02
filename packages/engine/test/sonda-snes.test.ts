@@ -1,7 +1,6 @@
 // M11b N.4: o Snes9x com a sonda (tools/remendos/snes9x-sonda.patch) toca IGUAL ao Snes9x publicado do antigo (mesmo
 // .spc, som byte a byte) e entrega a onda de cada uma das 8 vozes (a jukebox mostra Ondas e Notas) e o mudo por voz.
 import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { SessaoLibretro, type FabricaDeNucleo } from '../src/libretro';
 import { Musica } from '../src/musica';
@@ -9,9 +8,10 @@ import { estadoDoSpc, romQuieta } from '../src/spc';
 import { fabricaDoArquivo, PASTA_NUCLEOS } from './nucleo-node';
 import { spcDeTeste } from './roms';
 
-const PUBLICADO = `${PASTA_NUCLEOS}snes9x.js`;
-const COM_SONDA = fileURLToPath(new URL('../../../third_party/cores/wasm/snes9x-sonda.js', import.meta.url));
-const tem = existsSync(PUBLICADO) && existsSync(COM_SONDA);
+// o do app (pnpm nucleos) é o com sonda; o publicado do antigo vem da pasta dele (KOF_ANTIGO), só pra comparar
+const COM_SONDA = `${PASTA_NUCLEOS}snes9x.js`;
+const PUBLICADO = `${process.env.KOF_ANTIGO ?? ''}/publicado/nucleos/snes9x-ab8ba810.js`;
+const tem = existsSync(COM_SONDA);
 
 async function tocar(fabrica: FabricaDeNucleo, quadros: number) {
   const s = new SessaoLibretro('snes');
@@ -25,7 +25,7 @@ async function tocar(fabrica: FabricaDeNucleo, quadros: number) {
 }
 
 describe.skipIf(!tem)('Snes9x com sonda', () => {
-  it('o som sai byte a byte igual ao Snes9x publicado do antigo', async () => {
+  it.skipIf(!existsSync(PUBLICADO))('o som sai byte a byte igual ao Snes9x publicado do antigo', async () => {
     const a = await tocar(fabricaDoArquivo(PUBLICADO, 'snes9x'), 60);
     const b = await tocar(fabricaDoArquivo(COM_SONDA, 'snes9x'), 60);
     expect(a.som.length).toBeGreaterThan(30000);

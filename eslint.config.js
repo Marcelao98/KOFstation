@@ -16,6 +16,7 @@ export default tseslint.config(
       '**/dist/**',
       'target/**',
       'apps/desktop/public/nucleos/**',
+      'third_party/cores/**', // núcleos compilados (fora do git)
       'apps/desktop/src/styles/antigo/**',
       // cópias sem mudança do app antigo (conferidas por teste): o estilo do código é o de lá
       'packages/engine/src/visual/kofvisual.js',

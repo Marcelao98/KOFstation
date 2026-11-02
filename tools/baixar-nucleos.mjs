@@ -14,12 +14,12 @@ mkdirSync(destino, { recursive: true });
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 let falhas = 0;
 for (const [nome, n] of Object.entries(manifesto.nucleos)) {
-  const alvo = join(destino, `${nome}.js`);
+  const alvo = join(destino, n.destino ?? `${nome}.js`);
   if (existsSync(alvo) && sha(readFileSync(alvo)) === n.sha256) continue;
   let dados;
   try {
-    if (process.env.KOF_NUCLEOS_DE && existsSync(join(process.env.KOF_NUCLEOS_DE, `${nome}.js`)))
-      dados = readFileSync(join(process.env.KOF_NUCLEOS_DE, `${nome}.js`));
+    if (process.env.KOF_NUCLEOS_DE && existsSync(join(process.env.KOF_NUCLEOS_DE, n.destino ?? `${nome}.js`)))
+      dados = readFileSync(join(process.env.KOF_NUCLEOS_DE, n.destino ?? `${nome}.js`));
     else if (process.env.KOF_NUCLEOS_DE && n.arquivo) dados = readFileSync(join(process.env.KOF_NUCLEOS_DE, n.arquivo));
     else {
       const r = await fetch(n.url ?? manifesto.origem + n.arquivo);

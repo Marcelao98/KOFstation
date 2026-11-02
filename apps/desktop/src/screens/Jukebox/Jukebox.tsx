@@ -2,6 +2,7 @@
 // canais, Ondas com Mudo/Solo por canal, Notas com o piano e a sincronia) e a lista agrupada por jogo.
 import { useEffect, useRef, useState } from 'react';
 import { acao } from '../../app/acoes';
+import { capaPorNome, usarCapas } from '../../stores/capas';
 import { mudasEfetivas, tocadorAtual, usarJukebox, type ItemJuke } from '../../stores/jukebox';
 import {
   analisarNotas,
@@ -33,6 +34,9 @@ function rotuloDe(m: ItemJuke): string {
 export function Jukebox() {
   const j = usarJukebox();
   const f = j.lista[j.atual];
+  // a capa oficial do jogo pelo nome (srcCapa do antigo); sem ela, o print guardado com a música
+  usarCapas((c) => c.versao); // redesenha quando a capa chega
+  const capa = (f && f.origem !== 'trilha' && f.sistema ? capaPorNome(f.jogo, f.sistema) : null) ?? f?.capa ?? null;
   const nomes = j.info?.nomes ?? ['Voz 1', 'Voz 2', 'Voz 3', 'Voz 4', 'Voz 5', 'Voz 6', 'Voz 7', 'Voz 8'];
   const snesV = nomes.length === 8 && nomes[0] === 'Voz 1';
   const m = mudasEfetivas(j);
@@ -115,7 +119,7 @@ export function Jukebox() {
       </div>
       <div className={'jk' + (j.vista !== 'capa' ? ' ondas' : '')}>
         <div className="jk-tocando">
-          <div className="jk-capa">{f?.capa ? <img id="jk-capa" alt="" src={f.capa} /> : <span>🎵</span>}</div>
+          <div className="jk-capa">{capa ? <img id="jk-capa" alt="" src={capa} /> : <span>🎵</span>}</div>
           <h2 id="jk-titulo">{f ? f.titulo : 'Nada tocando'}</h2>
           <p id="jk-jogo" className="dica">
             {f

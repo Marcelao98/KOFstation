@@ -95,6 +95,8 @@ export interface FaixaNoWorker {
   spc?: Uint8Array | null;
   /** trilha do KOFstation (comandos FM/PSG): toca no núcleo só de som */
   fm?: Uint8Array | null;
+  /** o 8 bits (reserva quando faltam o violino e o núcleo FM): toca sem núcleo */
+  oito?: import('./oitobits').DadosOitoBits | null;
   /** BIOS e os arquivos do jogo (Neo Geo) */
   extras?: ExtrasDoJogo;
 }

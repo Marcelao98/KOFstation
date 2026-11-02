@@ -182,8 +182,8 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ✅ |
 | N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ✅ |
 | N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ⏸ |
-| N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ⬜ |
-| N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⬜ |
+| N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ✅ |
+| N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⏸ |
 | N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⬜ |
 | N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ⬜ |
 | N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ⬜ |
@@ -202,6 +202,16 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > desenho (filtros, molduras), botões e analógico (DualShock), estados, cartão de memória (conferido 1x/s), pausa,
 > turbo, volume, painel F3. `tools/testar-nativo.mjs` (também no CI): app de verdade + Chromium + PS-X EXE gerado,
 > pixels da tela do app conferidos, 60 fps.
+> **N.4 feito (02/11):** `tools/remendos/snes9x-sonda.patch` (a saída de cada voz do DSP antes do volume, 32 kHz, e o
+> mudo por voz) + `tools/nucleos-wasm.sh` (o `construir.sh` e a `ponte.cpp` do antigo num commit fixo); Release
+> `nucleos-2`; o Snes9x do app passa a ser este. Conferido: o mesmo `.spc` toca **byte a byte igual** ao Snes9x publicado
+> do antigo (`sonda-snes.test`, com `KOF_ANTIGO`); a voz que soa aparece na onda; o mudo cala só ela. (O chip Kof do
+> antigo não roda aqui: é da Mel. O Snes9x é o som que o antigo já usava no jogo.)
+> **N.5 feito, ⏸ você confere (02/11):** jukebox do SNES com Ondas (8 vozes) e Notas; capa oficial do jogo pelo nome (o
+> print fica de reserva); o 8 bits do antigo portado (`oitobits.ts`: Rua e Air **byte a byte iguais** ao `KofMusica`)
+> como reserva da trilha (violino → FM → 8 bits); `.wav` da trilha **byte a byte igual** ao `exportarWav` do antigo
+> (`musica.test`, com `KOF_ANTIGO`). Prints do novo nas 3 vistas (e2e `jukebox.spec` com `KOF_PRINTS`); lado a lado
+> com o antigo não fiz (a jukebox do SNES do antigo usava o núcleo Kof).
 
 Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil · N.6 100–200 mil · N.7–N.8 90 mil. Com o N.9, o
 M12 encolhe (o canal e o processo já vêm do N.1).

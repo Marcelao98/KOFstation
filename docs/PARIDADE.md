@@ -98,12 +98,11 @@
 - 🟨 Guardar música por estado (todos os sistemas com sonda), lista com a Trilha do KOFstation, renomear/apagar, mini-player
   (teste `jukebox.spec`). **Diferença (D29):** no SNES o antigo guardava um .spc e tocava no chip de som do núcleo Kof;
   aqui guarda o estado do Snes9x (toca igual ao jogo) e o .spc importado toca no Snes9x (entra num estado dele; teste
-  `spc.test`). Exportar .spc sai do estado. A capa é o print do jogo (a capa oficial por nome ainda não).
-- 🟨 Barras (8 SNES pelo envelope, 4 GB...), Ondas por canal com estilo pelo tema, Mudo/Solo, Notas (YIN), sincronia,
-  .wav. **Diferença:** no SNES não tem a onda de cada voz (o Snes9x não tem sonda; o Kof tinha): Ondas e Notas ficam
-  vazias no SNES, barras e Mudo/Solo funcionam.
-- 🟨 Trilha FM (6 músicas, núcleo só de som) e Air em violino. Falta o 8 bits, que no antigo só tocava se faltasse o
-  núcleo FM (aqui ele vem sempre pelo manifesto).
+  `spc.test`). Exportar .spc sai do estado. A capa é a oficial do jogo pelo nome (o print guardado fica de reserva), como no antigo.
+- ✅ Barras (8 SNES pelo envelope, 4 GB...), Ondas por canal com estilo pelo tema, Mudo/Solo, Notas (YIN), sincronia,
+  .wav. No SNES a onda de cada voz vem do Snes9x com sonda (M11b N.4; som byte a byte igual ao Snes9x do antigo).
+- ✅ Trilha FM (6 músicas, núcleo só de som), Air em violino e o 8 bits de reserva (violino → FM → 8 bits, como o
+  antigo; Rua e Air byte a byte iguais ao `KofMusica`). `.wav` da trilha byte a byte igual ao do antigo.
 
 ## Estatísticas e extras — [bug, atualiza, guarda]
 - 🟨 Tempo jogado (só jogando de verdade), sessões, últimos 7 dias, por jogo, por aparelho (as partes do `.kofsave`);

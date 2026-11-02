@@ -59,7 +59,8 @@ function picos(ondas: Int16Array, canais: number, escalas?: readonly number[]): 
 }
 
 /** Gera o .wav de qualquer fonte (o `exportarWav` do antigo: tempo + fade, mais rápido que o tempo real). */
-async function wavDe(
+/** O .wav de qualquer fonte (o `exportarWav` do antigo: segundos + fade, mais rápido que o tempo real). */
+export async function wavDeFonte(
   f: Pick<FonteDeMusica, 'taxa' | 'quadro'>,
   segundos: number,
   fadeMs: number,
@@ -198,7 +199,7 @@ export class Musica implements FonteDeMusica {
 
   /** O .wav da faixa: `segundos` + fade, mais rápido que o tempo real (o `exportarWav` do antigo). */
   gerarWav(segundos: number, fadeMs: number, pausa?: () => Promise<void>) {
-    return wavDe(this, segundos, fadeMs, pausa);
+    return wavDeFonte(this, segundos, fadeMs, pausa);
   }
 }
 
@@ -271,7 +272,7 @@ export class MusicaFm implements FonteDeMusica {
   }
 
   gerarWav(segundos: number, fadeMs: number, pausa?: () => Promise<void>) {
-    return wavDe(this, segundos, fadeMs, pausa);
+    return wavDeFonte(this, segundos, fadeMs, pausa);
   }
 }
 

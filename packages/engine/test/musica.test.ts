@@ -5,6 +5,7 @@ import { SessaoLibretro } from '../src/libretro';
 import { ganhoDoFade, Musica, MusicaFm, TAM_ONDA, type ModuloSomFm } from '../src/musica';
 import { fabricaNode, PASTA_NUCLEOS } from './nucleo-node';
 import { romGb } from './roms';
+import { montarWav } from '../src/spc';
 
 const tem = existsSync(`${PASTA_NUCLEOS}gambatte.js`);
 const energia = (a: Int16Array) => a.reduce((s, x) => s + Math.abs(x), 0);
@@ -63,4 +64,72 @@ describe.skipIf(!existsSync(`${PASTA_NUCLEOS}somfm.js`))('trilha do KOFstation (
     expect(som).toBeGreaterThan(0);
     expect(energia(m.ondas())).toBeGreaterThan(0);
   });
+});
+
+// N.5: o .wav da trilha sai byte a byte igual ao do antigo (o exportarWav do app.js, copiado aqui, com o tocador do
+// web/somfm.js do antigo × o MusicaFm + wavDeFonte + montarWav do novo). Só com KOF_ANTIGO=<pasta do kofstation-old>.
+describe.skipIf(!process.env.KOF_ANTIGO || !existsSync(`${PASTA_NUCLEOS}somfm.js`))('.wav da trilha × antigo', () => {
+  it('"Se Essa Rua" em .wav: mesmos bytes', async () => {
+    const antigo = process.env.KOF_ANTIGO ?? '';
+    const { readFileSync } = await import('node:fs');
+    const vm = await import('node:vm');
+    const ctx = vm.createContext({
+      console,
+      atob: (s: string) => Buffer.from(s, 'base64').toString('binary'),
+      module: { exports: {} },
+    });
+    vm.runInContext(readFileSync(`${PASTA_NUCLEOS}somfm.js`, 'utf8'), ctx);
+    vm.runInContext(readFileSync(`${PASTA_NUCLEOS}trilha.js`, 'utf8') + ';globalThis.T=KofTrilha', ctx);
+    vm.runInContext(readFileSync(`${antigo}/web/somfm.js`, 'utf8'), ctx);
+    const rua = (ctx.T as { musicas: { id: string; cmd?: string; segundos: number }[] }).musicas.find(
+      (m) => m.id === 'rua',
+    );
+    const cmd = Uint8Array.from(Buffer.from(rua?.cmd ?? '', 'base64'));
+    const seg = (rua?.segundos ?? 0) < 45 ? (rua?.segundos ?? 0) * 2 : (rua?.segundos ?? 0);
+    // antigo (app.js, exportarWav)
+    type Tk = { taxa: number; encher(): { b: Int16Array; n: number }; limpar(): void };
+    const KofSomFm = (ctx.module as { exports: { tocador(c: Uint8Array): Promise<Tk> } }).exports;
+    const tk = await KofSomFm.tocador(cmd);
+    const taxa = Math.round(tk.taxa);
+    const fade = 4000 / 1000;
+    const total = Math.round(taxa * (seg + fade));
+    const pcm = new Int16Array(total * 2);
+    let n = 0;
+    while (n < total) {
+      const { b, n: q } = tk.encher();
+      for (let i = 0; i + 1 < q && n < total; i += 2, n++) {
+        const t = n / taxa;
+        const k = t > seg ? Math.max(0, 1 - (t - seg) / fade) : 1;
+        pcm[n * 2] = (b[i] ?? 0) * k;
+        pcm[n * 2 + 1] = (b[i + 1] ?? 0) * k;
+      }
+      tk.limpar();
+    }
+    const cab = new DataView(new ArrayBuffer(44));
+    const txt = (o: number, t: string) => {
+      for (let i = 0; i < 4; i++) cab.setUint8(o + i, t.charCodeAt(i));
+    };
+    txt(0, 'RIFF');
+    cab.setUint32(4, 36 + pcm.byteLength, true);
+    txt(8, 'WAVE');
+    txt(12, 'fmt ');
+    cab.setUint32(16, 16, true);
+    cab.setUint16(20, 1, true);
+    cab.setUint16(22, 2, true);
+    cab.setUint32(24, taxa, true);
+    cab.setUint32(28, taxa * 4, true);
+    cab.setUint16(32, 4, true);
+    cab.setUint16(34, 16, true);
+    txt(36, 'data');
+    cab.setUint32(40, pcm.byteLength, true);
+    const velho = Buffer.concat([Buffer.from(cab.buffer), Buffer.from(pcm.buffer)]);
+    // novo (outra instância do núcleo: o antigo reaproveita uma só)
+    const ctx2 = vm.createContext({ console, atob: (s: string) => Buffer.from(s, 'base64').toString('binary') });
+    vm.runInContext(readFileSync(`${PASTA_NUCLEOS}somfm.js`, 'utf8'), ctx2);
+    const m = await MusicaFm.abrir(cmd, ctx2.Nucleo_somfm as () => Promise<ModuloSomFm>);
+    const w = await m.gerarWav(seg, 4000);
+    const novo = Buffer.from(montarWav(w.pcm, w.taxa));
+    expect(novo.length).toBe(velho.length);
+    expect(novo.equals(velho)).toBe(true);
+  }, 60_000);
 });

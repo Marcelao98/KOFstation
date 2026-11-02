@@ -16,6 +16,7 @@ export * from './paletas';
 export * from './sonda';
 export * from './spc';
 export * from './musica';
+export * from './oitobits';
 export * from './tocador';
 export * from './violino';
 export * from './bug';
