@@ -74,8 +74,8 @@ const nav = await chromium.launch({
 try {
   const page = await nav.newPage({ viewport: { width: 1100, height: 700 } });
   page.on('pageerror', (e) => falhas.push(`erro na página: ${e.message}`));
-  await page.goto(url);
-  await page.waitForSelector('#home');
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForSelector('#home', { timeout: 60000 });
   const api = (cmd, args) =>
     page.evaluate(
       async ([cmd, args, token]) => {
@@ -90,8 +90,8 @@ try {
     );
   conferir((await api('nativo.disponivel', {})).sistemas?.includes('ps1'), 'o kofstation tem o PS1 nativo embutido');
   await api('library.root.set', { path: raiz });
-  await page.reload();
-  await page.waitForSelector('#home');
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForSelector('#home', { timeout: 60000 });
   await page.keyboard.press('Control+KeyL');
   await page.waitForSelector('#roms li');
   await page.locator('#roms li', { hasText: 'Desenha' }).first().click();

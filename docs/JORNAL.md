@@ -21,6 +21,36 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-02 · Etapas M11b N.2–N.8 · PS1 nativo, jukebox do SNES igual, N64 desenhando
+
+**Pedido:** "segue até terminar" (depois do N.1).
+**Feito:** N.2 `tools/nucleos-nativos.sh` (PCSX-ReARMed c8816799 com lightrec, Linux + Windows por mingw-w64) e o
+workflow "Núcleos compilados" → Release `nucleos-2` (manifesto, seção `nativos`; o `pnpm nucleos` baixa a plataforma
+atual). N.3 o `kofstation` embute o núcleo nativo da plataforma (`crates/kof-app/src/nativo.rs`, comandos `nativo.*`) e o
+PS1 abre nele por padrão (jogo da Kof Games; o CD é lido pelo processo); `JogoNativo` na engine com a mesma cara do
+`Jogo`; Opções de emulação → "Núcleo do PlayStation"; se falhar, cai no wasm. N.4 `tools/remendos/snes9x-sonda.patch` +
+`tools/nucleos-wasm.sh` (o `construir.sh`/`ponte.cpp` do antigo num commit fixo); o Snes9x do app passa a ser o com
+sonda. N.5 jukebox do SNES com Ondas/Notas, capa oficial pelo nome, o 8 bits do antigo portado (`oitobits.ts`) como
+reserva da trilha. N.6 ROM de N64 que boota (programa no lugar do IPL3 → RDP → VI). N.7 PS1 wasm conferido pela imagem.
+N.8 cartão BIOS do Início, ícone do app (xícara do `icone.py`, em SVG) na abertura e na janela, lista de BIOS no passo 2.
+Executáveis novos na `teste-binarios` (`85befef`; Linux SHA-256 `a9633142…`, Windows `b86ff328…`).
+**Decidido:** núcleos que a gente compila: Release `nucleos-<VERSAO>` (sobe a VERSAO quando muda núcleo; recompilar dá
+outros bytes). PCSX nativo: `reset` antes de carregar estado (o lightrec dá SIGILL sem isso, também no upstream novo).
+**Medido / conferido:** `tests/pcsx.rs`: PS-X EXE gerado desenha (vermelho + retângulo verde), pixels conferidos; estado
+3x com o recompilador. `tools/testar-nativo.mjs` (também no CI): app de verdade + Chromium + PCSX nativo, pixels da
+tela do app, 60 fps. Snes9x com sonda: o mesmo `.spc` toca **byte a byte igual** ao Snes9x publicado do antigo.
+8 bits (Rua e Air) e `.wav` da trilha **byte a byte iguais** ao antigo (testes com `KOF_ANTIGO`). N64 em wasm desenha a
+ROM nova (e2e, pixels). `check`, `check:rust`, e2e verdes; CI do N.1 verde também no Windows.
+**Deu errado / aprendido:** o N64 "quebrado" era a ROM de teste (zeros no lugar do IPL3), não o núcleo. O PCSX com
+lightrec entrega RGB565 (verde 31 → 251, a mesma conta do wasm). No CI, `page.goto` esperando "load" estourou uma vez:
+o teste do nativo espera o DOM e a tela do Início.
+**Onde parou:** ⏸ o Marcelo testa a `teste-binarios`: **PS1 de verdade** (Linux e Windows; liso?), N64 de verdade,
+jukebox do SNES (F7 num jogo, Ondas/Notas), Neo Geo. Falta o **N.9 (PS2 nativo)**: precisa ensinar o `kof-nativo` a dar
+um OpenGL sem janela pro núcleo (`SET_HW_RENDER`) e ler a imagem de volta; o mesmo caminho serve pro N64 nativo. É do
+tamanho do M12: fazer numa sessão própria.
+
+---
+
 ## 2026-11-02 · Etapa M11b N.1 · núcleo nativo num processo filho
 
 **Pedido:** começar o M11b pelo N.1 ("pode fazer tudo").

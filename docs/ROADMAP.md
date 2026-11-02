@@ -224,6 +224,9 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > **N.8 feito (02/11):** cartão BIOS do Início diz quais estão guardadas ("✅ GBA, Neo Geo · trocar ou guardar outra");
 > a abertura mostra o ícone do app (a xícara do `icone.py` do antigo, em SVG; também o ícone da janela) e, no passo 2, a
 > lista de BIOS (GBA roda sem; Neo Geo guardado ou faltando).
+> **N.9 ⬜ (próxima sessão):** o `kof-nativo` precisa dar ao núcleo um OpenGL sem janela (`SET_HW_RENDER`: contexto EGL
+> no processo do jogo, framebuffer, `get_proc_address`) e ler a imagem de volta pra página; depois o LRPS2 (commit do
+> antigo) no `tools/nucleos-nativos.sh`. O mesmo caminho dá o N64 nativo.
 
 Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil · N.6 100–200 mil · N.7–N.8 90 mil. Com o N.9, o
 M12 encolhe (o canal e o processo já vêm do N.1).
