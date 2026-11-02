@@ -19,7 +19,8 @@
     "e2e": "pnpm --filter @kof/desktop e2e",
     "check:rust": "cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
     "check:tudo": "pnpm check && pnpm check:rust",
-    "nucleos": "node tools/baixar-nucleos.mjs"
+    "nucleos": "node tools/baixar-nucleos.mjs",
+    "bug": "node tools/reproduzir-bug.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -3,7 +3,8 @@
 // pelo fps do núcleo. No máximo 4 quadros de uma vez (igual ao antigo); turbo = 4 por passo.
 import { criarAnel, escrever, ocupacao, type Anel } from './anel';
 import { SessaoLibretro, type FabricaDeNucleo } from './libretro';
-import type { DoWorker, ParaWorker } from './mensagens';
+import { assinaturaDoQuadro } from './bug';
+import type { DoWorker, ParaWorker, ReplayDoBug } from './mensagens';
 import { Reamostrador } from './reamostrador';
 import { Rebobinador } from './rebobinador';
 import { criarRelogio, MAX_QUADROS_POR_PASSO, type Relogio } from './tempo';
@@ -26,6 +27,40 @@ let ultimoPasso = 0;
 let parado = false;
 const med = { quadros: 0, nucleo: 0, atrasos: 0, desde: 0, faltasAntes: 0 };
 let sramAntes: Uint8Array | null = null;
+
+// ---------- caçador de bugs (novoMarco/rodarQuadro do antigo): marco a cada 600 quadros + os botões de cada um ----------
+let cacador = true;
+let marco: { estado: Uint8Array; entradas: number[] } | null = null;
+let marcoAnt: { estado: Uint8Array; entradas: number[] } | null = null;
+function novoMarco(s: SessaoLibretro | null, zerar = false) {
+  marcoAnt = zerar ? null : marco;
+  try {
+    marco = cacador && s ? { estado: s.salvarEstado(), entradas: [] } : null;
+  } catch {
+    marco = null; // o núcleo não deu o estado agora (N64 antes do 1º quadro): o próximo marco tenta de novo
+  }
+}
+function anotarQuadro(s: SessaoLibretro) {
+  if (!marco) return;
+  marco.entradas.push(s.pad[0] ?? 0);
+  if (marco.entradas.length >= 600) novoMarco(s);
+}
+const b64 = (u8: Uint8Array) => {
+  let t = '';
+  for (let i = 0; i < u8.length; i += 0x8000) t += String.fromCharCode(...u8.subarray(i, i + 0x8000));
+  return btoa(t);
+};
+function pacoteDoBug(s: SessaoLibretro): Uint8Array {
+  const base = marcoAnt ?? marco;
+  const entradas = base ? (marcoAnt ? marcoAnt.entradas.concat(marco?.entradas ?? []) : base.entradas) : [];
+  const r: ReplayDoBug = {
+    estado: base ? b64(base.estado) : null,
+    entradas: b64(new Uint8Array(Uint16Array.from(entradas).buffer)),
+    quadros: entradas.length,
+    agora: { estado: b64(s.salvarEstado()), assinatura: assinaturaDoQuadro(s.quadro, entradas.length) },
+  };
+  return new TextEncoder().encode(JSON.stringify(r));
+}
 
 // ---------- rebobinar (app.js 1845–1875 do antigo, agora junto do núcleo) ----------
 const rb = {
@@ -65,6 +100,7 @@ function avisarRebob(forcar = false) {
   enviar({ tipo: 'rebob', r });
 }
 function terminarRebobinar() {
+  novoMarco(sessao, true); // voltou no tempo: os botões gravados não levam mais até aqui
   if (rb.rebobinou && rb.r && rb.recargaX) {
     rb.r.limpar(); // usou: zera e recarrega (Só alegria: continua)
     rb.recargaTotal = rb.recarga = rb.limite * rb.recargaX * 60;
@@ -147,6 +183,7 @@ function umQuadro(s: SessaoLibretro, comSom: boolean) {
   const { audio } = s.rodar();
   med.nucleo += performance.now() - t0;
   med.quadros++;
+  anotarQuadro(s);
   if (comSom && anel && reamostrador) escrever(anel, reamostrador.converter(audio));
 }
 
@@ -218,6 +255,7 @@ eu.onmessage = async ({ data: m }) => {
         }
         sramAntes = s.tamanhoSram ? s.lerSram() : null;
         novoRebob(s);
+        novoMarco(s, true);
         sessao = s;
         taxaSaida = m.taxaSaida;
         anel = m.sab ? criarAnel((m.sab.byteLength - 16) / 8, m.sab) : null;
@@ -243,12 +281,17 @@ eu.onmessage = async ({ data: m }) => {
     case 'turbo':
       turbo = m.sim;
       break;
+    case 'cacador':
+      cacador = m.ligado;
+      novoMarco(sessao, true);
+      break;
     case 'som':
       somTocando = m.tocando;
       break;
     case 'reiniciar':
       sessao?.reiniciar();
       novoRebob(sessao);
+      novoMarco(sessao, true);
       break;
     case 'opcoes':
       sessao?.mudarOpcoes(m.opcoes);
@@ -277,10 +320,12 @@ eu.onmessage = async ({ data: m }) => {
       }
       if (m.pedido === 'estado-salvar') responder(m.id, () => s.salvarEstado());
       else if (m.pedido === 'sram-ler') responder(m.id, () => s.lerSram());
+      else if (m.pedido === 'bug-pacote') responder(m.id, () => pacoteDoBug(s));
       else if (m.pedido === 'estado-carregar')
         responder(m.id, () => {
           s.carregarEstado(m.bytes ?? new Uint8Array(0));
           novoRebob(s);
+          novoMarco(s, true);
           s.rodar(); // um quadro já com o estado, pra imagem certa na tela
           mandarQuadro(s);
           return undefined;

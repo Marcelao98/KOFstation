@@ -52,6 +52,13 @@ export function trocarOpcoesDoNucleo(f: typeof opcoesDoNucleo) {
   opcoesDoNucleo = f;
 }
 
+/** Erro no núcleo (o caçador de bugs oferece reportar). */
+export const aoErroDoEmulador = new Set<(m: string) => void>();
+
+let abertoAgora: JogoAberto | null = null;
+/** A ROM do jogo aberto (o patch de tradução aplica nela). */
+export const jogoAbertoAgora = (): JogoAberto | null => abertoAgora;
+
 /** Chamados depois que um jogo abriu (perguntar o modo: M5.4; controles do jogo: M8). */
 export const depoisDeAbrirJogo = new Set<() => void>();
 
@@ -149,6 +156,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           erro: (m) => {
             set({ pausaManual: true });
             usarAvisos.getState().avisarErro(`erro no emulador: ${m}`);
+            aoErroDoEmulador.forEach((f) => f(m));
           },
         },
       );
@@ -160,6 +168,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         tamanho: aberto.rom.length,
         ultimo: Date.now(),
       };
+      abertoAgora = aberto;
       set({
         jogo,
         nome: aberto.nome,
@@ -190,6 +199,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     void antesDeTrocar();
     document.body.classList.remove('rebobinando');
     get().jogo?.fechar();
+    abertoAgora = null;
     ultimoQuadro.pixels = null;
     set({ jogo: null, nome: '', registro: null, info: null, medicao: null, rapidoAberto: false });
     usarTelas.setState({ temJogo: false });

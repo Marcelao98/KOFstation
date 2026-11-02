@@ -30,10 +30,14 @@ export function usePausado(): boolean {
   return pausaManual || rapidoAberto || perguntando || jogoPausadoPorTela(telas) || (!focada && pausaAuto);
 }
 
+/** O jogo está rodando agora? (as estatísticas só contam o tempo jogando de verdade) */
+export const pausaAtual = { pausado: true };
+
 export function usePausa(): void {
   const jogo = usarJogo((j) => j.jogo);
   const pausado = usePausado();
   useEffect(() => {
     jogo?.pausar(pausado);
+    pausaAtual.pausado = !jogo || pausado;
   }, [jogo, pausado]);
 }

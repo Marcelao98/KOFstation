@@ -166,6 +166,11 @@ function baixar(nome: string, u8: Uint8Array, tipo = 'application/octet-stream')
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 }
 
+/** O avisarMudo do antigo: a pessoa deu play com o som desligado. */
+const avisarMudo = () => {
+  if (usarJogo.getState().mudo) usarAvisos.getState().avisar('🔇 o som está desligado: aperte M pra ligar', 4000);
+};
+
 const tempoDe = (f: ItemJuke) => ({ segundos: f.segundos || PADRAO_SEG, fadeMs: f.fadeMs || PADRAO_FADE });
 
 /** O que o Worker precisa pra tocar a faixa. */
@@ -281,6 +286,7 @@ export const usarJukebox = create<Jukebox>()((set, get) => {
         if (minha !== vez) return novo.fechar(); // outra faixa foi pedida nesse meio tempo
         ligar(novo, { atual: i, interna: null, ...(mesmoSistema ? {} : { mudas, solo: -1 }) });
         pausarJogo();
+        avisarMudo();
       } catch (e) {
         usarAvisos.getState().avisar('não consegui tocar: ' + (e instanceof Error ? e.message : String(e)), 4000);
       }
@@ -295,6 +301,7 @@ export const usarJukebox = create<Jukebox>()((set, get) => {
         pausarJogo();
         tk.tocar(true);
         set({ tocando: true });
+        avisarMudo();
       } else if (lista.length) void get().tocar(Math.max(0, get().atual));
     },
 

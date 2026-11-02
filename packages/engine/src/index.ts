@@ -17,3 +17,4 @@ export * from './spc';
 export * from './musica';
 export * from './tocador';
 export * from './violino';
+export * from './bug';

@@ -3,7 +3,7 @@
 import type { SistemaId } from '@kof/domain';
 import { CODIGO_WORKLET } from './anel';
 import type { InfoDoJogo } from './libretro';
-import type { DoWorker, Medicao, ParaWorker, Pedido, SituacaoRebob } from './mensagens';
+import type { DoWorker, Medicao, ParaWorker, Pedido, ReplayDoBug, SituacaoRebob } from './mensagens';
 import { NUCLEOS } from './nucleos';
 
 export interface EventosDoJogo {
@@ -196,6 +196,17 @@ export class Jogo {
   pausar(sim: boolean) {
     this.mandar({ tipo: 'pausar', sim });
     if (this.ctx) void (sim ? this.ctx.suspend() : this.ctx.resume()).catch(() => undefined);
+  }
+
+  /** Caçador de bugs ligado/desligado (marco a cada 10 s + os botões). */
+  cacador(ligado: boolean) {
+    this.mandar({ tipo: 'cacador', ligado });
+  }
+
+  /** O que o caçador guardou, pro pacote do bug. */
+  async replayDoBug(): Promise<ReplayDoBug> {
+    const b = await this.pedir('bug-pacote');
+    return JSON.parse(new TextDecoder().decode(b ?? new Uint8Array(0))) as ReplayDoBug;
   }
 
   turbo(sim: boolean) {

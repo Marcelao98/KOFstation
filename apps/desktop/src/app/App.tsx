@@ -22,6 +22,11 @@ import { Teclas } from '../screens/Teclas/Teclas';
 import { Jogadores } from '../screens/Jogadores/Jogadores';
 import { Jukebox } from '../screens/Jukebox/Jukebox';
 import { Abertura } from '../screens/Abertura/Abertura';
+import { Estatisticas } from '../screens/Estatisticas/Estatisticas';
+import { Bug } from '../screens/Bug/Bug';
+import { usarBug } from '../stores/bug';
+import '../stores/estatisticas';
+import { abrirPatch } from '../stores/traducao';
 import { primeiraVez, usarAbertura } from '../stores/abertura';
 import { usarJukebox } from '../stores/jukebox';
 import { Molduras } from '../screens/Molduras/Molduras';
@@ -38,6 +43,7 @@ import { usarCapas } from '../stores/capas';
 import { usarEntrada } from '../stores/entrada';
 import { usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
+import { config } from '../stores/config';
 import { usarShowcase } from '../stores/showcase';
 import { usarTelas, type TelaId } from '../stores/telas';
 import { acao } from './acoes';
@@ -49,7 +55,7 @@ const SETAS: Record<string, [number, number]> = {
   ArrowDown: [0, 1],
   ArrowUp: [0, -1],
 };
-const ACEITA = ['zip', 'kofsave', ...EXTENSOES].map((e) => '.' + e).join(',');
+const ACEITA = ['zip', 'kofsave', 'ips', 'bps', 'ups', ...EXTENSOES].map((e) => '.' + e).join(',');
 
 /** Arquivo aberto ou arrastado: .kofsave traz o backup; o resto é jogo. */
 async function abrirQualquer(f: File) {
@@ -58,6 +64,7 @@ async function abrirQualquer(f: File) {
     await usarBackup.getState().importar(new Uint8Array(await f.arrayBuffer()), false);
     return;
   }
+  if (/\.(ips|bps|ups)$/i.test(f.name)) return void (await abrirPatch(f)); // patch de tradução
   await usarJogo.getState().abrirArquivo(f);
 }
 
@@ -68,6 +75,10 @@ function teclaGlobal(e: KeyboardEvent) {
   const digitando = (e.target as Element | null)?.closest?.('input, textarea, select');
   if (j.rapidoAberto && teclaDoRapido.tratar?.(e.code)) return e.preventDefault();
   const noJogo = !!j.jogo && t.atual === 'jogo' && !t.temasAberto;
+  if (usarBug.getState().aberto) {
+    if (e.code === 'Escape') usarBug.getState().fechar();
+    return; // escrevendo a descrição do bug
+  }
   if (usarAbertura.getState().aberta) {
     if (e.code === 'Escape') usarAbertura.getState().fechar(true);
     return; // a abertura cuida das teclas dela
@@ -151,6 +162,9 @@ export function App({ backend }: { backend: Backend }) {
     };
     const soltar = (e: DragEvent) => {
       e.preventDefault();
+      const todos = [...(e.dataTransfer?.files ?? [])];
+      if (todos.length && todos.every((x) => /\.spc$/i.test(x.name)))
+        return void usarJukebox.getState().importarSpcs(todos); // arquivos .spc vão pra jukebox
       const f = e.dataTransfer?.files[0];
       if (f) void abrirQualquer(f);
     };
@@ -171,7 +185,18 @@ export function App({ backend }: { backend: Backend }) {
   useEffect(() => {
     let vivo = true;
     obterInfo(backend).then(
-      (info) => vivo && usarApp.getState().setInfo(info),
+      (info) => {
+        if (!vivo) return;
+        usarApp.getState().setInfo(info);
+        // o avisarSeAtualizou do antigo: a versão mudou desde a última vez que o app abriu
+        const vista = config().ler('versaoVista');
+        if (vista && vista !== info.version)
+          setTimeout(
+            () => usarAvisos.getState().avisar(`✨ KOFstation atualizado! versão ${info.version}`, 5000),
+            1200,
+          );
+        config().guardar('versaoVista', info.version);
+      },
       (e: unknown) => {
         const b = paraBackendError(e);
         if (vivo) usarAvisos.getState().avisarErro(`${mensagemDoErro(b.code)} (${b.message})`);
@@ -194,9 +219,10 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'teclas' && <Teclas />}
         {atual === 'jogadores' && <Jogadores />}
         {atual === 'jukebox' && <Jukebox />}
-        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas', 'jogadores', 'jukebox'].includes(atual) && (
-          <Pendente tela={atual as TelaId} />
-        )}
+        {atual === 'estatisticas' && <Estatisticas />}
+        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas', 'jogadores', 'jukebox', 'estatisticas'].includes(
+          atual,
+        ) && <Pendente tela={atual as TelaId} />}
         <div id="moldura" hidden={atual !== 'jogo'}>
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>
         </div>
@@ -206,6 +232,7 @@ export function App({ backend }: { backend: Backend }) {
         <Molduras />
         <PedirPasta />
         <Backup />
+        <Bug />
         <PlanoDeOrganizacao />
         <Ampulheta />
         <MenuRapido />

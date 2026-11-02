@@ -14,6 +14,7 @@ import { usarPainel } from '../stores/painel';
 import { usarMoldura } from '../stores/moldura';
 import { usarJukebox } from '../stores/jukebox';
 import { usarAbertura } from '../stores/abertura';
+import { usarBug } from '../stores/bug';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
 const TELAS: Partial<Record<string, TelaId>> = {
@@ -31,13 +32,9 @@ const TELAS: Partial<Record<string, TelaId>> = {
 
 /** Etapa em que cada ação ainda não feita chega. */
 export const ETAPA: Readonly<Record<string, string>> = {
-  traducao: 'M10',
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
-  bug: 'M10',
-  'cacador-toggle': 'M10',
   atualizacao: 'M15',
-  estatisticas: 'M10',
   'bios-tela': 'M11',
   aparelhos: 'M13',
 };
@@ -191,6 +188,21 @@ export function acao(nome: string, valor?: string): boolean {
     case 'capas':
       usarCapas.getState().alternarCapas();
       usarAvisos.getState().avisar(`🖼 capas oficiais ${usarCapas.getState().ligadas ? 'ligadas' : 'desligadas'}`);
+      return true;
+    case 'fechar-estat':
+      telas.sair();
+      return true;
+    case 'bug':
+      usarBug.getState().abrir();
+      return true;
+    case 'bug-fechar':
+      usarBug.getState().fechar();
+      return true;
+    case 'cacador-toggle':
+      usarBug.getState().alternarCacador();
+      return true;
+    case 'traducao':
+      void import('../stores/traducao').then((m) => m.escolherTraducao());
       return true;
     case 'boas-vindas':
       usarAbertura.getState().abrir();

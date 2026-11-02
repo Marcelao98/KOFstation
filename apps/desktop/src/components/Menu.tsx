@@ -3,12 +3,18 @@ import { useEffect, useState } from 'react';
 import { acao } from '../app/acoes';
 import { MENUS } from '../app/menus';
 import { INICIO, usarJukebox } from '../stores/jukebox';
+import { usarBug } from '../stores/bug';
 
 export function Menu() {
   const [aberto, setAberto] = useState<number | null>(null);
   const musica = usarJukebox((j) => j.escolhaInicio);
+  const cacador = usarBug((b) => b.cacador);
   const rotulo = (a: string, t: string) =>
-    a === 'musica-inicio' ? 'Música no Início: ' + (INICIO.find(([k]) => k === musica)?.[1] ?? '') : t;
+    a === 'musica-inicio'
+      ? 'Música no Início: ' + (INICIO.find(([k]) => k === musica)?.[1] ?? '')
+      : a === 'cacador-toggle'
+        ? 'Caçador de bugs: ' + (cacador ? 'ligado' : 'desligado')
+        : t;
   useEffect(() => {
     if (aberto === null) return;
     const fechar = (e: MouseEvent) => {

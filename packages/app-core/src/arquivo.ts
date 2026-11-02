@@ -23,7 +23,7 @@ export class ErroDeArquivo extends Error {
 const semExtensao = (n: string) => (n.split(/[\\/]/).pop() ?? n).replace(/\.[^.]+$/, '');
 const roda = (s: SistemaId | null): s is SistemaId => !!s && !!NUCLEOS[s];
 
-async function inflar(dados: Uint8Array): Promise<Uint8Array> {
+export async function inflar(dados: Uint8Array): Promise<Uint8Array> {
   const fluxo = new Blob([dados as Uint8Array<ArrayBuffer>])
     .stream()
     .pipeThrough(new DecompressionStream('deflate-raw'));

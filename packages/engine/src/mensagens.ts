@@ -29,12 +29,25 @@ export type ParaWorker =
   | { tipo: 'eixos'; jogador: number; e: number[] }
   | { tipo: 'pausar'; sim: boolean }
   | { tipo: 'turbo'; sim: boolean }
+  /** caçador de bugs: marco a cada 10 s + botões de cada quadro */
+  | { tipo: 'cacador'; ligado: boolean }
   | { tipo: 'som'; tocando: boolean }
   | { tipo: 'reiniciar' }
   | { tipo: 'parar' };
 
 /** Pedidos que esperam resposta (o Worker responde com o mesmo id). */
-export type Pedido = 'estado-salvar' | 'estado-carregar' | 'sram-ler';
+export type Pedido = 'estado-salvar' | 'estado-carregar' | 'sram-ler' | 'bug-pacote';
+
+/** O que o caçador de bugs guardou (resposta do pedido 'bug-pacote', em JSON): o marco de segundos antes, os botões
+ *  de cada quadro desde ele e o estado e a assinatura da imagem de agora. */
+export interface ReplayDoBug {
+  /** savestate do marco (base64); null = caçador desligado */
+  estado: string | null;
+  /** botões do jogador 1 em cada quadro (Uint16 little-endian, base64) */
+  entradas: string;
+  quadros: number;
+  agora: { estado: string; assinatura: string };
+}
 
 export interface Medicao {
   fps: number;
