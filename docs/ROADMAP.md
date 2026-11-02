@@ -168,6 +168,30 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | M11.5 | N64 em wasm | você joga | ⏸ |
 | M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ⏸ |
 
+## M11b — PS nativo e o que ficou incompleto no M9–M11 (aprovado em 02/11: "pode fazer tudo")
+
+> **02/11:** o Marcelo testou o pacote M9–M11 e não aceita a jukebox do SNES sem Ondas/Notas ("igualzinha à outra") nem
+> o N64 sem rodar jogo. Prioridade dele: **PS rodando liso**, com núcleo **nativo** (o wasm continua no app como
+> reserva; nada de apagar os núcleos wasm) e o nativo como **padrão** no PS. Ordem abaixo = ordem de execução.
+> Núcleos que a gente compila (nativos e o Snes9x com sonda) ficam como anexo de **Release no repositório KOFStation**;
+> o `pnpm nucleos` baixa de lá conferindo o SHA-256 (nada no histórico do git). Mesmo commit do núcleo que o antigo usa
+> (o `construir.sh` do antigo diz qual), pra estados e saves continuarem abrindo nos dois.
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ⬜ |
+| N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ⬜ |
+| N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ⬜ |
+| N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ⬜ |
+| N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⬜ |
+| N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⬜ |
+| N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ⬜ |
+| N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ⬜ |
+| N.9 | PS2 nativo (o M12) em cima do N.1 (LRPS2 como núcleo libretro nativo, sem o kofnativo.c) | você joga PS2 | ⬜ |
+
+Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil · N.6 100–200 mil · N.7–N.8 90 mil. Com o N.9, o
+M12 encolhe (o canal e o processo já vêm do N.1).
+
 ## M12 — PS2 nativo
 
 | Passo | O que faço | Checkpoint | Estado |

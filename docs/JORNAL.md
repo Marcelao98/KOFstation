@@ -21,6 +21,22 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-02 · Pós-entrega do M9–M11 · plano do PS nativo e do que ficou incompleto
+
+**Pedido:** o Marcelo não aceita o pacote M9–M11 assim: a jukebox tem que ser "igualzinha à outra" (no SNES faltam Ondas
+e Notas) e o N64 tem que rodar. Prioridade nova: PS rodando liso, com núcleo nativo como padrão (o wasm fica como
+reserva, sem apagar). Aprovou fazer tudo e pediu pra salvar e continuar em outra sessão.
+**Feito:** só o plano (ROADMAP → **M11b**, passos N.1 a N.9). Nenhum código.
+**Decidido:** núcleos que a gente compila vão como anexo de Release no repositório KOFStation, baixados pelo manifesto
+(SHA-256), no mesmo commit do núcleo que o antigo usa. O nativo roda num processo filho do `kof-app` (frontend libretro
+em Rust), com o som nativo ditando o ritmo e a imagem indo pra página desenhar com os filtros (vira decisão D32 no N.1).
+**Medido / conferido:** hoje o PS1 é o PCSX-ReARMed em WebAssembly, num Worker, sem dynarec: por isso pesa.
+**Onde parou:** começar o **N.1** (crate `kof-nativo`), depois N.2 e N.3 (PS1 nativo, checkpoint: o Marcelo joga PS1
+liso). Pacote só quando a jukebox do SNES estiver igual ao antigo e o N64 tiver rodado com imagem conferida, ou antes se
+ele pedir o PS1 nativo pra testar. M9–M11 continuam ⏸.
+
+---
+
 ## 2026-11-02 · Etapas M9–M11 · jukebox, extras e sistemas com BIOS (em lote)
 
 **Pedido:** "vai até o M11", de uma vez. Perguntou se o M11 não sairia mais barato, já que os núcleos estão prontos.
