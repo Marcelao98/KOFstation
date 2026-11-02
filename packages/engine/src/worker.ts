@@ -40,7 +40,14 @@ function novoMarco(s: SessaoLibretro | null, zerar = false) {
     marco = null; // o núcleo não deu o estado agora (N64 antes do 1º quadro): o próximo marco tenta de novo
   }
 }
+/** O 1º marco espera o 1º quadro: o Mupen64Plus só tem estado depois dele (pedir antes quebra o núcleo). */
+let marcoNoProximo = false;
 function anotarQuadro(s: SessaoLibretro) {
+  if (marcoNoProximo) {
+    marcoNoProximo = false;
+    novoMarco(s, true);
+    return;
+  }
   if (!marco) return;
   marco.entradas.push(s.pad[0] ?? 0);
   if (marco.entradas.length >= 600) novoMarco(s);
@@ -205,6 +212,16 @@ function umQuadro(s: SessaoLibretro, comSom: boolean) {
 
 function passo() {
   if (parado) return;
+  try {
+    passoSemErro();
+  } catch (e) {
+    // o núcleo quebrou no meio do quadro: para (sem tentar de novo a cada 4 ms) e manda o que ele escreveu
+    parado = true;
+    enviar({ tipo: 'erro', mensagem: e instanceof Error ? e.message : String(e), log: sessao?.log ?? [] });
+  }
+}
+
+function passoSemErro() {
   setTimeout(passo, 4);
   const s = sessao;
   const agora = performance.now();
@@ -271,7 +288,7 @@ eu.onmessage = async ({ data: m }) => {
         }
         sramAntes = s.tamanhoSram ? s.lerSram() : null;
         novoRebob(s);
-        novoMarco(s, true);
+        marcoNoProximo = true;
         sessao = s;
         taxaSaida = m.taxaSaida;
         anel = m.sab ? criarAnel((m.sab.byteLength - 16) / 8, m.sab) : null;
@@ -299,7 +316,8 @@ eu.onmessage = async ({ data: m }) => {
       break;
     case 'cacador':
       cacador = m.ligado;
-      novoMarco(sessao, true);
+      marco = marcoAnt = null;
+      marcoNoProximo = true; // o marco sai no próximo quadro (nunca antes do 1º: N64)
       break;
     case 'som':
       somTocando = m.tocando;

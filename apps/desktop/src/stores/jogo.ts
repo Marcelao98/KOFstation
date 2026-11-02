@@ -178,8 +178,9 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           medicao: (medicao) => set({ medicao }),
           sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
           rebob: (r) => aoMudarRebob.forEach((f) => f(r)),
-          erro: (m) => {
+          erro: (m, log) => {
             set({ pausaManual: true });
+            if (log.length) registrar('error', 'nucleo', `${m} · o núcleo disse: ${log.slice(-8).join(' | ')}`);
             usarAvisos.getState().avisarErro(`erro no emulador: ${m}`);
             aoErroDoEmulador.forEach((f) => f(m));
           },
