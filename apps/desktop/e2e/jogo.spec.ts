@@ -84,6 +84,17 @@ test('menu rápido: F2 e botão direito, volume com ◀▶, Esc fecha', async ({
 test('arquivo que não é jogo e sistema que ainda não chegou avisam', async ({ page }) => {
   await page.setInputFiles('#arquivo', { name: 'leia.txt', mimeType: 'text/plain', buffer: Buffer.from('oi') });
   await expect(page.locator('#aviso')).toContainText('não parece um jogo');
-  await page.setInputFiles('#arquivo', { name: 'disco.cue', mimeType: 'text/plain', buffer: Buffer.from('FILE') });
-  await expect(page.locator('#aviso')).toContainText('PlayStation ainda não roda');
+  await page.setInputFiles('#arquivo', {
+    name: 'jogo.elf',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.from('ELF'),
+  });
+  await expect(page.locator('#aviso')).toContainText('PlayStation 2 ainda não roda');
+  // .cue sozinho, sem os .bin que ele cita: diz o que falta
+  await page.setInputFiles('#arquivo', {
+    name: 'disco.cue',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('FILE "disco.bin" BINARY\n  TRACK 01 MODE2/2352\n'),
+  });
+  await expect(page.locator('#aviso')).toContainText('faltam disco.bin');
 });

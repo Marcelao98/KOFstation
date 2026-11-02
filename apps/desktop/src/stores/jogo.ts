@@ -1,8 +1,13 @@
 // O jogo aberto: a sessão da engine e o que a interface mostra (nome, pausa, volume, medições). O laço de imagem não
 // passa por aqui: os quadros vão direto pro canvas (hooks/useTelaDoJogo).
 import {
+  biosDoSistema,
+  completarJogo,
   ErroDeArquivo,
+  faltaBiosDe,
   guardarNaKofGames,
+  lerDaKofGames,
+  varrerKofGames,
   identidade,
   lerArquivoDeJogo,
   registrar,
@@ -68,6 +73,8 @@ export interface Origem {
   path?: string;
   /** o arquivo de fora (aberto/arrastado): ganha uma cópia na Kof Games */
   arquivoDeFora?: File;
+  /** os outros arquivos escolhidos junto (os .bin do .cue): vão pra mesma pasta da Kof Games */
+  soltos?: File[];
 }
 
 export interface EstadoJogo {
@@ -87,7 +94,7 @@ export interface EstadoJogo {
   mudo: boolean;
   proporcao: Proporcao;
   escala: number;
-  abrirArquivo: (f: File) => Promise<void>;
+  abrirArquivo: (f: File, soltos?: File[]) => Promise<void>;
   abrirJogo: (aberto: JogoAberto, origem?: Origem) => Promise<boolean>;
   fechar: () => void;
   alternarPausa: () => void;
@@ -117,11 +124,14 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   proporcao: ((p) => (PROPORCOES.some(([k]) => k === p) ? p : '43') as Proporcao)(config().ler('proporcao')),
   escala: lerNum('escala', 0),
 
-  abrirArquivo: async (arquivo) => {
+  abrirArquivo: async (arquivo, soltos = []) => {
     const av = usarAvisos.getState();
     try {
-      const aberto = await lerArquivoDeJogo(arquivo.name, new Uint8Array(await arquivo.arrayBuffer()));
-      await get().abrirJogo(aberto, { arquivoDeFora: arquivo });
+      const outros = await Promise.all(
+        soltos.map(async (s) => ({ nome: s.name, bytes: new Uint8Array(await s.arrayBuffer()) })),
+      );
+      const aberto = await lerArquivoDeJogo(arquivo.name, new Uint8Array(await arquivo.arrayBuffer()), outros);
+      await get().abrirJogo(aberto, { arquivoDeFora: arquivo, soltos });
     } catch (e) {
       if (e instanceof ErroDeArquivo) av.avisar(e.message, 5000);
       else av.avisarErro(`não consegui abrir ${arquivo.name}: ${e instanceof Error ? e.message : String(e)}`);
@@ -132,6 +142,16 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     if (get().abrindo) return false;
     set({ abrindo: true });
     try {
+      const { armazem } = servicos();
+      // Neo Geo sem o neogeo.zip: a tela da BIOS pede, e o jogo abre quando ela chegar
+      if (await faltaBiosDe(armazem, aberto.sistema)) {
+        set({ abrindo: false });
+        const { usarBios } = await import('./bios');
+        await usarBios.getState().pedir(aberto.sistema, () => get().abrirJogo(aberto, origem));
+        return false;
+      }
+      aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
+      const bios = await biosDoSistema(armazem, aberto.sistema);
       if (get().jogo) await antesDeTrocar();
       get().jogo?.fechar();
       const { volume, mudo } = get();
@@ -147,6 +167,11 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           mudo,
           sram,
           opcoes: opcoesDoNucleo(aberto.sistema),
+          extras: {
+            bios,
+            ...(aberto.principal ? { principal: aberto.principal } : {}),
+            ...(aberto.arquivos ? { arquivos: aberto.arquivos } : {}),
+          },
         },
         {
           quadro: (pixels, largura, altura) => Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true }),
@@ -245,6 +270,28 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   fecharRapido: () => set({ rapidoAberto: false }),
 }));
 
+/**
+ * Um arquivo que o jogo precisa (os .bin do .cue, o zip do pai do Neo Geo): primeiro na pasta do jogo, depois em
+ * qualquer lugar da Kof Games com esse nome. null = não achou (ou não tem Kof Games).
+ */
+export async function acharNaKofGames(nome: string, pathDoJogo?: string): Promise<Uint8Array | null> {
+  const { backend } = servicos();
+  const alvo = nome.toLowerCase();
+  const pasta = pathDoJogo?.split('/').slice(0, -1).join('/');
+  if (pasta)
+    try {
+      return await lerDaKofGames(backend, `${pasta}/${nome}`);
+    } catch {
+      // não está do lado: procura na Kof Games inteira
+    }
+  try {
+    const achou = (await varrerKofGames(backend)).find((a) => a.arquivo.toLowerCase() === alvo);
+    return achou ? await lerDaKofGames(backend, achou.path) : null;
+  } catch {
+    return null; // sem Kof Games escolhida
+  }
+}
+
 /** Depois de abrir: registra na biblioteca e, se veio de fora, guarda uma cópia na Kof Games (o original fica). */
 async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<RegistroJogo | null> {
   const { backend, armazem } = servicos();
@@ -256,6 +303,11 @@ async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<
       const bytes = new Uint8Array(await f.arrayBuffer());
       const guardado = await guardarNaKofGames(backend, fato, bytes);
       path = guardado?.path;
+      // os .bin do .cue vão pra mesma pasta (senão o jogo da biblioteca não acha eles)
+      const pasta = guardado?.path.split('/')[1];
+      if (pasta)
+        for (const s of origem.soltos ?? [])
+          await backend.enviarBinario('library.import', { pasta, nome: s.name }, new Uint8Array(await s.arrayBuffer()));
       if (guardado?.novo)
         usarAvisos
           .getState()

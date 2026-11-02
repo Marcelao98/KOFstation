@@ -2,6 +2,8 @@
 // guardadas por jogo), o tocador da faixa (uma instância separada do núcleo, num Worker), mudo/solo por canal, .spc e
 // .wav, o mini-player da barra de baixo e a música do Início.
 import {
+  biosDoSistema,
+  completarJogo,
   apagarMusica,
   bytesDaMusica,
   bytesDoJogo,
@@ -33,7 +35,7 @@ import { create } from 'zustand';
 import { fotoDoQuadro } from '../app/foto';
 import { usarAvisos } from './avisos';
 import { config } from './config';
-import { usarJogo } from './jogo';
+import { acharNaKofGames, usarJogo } from './jogo';
 import { servicos } from './servicos';
 import { usarTelas } from './telas';
 
@@ -188,8 +190,18 @@ async function faixaNoWorker(f: ItemJuke): Promise<FaixaNoWorker | 'violino'> {
   if (!NUCLEOS[sistema]) throw new Error(`essa versão do KOFstation não toca música de ${sistema}`);
   const reg = f.jogoId ? await armazem.meta<RegistroJogo>('jogos', f.jogoId) : null;
   if (!reg) throw new Error(`a ROM de ${f.jogo} não está mais na biblioteca: abra o jogo uma vez e tente de novo`);
-  const { rom } = await bytesDoJogo(backend, armazem, reg);
-  return { sistema, rom, estado: bytes };
+  const aberto = await completarJogo(await bytesDoJogo(backend, armazem, reg), (n) => acharNaKofGames(n, reg.path));
+  const bios = await biosDoSistema(armazem, sistema);
+  return {
+    sistema,
+    rom: aberto.rom,
+    estado: bytes,
+    extras: {
+      bios,
+      ...(aberto.principal ? { principal: aberto.principal } : {}),
+      ...(aberto.arquivos ? { arquivos: aberto.arquivos } : {}),
+    },
+  };
 }
 
 async function abrirTocador(f: ItemJuke, mudas: number, repetir: boolean): Promise<TocadorDeMusica> {

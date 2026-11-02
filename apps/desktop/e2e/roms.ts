@@ -47,3 +47,30 @@ export function romGbSom(): Buffer {
   r[0x14d] = x;
   return r;
 }
+
+/** Executável de PlayStation (PS-X EXE) que fica num laço: o PCSX abre sem CD e sem BIOS (a dele imita). */
+export function exePs1(): Buffer {
+  const r = Buffer.alloc(0x1000);
+  r.write('PS-X EXE', 0, 'latin1');
+  r.writeUInt32LE(0x80010000, 0x10); // pc0
+  r.writeUInt32LE(0x80010000, 0x18); // t_addr
+  r.writeUInt32LE(0x800, 0x1c); // t_size
+  r.writeUInt32LE(0x801fff00, 0x30); // pilha
+  r.write('Sony Computer Entertainment Inc. for North America area', 0x4c, 'latin1');
+  r.writeUInt32LE(0x08004000, 0x800); // j 0x80010000
+  return r;
+}
+
+/** ROM de Nintendo 64 mínima (cabeçalho big-endian e a CPU num laço): o Mupen64Plus abre e desenha. */
+export function romN64(): Buffer {
+  const r = Buffer.alloc(0x101000);
+  r.writeUInt32BE(0x80371240, 0); // .z64
+  r.writeUInt32BE(0x0000000f, 4); // clock
+  r.writeUInt32BE(0x80000400, 8); // ponto de entrada
+  r.write('KOF TESTE N64      ', 0x20, 'latin1');
+  r.write('N', 0x3b, 'latin1');
+  r.write('KT', 0x3c, 'latin1');
+  r.write('E', 0x3e, 'latin1');
+  r.writeUInt32BE(0x08000100, 0x1000); // j 0x80000400 (o código do jogo começa em 0x1000 na ROM)
+  return r;
+}

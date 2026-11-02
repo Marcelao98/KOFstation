@@ -8,7 +8,7 @@ export type ComandoTeste = (args: Record<string, unknown>, dados: Uint8Array) =>
 const NIVEIS = ['error', 'warn', 'info', 'debug'];
 const erro = (code: string, message: string) => ({ code, message });
 
-const LOJAS = ['jogos', 'saves', 'estados', 'autos', 'stats', 'musicas', 'capas', 'visual', 'roms'];
+const LOJAS = ['jogos', 'saves', 'estados', 'autos', 'stats', 'musicas', 'capas', 'visual', 'roms', 'bios'];
 
 export interface KofTeste {
   /** arquivos da Kof Games falsa (caminho relativo à raiz → bytes) */

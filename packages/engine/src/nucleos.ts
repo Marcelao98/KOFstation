@@ -2,7 +2,7 @@
 // `SISTEMAS` do web/nucleo.js do kofstation-old (só o que a engine precisa; nome e extensões ficam no domain).
 import type { SistemaId } from '@kof/domain';
 
-export type NucleoId = 'snes9x' | 'gambatte' | 'fceumm' | 'genplus' | 'mgba';
+export type NucleoId = 'snes9x' | 'gambatte' | 'fceumm' | 'genplus' | 'mgba' | 'fbneo' | 'pcsx' | 'mupen64';
 
 export interface ConfigNucleo {
   nucleo: NucleoId;
@@ -19,9 +19,15 @@ export interface ConfigNucleo {
   ext: string;
   /** sem rebobinar (estado grande demais: PS1/PS2) */
   semRebob?: boolean;
+  /** o núcleo só abre o jogo por arquivo (FBNeo, PCSX): vai pro disco virtual /jogos */
+  caminho?: boolean;
+  /** tipo de controle libretro (PS1: 517 = DualShock) */
+  dispositivo?: number;
+  /** desenha com OpenGL (N64): WebGL2 num OffscreenCanvas dentro do Worker */
+  gl?: boolean;
 }
 
-/** Sistemas que já rodam no app novo (M2). PS1, N64, Neo Geo e PS2 chegam no M11/M12. */
+/** Sistemas que rodam no app novo (M2 + M11). O PS2 chega no M12. */
 export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
   snes: { nucleo: 'snes9x', largura: 256, altura: 224, ext: 'sfc' },
   gb: { nucleo: 'gambatte', largura: 160, altura: 144, ext: 'gb' },
@@ -30,6 +36,51 @@ export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
   sms: { nucleo: 'genplus', largura: 256, altura: 192, dinamico: true, tv43: true, ext: 'sms' },
   gba: { nucleo: 'mgba', largura: 240, altura: 160, ext: 'gba' },
   gg: { nucleo: 'genplus', largura: 160, altura: 144, dinamico: true, proporcao: 10 / 9, ext: 'gg' },
+  // Neo Geo (FBNeo só com o Neo Geo): o zip inteiro do fliperama vai pro /jogos com o zip do pai (clones) e a BIOS
+  // neogeo.zip em /sistema. Modo AES (o console de casa: sem ficha) por padrão
+  neogeo: {
+    nucleo: 'fbneo',
+    largura: 320,
+    altura: 224,
+    dinamico: true,
+    tv43: true,
+    caminho: true,
+    opcoes: { 'fbneo-neogeo-mode': 'AES_EUR' },
+    ext: 'zip',
+  },
+  // PlayStation (PCSX-ReARMed): o CD fica no /jogos enquanto o jogo roda (o núcleo lê aos poucos). BIOS opcional.
+  // Atrasou (jogo 3D): pula o desenho de até 3 quadros em vez de picotar o som
+  ps1: {
+    nucleo: 'pcsx',
+    largura: 320,
+    altura: 240,
+    dinamico: true,
+    tv43: true,
+    caminho: true,
+    dispositivo: 517,
+    semRebob: true,
+    opcoes: { pcsx_rearmed_frameskip_type: 'auto', pcsx_rearmed_frameskip_interval: '3' },
+    ext: 'cue',
+  },
+  // Nintendo 64 (Mupen64Plus-Next): GLideN64 em WebGL2; a ponte lê a imagem de volta. Estado grande: sem rebobinar
+  n64: {
+    nucleo: 'mupen64',
+    largura: 320,
+    altura: 240,
+    dinamico: true,
+    tv43: true,
+    semRebob: true,
+    gl: true,
+    opcoes: {
+      'mupen64plus-rdp-plugin': 'gliden64',
+      'mupen64plus-cpucore': 'cached_interpreter',
+      'mupen64plus-43screensize': '320x240',
+      'mupen64plus-EnableNativeResFactor': '1',
+      'mupen64plus-ThreadedRenderer': 'False',
+      'mupen64plus-pak1': 'memory',
+    },
+    ext: 'z64',
+  },
 };
 
 /** O SNES é sempre de TV no antigo (naTv: sistema snes ou tv43). */
@@ -59,6 +110,32 @@ const LIGACAO: readonly (readonly [number, number])[] = [
   [0x0008, 12],
   [0x0004, 13],
 ];
+
+// N64 (controle do SNES): B/Y = A/B, L = Z, R = R, Select = L; X/A = C▲/C▼ e L2/R2 = C◀/C▶ (bits 16-19 da ponte, que
+// viram o analógico direito); o direcional vira o analógico na ponte
+const BITS_N64: readonly (readonly [number, number])[] = [
+  [0x8000, 0],
+  [0x4000, 1],
+  [0x1000, 3],
+  [0x0800, 4],
+  [0x0400, 5],
+  [0x0200, 6],
+  [0x0100, 7],
+  [0x0020, 12],
+  [0x0010, 11],
+  [0x2000, 10],
+  [0x0040, 16],
+  [0x0080, 17],
+  [0x0008, 18],
+  [0x0004, 19],
+];
+
+/** O `mascaraN64()` do antigo. */
+export function mascaraN64(bits: number): number {
+  let m = 0;
+  for (const [bit, id] of BITS_N64) if (bits & bit) m |= 1 << id;
+  return m;
+}
 
 /** O `mascara()` do antigo. */
 export function mascaraLibretro(bits: number): number {

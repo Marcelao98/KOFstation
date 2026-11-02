@@ -7,8 +7,8 @@ use serde_json::Value;
 use std::path::{Path, PathBuf};
 
 /// As lojas que existem (as do banco `kofnes` do antigo que viraram arquivo).
-pub const LOJAS: [&str; 9] = [
-    "jogos", "saves", "estados", "autos", "stats", "musicas", "capas", "visual", "roms",
+pub const LOJAS: [&str; 10] = [
+    "jogos", "saves", "estados", "autos", "stats", "musicas", "capas", "visual", "roms", "bios",
 ];
 
 #[derive(Debug, Serialize)]

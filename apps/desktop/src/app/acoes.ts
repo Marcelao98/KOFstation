@@ -15,6 +15,7 @@ import { usarMoldura } from '../stores/moldura';
 import { usarJukebox } from '../stores/jukebox';
 import { usarAbertura } from '../stores/abertura';
 import { usarBug } from '../stores/bug';
+import { usarBios } from '../stores/bios';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
 const TELAS: Partial<Record<string, TelaId>> = {
@@ -33,9 +34,7 @@ const TELAS: Partial<Record<string, TelaId>> = {
 /** Etapa em que cada ação ainda não feita chega. */
 export const ETAPA: Readonly<Record<string, string>> = {
   'controle-celular': 'M13',
-  'nucleo-snes': 'M11',
   atualizacao: 'M15',
-  'bios-tela': 'M11',
   aparelhos: 'M13',
 };
 
@@ -191,6 +190,25 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     case 'fechar-estat':
       telas.sair();
+      return true;
+    case 'nucleo-snes':
+      // o núcleo Kof é da Mel e fica fora deste repositório até ela definir a licença (AGENTS.md): por enquanto só o
+      // Snes9x. A escolha já existe pra quando ele chegar (adaptador KofCore)
+      usarAvisos
+        .getState()
+        .avisar(
+          'SNES: Snes9x (o mais rápido). O núcleo Kof entra no app novo quando a Mel liberar a licença dele',
+          4500,
+        );
+      return true;
+    case 'bios-tela':
+      void usarBios.getState().mostrar();
+      return true;
+    case 'bios':
+      usarBios.getState().escolher();
+      return true;
+    case 'bios-fechar':
+      usarBios.getState().fechar();
       return true;
     case 'bug':
       usarBug.getState().abrir();

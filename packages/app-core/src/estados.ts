@@ -37,7 +37,7 @@ export function bytesDoCapturado(o: EstadoDoNucleo, nucleo: string): Uint8Array 
   if (de !== nucleo)
     throw new Error(
       de === 'kof'
-        ? 'esse estado é do núcleo Kof do SNES (ele chega no app novo no M11)'
+        ? 'esse estado é do núcleo Kof do SNES (ele entra no app novo quando a Mel liberar a licença dele)'
         : 'esse estado é de outro núcleo',
     );
   if (!o.d) throw new Error('estado vazio');

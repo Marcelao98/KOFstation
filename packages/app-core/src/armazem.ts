@@ -3,7 +3,7 @@
 // (opcionais, lidos só quando precisa).
 import { paraBackendError, type Backend } from './backend';
 
-export type Loja = 'jogos' | 'saves' | 'estados' | 'autos' | 'stats' | 'musicas' | 'capas' | 'visual' | 'roms';
+export type Loja = 'jogos' | 'saves' | 'estados' | 'autos' | 'stats' | 'musicas' | 'capas' | 'visual' | 'roms' | 'bios';
 
 export interface Registro<M> {
   key: string;

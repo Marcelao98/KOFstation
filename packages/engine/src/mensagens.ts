@@ -1,6 +1,6 @@
 // Mensagens entre a página (Jogo) e o Worker do núcleo.
 import type { SistemaId } from '@kof/domain';
-import type { InfoDoJogo } from './libretro';
+import type { ExtrasDoJogo, InfoDoJogo } from './libretro';
 
 export type ParaWorker =
   | {
@@ -14,6 +14,8 @@ export type ParaWorker =
       sram?: Uint8Array | null;
       /** opções do núcleo (paleta do GB/NES...) */
       opcoes?: Record<string, string>;
+      /** BIOS e os outros arquivos do jogo (Neo Geo, PS1) */
+      extras?: ExtrasDoJogo;
     }
   | { tipo: 'sram-escrever'; bytes: Uint8Array }
   | { tipo: 'opcoes'; opcoes: Record<string, string> }
@@ -93,6 +95,8 @@ export interface FaixaNoWorker {
   spc?: Uint8Array | null;
   /** trilha do KOFstation (comandos FM/PSG): toca no núcleo só de som */
   fm?: Uint8Array | null;
+  /** BIOS e os arquivos do jogo (Neo Geo) */
+  extras?: ExtrasDoJogo;
 }
 
 export type ParaTocador =

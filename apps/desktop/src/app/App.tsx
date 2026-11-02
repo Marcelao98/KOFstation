@@ -1,5 +1,5 @@
 import { mensagemDoErro, obterInfo, paraBackendError, type Backend } from '@kof/app-core';
-import { EXTENSOES, ehPacote } from '@kof/domain';
+import { EXTENSOES, ehPacote, principal as principalDoCd } from '@kof/domain';
 import { useEffect, useRef } from 'react';
 import { Aviso } from '../components/Aviso';
 import { Desempenho } from '../components/Desempenho';
@@ -24,6 +24,7 @@ import { Jukebox } from '../screens/Jukebox/Jukebox';
 import { Abertura } from '../screens/Abertura/Abertura';
 import { Estatisticas } from '../screens/Estatisticas/Estatisticas';
 import { Bug } from '../screens/Bug/Bug';
+import { BiosTela } from '../screens/Bios/BiosTela';
 import { usarBug } from '../stores/bug';
 import '../stores/estatisticas';
 import { abrirPatch } from '../stores/traducao';
@@ -49,6 +50,20 @@ import { usarTelas, type TelaId } from '../stores/telas';
 import { acao } from './acoes';
 import { atalhoDe } from './atalhos';
 
+/** Telas que já existem no app novo (as outras mostram em que etapa chegam). */
+const PRONTAS: string[] = [
+  'home',
+  'guia',
+  'jogo',
+  'biblioteca',
+  'estados',
+  'teclas',
+  'jogadores',
+  'jukebox',
+  'estatisticas',
+  'bios-tela',
+];
+
 const SETAS: Record<string, [number, number]> = {
   ArrowRight: [1, 0],
   ArrowLeft: [-1, 0],
@@ -56,6 +71,17 @@ const SETAS: Record<string, [number, number]> = {
   ArrowUp: [0, -1],
 };
 const ACEITA = ['zip', 'kofsave', 'ips', 'bps', 'ups', ...EXTENSOES].map((e) => '.' + e).join(',');
+
+/** Vários arquivos (o .cue com os .bin, as faixas de um CD): o principal abre com os outros junto. */
+async function abrirVarios(fs: File[]) {
+  if (fs.length < 2) return fs[0] ? abrirQualquer(fs[0]) : undefined;
+  const p = fs.find((x) => /\.cue$/i.test(x.name)) ?? principalDoCd(fs) ?? fs[0];
+  if (!p) return;
+  await usarJogo.getState().abrirArquivo(
+    p,
+    fs.filter((x) => x !== p),
+  );
+}
 
 /** Arquivo aberto ou arrastado: .kofsave traz o backup; o resto é jogo. */
 async function abrirQualquer(f: File) {
@@ -165,8 +191,7 @@ export function App({ backend }: { backend: Backend }) {
       const todos = [...(e.dataTransfer?.files ?? [])];
       if (todos.length && todos.every((x) => /\.spc$/i.test(x.name)))
         return void usarJukebox.getState().importarSpcs(todos); // arquivos .spc vão pra jukebox
-      const f = e.dataTransfer?.files[0];
-      if (f) void abrirQualquer(f);
+      if (todos.length) void abrirVarios(todos);
     };
     const arrastando = (e: DragEvent) => e.preventDefault();
     addEventListener('contextmenu', direito);
@@ -220,9 +245,8 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'jogadores' && <Jogadores />}
         {atual === 'jukebox' && <Jukebox />}
         {atual === 'estatisticas' && <Estatisticas />}
-        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas', 'jogadores', 'jukebox', 'estatisticas'].includes(
-          atual,
-        ) && <Pendente tela={atual as TelaId} />}
+        {atual === 'bios-tela' && <BiosTela />}
+        {!PRONTAS.includes(atual) && <Pendente tela={atual as TelaId} />}
         <div id="moldura" hidden={atual !== 'jogo'}>
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>
         </div>
@@ -247,11 +271,12 @@ export function App({ backend }: { backend: Backend }) {
         id="arquivo"
         ref={arquivo}
         accept={ACEITA}
+        multiple
         hidden
         onChange={(e) => {
-          const f = e.target.files?.[0];
+          const fs = [...(e.target.files ?? [])];
           e.target.value = '';
-          if (f) void abrirQualquer(f);
+          void abrirVarios(fs);
         }}
       />
     </>

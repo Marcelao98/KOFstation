@@ -173,6 +173,22 @@ async function carregarNucleo(url: string, nucleo: string): Promise<FabricaDeNuc
   return f as FabricaDeNucleo;
 }
 
+/**
+ * N64: o núcleo desenha com OpenGL ES. No antigo era um <canvas id="kof-gl"> escondido na página; aqui, dentro do Worker,
+ * um OffscreenCanvas (o WebGL2 funciona igual). A ponte procura o canvas por '#kof-gl': um `document` mínimo responde.
+ */
+function doModulo(s: SessaoLibretro): Record<string, unknown> {
+  if (!s.config.gl) return {};
+  if (typeof OffscreenCanvas !== 'function') throw new Error('esse navegador não tem OffscreenCanvas (o N64 precisa)');
+  const cv = new OffscreenCanvas(320, 240);
+  const doc = {
+    querySelector: (q: string) => (q === '#kof-gl' || q === '#canvas' ? cv : null),
+    getElementById: (id: string) => (id === 'kof-gl' || id === 'canvas' ? cv : null),
+  };
+  eu.document = doc;
+  return { canvas: cv };
+}
+
 function mandarQuadro(s: SessaoLibretro) {
   const copia = s.quadro.slice();
   enviar({ tipo: 'quadro', pixels: copia.buffer, largura: s.info.largura, altura: s.info.altura }, [copia.buffer]);
@@ -247,8 +263,8 @@ eu.onmessage = async ({ data: m }) => {
     case 'iniciar':
       try {
         const s = new SessaoLibretro(m.sistema);
-        await s.iniciar(await carregarNucleo(m.urlNucleo, s.config.nucleo), m.opcoes ?? {});
-        const info = s.carregar(m.rom);
+        await s.iniciar(await carregarNucleo(m.urlNucleo, s.config.nucleo), m.opcoes ?? {}, doModulo(s));
+        const info = s.carregar(m.rom, m.extras ?? {});
         if (m.sram && s.tamanhoSram) {
           s.escreverSram(m.sram); // o save vai antes do 1º quadro, e o jogo recomeça com ele (como no antigo)
           s.reiniciar();

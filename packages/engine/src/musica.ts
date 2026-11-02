@@ -2,7 +2,7 @@
 // (o jogo aberto não é tocado), sem imagem e sem botão, com o estado do jogo do momento em que a música foi guardada (o
 // `tocador` do web/nucleo.js do antigo). SNES com .spc: o .spc entra num estado do Snes9x (spc.ts).
 import type { SistemaId } from '@kof/domain';
-import { SessaoLibretro, type FabricaDeNucleo } from './libretro';
+import { SessaoLibretro, type ExtrasDoJogo, type FabricaDeNucleo } from './libretro';
 import { CANAIS, taxaDaOnda } from './sonda';
 import { estadoDoSpc, regsDoDsp, romQuieta } from './spc';
 
@@ -20,6 +20,8 @@ export interface FaixaParaTocar {
   spc?: Uint8Array | null;
   /** trilha do KOFstation: comandos pros chips FM e PSG (toca no núcleo só de som) */
   fm?: Uint8Array | null;
+  /** BIOS e os arquivos do jogo (Neo Geo: o zip do pai) */
+  extras?: ExtrasDoJogo;
 }
 
 /** O que o Worker do tocador precisa de uma música (do núcleo do jogo ou do núcleo só de som). */
@@ -110,7 +112,7 @@ export class Musica implements FonteDeMusica {
     await s.iniciar(fabrica);
     const rom = f.spc ? romQuieta() : f.rom;
     if (!rom) throw new Error('falta a ROM do jogo pra tocar essa música');
-    const info = s.carregar(rom);
+    const info = s.carregar(rom, f.extras ?? {});
     m.taxa = info.taxaAudio;
     if (f.spc) {
       s.rodarSoSom();

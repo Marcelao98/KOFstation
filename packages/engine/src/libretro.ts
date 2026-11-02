@@ -1,7 +1,7 @@
 // Uma sessão de jogo num núcleo libretro do kofstation-old (ponte.cpp compilada pra wasm). Faz o que a classe
 // Consolinho do web/nucleo.js fazia, sem DOM: roda no Worker do app e no Node (testes).
 import type { SistemaId } from '@kof/domain';
-import { NUCLEOS, mascaraLibretro, nomeParaNucleo, type ConfigNucleo } from './nucleos';
+import { NUCLEOS, mascaraLibretro, mascaraN64, nomeParaNucleo, type ConfigNucleo } from './nucleos';
 import { encaixarQuadro } from './quadro';
 
 /** O pedaço do módulo do emscripten que a ponte expõe (funções lr_*). */
@@ -40,11 +40,36 @@ export interface ModuloLibretro {
   _lr_onda_pos_c?(c: number): number;
   // arquivo no disco virtual do núcleo (BIOS em /sistema, jogo grande em /jogos)
   _lr_arquivo?(caminho: number, dados: number, n: number): number;
+  _lr_apagar?(caminho: number): void;
+  _lr_dispositivo?(d: number): void;
+  /** disco virtual do emscripten (PCSX): o CD vai direto, sem passar pela memória do wasm */
+  FS?: {
+    mkdir(p: string): void;
+    writeFile(p: string, d: Uint8Array, o?: { canOwn?: boolean }): void;
+    unlink(p: string): void;
+  };
+}
+
+/** Um arquivo pro disco virtual do núcleo (BIOS em /sistema, zip do pai e .bin do CD em /jogos). */
+export interface ArquivoDoNucleo {
+  nome: string;
+  bytes: Uint8Array;
+}
+
+/** O que mais o jogo precisa além da ROM. */
+export interface ExtrasDoJogo {
+  /** BIOS do usuário (vão pro /sistema) */
+  bios?: ArquivoDoNucleo[];
+  /** núcleo por caminho (FBNeo, PCSX): nome do arquivo principal no /jogos (mslug.zip, jogo.cue) */
+  principal?: string;
+  /** outros arquivos do jogo no /jogos (zip do pai; os .bin do .cue) */
+  arquivos?: ArquivoDoNucleo[];
 }
 
 export type FabricaDeNucleo = (opcoes: {
   print: (s: string) => void;
   printErr: (s: string) => void;
+  [k: string]: unknown;
 }) => Promise<ModuloLibretro>;
 
 export interface InfoDoJogo {
@@ -102,12 +127,16 @@ export class SessaoLibretro {
     }
   }
 
-  async iniciar(fabrica: FabricaDeNucleo, opcoesExtras: Record<string, string> = {}): Promise<void> {
+  async iniciar(
+    fabrica: FabricaDeNucleo,
+    opcoesExtras: Record<string, string> = {},
+    doModulo: Record<string, unknown> = {},
+  ): Promise<void> {
     const anotar = (s: string) => {
       this.log.push(String(s));
       if (this.log.length > 40) this.log.shift();
     };
-    this.mod = await fabrica({ print: anotar, printErr: anotar });
+    this.mod = await fabrica({ print: anotar, printErr: anotar, ...doModulo });
     for (const [k, v] of Object.entries({ ...this.config.opcoes, ...opcoesExtras })) {
       const pk = texto(this.mod, k);
       const pv = texto(this.mod, v);
@@ -118,21 +147,65 @@ export class SessaoLibretro {
     this.mod._lr_init();
   }
 
-  carregar(rom: Uint8Array): InfoDoJogo {
+  /** Grava um arquivo no disco virtual do núcleo (o `gravar` do nucleo.js do antigo). */
+  private gravar(caminho: string, dados: Uint8Array): boolean {
     const m = this.mod;
-    const p = m._lr_alloc(rom.length);
-    m.HEAPU8.set(rom, p);
-    const pn = texto(m, nomeParaNucleo(this.sistema, rom));
-    const ok = m._lr_load(p, rom.length, pn);
-    m._free(p);
-    m._free(pn);
-    if (!ok) {
-      const falta = this.log
-        .filter((l) => /fail|error|invalid|unsupported/i.test(l))
-        .slice(-2)
-        .join(' · ');
-      throw new Error(`o núcleo ${this.config.nucleo} não aceitou essa ROM` + (falta ? `: ${falta}` : ''));
+    if (m.FS && dados.length > 8 << 20) {
+      // CD de PlayStation (centenas de MB): direto pro disco virtual, sem cópia
+      try {
+        m.FS.mkdir(caminho.replace(/\/[^/]*$/, ''));
+      } catch {
+        // a pasta já existe
+      }
+      try {
+        m.FS.writeFile(caminho, dados, { canOwn: true });
+        return true;
+      } catch {
+        return false;
+      }
     }
+    if (!m._lr_arquivo) return false;
+    const pc = texto(m, caminho);
+    const pd = m._lr_alloc(dados.length);
+    m.HEAPU8.set(dados, pd);
+    const ok = m._lr_arquivo(pc, pd, dados.length);
+    m._free(pc);
+    m._free(pd);
+    return !!ok;
+  }
+
+  private apagar(caminho: string) {
+    if (!this.mod._lr_apagar) return;
+    const pc = texto(this.mod, caminho);
+    this.mod._lr_apagar(pc);
+    this.mod._free(pc);
+  }
+
+  /** Linhas do que o núcleo escreveu que parecem erro (pro aviso). */
+  private faltou(re: RegExp, n: number): string {
+    return this.log
+      .filter((l) => re.test(l))
+      .slice(-n)
+      .join(' · ');
+  }
+
+  carregar(rom: Uint8Array, extras: ExtrasDoJogo = {}): InfoDoJogo {
+    const m = this.mod;
+    for (const b of extras.bios ?? []) this.gravar('/sistema/' + b.nome, b.bytes);
+    if (this.config.caminho) this.carregarPorCaminho(rom, extras);
+    else {
+      const p = m._lr_alloc(rom.length);
+      m.HEAPU8.set(rom, p);
+      const pn = texto(m, nomeParaNucleo(this.sistema, rom));
+      const ok = m._lr_load(p, rom.length, pn);
+      m._free(p);
+      m._free(pn);
+      if (!ok) {
+        const falta = this.faltou(/fail|error|invalid|unsupported/i, 2);
+        throw new Error(`o núcleo ${this.config.nucleo} não aceitou essa ROM` + (falta ? `: ${falta}` : ''));
+      }
+    }
+    if (this.config.dispositivo && m._lr_dispositivo) m._lr_dispositivo(this.config.dispositivo);
     const i = m._lr_info() >> 3;
     const f64 = m.HEAPF64;
     this.info = {
@@ -153,6 +226,56 @@ export class SessaoLibretro {
     this.estadoBuf = m._lr_alloc((this.tamEstado + 3) & ~3);
     return this.info;
   }
+
+  /** Núcleo que só abre o jogo por arquivo (FBNeo, PCSX): o jogo e os extras vão pro /jogos (carregarPorCaminho). */
+  private carregarPorCaminho(rom: Uint8Array, extras: ExtrasDoJogo) {
+    const m = this.mod;
+    const ps1 = this.sistema === 'ps1';
+    const principal = extras.principal ?? 'jogo.' + this.config.ext;
+    const arqs: [string, Uint8Array][] = [
+      [principal, rom],
+      ...(extras.arquivos ?? []).map((a) => [a.nome, a.bytes] as [string, Uint8Array]),
+    ];
+    for (const [nome, dados] of arqs)
+      if (!this.gravar('/jogos/' + nome, dados))
+        throw new Error(
+          'faltou memória pra abrir ' +
+            nome +
+            (ps1 ? ' (CD grande demais: tente o jogo em .chd, que é comprimido)' : ''),
+        );
+    const pc = texto(m, '/jogos/' + principal);
+    this.log.length = 0;
+    let ok = m._lr_load(0, 0, pc);
+    const modo = this.config.opcoes?.['fbneo-neogeo-mode'];
+    if (!ok && modo) {
+      // a BIOS do usuário não tem a do AES: tenta de novo com a que o neogeo.zip escolher sozinho (MVS)
+      this.mudarOpcoes({ 'fbneo-neogeo-mode': 'DIPSWITCH' });
+      ok = m._lr_load(0, 0, pc);
+      if (!ok) this.mudarOpcoes({ 'fbneo-neogeo-mode': modo });
+      else this.modoMvs = true;
+    }
+    m._free(pc);
+    // o FBNeo já copiou tudo pra memória dele: tira do disco virtual (o CD do PS1 fica: ele lê aos poucos)
+    if (!ps1) for (const [nome] of arqs) this.apagar('/jogos/' + nome);
+    // o FBNeo às vezes "abre" só pra mostrar a tela de erro dele (driver não iniciou: estado de tamanho 0)
+    if (ok && !m._lr_state_size()) {
+      m._lr_unload();
+      ok = 0;
+    }
+    if (ok) return;
+    if (ps1) {
+      const falta = this.faltou(/fail|error|missing|not found|could not/i, 2);
+      throw new Error(
+        'o PlayStation não abriu esse jogo' +
+          (falta ? ': ' + falta : /\.cue$/i.test(principal) ? ' (os arquivos .bin do .cue precisam vir junto)' : ''),
+      );
+    }
+    const falta = this.faltou(/required|missing|not found|bad crc|error|failed/i, 3);
+    throw new Error('o Neo Geo não abriu esse jogo' + (falta ? ': ' + falta : ' (confira o zip e o neogeo.zip)'));
+  }
+
+  /** O Neo Geo abriu na BIOS do fliperama (MVS): a BIOS do usuário não tem a do console. */
+  modoMvs = false;
 
   /** Tamanho da bateria (0 = o jogo não tem save). */
   get tamanhoSram(): number {
@@ -184,12 +307,13 @@ export class SessaoLibretro {
    *  núcleo, válida até o próximo quadro. `mudouTamanho` = a resolução mudou (Sega). */
   rodar(): { audio: Int16Array; mudouTamanho: boolean } {
     const m = this.mod;
-    m._lr_pad(mascaraLibretro(this.pad[0] ?? 0));
+    const mascara = this.sistema === 'n64' ? mascaraN64 : mascaraLibretro;
+    m._lr_pad(mascara(this.pad[0] ?? 0));
     const e0 = this.eixos[0] ?? [0, 0, 0, 0];
     if (m._lr_eixos) m._lr_eixos(e0[0] ?? 0, e0[1] ?? 0, e0[2] ?? 0, e0[3] ?? 0); // analógico do jogador 1
     if (m._lr_pad_n && m._lr_eixos_n)
       for (let j = 1; j < 4; j++) {
-        m._lr_pad_n(j, mascaraLibretro(this.pad[j] ?? 0));
+        m._lr_pad_n(j, mascara(this.pad[j] ?? 0));
         const e = this.eixos[j] ?? [0, 0, 0, 0];
         m._lr_eixos_n(j, e[0] ?? 0, e[1] ?? 0, e[2] ?? 0, e[3] ?? 0);
       }

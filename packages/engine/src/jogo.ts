@@ -2,7 +2,7 @@
 // Sem React: a tela do jogo só recebe callbacks (o laço não passa pelo render).
 import type { SistemaId } from '@kof/domain';
 import { CODIGO_WORKLET } from './anel';
-import type { InfoDoJogo } from './libretro';
+import type { ExtrasDoJogo, InfoDoJogo } from './libretro';
 import type { DoWorker, Medicao, ParaWorker, Pedido, ReplayDoBug, SituacaoRebob } from './mensagens';
 import { NUCLEOS } from './nucleos';
 
@@ -27,6 +27,8 @@ export interface OpcoesDoJogo {
   sram?: Uint8Array | null;
   /** opções do núcleo (paletas...) */
   opcoes?: Record<string, string>;
+  /** BIOS e os outros arquivos do jogo (Neo Geo: o zip do pai; PS1: os .bin do .cue) */
+  extras?: ExtrasDoJogo;
 }
 
 export class Jogo {
@@ -73,6 +75,7 @@ export class Jogo {
       taxaSaida: j.ctx?.sampleRate ?? 48000,
       sram: opcoes.sram ?? null,
       opcoes: opcoes.opcoes ?? {},
+      extras: opcoes.extras ?? {},
     });
     try {
       j.info = await pronto;

@@ -50,6 +50,22 @@
       "tamanho": 82548,
       "sha256": "12ee70a7229d1aa81fc2ac94c7cf0380a948ecf46da057d2699c2b92c629d924",
       "nota": "núcleo só de som (YM2612 + PSG do Genesis Plus GX, nucleo-libretro/somfm.c): o antigo embute no KOFstation.html, daqui sai só esse trecho"
+    },
+    "fbneo": {
+      "arquivo": "fbneo-2c9052c7.js",
+      "tamanho": 8123229,
+      "sha256": "2c9052c7667188c60ff6d837f519476244a87db1c6d3a773c795312b0ed16682",
+      "nota": "FBNeo só com o Neo Geo (licença não comercial do FBNeo)"
+    },
+    "pcsx": {
+      "arquivo": "pcsx-ba44bc08.js",
+      "tamanho": 1284230,
+      "sha256": "ba44bc080f914680e881569dc3942db0dc6dea41544c75b5eb4f54194888bd51"
+    },
+    "mupen64": {
+      "arquivo": "mupen64-66e19597.js",
+      "tamanho": 4564926,
+      "sha256": "66e195978cf81275fa3c7d92ebe263cfb53b6d8cc51c56f78516d9df3e912220"
     }
   }
 }

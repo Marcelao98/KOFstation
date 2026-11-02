@@ -18,3 +18,4 @@ export * from './modos';
 export * from './entrada';
 export * from './jogadores';
 export * from './patch';
+export * from './bios';
