@@ -21,6 +21,26 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-02 · Pós-entrega dos Lotes A e B · "connection refused" e onde parou
+
+**Pedido:** o Marcelo instalou o pacote M3–M8; abriu uma vez e rodou liso, na segunda deu "connection refused". Depois
+desistiu de trazer os saves do app antigo ("muito trampo") e quer conferir se os saves do **novo** funcionam.
+**Feito:** correção `ab024f4`: quando já tem um Chromium aberto com o perfil do KOFstation, o processo novo entrega o
+endereço pro que já existe e sai na hora; o `kofstation` achava que a janela tinha fechado e desligava o servidor. Agora
+só um navegador que durou mais de 15 s conta como janela fechada; senão vale o sinal de vida da página (`app.vivo` a
+cada 5 s; sem sinal por 30 s, encerra). Binários da `teste-binarios` trocados (Linux SHA-256 `86005e4f…`), `main` em dia.
+**Medido / conferido:** reproduzido com um navegador falso que sai na hora: o servidor fica no ar com a janela aberta e
+encerra sozinho 30 s depois que ela some. `check`, `check:rust` e 29 testes de fluxo verdes.
+**Aprendido:** no antigo isso não existia porque não tinha servidor (o lançador abria um `.html` direto). Saves do antigo
+ficam dentro do navegador dele (IndexedDB): só saem pelo backup `.kofsave` (Arquivo → 💾 Backup no antigo).
+**Onde parou:** ⏸ o Marcelo vai testar a lista de 39 itens (está na conversa; resumo no README → "Rodar"), começando
+pelos **saves do novo**: jogar algo com save de cartucho, salvar no jogo, fechar e abrir (save em
+`~/.local/share/KOFstation/lojas/saves/`, chave `sram.<título>.<tamanho>`); F5/F6/F8; Continuar de onde parou. Bug que
+ele trouxer: consertar com commit "Correção: …", trocar a `teste-binarios` (um commit, `push -f`) e juntar na `main`.
+Depois que ele aprovar o pacote: marcar M3–M8 como ✅ no ROADMAP e seguir pro M9 (Jukebox).
+
+---
+
 ## 2026-11-01 · Lotes A e B (M3–M8) · biblioteca, saves, rebobinar, imagem e controles
 
 **Pedido:** fazer o Lote A (M3 Biblioteca e Kof Games, M4 Configurações e `.kofsave`, M5 Saves/estados/modos, M6
