@@ -67,6 +67,18 @@ function opcoes(): Op[] {
       () => 'vale em todos os modos (é o "suspender" do console); PS1/N64/PS2 no mínimo a cada 2 min',
     ],
     [
+      'Núcleo do PlayStation',
+      'nucleoPs1',
+      [
+        ['nativo', 'nativo (rápido, com recompilador)'],
+        ['wasm', 'WebAssembly (o de antes)'],
+      ],
+      () => (config().ler('nucleoPs1') === 'wasm' ? 'wasm' : 'nativo'),
+      (v) => config().guardar('nucleoPs1', v),
+      () =>
+        'o nativo roda fora do navegador e lê o CD direto da Kof Games; se faltar ou falhar, o PS1 abre no WebAssembly sozinho (vale no próximo jogo)',
+    ],
+    [
       'Pausar ao sair da janela',
       'pausaAuto',
       [

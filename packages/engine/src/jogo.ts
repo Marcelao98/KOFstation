@@ -241,3 +241,6 @@ export class Jogo {
     this.ctx = null;
   }
 }
+
+/** O jogo aberto: no núcleo em wasm (Worker) ou num núcleo nativo (processo à parte). */
+export type SessaoDeJogo = Jogo | import('./nativo').JogoNativo;

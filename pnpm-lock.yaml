@@ -106,6 +106,9 @@ importers:
 
   packages/engine:
     dependencies:
+      '@kof/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@kof/domain':
         specifier: workspace:*
         version: link:../domain

@@ -6,6 +6,7 @@ export * from './nucleos';
 export * from './quadro';
 export * from './anel';
 export * from './jogo';
+export * from './nativo';
 export * from './mensagens';
 export * from './reamostrador';
 export * from './rebobinador';

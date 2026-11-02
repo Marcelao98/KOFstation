@@ -12,6 +12,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@kof/domain": "workspace:*"
+    "@kof/domain": "workspace:*",
+    "@kof/contracts": "workspace:*"
   }
 }

@@ -16,7 +16,17 @@ import {
   type JogoAberto,
 } from '@kof/app-core';
 import { chaveSramDe, fatosDe, SISTEMAS, type RegistroJogo } from '@kof/domain';
-import { Jogo, type InfoDoJogo, type Medicao, type Proporcao, type SituacaoRebob } from '@kof/engine';
+import {
+  Jogo,
+  JogoNativo,
+  NUCLEOS,
+  type EventosDoJogo,
+  type InfoDoJogo,
+  type Medicao,
+  type Proporcao,
+  type SessaoDeJogo,
+  type SituacaoRebob,
+} from '@kof/engine';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { aoTrazerSaves } from './backup';
@@ -77,8 +87,24 @@ export interface Origem {
   soltos?: File[];
 }
 
+/** Sistemas com núcleo nativo neste executável (perguntado uma vez). */
+let nativosDisponiveis: Promise<string[]> | null = null;
+function nativos(): Promise<string[]> {
+  nativosDisponiveis ??= servicos()
+    .backend.chamar<{ sistemas: string[] }>('nativo.disponivel')
+    .then((r) => r.sistemas)
+    .catch(() => []); // backend de teste ou kofstation antigo: sem nativo, o wasm roda
+  return nativosDisponiveis;
+}
+
+/** O jogo vai no núcleo nativo? PS1 por padrão (Opções de emulação troca), só com o jogo na Kof Games. */
+async function querNativo(sistema: string, path: string | undefined): Promise<boolean> {
+  if (sistema !== 'ps1' || !path || config().ler('nucleoPs1') === 'wasm') return false;
+  return (await nativos()).includes(sistema);
+}
+
 export interface EstadoJogo {
-  jogo: Jogo | null;
+  jogo: SessaoDeJogo | null;
   nome: string;
   /** registro do jogo aberto (id = "título|tamanho", as chaves do antigo) */
   registro: RegistroJogo | null;
@@ -150,15 +176,54 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         await usarBios.getState().pedir(aberto.sistema, () => get().abrirJogo(aberto, origem));
         return false;
       }
-      aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
+      const nativo = await querNativo(aberto.sistema, origem.path);
+      // nativo: o processo lê o CD direto da Kof Games (os .bin do .cue não passam pela página)
+      if (!nativo) aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
       const bios = await biosDoSistema(armazem, aberto.sistema);
       if (get().jogo) await antesDeTrocar();
-      get().jogo?.fechar();
+      fecharSessao(get().jogo);
       const { volume, mudo } = get();
       const ident = identidade(aberto.sistema, aberto.rom, aberto.nome);
       const chaveSram = chaveSramDe(ident.titulo || aberto.nome, aberto.rom.length);
       const sram = await saveDoJogo(chaveSram);
-      const jogo = await Jogo.abrir(
+      const opcoes = opcoesDoNucleo(aberto.sistema);
+      const eventos: EventosDoJogo = {
+        quadro: (pixels, largura, altura) => Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true }),
+        medicao: (medicao) => set({ medicao }),
+        sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
+        rebob: (r) => aoMudarRebob.forEach((f) => f(r)),
+        erro: (m, log) => {
+          set({ pausaManual: true });
+          if (log.length) registrar('error', 'nucleo', `${m} · o núcleo disse: ${log.slice(-8).join(' | ')}`);
+          if (get().jogo instanceof JogoNativo) void anotarLogNativo(m);
+          usarAvisos.getState().avisarErro(`erro no emulador: ${m}`);
+          aoErroDoEmulador.forEach((f) => f(m));
+        },
+      };
+      let jogo: SessaoDeJogo | null = null;
+      if (nativo && origem.path)
+        try {
+          const r = await servicos().backend.chamar<{ porta: number; token: string }>('nativo.abrir', {
+            sistema: aberto.sistema,
+            path: origem.path,
+            bios: bios.map((b) => b.nome),
+            opcoes: { ...NUCLEOS[aberto.sistema]?.opcoes, ...opcoes, pcsx_rearmed_drc: 'enabled' },
+            ...(NUCLEOS[aberto.sistema]?.dispositivo ? { dispositivo: NUCLEOS[aberto.sistema]?.dispositivo } : {}),
+          });
+          jogo = await JogoNativo.abrir(
+            { sistema: aberto.sistema, porta: r.porta, token: r.token, volume: volume / 100, mudo, sram },
+            eventos,
+          );
+        } catch (e) {
+          // reserva automática: o wasm continua no app
+          registrar('warn', 'nativo', `o núcleo nativo não abriu (${textoDoErro(e)}): usando o WebAssembly`);
+          av.avisar('PS1 nativo não abriu: usando o WebAssembly', 3500);
+          void servicos()
+            .backend.chamar('nativo.fechar')
+            .catch(() => undefined);
+          aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
+        }
+      jogo ??= await Jogo.abrir(
         {
           sistema: aberto.sistema,
           rom: aberto.rom,
@@ -166,25 +231,14 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
           volume: volume / 100,
           mudo,
           sram,
-          opcoes: opcoesDoNucleo(aberto.sistema),
+          opcoes,
           extras: {
             bios,
             ...(aberto.principal ? { principal: aberto.principal } : {}),
             ...(aberto.arquivos ? { arquivos: aberto.arquivos } : {}),
           },
         },
-        {
-          quadro: (pixels, largura, altura) => Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true }),
-          medicao: (medicao) => set({ medicao }),
-          sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
-          rebob: (r) => aoMudarRebob.forEach((f) => f(r)),
-          erro: (m, log) => {
-            set({ pausaManual: true });
-            if (log.length) registrar('error', 'nucleo', `${m} · o núcleo disse: ${log.slice(-8).join(' | ')}`);
-            usarAvisos.getState().avisarErro(`erro no emulador: ${m}`);
-            aoErroDoEmulador.forEach((f) => f(m));
-          },
-        },
+        eventos,
       );
       const provisorio: RegistroJogo = {
         ...ident,
@@ -210,7 +264,13 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       const sis = SISTEMAS.find((s) => s.id === aberto.sistema)?.nome ?? aberto.sistema;
       av.avisar(`▶ ${aberto.nome} (${sis})`);
       if (mudo) av.avisar('o som está desligado: aperte M pra ligar', 3000);
-      else if (!jogo.comSom) av.avisar('sem som: o navegador não liberou o áudio (o jogo roda mudo)', 4000);
+      else if (!jogo.comSom)
+        av.avisar(
+          jogo instanceof JogoNativo
+            ? 'sem som: nenhuma saída de som achada (o jogo roda mudo)'
+            : 'sem som: o navegador não liberou o áudio (o jogo roda mudo)',
+          4000,
+        );
       depoisDeAbrirJogo.forEach((f) => f());
       void guardarNaBiblioteca(aberto, origem).then((r) => r && get().registro?.id === r.id && set({ registro: r }));
       return true;
@@ -224,7 +284,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   fechar: () => {
     void antesDeTrocar();
     document.body.classList.remove('rebobinando');
-    get().jogo?.fechar();
+    fecharSessao(get().jogo);
     abertoAgora = null;
     ultimoQuadro.pixels = null;
     set({ jogo: null, nome: '', registro: null, info: null, medicao: null, rapidoAberto: false });
@@ -270,6 +330,29 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   },
   fecharRapido: () => set({ rapidoAberto: false }),
 }));
+
+/** Fecha a sessão; a nativa também fecha o processo dela. */
+function fecharSessao(j: SessaoDeJogo | null) {
+  j?.fechar();
+  if (j instanceof JogoNativo)
+    void servicos()
+      .backend.chamar('nativo.fechar')
+      .catch(() => undefined);
+}
+
+/** O núcleo nativo deu erro: o log do processo vai pro log do app (e o caçador de bugs junta). */
+async function anotarLogNativo(m: string) {
+  try {
+    const l = await servicos().backend.chamar<{ vivo: boolean; saida: string | null; linhas: string[] }>('nativo.log');
+    registrar(
+      'error',
+      'nativo',
+      `${m} · processo ${l.vivo ? 'vivo' : `fechou (${l.saida ?? '?'})`} · ${l.linhas.slice(-15).join(' | ')}`,
+    );
+  } catch (e) {
+    registrar('warn', 'nativo', `sem o log do processo nativo: ${textoDoErro(e)}`);
+  }
+}
 
 /**
  * Um arquivo que o jogo precisa (os .bin do .cue, o zip do pai do Neo Geo): primeiro na pasta do jogo, depois em
