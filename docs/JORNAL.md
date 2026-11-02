@@ -21,6 +21,47 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-01 · Lotes A e B (M3–M8) · biblioteca, saves, rebobinar, imagem e controles
+
+**Pedido:** fazer o Lote A (M3 Biblioteca e Kof Games, M4 Configurações e `.kofsave`, M5 Saves/estados/modos, M6
+Rebobinar) e o Lote B (M7 Painel de imagem e molduras, M8 Controles e jogadores 2–4) inteiros, sem parar nos
+checkpoints; junto, o `docs/EXPANDIR.md` e o log dos erros da tela no arquivo do Rust (`log.write`). Um commit por passo.
+**Feito (22 commits, `4bb8e1f`…`433425e`):**
+- Rust: `api.rs` com os comandos (testável sem HTTP), corpo JSON ou binário (`X-Kof-Args`), uma linha por pedido;
+  crate `kof-files` (escopos, raiz Kof Games pela posição do executável ou escolhida, varredura com diretório do zip e
+  cara de CD, CRC No-Intro com cache, inventário + aplicar o plano de organizar, lojas `.json`+`.bin`, config, capas do
+  libretro-thumbnails com `ureq`). `log.write` com os erros da tela.
+- `domain`: identidade da ROM (CRC, título, `título|tamanho`, `sram.<título>.<tamanho>`), detecção pelo conteúdo, Neo Geo
+  (lista do FBNeo), plano de organizar, busca/facetas/base de jogos, guarda (`.kofsave`), modos, entrada em camadas,
+  jogadores. `engine`: bateria e estados no Worker, rebobinador (o do antigo), `RenderizadorVisual` + `kofvisual.js` e
+  `kofmolduras.js` copiados sem mudança, paletas.
+- Telas: Biblioteca (lotes de 150, ficha, filtros, capas, sofá), pasta Kof Games e plano de organizar, Backup, Estados
+  (com Opções de emulação), Modo de jogo, Início com Continuar/Recentes, ampulheta do rebobinar, painel de imagem (F4),
+  galeria de molduras, Controles e teclas, Jogadores. `docs/EXPANDIR.md`.
+
+**Decidido:** D23 (pasta digitada/colada, sem diálogo nativo), D24 (dados em `<dados>/lojas` com os formatos do antigo),
+D25 (plano de organizar no TS, Rust só lista e move; mostra o plano antes), D26 (visual e molduras copiados sem mudança),
+D27 (uma linha por pedido; binário sem base64).
+**Medido / conferido (com `KOF_ANTIGO`, comparando com o código do antigo):** savestate do antigo abre no novo e o do
+novo no antigo, com a mesma imagem depois, nos 5 sistemas; o rebobinador restaura os mesmos estados, passo a passo; o
+`.kofsave` é lido e escrito pelo `guarda.js` antigo nos dois sentidos (mesmo hash); a base de jogos responde igual ao
+`KofJogos`; título/CRC iguais ao `nucleo.js`/`jogos.js`; **os 42 jeitos do painel de imagem dão o mesmo canvas, pixel a
+pixel**, do `KOFstation.html` publicado. 29 testes de fluxo + ~100 de unidade passando; executável de verdade testado de
+ponta a ponta (pasta → plano → organizar → jogar → F5 → painel → backup) sem erro.
+**Deu errado / aprendido:**
+- O App passou a carregar depois da configuração (`import()` dinâmico): teste de fluxo que aperta tecla logo após o
+  `goto` precisa esperar o `#home`.
+- Duas gravações do registro de um jogo (abrir e salvar automático) se cruzavam e apagavam o `temAuto`: agora passam
+  por uma fila (`naFila`).
+- Um `vite preview` esquecido aberto fez o Playwright testar um build velho; e o Gambatte não devolve o mesmo estado byte
+  a byte depois de carregar e salvar (o antigo também não): o teste do rebobinar confere o que é carregado no núcleo.
+- Commit do M3.2 saiu com um aviso do clippy (corrigido no M3.3); o do M5.3 foi corrigido antes do envio (amend local).
+**Onde parou:** ⏸ esperando o Marcelo testar o pacote (comando de instalação e lista do que testar na conversa e no
+README). Fica pra depois: estatísticas/espaço usado (M10; o backup já leva as estatísticas), CD de PS1 e analógico num
+jogo de verdade (M11), celulares como jogadores (M13), medir 3.000 jogos na biblioteca com a CPU limitada.
+
+---
+
 ## 2026-11-01 · Checkpoint do M2 · aprovado
 
 **Pedido:** instalar em `~/Programas/Kof Games/KOFstation` (só o executável; o antigo foi renomeado pra

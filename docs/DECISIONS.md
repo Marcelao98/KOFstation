@@ -116,3 +116,31 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - O núcleo roda num Web Worker e mantém ~60 ms de som num anel de memória compartilhada; o AudioWorklet consome no
   relógio da placa de som. Sem som (sem isolamento ou placa), um relógio pelo fps do núcleo. É o "motor novo" que
   estava planejado no antigo. Medido no M2: 60 fps e 0 falta de som, também com a CPU limitada a 4x.
+
+## D23. A pasta Kof Games é digitada/colada (sem diálogo nativo) — **aceita** (M3, 01/11)
+- No navegador em modo app não existe diálogo de pasta que devolva o caminho (o `showDirectoryPicker` dá um "handle",
+  não o caminho, e o Rust precisa do caminho). A janela "📁 Pasta Kof Games" vem preenchida com a sugestão
+  (`~/Kof Games`) e cria a pasta se o pai existir. Se o executável mora em `<Kof Games>/KOFstation/`, a raiz vem
+  sozinha, como o lançador antigo fazia. Diálogo nativo (`rfd`/portal) só se o Marcelo pedir: puxa GTK/D-Bus no Linux.
+
+## D24. Dados do app em `<dados>/lojas/<loja>/` — **aceita** (M3–M5, 01/11)
+- O IndexedDB `kofnes` do antigo virou arquivos do Rust: cada registro é `<chave>.json` (metadados) + `<chave>.bin`
+  (bytes), com os MESMOS formatos de registro do antigo (saves com a chave `sram.<título>.<tamanho>`, estados com o JSON
+  `{lr, d}` em gzip, jogos com `título|tamanho`). Assim o `.kofsave` entra e sai sem conversão.
+- Fica em `<dados>` (`~/.local/share/KOFstation`, `%LOCALAPPDATA%\KOFstation`), não na Kof Games: os saves não mudam de
+  lugar quando a pessoa troca a pasta. Ir pra `Kof Games/Saves` (pra sincronizar entre aparelhos) é decisão do M13.
+- Sem a Kof Games escolhida, a ROM aberta fica guardada na loja `roms` (como antes: abre sem diálogo da próxima vez).
+
+## D25. O plano de organizar é do TS; o Rust só lista e move — **aceita** (M3, 01/11)
+- A regra de "que console é" (extensão, zip, CD, Neo Geo pelos CRCs) mora no `domain` e serve pra arquivo aberto e pra
+  pasta. O Rust junta os fatos (`library.scan`/`library.inventory`: tamanho, diretório do zip, cara de CD) e aplica os
+  movimentos que a pessoa aprovou (`library.organize.apply`). Organizar mostra o plano antes (o antigo movia direto).
+
+## D26. Painel de imagem e molduras copiados sem mudança — **aceita** (M7, 01/11)
+- `web/visual.js` e `web/molduras.js` do antigo entram como `kofvisual.js`/`kofmolduras.js` (só a última linha vira
+  `export`); um teste confere o SHA-256 do miolo. O renderizador (`engine/visual/render.ts`) é o `gl*`/`pintar` do antigo
+  linha por linha, em WebGL 1 como lá. Resultado medido: os mesmos pixels nas 42 predefinições.
+
+## D27. O servidor local atende cada pedido numa linha própria — **aceita** (M3.6, 01/11)
+- Baixar uma capa (rede, até 20 s) não pode segurar o save que chega junto. Comandos binários vão em
+  `application/octet-stream` com os argumentos no cabeçalho `X-Kof-Args` (nada de base64 em JSON).

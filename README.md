@@ -10,9 +10,10 @@ camada de experiência em volta deles.
 > [Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old) e continua sendo o produto até a troca.
 > A migração anda em etapas com paridade total: nada do antigo pode se perder ([docs/PARIDADE.md](docs/PARIDADE.md)).
 
-**Onde estamos (31/10/2026):** etapa **M2 pronta** — o app novo já roda jogo (SNES, NES, Game Boy/Color, GBA, Mega Drive,
-Master System, Game Gear) com a mesma imagem e o mesmo som do antigo, quadro a quadro. Ainda sem biblioteca e sem
-saves. Detalhe de cada etapa: [docs/ROADMAP.md](docs/ROADMAP.md). O que aconteceu em cada sessão:
+**Onde estamos (01/11/2026):** etapas **M3 a M8 feitas**, esperando o Marcelo testar — biblioteca e pasta Kof Games,
+configurações em arquivo e backup `.kofsave` (abre nos dois apps), saves, estados, salvar automático, modos de jogo,
+rebobinar, painel de imagem (os mesmos pixels do antigo nas 42 predefinições), molduras, paletas, controles por console e
+por jogo e jogadores 2 a 4. Roda SNES, NES, Game Boy/Color, GBA, Mega Drive, Master System e Game Gear. Detalhe de cada etapa: [docs/ROADMAP.md](docs/ROADMAP.md). O que aconteceu em cada sessão:
 [docs/JORNAL.md](docs/JORNAL.md).
 
 ---
@@ -26,11 +27,13 @@ flowchart LR
   subgraph PC["Computador (Linux ou Windows)"]
     APP["kofstation (Rust)<br/>crates/kof-app<br/>um executável só"]
     NAV["Chrome / Chromium / Edge / Brave<br/>em modo app (sem barra)<br/>perfil próprio do KOFstation"]
-    LOG[("~/.local/share/KOFstation<br/>logs/")]
+    DADOS[("~/.local/share/KOFstation<br/>config/ · lojas/ · cache/ · logs/")]
+    KG[("Kof Games<br/>Games/&lt;console&gt; · Novos · Config · Saves")]
   end
   APP -- "abre e fecha junto" --> NAV
-  NAV -- "http://127.0.0.1:porta<br/>página + /api com token" --> APP
-  APP --> LOG
+  NAV -- "http://127.0.0.1:porta<br/>página + /api com token<br/>(JSON ou binário)" --> APP
+  APP --> DADOS
+  APP -- "varre, organiza, lê ROM" --> KG
 ```
 
 O `kofstation` leva **o app web inteiro e os núcleos dentro dele**. Ao abrir, ele sobe um servidor só em `127.0.0.1`
@@ -43,21 +46,22 @@ D2 em [docs/DECISIONS.md](docs/DECISIONS.md).
 ```mermaid
 flowchart TB
   subgraph DESK["apps/desktop — React + TypeScript"]
-    SC["screens/ — Início, Guia, Temas, Pendente…"]
+    SC["screens/ — Início, Biblioteca, Estados, Modo, Visual, Molduras, Teclas, Jogadores, Backup, Guia, Temas…"]
     CO["components/ — Menu, Lateral, MenuRapido, Aviso, Status, Desempenho"]
-    HK["hooks/ — tela do jogo, entrada, pausa, navegação por controle"]
-    ST["stores/ (Zustand) — telas, prefs, jogo, avisos, showcase"]
-    PL["platform/ — local (kofstation) · teste (memória)"]
+    HK["hooks/ — tela do jogo (filtros e moldura), entrada dos 4 jogadores, pausa, navegação por controle"]
+    ST["stores/ (Zustand) — telas, config, jogo, biblioteca, capas, bateria, estados, auto, modo, rebob, visual, painel, moldura, entrada, jogadores, backup…"]
+    PL["platform/ — local (kofstation) · teste (memória, imita os comandos do Rust)"]
   end
   subgraph PKG["packages/ — TypeScript sem React"]
-    AC["app-core — casos de uso: obterInfo, lerArquivoDeJogo, observarControle, erros"]
-    DO["domain — puro: sistemas, temas, frases, controle virtual, zip"]
-    EN["engine — SessaoLibretro, Worker, anel de som, AudioWorklet, WebGL, escala"]
+    AC["app-core — casos de uso: Kof Games, jogos, armazém, config, saves/bateria, estados, backup, capas, base de jogos, log"]
+    DO["domain — puro: sistemas, detecção e CRC, busca e facetas, organizar, guarda (.kofsave), modos, entrada em camadas, jogadores"]
+    EN["engine — SessaoLibretro, Worker (bateria, estados, rebobinar), som, RenderizadorVisual (visual.js do antigo), molduras"]
     CT["contracts — tipos e exemplos do contrato com o Rust"]
   end
   subgraph RS["crates/ — Rust"]
-    KA["kof-app — servidor local + abre o navegador"]
-    KC["kof-core — app.info, erros com código, log em arquivo"]
+    KA["kof-app — servidor local (uma linha por pedido) + api.rs (os comandos) + abre o navegador"]
+    KF["kof-files — escopos, Kof Games, varredura, CRC, organizar, lojas, config, capas"]
+    KC["kof-core — app.info, erros com código, log em arquivo (inclusive o da tela)"]
   end
   NU[("núcleos libretro do kofstation-old<br/>third_party/cores/manifest.json (SHA-256)")]
 
@@ -71,7 +75,9 @@ flowchart TB
   AC --> EN
   AC --> CT
   PL -->|"HTTP + token"| KA
+  KA --> KF
   KA --> KC
+  KF --> KC
   EN --> NU
 ```
 
@@ -111,11 +117,12 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 |---|---|
 | Casca: menus, barra lateral, Início, Guia, 126 temas, showcase, Voltar, atalhos, navegação por controle | ✅ M1 |
 | Jogo: núcleo no Worker, som, imagem com escala/proporção, teclado e controle, pausa, turbo, volume, menu rápido, painel F3, abrir arquivo/.zip/arrastar | ✅ M2 |
-| Biblioteca e pasta Kof Games | ⬜ M3 |
-| Configurações em arquivo e backup `.kofsave` | ⬜ M4 |
-| Saves, estados, modos de jogo, rebobinar | ⬜ M5–M6 |
-| Painel de imagem, filtros, molduras | ⬜ M7 |
-| Controles configuráveis, jogadores 2–4 | ⬜ M8 |
+| Biblioteca (busca, facetas, base de jogos, capas, sofá) e pasta Kof Games (organizar com plano) | ⏸ M3 (falta o Marcelo testar) |
+| Configurações em arquivo (camadas geral → console → jogo) e backup `.kofsave` (abre nos dois apps) | ⏸ M4 |
+| Save de bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos de jogo | ⏸ M5 |
+| Rebobinar (no Worker, igual ao antigo) | ⏸ M6 |
+| Painel de imagem (os mesmos pixels do antigo), passadas, molduras, paletas | ⏸ M7 |
+| Controles e teclas por console/jogo, analógico no teclado, jogadores 2–4 | ⏸ M8 |
 | Jukebox e música, estatísticas, patches, caçador de bugs | ⬜ M9–M10 |
 | PS1, N64, Neo Geo, PS2 | ⬜ M11–M12 |
 | Rede e celular, pacotes e atualização, Android | ⬜ M13–M15 |
@@ -124,10 +131,10 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 
 ## Rodar
 
-Só testar (sem compilar nada; o `git` pede o login do GitHub se o repositório for privado):
+Só testar (sem compilar nada), instalando em `~/Programas/Kof Games/KOFstation` (a pasta de cima vira a Kof Games):
 
 ```bash
-git clone --depth 1 -b teste-binarios https://github.com/Marcelao98/KOFstation ~/Downloads/kofstation-teste && chmod +x ~/Downloads/kofstation-teste/kofstation && ~/Downloads/kofstation-teste/kofstation
+mkdir -p ~/Programas/"Kof Games"/KOFstation && curl -fL -o ~/Programas/"Kof Games"/KOFstation/kofstation https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/kofstation && chmod +x ~/Programas/"Kof Games"/KOFstation/kofstation && ~/Programas/"Kof Games"/KOFstation/kofstation
 ```
 
 Pelo código (precisa de Node 22+, Rust pelo rustup e um navegador Chromium; detalhes em

@@ -12,8 +12,8 @@
 | F1 | reiniciar o jogo | M2 | ✅ |
 | F2 | menu rápido (abre/fecha) | M2 | ✅ |
 | F3 | painel de desempenho | M2 | ✅ |
-| F4 | painel de imagem | M7 | ⬜ |
-| F5 / F6 / F8 | salvar estado / tela de estados / carregar o último | M5 | ⬜ |
+| F4 | painel de imagem | M7 | ✅ |
+| F5 / F6 / F8 | salvar estado / tela de estados / carregar o último | M5 | ✅ |
 | F7 | guardar a música (jukebox) | M9 | ⬜ |
 | F9 | reportar bug (caçador de bugs) | M10 | ⬜ |
 | F11 | tela cheia | M1 | 🟨 |
@@ -21,13 +21,13 @@
 | M | mudo | M2 | ✅ |
 | − / = (e numérico) | volume −10 / +10 | M2 | ✅ |
 | Tab (segurar) | turbo | M2 | 🟨 |
-| Backspace (segurar) / Select+Y | rebobinar | M6 | ⬜ |
-| Ctrl+O / Ctrl+L | abrir arquivo / biblioteca | M3 | ⬜ |
+| Backspace (segurar) / Select+Y | rebobinar | M6 | ✅ |
+| Ctrl+O / Ctrl+L | abrir arquivo / biblioteca | M3 | ✅ |
 | Home | Início | M1 | ✅ |
 | Alt+← / BrowserBack / botão direito | Voltar | M1 | ✅ |
-| Biblioteca: digitar = busca; F6 ou E = estados do jogo selecionado | | M3 | ⬜ |
-| Teclas do jogo + E/R (L2/R2) + analógico (setas/IJKL/TFGH no PS1/PS2/N64) | | M8 | ⬜ |
-| Teclas reservadas não podem ser mapeadas pro jogo (`RESERVADAS`) | | M8 | ⬜ |
+| Biblioteca: digitar = busca; F6 ou E = estados do jogo selecionado | | M3 | ✅ |
+| Teclas do jogo + E/R (L2/R2) + analógico (setas/IJKL/TFGH no PS1/PS2/N64) | | M8 | 🟨 (o mapa e a tela ✅; jogo de PS1/N64 só no M11) |
+| Teclas reservadas não podem ser mapeadas pro jogo (`RESERVADAS`) | | M8 | ✅ |
 
 ## Navegação e telas — [home, direito, foco, menu]
 - ⬜ Todas as telas do antigo existem (Início, Biblioteca, Estados, Jukebox, Estatísticas, Guia, Controles e teclas,
@@ -41,7 +41,7 @@
 - ⬜ Avisos (`avisar`, `avisarErro`) com as mesmas mensagens.
 
 ## Início, abertura, guia — [home, hometemas, abertura]
-- 🟨 Início: frases, logo por tema e dicas ✅; continuar/últimos jogos (M3/M5), BIOS (M11), sofá (M3).
+- 🟨 Início: frases, logo por tema e dicas ✅; Continuar de onde parou e Jogados recentemente ✅ (M5.3); BIOS (M11).
 - ⬜ Abertura da 1ª vez (biblioteca vazia): título → frases → 10 temas → apresentação → guia de 4 passos; Ajuda >
   Boas-vindas reabre.
 - ⬜ Música do Início (escolha, sortear, desligar; só toca depois do 1º gesto).
@@ -53,44 +53,43 @@
 - 🟨 Contraste: o CSS é o mesmo do antigo (então é igual); o teste de contraste automático entra junto do M7.
 
 ## Biblioteca e arquivos — [bib, busca, pastas, sofa]
-- ⬜ Milhares de jogos sem travar; ficha com capa, metadados e botõezinhos que filtram.
-- ⬜ Busca livre + `campo:valor`; facetas (Console, Gênero, Empresa, Década, Jogadores, Série) com contagem; ordenar.
-- ⬜ CRC No-Intro (sem cabeçalho 512/iNES) gravado no registro; base de jogos por CRC/título/set Neo Geo.
-- ⬜ Capas do libretro-thumbnails por sistema, com cache e falha lembrada.
-- ⬜ Kof Games: cria a árvore, organiza Novos/soltos/pasta errada (CD .cue+.bin junto), copia o que vem de fora.
-- ⬜ Abrir/arrastar: ROM, zip (inclusive CD dentro de zip), .cue com .bin, .bin sozinho (monta .cue), vários de uma vez,
-  patch, `.kofsave`, `.kofvisual`.
-- ⬜ Detecção de sistema por extensão e conteúdo (SYSTEM.CNF/BOOT2 do PS2, zip de Neo Geo por nome e por CRC, CD de PS1).
+- 🟨 Milhares de jogos em lotes de 150 (como o antigo); ficha com capa, metadados e botõezinhos que filtram ✅. Falta medir 3.000 jogos com a CPU limitada.
+- ✅ Busca livre + `campo:valor`; facetas (Console, Gênero, Empresa, Década, Jogadores, Série) com contagem; ordenar. [e2e biblioteca]
+- ✅ CRC No-Intro (sem cabeçalho 512/iNES) gravado no registro; base de jogos por CRC/título/set Neo Geo (mesmas respostas do `KofJogos`, teste com KOF_ANTIGO).
+- ✅ Capas do libretro-thumbnails por sistema, com cache e falha lembrada (agora baixadas pelo Rust). Modo sofá ✅.
+- ✅ Kof Games: cria a árvore, organiza Novos/soltos/pasta errada (CD .cue+.bin junto), copia o que vem de fora. Novo: mostra o plano antes de mover (D25).
+- 🟨 Abrir/arrastar: ROM, zip e `.kofsave` ✅, `.kofvisual` pelo painel ✅; CD (.cue/.bin) quando o PS1 rodar (M11); patch (M10).
+- ✅ Detecção de sistema por extensão e conteúdo (SYSTEM.CNF/BOOT2 do PS2, zip de Neo Geo por nome e por CRC, CD de PS1). [domain deteccao.test]
 
 ## Emulação, vídeo e som — [teste, nucleos, nucleo-snes, matriz, dk, erro]
 - ⬜ Os mesmos sistemas: SNES (Snes9x; Kof opcional quando liberado), GB/GBC, NES, MD, SMS, GG, GBA, Neo Geo, PS1, N64, PS2.
 - 🟨 Núcleo carregado só ao abrir um jogo daquele console (no Worker); o aviso de núcleo faltando vira erro claro do Worker.
 - ⬜ Resolução dinâmica (Sega, PS1), corte do NES (256x224), proporção 4:3 "como na TV", 10:9 GB/GG, 3:2 GBA.
-- ⬜ Paletas do GB (automática, verde, cinza) e do NES (3).
+- ✅ Paletas do GB (automática, verde, cinza) e do NES (3), mudando com o jogo rodando.
 - 🟨 Volume, mudo e aviso de mudo ao abrir jogo ✅; na jukebox: M9.
 - ⬜ Pular quadros quando atrasa (PS1 `frameskip auto`); turbo.
 - ⬜ Estado salvo com outro núcleo de SNES reabre no núcleo certo.
 - ✅ Mesmos pixels e mesmas amostras do antigo, quadro a quadro, em SNES, NES, MD, GB e GBA (comparação automática, `packages/engine/test/paridade.test.ts`).
 
 ## Painel de imagem e molduras — [filtros, visual-*, molduras]
-- ⬜ 61 ajustes, 42 predefinições, categorias/grupos, custo leve/médio/pesado, comparar (lado a lado, piscar),
-  ⭐ meus, 📤/📥 `.kofvisual`, por console e por jogo, Simples e Avançado, prévias.
-- ⬜ Passadas NTSC/Scale4x/bloom; aviso quando a passada falha.
-- ⬜ 15 molduras SVG com animação, por console, moldura PNG própria (acha o buraco).
-- ⬜ **Pixels idênticos ao antigo em todas as predefinições** (filtros aprovados: não mudam).
+- ✅ 61 ajustes, 42 predefinições, categorias/grupos, custo leve/médio/pesado, comparar (lado a lado, piscar),
+  ⭐ meus, 📤/📥 `.kofvisual`, por console e por jogo, Simples e Avançado, prévias. [e2e visual]
+- ✅ Passadas NTSC/Scale4x/bloom; aviso quando a passada falha (código do antigo).
+- ✅ 15 molduras SVG com animação, por console, moldura PNG própria (acha o buraco). [e2e molduras; molduras.js conferido por SHA-256]
+- ✅ **Pixels idênticos ao antigo em todas as predefinições** (e2e visual-paridade com o KOFstation.html publicado, KOF_ANTIGO).
 
 ## Controles — [teclas, controles, jogadores]
-- ⬜ Camadas Geral → console → só este jogo, pra teclado e controle; tecla repetida sai da ação antiga; ↺ por botão.
-- ⬜ Nomes dos botões por console; captura de botão do controle (espera soltar, 10 s).
-- ⬜ Analógico no teclado (PS1 misto, PS2 puro, N64 só o esquerdo).
-- ⬜ Jogadores 2–4: teclado sempre J1, controles e celulares em vagas, escolha lembrada pelo nome do controle, tela com luz.
+- ✅ Camadas Geral → console → só este jogo, pra teclado e controle; tecla repetida sai da ação antiga; ↺ por botão. [e2e controles]
+- ✅ Nomes dos botões por console; captura de botão do controle (espera soltar, 10 s).
+- 🟨 Analógico no teclado (PS1 misto, PS2 puro, N64 só o esquerdo): mapa e envio pro núcleo ✅; conferir num jogo quando o PS1/N64 rodar (M11).
+- 🟨 Jogadores 2–4: teclado sempre J1, controles em vagas, escolha lembrada pelo nome do controle, tela com luz ✅; celulares pela rede (M13).
 
 ## Saves, estados, modos, rebobinar — [saves, estados, auto, modos, rebob, migra]
-- ⬜ Save de bateria comprimido, rascunho seguro ao fechar, sem o fim 0xFF.
-- ⬜ Savestates (até o limite por modo), automático a cada N s, Continuar, carregar o último.
-- ⬜ Modos alegria/normal/raiz/hardcore com as mesmas regras; pergunta ao abrir (desligável); Opções de emulação.
-- ⬜ Rebobinar estilo Príncipe da Pérsia (preto e branco, ampulheta de 30 s; alegria sem recarga), desligado no PS1/PS2.
-- ⬜ `.kofsave` exportado no antigo abre no novo e vice-versa (saves, estatísticas, configs opcionais, estados opcionais).
+- ✅ Save de bateria comprimido, rascunho seguro ao fechar, sem o fim 0xFF (chave `sram.<título>.<tamanho>` do antigo). [e2e saves]
+- ✅ Savestates (limite por jogo), automático a cada N s, Continuar, carregar o último; estado do antigo abre no novo e vice-versa (teste com KOF_ANTIGO, 5 sistemas).
+- ✅ Modos alegria/normal/raiz/hardcore com as mesmas regras; pergunta ao abrir (desligável); Opções de emulação.
+- ✅ Rebobinar estilo Príncipe da Pérsia (preto e branco, ampulheta de 30 s; alegria sem recarga); o Rebobinador restaura os mesmos estados do antigo, passo a passo. PS1/PS2: `semRebob` (M11).
+- ✅ `.kofsave` exportado no antigo abre no novo e vice-versa (saves, estatísticas, configs opcionais, estados opcionais). [guarda.test com o guarda.js do antigo; e2e backup]
 - ⬜ Saves nativos do celular (PS1 `.mcd`, N64) entram no backup.
 
 ## Jukebox e música — [juke, jukebox, trilha, capas-wav]
