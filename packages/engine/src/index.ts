@@ -12,3 +12,8 @@ export * from './rebobinador';
 export * from './visual';
 export * from './molduras';
 export * from './paletas';
+export * from './sonda';
+export * from './spc';
+export * from './musica';
+export * from './tocador';
+export * from './violino';

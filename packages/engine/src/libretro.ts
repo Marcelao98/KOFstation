@@ -32,6 +32,14 @@ export interface ModuloLibretro {
   _lr_mem_ptr?(id: number): number;
   _lr_mem_size?(id: number): number;
   _lr_ok?(): number;
+  // sonda do osciloscópio e mudo por canal (jukebox: núcleos remendados do antigo)
+  _lr_sonda?(liga: number): void;
+  _lr_canais?(): number;
+  _lr_mudas?(m: number): void;
+  _lr_onda?(): number;
+  _lr_onda_pos_c?(c: number): number;
+  // arquivo no disco virtual do núcleo (BIOS em /sistema, jogo grande em /jogos)
+  _lr_arquivo?(caminho: number, dados: number, n: number): number;
 }
 
 export type FabricaDeNucleo = (opcoes: {
@@ -76,6 +84,11 @@ export class SessaoLibretro {
     const c = NUCLEOS[sistema];
     if (!c) throw new Error(`o app novo ainda não roda ${sistema}`);
     this.config = c;
+  }
+
+  /** O módulo do núcleo (a jukebox lê a sonda direto da memória dele). */
+  get modulo(): ModuloLibretro {
+    return this.mod;
   }
 
   /** Muda opções do núcleo com o jogo rodando (paleta do GB/NES): o núcleo lê na próxima vez que perguntar. */
@@ -193,6 +206,14 @@ export class SessaoLibretro {
     encaixarQuadro(fb, w, h, this.info.largura, this.info.altura, this.quadro);
     const audio = new Int16Array(m.HEAPU8.buffer, m._lr_audio(), m._lr_audio_n() * 2);
     return { audio, mudouTamanho };
+  }
+
+  /** Um quadro sem imagem e sem botão (jukebox). Devolve o som desse quadro (vista na memória do núcleo). */
+  rodarSoSom(): Int16Array {
+    const m = this.mod;
+    m._lr_pad(0);
+    m._lr_run(1, 0);
+    return new Int16Array(m.HEAPU8.buffer, m._lr_audio(), m._lr_audio_n() * 2);
   }
 
   reiniciar(): void {

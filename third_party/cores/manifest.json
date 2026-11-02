@@ -31,6 +31,25 @@
       "tamanho": 824997,
       "sha256": "371590f5c4435065f87e2d244b41c33c9ffba840a8d4a0d9972c3cebaf99931f",
       "nota": "base de jogos (libretro-database, CC BY-SA 4.0): não é núcleo, vem pelo mesmo caminho"
+    },
+    "violino": {
+      "arquivo": "violino-306d94e5.js",
+      "tamanho": 1327057,
+      "sha256": "306d94e51eed21bd985b099aa096952eed91c0d5d767539111009bbce9d73223",
+      "nota": "Air (Bach) em violino, The USAF Strings, domínio público (Opus em base64): não é núcleo"
+    },
+    "trilha": {
+      "url": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/ceba493fc494165de6f561b77a699fb8c22b295f/web/musicas/trilha.js",
+      "tamanho": 41305,
+      "sha256": "3ab8c365e15df1a5608073b0f2e520e225dc415364c424a087e8cdb514992b54",
+      "nota": "a trilha do KOFstation no som do Mega Drive (comandos gerados pelo trilha.py do antigo, músicas de domínio público)"
+    },
+    "somfm": {
+      "url": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/ceba493fc494165de6f561b77a699fb8c22b295f/publicado/KOFstation.html",
+      "trecho": ["var Nucleo_somfm", "// Tocador da trilha do KOFstation no núcleo SÓ DE SOM"],
+      "tamanho": 82548,
+      "sha256": "12ee70a7229d1aa81fc2ac94c7cf0380a948ecf46da057d2699c2b92c629d924",
+      "nota": "núcleo só de som (YM2612 + PSG do Genesis Plus GX, nucleo-libretro/somfm.c): o antigo embute no KOFstation.html, daqui sai só esse trecho"
     }
   }
 }

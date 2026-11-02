@@ -20,6 +20,10 @@ import { ModoTela } from '../screens/Modo/ModoTela';
 import { Visual } from '../screens/Visual/Visual';
 import { Teclas } from '../screens/Teclas/Teclas';
 import { Jogadores } from '../screens/Jogadores/Jogadores';
+import { Jukebox } from '../screens/Jukebox/Jukebox';
+import { Abertura } from '../screens/Abertura/Abertura';
+import { primeiraVez, usarAbertura } from '../stores/abertura';
+import { usarJukebox } from '../stores/jukebox';
 import { Molduras } from '../screens/Molduras/Molduras';
 import { Inicio } from '../screens/Inicio/Inicio';
 import { Pendente } from '../screens/Pendente/Pendente';
@@ -64,6 +68,10 @@ function teclaGlobal(e: KeyboardEvent) {
   const digitando = (e.target as Element | null)?.closest?.('input, textarea, select');
   if (j.rapidoAberto && teclaDoRapido.tratar?.(e.code)) return e.preventDefault();
   const noJogo = !!j.jogo && t.atual === 'jogo' && !t.temasAberto;
+  if (usarAbertura.getState().aberta) {
+    if (e.code === 'Escape') usarAbertura.getState().fechar(true);
+    return; // a abertura cuida das teclas dela
+  }
   if (e.code === 'Escape') {
     e.preventDefault();
     if (usarShowcase.getState().ativo) return usarShowcase.getState().parar(false);
@@ -85,6 +93,14 @@ function teclaGlobal(e: KeyboardEvent) {
   if (e.code === 'Minus' || e.code === 'NumpadSubtract') return void acao('vol-menos');
   if (e.code === 'Equal' || e.code === 'NumpadAdd') return void acao('vol-mais');
   if (noJogo && e.code === 'KeyP') return void acao('pausar');
+  // na jukebox: Espaço toca/pausa, P volta pro jogo (como no antigo)
+  if (t.atual === 'jukebox' && !t.temasAberto) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      return void usarJukebox.getState().alternar();
+    }
+    if (e.code === 'KeyP' && j.jogo) return void acao('voltar-jogo');
+  }
   // setas no Início e na galeria andam pelos botões (como no antigo)
   const s = SETAS[e.code];
   const tela = telaDeCima();
@@ -110,6 +126,7 @@ export function App({ backend }: { backend: Backend }) {
 
   useEffect(() => {
     document.body.classList.toggle('sofa', usarCapas.getState().sofa);
+    primeiraVez();
   }, []);
 
   useEffect(() => {
@@ -176,7 +193,8 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'estados' && <Estados />}
         {atual === 'teclas' && <Teclas />}
         {atual === 'jogadores' && <Jogadores />}
-        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas', 'jogadores'].includes(atual) && (
+        {atual === 'jukebox' && <Jukebox />}
+        {!['home', 'guia', 'jogo', 'biblioteca', 'estados', 'teclas', 'jogadores', 'jukebox'].includes(atual) && (
           <Pendente tela={atual as TelaId} />
         )}
         <div id="moldura" hidden={atual !== 'jogo'}>
@@ -194,6 +212,7 @@ export function App({ backend }: { backend: Backend }) {
         <Aviso />
         <BarraShowcase />
       </main>
+      <Abertura />
       <Status />
       <Desempenho />
       <input

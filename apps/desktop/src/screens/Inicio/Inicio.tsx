@@ -11,6 +11,7 @@ import { autoLigado, continuar } from '../../stores/auto';
 import { usarAvisos } from '../../stores/avisos';
 import { usarBiblioteca } from '../../stores/biblioteca';
 import { servicos } from '../../stores/servicos';
+import { INICIO, usarJukebox } from '../../stores/jukebox';
 import { srcCapa } from '../Biblioteca/Capas';
 
 const sortearDica = (antes: number): number => {
@@ -96,6 +97,11 @@ export function Inicio() {
   const ultimo = jogos[0];
   const continuarAuto = !!ultimo?.temAuto && autoLigado();
   const nomeDoJogo = usarJogo((j) => j.nome);
+  const musica = usarJukebox((j) => j.escolhaInicio);
+  // sem jogo aberto, o Início toca a música dele (abrirHome do antigo); o navegador só solta o som depois do 1º gesto
+  useEffect(() => {
+    if (!jogo) void usarJukebox.getState().tocarInicio();
+  }, [jogo]);
   const tema = usarPrefs((p) => p.temaNaTela);
   const info = usarApp((a) => a.info);
   const [dica, setDica] = useState(() => sortearDica(-1));
@@ -220,7 +226,7 @@ export function Inicio() {
         </button>{' '}
         ·{' '}
         <button className="hm-link" data-acao="musica-inicio" onClick={() => acao('musica-inicio')}>
-          🎵 Se Essa Rua
+          🎵 {INICIO.find(([k]) => k === musica)?.[1]}
         </button>
       </footer>
     </section>

@@ -2,9 +2,13 @@
 import { useEffect, useState } from 'react';
 import { acao } from '../app/acoes';
 import { MENUS } from '../app/menus';
+import { INICIO, usarJukebox } from '../stores/jukebox';
 
 export function Menu() {
   const [aberto, setAberto] = useState<number | null>(null);
+  const musica = usarJukebox((j) => j.escolhaInicio);
+  const rotulo = (a: string, t: string) =>
+    a === 'musica-inicio' ? 'Música no Início: ' + (INICIO.find(([k]) => k === musica)?.[1] ?? '') : t;
   useEffect(() => {
     if (aberto === null) return;
     const fechar = (e: MouseEvent) => {
@@ -48,7 +52,7 @@ export function Menu() {
                       acao(it.a, it.v);
                     }}
                   >
-                    {it.t}
+                    {rotulo(it.a, it.t)}
                     {it.k && <kbd>{it.k}</kbd>}
                   </button>
                 ),

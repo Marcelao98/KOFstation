@@ -70,3 +70,51 @@ export interface SituacaoRebob {
   recarga: number;
   recargaTotal: number;
 }
+
+// ---------- jukebox: o Worker do tocador (uma instância separada do núcleo, só som) ----------
+
+export interface FaixaNoWorker {
+  sistema: SistemaId;
+  rom?: Uint8Array | null;
+  estado?: Uint8Array | null;
+  spc?: Uint8Array | null;
+  /** trilha do KOFstation (comandos FM/PSG): toca no núcleo só de som */
+  fm?: Uint8Array | null;
+}
+
+export type ParaTocador =
+  | {
+      tipo: 'iniciar';
+      faixa: FaixaNoWorker;
+      urlNucleo: string;
+      /** null = só gerar o .wav (sem tocar) */
+      sab: SharedArrayBuffer | null;
+      taxaSaida: number;
+      segundos: number;
+      fadeMs: number;
+      repetir: boolean;
+      mudas: number;
+    }
+  | { tipo: 'mudas'; m: number }
+  | { tipo: 'config'; segundos: number; fadeMs: number; repetir: boolean }
+  | { tipo: 'tocar'; sim: boolean }
+  | { tipo: 'wav'; segundos: number; fadeMs: number }
+  | { tipo: 'parar' };
+
+export type DoTocador =
+  | {
+      tipo: 'pronto';
+      canais: number;
+      nomes: string[];
+      papeis: string[];
+      escalas: number[];
+      taxa: number;
+      taxaOnda: number;
+      temOndas: boolean;
+    }
+  /** ~30 por segundo: a onda de cada canal (a mais nova no fim), o nível de cada um e o tempo */
+  | { tipo: 'ondas'; amostras: number; filaMs: number; ondas: Int16Array; niveis: Float32Array }
+  /** acabou o tempo da faixa (com o fade): a página passa pra próxima */
+  | { tipo: 'fim' }
+  | { tipo: 'wav'; bytes: Uint8Array }
+  | { tipo: 'erro'; mensagem: string };

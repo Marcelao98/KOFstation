@@ -27,3 +27,23 @@ export function romGbComSave(valor = 0x42): Buffer {
   r[0x14d] = x;
   return r;
 }
+
+/** Game Boy com o canal 1 tocando uma quadrada sem parar (a música da jukebox nos testes). */
+export function romGbSom(): Buffer {
+  const r = Buffer.alloc(0x8000);
+  r.set([0x00, 0xc3, 0x50, 0x01], 0x100); // nop; jp $0150
+  r.write('KOFSOM', 0x134, 'latin1');
+  // som ligado, volume cheio, canal 1 nos dois lados, ciclo 50%, envelope cheio, dispara em ~512 Hz sem tempo de
+  // duração (toca pra sempre); jr para si mesmo
+  r.set(
+    [
+      0x3e, 0x80, 0xe0, 0x26, 0x3e, 0x77, 0xe0, 0x24, 0x3e, 0x11, 0xe0, 0x25, 0x3e, 0x80, 0xe0, 0x11, 0x3e, 0xf0, 0xe0,
+      0x12, 0x3e, 0x87, 0xe0, 0x14, 0x18, 0xfe,
+    ],
+    0x150,
+  );
+  let x = 0;
+  for (let i = 0x134; i <= 0x14c; i++) x = (x - (r[i] ?? 0) - 1) & 0xff;
+  r[0x14d] = x;
+  return r;
+}

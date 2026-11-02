@@ -15,3 +15,4 @@ export * from './backup';
 export * from './bateria';
 export * from './estados';
 export * from './visual';
+export * from './musicas';

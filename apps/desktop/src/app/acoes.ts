@@ -12,6 +12,8 @@ import { usarTelas, type TelaId } from '../stores/telas';
 import { usarVisual } from '../stores/visual';
 import { usarPainel } from '../stores/painel';
 import { usarMoldura } from '../stores/moldura';
+import { usarJukebox } from '../stores/jukebox';
+import { usarAbertura } from '../stores/abertura';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
 const TELAS: Partial<Record<string, TelaId>> = {
@@ -32,13 +34,9 @@ export const ETAPA: Readonly<Record<string, string>> = {
   traducao: 'M10',
   'controle-celular': 'M13',
   'nucleo-snes': 'M11',
-  'musica-inicio': 'M9',
-  'guardar-musica': 'M9',
-  'boas-vindas': 'M9',
   bug: 'M10',
   'cacador-toggle': 'M10',
   atualizacao: 'M15',
-  jukebox: 'M9',
   estatisticas: 'M10',
   'bios-tela': 'M11',
   aparelhos: 'M13',
@@ -193,6 +191,30 @@ export function acao(nome: string, valor?: string): boolean {
     case 'capas':
       usarCapas.getState().alternarCapas();
       usarAvisos.getState().avisar(`🖼 capas oficiais ${usarCapas.getState().ligadas ? 'ligadas' : 'desligadas'}`);
+      return true;
+    case 'boas-vindas':
+      usarAbertura.getState().abrir();
+      return true;
+    case 'jukebox':
+      void usarJukebox.getState().abrir();
+      return true;
+    case 'fechar-jukebox':
+      telas.sair();
+      return true;
+    case 'guardar-musica':
+      void usarJukebox.getState().guardarDoJogo();
+      return true;
+    case 'musica-inicio':
+      usarJukebox.getState().mudarMusicaInicio();
+      return true;
+    case 'jk-tocar':
+      usarJukebox.getState().alternar();
+      return true;
+    case 'jk-prox':
+      usarJukebox.getState().proxima(1);
+      return true;
+    case 'jk-parar':
+      usarJukebox.getState().fechar();
       return true;
     case 'sofa':
       usarCapas.getState().alternarSofa();
