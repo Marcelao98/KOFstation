@@ -14,3 +14,13 @@ pub mod supervisor;
 
 pub use nucleo::{Entrada, Quadro};
 pub use supervisor::{Pedido, ProcessoNativo};
+
+/// Pasta dos núcleos nativos desta plataforma (`third_party/cores/nativos/<plataforma>/`, igual ao manifesto).
+pub fn plataforma() -> &'static str {
+    match (std::env::consts::OS, std::env::consts::ARCH) {
+        ("windows", "x86_64") => "windows-x64",
+        ("linux", "x86_64") => "linux-x64",
+        ("linux", "aarch64") => "linux-arm64",
+        _ => "outra",
+    }
+}

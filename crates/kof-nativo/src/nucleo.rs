@@ -333,6 +333,10 @@ pub struct Abertura {
 
 pub struct Nucleo {
     f: Funcoes,
+    /// PCSX-ReARMed com o recompilador lightrec (x86_64): carregar estado sem reset antes faz ele pular pra um bloco
+    /// de código já descartado (SIGILL; acontece também no upstream mais novo). O reset limpa o cache do recompilador
+    /// inteiro e o estado sobrescreve tudo depois (teste `pcsx.rs`).
+    resetar_antes_do_estado: bool,
     pub info: InfoNucleo,
     pub av: retro_system_av_info,
     /// o conteúdo precisa viver enquanto o jogo está aberto (alguns núcleos guardam o ponteiro)
@@ -494,6 +498,7 @@ impl Nucleo {
         tracing::info!(nucleo = %info.nome, versao = %info.versao, ?av, "núcleo nativo aberto");
         Ok(Nucleo {
             f,
+            resetar_antes_do_estado: info.nome.contains("PCSX"),
             info,
             av,
             _conteudo: conteudo,
@@ -575,7 +580,12 @@ impl Nucleo {
 
     pub fn carregar_estado(&mut self, dados: &[u8]) -> Result<(), KofError> {
         // SAFETY: o núcleo só lê `dados.len()` bytes
-        let ok = unsafe { (self.f.unserialize)(dados.as_ptr() as *const c_void, dados.len()) };
+        let ok = unsafe {
+            if self.resetar_antes_do_estado {
+                (self.f.reset)();
+            }
+            (self.f.unserialize)(dados.as_ptr() as *const c_void, dados.len())
+        };
         if ok {
             Ok(())
         } else {
