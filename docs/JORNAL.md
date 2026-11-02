@@ -21,6 +21,35 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-02 · Etapas M9–M11 · jukebox, extras e sistemas com BIOS (em lote)
+
+**Pedido:** "vai até o M11", de uma vez. Perguntou se o M11 não sairia mais barato, já que os núcleos estão prontos.
+**Feito:** M9 (`27769ab`): tocador da jukebox num Worker à parte (instância separada do núcleo, sonda de ondas, mudo/solo,
+fade, `.wav`), F7, tela com Capa/Ondas/Notas (YIN, sincronia), mini-player, trilha FM no núcleo só de som, Air em
+violino, música do Início e abertura da 1ª vez. M10 (`a1fd59c`): estatísticas (tempo jogando de verdade, sessões, 7 dias,
+por jogo), espaço usado, patches IPS/BPS/UPS com o 🇧🇷, caçador de bugs (marco a cada 600 quadros no Worker, F9, pacote
+`kofbug`, `pnpm bug <pacote> <rom>`), aviso de "atualizado" e de som desligado. M11 (`d6641a9`, `2cce114`): tela de BIOS
+e o "falta a BIOS" do Neo Geo, BIOS no `/sistema`, Neo Geo no FBNeo (zip + pai, AES/MVS), PS1 no PCSX (.cue + .bin, .chd,
+.pbp, .iso, .exe, zip com CD), N64 no Mupen64Plus (WebGL2 num OffscreenCanvas dentro do Worker), menu do núcleo do SNES.
+**Decidido:** D28 (BIOS na loja `bios`), D29 (música do SNES pelo Snes9x: .spc entra num estado dele), D30 (N64 no
+Worker com OffscreenCanvas), D31 (núcleo só de som e trilha pelo manifesto, de um commit fixo do antigo).
+**Medido / conferido:** `check`, `check:rust` e 38 testes de fluxo verdes (novos: jukebox, abertura, extras, bios).
+O `.spc` gerado no teste toca no Snes9x (a voz religada soa; sem ela, silêncio; mudo pela opção zera). PS1 roda um PS-X
+EXE gerado a 60 fps, também no executável de verdade (servidor Rust), junto com a trilha na jukebox. Executáveis: Linux
+34,8 MB, Windows 37,4 MB (entraram fbneo, pcsx, mupen64, somfm, violino e trilha).
+**Deu errado / aprendido:** `l.i += l.num()` no BPS lia o `l.i` antes do `num()` avançar (o antigo usava duas linhas). A
+tela de BIOS apagava o "falta a BIOS do Neo Geo" ao abrir (pego no teste). O N64 com a ROM gerada quebra ("couldn't
+allocate memory for cached interpreter"): rodei o mesmo núcleo do jeito do antigo, na página, e quebra igual, então é a
+ROM (não é jogo de verdade), não o Worker. O teste do N64 confere só o que dá sem jogo. De passagem: a loja `roms` faltava
+na lista do Rust (o jogo aberto sem Kof Games não guardava a cópia).
+**Tokens:** o M11 saiu bem mais barato que a estimativa (os núcleos já eram do antigo: só ligação e testes).
+**Onde parou:** ⏸ o Marcelo testa o pacote M9–M11 (`teste-binarios`). Mais importante: jogo de verdade de Neo Geo
+(com o neogeo.zip), PS1 (.cue com os .bin na mesma pasta) e N64; F7 num jogo de SNES e num de Mega Drive; .spc de
+fora na jukebox; Estatísticas depois de jogar; F9. Bug que ele trouxer: "Correção: …", trocar a `teste-binarios`,
+juntar na `main`. Depois que ele aprovar: M9–M11 ✅ e seguir pro M12 (PS2 nativo).
+
+---
+
 ## 2026-11-02 · Etapas M3–M8 · pacote aprovado
 
 **Pedido:** o Marcelo conferiu os saves do novo (save de cartucho, F5/F6/F8, Continuar de onde parou): "deu certo".

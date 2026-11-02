@@ -144,3 +144,25 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 ## D27. O servidor local atende cada pedido numa linha própria — **aceita** (M3.6, 01/11)
 - Baixar uma capa (rede, até 20 s) não pode segurar o save que chega junto. Comandos binários vão em
   `application/octet-stream` com os argumentos no cabeçalho `X-Kof-Args` (nada de base64 em JSON).
+
+## D28. BIOS na loja `bios` da pasta de dados — **aceita** (M11, 02/11)
+- O antigo guardava a BIOS no navegador (loja `bios` do IndexedDB). Aqui ela fica em `<dados>/lojas/bios/`, com a chave
+  = o nome que o núcleo procura (`gba_bios.bin`, `neogeo.zip`, `scph5501.bin`), e vai pro `/sistema` do núcleo antes de
+  cada jogo. Não fica na `Kof Games/Config/bios` (a ARCHITECTURE previa): assim a BIOS não some quando a pessoa troca a
+  pasta, e não precisa de comando novo no Rust. Ler também o que a pessoa puser à mão em `Config/bios` fica pro M15.
+
+## D29. Música do SNES pelo Snes9x (sem o núcleo Kof) — **aceita** (M9, 02/11)
+- O núcleo Kof é da Mel e fica fora do repositório até ela definir a licença; no antigo a jukebox do SNES usava o chip de
+  som dele. Aqui: F7 guarda o estado do Snes9x (toca igual ao jogo, na instância separada); o .spc importado entra no
+  bloco `SND` de um estado do Snes9x com uma ROM que não mexe no som, e as vozes que estavam soando são religadas por um
+  pedacinho de código do SPC700 (MOV $F2/$F3 + JMP, sem mexer em registrador nem flag). Mudo por voz pelas opções
+  `snes9x_sndchan_volume_N`; barras pelo envelope (ENVX) lido do estado. Quando o Kof chegar, ele volta a ser a opção.
+
+## D30. N64 no Worker com OffscreenCanvas — **aceita** (M11, 02/11)
+- O antigo criava um `<canvas id="kof-gl">` escondido na página. No Worker não tem página: um OffscreenCanvas vira o
+  canvas do módulo e um `document` mínimo responde ao `#kof-gl` que a ponte procura. Mesmo binário do antigo.
+
+## D31. Núcleo só de som e trilha pelo manifesto — **aceita** (M9, 02/11)
+- O `somfm` (YM2612 + PSG) vem embutido no `KOFstation.html` publicado do antigo: o `pnpm nucleos` baixa o html de um
+  commit fixo e guarda só o trecho do núcleo (conferido por SHA-256), e a `trilha.js` (comandos das 6 músicas) vem do
+  mesmo commit. O violino é arquivo do `publicado/nucleos`, como os núcleos. Nada disso entra no git.

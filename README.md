@@ -10,10 +10,10 @@ camada de experiência em volta deles.
 > [Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old) e continua sendo o produto até a troca.
 > A migração anda em etapas com paridade total: nada do antigo pode se perder ([docs/PARIDADE.md](docs/PARIDADE.md)).
 
-**Onde estamos (02/11/2026):** etapas **M3 a M8 feitas**, aprovadas pelo Marcelo em 02/11 — biblioteca e pasta Kof Games,
-configurações em arquivo e backup `.kofsave` (abre nos dois apps), saves, estados, salvar automático, modos de jogo,
-rebobinar, painel de imagem (os mesmos pixels do antigo nas 42 predefinições), molduras, paletas, controles por console e
-por jogo e jogadores 2 a 4. Roda SNES, NES, Game Boy/Color, GBA, Mega Drive, Master System e Game Gear. Detalhe de cada etapa: [docs/ROADMAP.md](docs/ROADMAP.md). O que aconteceu em cada sessão:
+**Onde estamos (02/11/2026):** M3 a M8 aprovados pelo Marcelo; **M9 a M11 feitos**, esperando ele testar — jukebox
+(F7, ondas, notas, .spc, .wav, trilha do KOFstation, música do Início), abertura da 1ª vez, estatísticas, espaço usado,
+traduções (IPS/BPS/UPS), caçador de bugs (F9) e a tela de BIOS. Roda SNES, NES, Game Boy/Color, GBA, Mega Drive, Master
+System, Game Gear, **Neo Geo, PlayStation e Nintendo 64**. Detalhe de cada etapa: [docs/ROADMAP.md](docs/ROADMAP.md). O que aconteceu em cada sessão:
 [docs/JORNAL.md](docs/JORNAL.md).
 
 ---
@@ -46,16 +46,16 @@ D2 em [docs/DECISIONS.md](docs/DECISIONS.md).
 ```mermaid
 flowchart TB
   subgraph DESK["apps/desktop — React + TypeScript"]
-    SC["screens/ — Início, Biblioteca, Estados, Modo, Visual, Molduras, Teclas, Jogadores, Backup, Guia, Temas…"]
+    SC["screens/ — Início, Biblioteca, Estados, Jukebox, Estatísticas, BIOS, Bug, Abertura, Modo, Visual, Molduras, Teclas, Jogadores, Backup, Guia, Temas…"]
     CO["components/ — Menu, Lateral, MenuRapido, Aviso, Status, Desempenho"]
     HK["hooks/ — tela do jogo (filtros e moldura), entrada dos 4 jogadores, pausa, navegação por controle"]
-    ST["stores/ (Zustand) — telas, config, jogo, biblioteca, capas, bateria, estados, auto, modo, rebob, visual, painel, moldura, entrada, jogadores, backup…"]
+    ST["stores/ (Zustand) — telas, config, jogo, biblioteca, capas, bateria, estados, auto, modo, rebob, visual, painel, moldura, entrada, jogadores, backup, jukebox, estatísticas, bios, bug, tradução, abertura…"]
     PL["platform/ — local (kofstation) · teste (memória, imita os comandos do Rust)"]
   end
   subgraph PKG["packages/ — TypeScript sem React"]
-    AC["app-core — casos de uso: Kof Games, jogos, armazém, config, saves/bateria, estados, backup, capas, base de jogos, log"]
-    DO["domain — puro: sistemas, detecção e CRC, busca e facetas, organizar, guarda (.kofsave), modos, entrada em camadas, jogadores"]
-    EN["engine — SessaoLibretro, Worker (bateria, estados, rebobinar), som, RenderizadorVisual (visual.js do antigo), molduras"]
+    AC["app-core — casos de uso: Kof Games, jogos (zip, Neo Geo, CD do PS1), armazém, config, saves/bateria, estados, backup, capas, base de jogos, músicas, estatísticas, BIOS, traduções, log"]
+    DO["domain — puro: sistemas, detecção e CRC, busca e facetas, organizar, guarda (.kofsave), modos, entrada em camadas, jogadores, patches IPS/BPS/UPS, BIOS"]
+    EN["engine — SessaoLibretro, Worker do jogo (bateria, estados, rebobinar, caçador de bugs; N64 com WebGL2 no Worker), Worker da jukebox (sonda, .spc, .wav, trilha FM, violino), som, RenderizadorVisual, molduras"]
     CT["contracts — tipos e exemplos do contrato com o Rust"]
   end
   subgraph RS["crates/ — Rust"]
@@ -123,8 +123,10 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Rebobinar (no Worker, igual ao antigo) | ✅ M6 |
 | Painel de imagem (os mesmos pixels do antigo), passadas, molduras, paletas | ✅ M7 |
 | Controles e teclas por console/jogo, analógico no teclado, jogadores 2–4 | ✅ M8 |
-| Jukebox e música, estatísticas, patches, caçador de bugs | ⬜ M9–M10 |
-| PS1, N64, Neo Geo, PS2 | ⬜ M11–M12 |
+| Jukebox e música (trilha FM, violino, .spc, .wav), abertura, música do Início | ⏸ M9 (falta o Marcelo testar) |
+| Estatísticas, espaço usado, traduções, caçador de bugs (F9) e replay | ⏸ M10 |
+| BIOS, GBA com BIOS, Neo Geo, PS1, N64 (núcleo do SNES: Snes9x; o Kof quando a Mel liberar) | ⏸ M11 |
+| PS2 | ⬜ M12 |
 | Rede e celular, pacotes e atualização, Android | ⬜ M13–M15 |
 
 ---

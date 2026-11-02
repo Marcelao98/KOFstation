@@ -41,10 +41,12 @@
 - ⬜ Avisos (`avisar`, `avisarErro`) com as mesmas mensagens.
 
 ## Início, abertura, guia — [home, hometemas, abertura]
-- 🟨 Início: frases, logo por tema e dicas ✅; Continuar de onde parou e Jogados recentemente ✅ (M5.3); BIOS (M11).
-- ⬜ Abertura da 1ª vez (biblioteca vazia): título → frases → 10 temas → apresentação → guia de 4 passos; Ajuda >
-  Boas-vindas reabre.
-- ⬜ Música do Início (escolha, sortear, desligar; só toca depois do 1º gesto).
+- 🟨 Início: frases, logo por tema e dicas ✅; Continuar de onde parou e Jogados recentemente ✅ (M5.3); cartão BIOS abre
+  a tela (M11), mas o texto dele ainda não diz quais BIOS estão guardadas (o antigo dizia: `marcarBiosHome`).
+- 🟨 Abertura da 1ª vez: título → frases → 10 temas → apresentação → guia de 4 passos; Ajuda > Boas-vindas reabre
+  (teste `abertura.spec`). Diferenças: no título, o logo do tema no lugar do ícone do app; no passo 2 falta a lista
+  "GBA roda sem / Neo Geo: falta o neogeo.zip" (`marcarAbBios`).
+- 🟨 Música do Início (escolha, sortear, desligar; só toca depois do 1º gesto): na trilha FM e no violino, como lá.
 - ✅ Guia com as mesmas páginas (texto copiado do antigo) e a tabela de atalhos.
 
 ## Temas — [galeria, temas-menu, categorias-temas, pacote-cafe, nostalgia-br, contraste]
@@ -93,21 +95,34 @@
 - ⬜ Saves nativos do celular (PS1 `.mcd`, N64) entram no backup.
 
 ## Jukebox e música — [juke, jukebox, trilha, capas-wav]
-- ⬜ Guardar música por estado (todos os sistemas), .spc no SNES (importar/exportar), capa, lista com a Trilha do KOFstation.
-- ⬜ Barras (8 SNES, 4 GB...), modo Ondas por canal com estilo pelo tema, Mudo/Solo, notas, sincronia, exportar .wav.
-- ⬜ Trilha FM (6 músicas), 8 bits, Air em violino; mesmo som.
+- 🟨 Guardar música por estado (todos os sistemas com sonda), lista com a Trilha do KOFstation, renomear/apagar, mini-player
+  (teste `jukebox.spec`). **Diferença (D29):** no SNES o antigo guardava um .spc e tocava no chip de som do núcleo Kof;
+  aqui guarda o estado do Snes9x (toca igual ao jogo) e o .spc importado toca no Snes9x (entra num estado dele; teste
+  `spc.test`). Exportar .spc sai do estado. A capa é o print do jogo (a capa oficial por nome ainda não).
+- 🟨 Barras (8 SNES pelo envelope, 4 GB...), Ondas por canal com estilo pelo tema, Mudo/Solo, Notas (YIN), sincronia,
+  .wav. **Diferença:** no SNES não tem a onda de cada voz (o Snes9x não tem sonda; o Kof tinha): Ondas e Notas ficam
+  vazias no SNES, barras e Mudo/Solo funcionam.
+- 🟨 Trilha FM (6 músicas, núcleo só de som) e Air em violino. Falta o 8 bits, que no antigo só tocava se faltasse o
+  núcleo FM (aqui ele vem sempre pelo manifesto).
 
 ## Estatísticas e extras — [bug, atualiza, guarda]
-- ⬜ Tempo jogado, sessões, por dia/mês/hora, por aparelho; Espaço usado.
-- ⬜ Patches IPS/BPS/UPS (CRC conferido; cabeçalho 512 do SNES), jogo traduzido com save próprio e selo 🇧🇷.
-- ⬜ Caçador de bugs: pacote com estado + botões; replay reproduz igual.
+- 🟨 Tempo jogado (só jogando de verdade), sessões, últimos 7 dias, por jogo, por aparelho (as partes do `.kofsave`);
+  Espaço usado por loja (teste `extras.spec`). A tela mostra o que a do antigo mostrava (7 dias e tabela).
+- ✅ Patches IPS/BPS/UPS (CRC conferido; cabeçalho 512 do SNES), jogo traduzido com save próprio e selo 🇧🇷 (testes
+  `patch.test` e `extras.spec`; o código é o `patch.js` do antigo).
+- 🟨 Caçador de bugs: pacote `kofbug-*.json.gz` com o marco + botões + print, issue no GitHub (agora
+  `Marcelao98/KOFStation`); `pnpm bug <pacote> <rom>` reproduz (teste `bug.test`). Pacote do antigo não reproduz no novo
+  (a assinatura é da imagem que o app mostra, e o antigo usava o núcleo Kof).
 - ⬜ Painel de desempenho (fps, ms por parte, engasgos, falta de som).
-- ⬜ Aviso "atualizou" e "tem versão nova".
+- 🟨 Aviso "atualizou" (versão mudou desde a última abertura) e "som desligado" ao tocar na jukebox. "Tem versão nova"
+  chega com o atualizador (M15).
 
 ## Sistemas com BIOS e nativos — [gba, neogeo, ps1, n64, ps2, ps2-pagina, ps2-nativo]
-- ⬜ Tela de BIOS por console; BIOS do PS2 por conteúdo; jogo que esperava BIOS abre sozinho depois.
-- ⬜ Neo Geo: zip inteiro + zip do pai, AES, erro com a linha do log.
-- ⬜ PS1 wasm (CD sem cópia, BIOS opcional), N64 wasm.
+- 🟨 Tela de BIOS por console; BIOS do PS2 por conteúdo; jogo que esperava BIOS abre sozinho depois (teste `bios.spec`).
+- 🟨 Neo Geo: zip inteiro + zip do pai, AES (volta pro MVS), erro com a linha do log (falta testar com jogo de verdade).
+- 🟨 PS1 wasm (CD sem cópia, BIOS opcional, .cue + .bin escolhidos juntos ou achados na Kof Games): roda um PS-X EXE
+  gerado no teste. N64 wasm: o núcleo sobe com WebGL2 dentro do Worker (OffscreenCanvas, D30); jogo de verdade é
+  teste do Marcelo (a ROM gerada não é um jogo válido nem no antigo).
 - ⬜ PS2 nativo em modo página e modo janela, disco aos pedaços, cartão de memória, savestate, filtro, pausa pelo Esc/Guide.
 
 ## Rede e celular — [aparelhos, jogar-no-pc, controle (android)]

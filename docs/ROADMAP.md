@@ -80,6 +80,8 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > M7.1+M7.2, M7.3+M7.4. Conferido contra o antigo: estados nos dois sentidos, rebobinar passo a passo, `.kofsave`
 > (`guarda.js`), base de jogos e os pixels das 42 predefinições do painel de imagem.
 > **02/11:** pacote M3–M8 aprovado pelo Marcelo (saves do novo conferidos: cartucho, F5/F6/F8, Continuar). Próximo: M9.
+> **02/11:** M9, M10 e M11 aprovados em lote ("até o M11"); feitos no mesmo dia, um commit por etapa (⏸ = esperando o
+> Marcelo testar o pacote). Os núcleos de PS1, N64 e Neo Geo são os binários do antigo (manifesto): só ligação.
 
 ## M3 — Biblioteca e Kof Games
 
@@ -139,32 +141,32 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M9.1 | Tocador numa 2ª instância do núcleo, guardar música (F7) | você guarda e toca uma música | ⬜ |
-| M9.2 | Tela da jukebox com barras e capa, `.spc` (importar/exportar) | um `.spc` do antigo toca igual | ⬜ |
-| M9.3 | Ondas, Mudo/Solo, notas, sincronia, exportar `.wav` | `.wav` igual ao do antigo | ⬜ |
-| M9.4 | Trilha FM, 8 bits, Air em violino, música do Início | você ouve | ⬜ |
-| M9.5 | Abertura da primeira vez | print/vídeo antigo × novo | ⬜ |
+| M9.1 | Tocador numa 2ª instância do núcleo, guardar música (F7) | você guarda e toca uma música | ⏸ |
+| M9.2 | Tela da jukebox com barras e capa, `.spc` (importar/exportar) | um `.spc` do antigo toca igual | ⏸ |
+| M9.3 | Ondas, Mudo/Solo, notas, sincronia, exportar `.wav` | `.wav` igual ao do antigo | ⏸ |
+| M9.4 | Trilha FM, 8 bits, Air em violino, música do Início | você ouve | ⏸ |
+| M9.5 | Abertura da primeira vez | print/vídeo antigo × novo | ⏸ |
 
 ## M10 — Estatísticas e extras
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M10.1 | Estatísticas (por dia/mês/hora/aparelho) e a tela | as tuas estatísticas importadas aparecem iguais | ⬜ |
-| M10.2 | Espaço usado | você vê | ⬜ |
-| M10.3 | Patches de tradução IPS/BPS/UPS | um jogo traduzido abre com o selo 🇧🇷 | ⬜ |
-| M10.4 | Caçador de bugs (F9) e replay | um pacote do antigo reproduz no novo | ⬜ |
-| M10.5 | Avisos de atualização e de mudo | você vê | ⬜ |
+| M10.1 | Estatísticas (por dia/mês/hora/aparelho) e a tela | as tuas estatísticas importadas aparecem iguais | ⏸ |
+| M10.2 | Espaço usado | você vê | ⏸ |
+| M10.3 | Patches de tradução IPS/BPS/UPS | um jogo traduzido abre com o selo 🇧🇷 | ⏸ |
+| M10.4 | Caçador de bugs (F9) e replay | um pacote do antigo reproduz no novo | ⏸ |
+| M10.5 | Avisos de atualização e de mudo | você vê | ⏸ |
 
 ## M11 — Sistemas com BIOS
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M11.1 | Tela de BIOS e importação (por nome, tamanho e conteúdo) | tuas BIOS reconhecidas | ⬜ |
-| M11.2 | GBA | você joga | ⬜ |
-| M11.3 | Neo Geo (zip inteiro + pai, AES) | você joga KOF | ⬜ |
-| M11.4 | PS1 em wasm (CD sem cópia) | você joga | ⬜ |
-| M11.5 | N64 em wasm | você joga | ⬜ |
-| M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ⬜ |
+| M11.1 | Tela de BIOS e importação (por nome, tamanho e conteúdo) | tuas BIOS reconhecidas | ⏸ |
+| M11.2 | GBA | você joga | ⏸ |
+| M11.3 | Neo Geo (zip inteiro + pai, AES) | você joga KOF | ⏸ |
+| M11.4 | PS1 em wasm (CD sem cópia) | você joga | ⏸ |
+| M11.5 | N64 em wasm | você joga | ⏸ |
+| M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ⏸ |
 
 ## M12 — PS2 nativo
 
