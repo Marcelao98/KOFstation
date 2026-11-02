@@ -184,9 +184,9 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ⏸ |
 | N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ✅ |
 | N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⏸ |
-| N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⬜ |
-| N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ⬜ |
-| N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ⬜ |
+| N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⏸ |
+| N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ✅ |
+| N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ✅ |
 | N.9 | PS2 nativo (o M12) em cima do N.1 (LRPS2 como núcleo libretro nativo, sem o kofnativo.c) | você joga PS2 | ⬜ |
 
 > **N.1 feito (02/11):** crate `kof-nativo` + `kofstation --nativo`; `cargo test -p kof-nativo` compila um núcleo libretro
@@ -212,6 +212,18 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > como reserva da trilha (violino → FM → 8 bits); `.wav` da trilha **byte a byte igual** ao `exportarWav` do antigo
 > (`musica.test`, com `KOF_ANTIGO`). Prints do novo nas 3 vistas (e2e `jukebox.spec` com `KOF_PRINTS`); lado a lado
 > com o antigo não fiz (a jukebox do SNES do antigo usava o núcleo Kof).
+> **N.6 feito, ⏸ você joga N64 (02/11):** o "quebra" era a ROM de teste: o N64 começa executando `ROM[0x40..]` (o IPL3)
+> de dentro da memória do RSP, e a nossa tinha zeros ali (a CPU andava no vazio até cair; no antigo, igual). A ROM nova
+> (`romN64QueDesenha`) tem um programa MIPS no lugar do IPL3 que manda comandos pro RDP (fundo vermelho, retângulo verde)
+> e liga o VI: **o Mupen64Plus em wasm desenha certo** (e2e `bios.spec`, pixels conferidos). Jogo de verdade: você.
+> N64 nativo avaliado: o Mupen64Plus-Next nativo só desenha pela GPU (GLideN64, `SET_HW_RENDER`); o `kof-nativo` hoje
+> recusa isso. Dá pra fazer com um contexto OpenGL sem janela no processo do jogo (EGL) e ler a imagem de volta, o mesmo
+> caminho que o PS2 (N.9) precisa: fica junto com ele.
+> **N.7 feito (02/11):** PS1 em wasm com o mesmo PS-X EXE que desenha: pixels conferidos (e2e). Neo Geo com imagem só
+> com a BIOS (não entra em teste): o fluxo de pedir a BIOS e o zip + pai seguem no teste de antes.
+> **N.8 feito (02/11):** cartão BIOS do Início diz quais estão guardadas ("✅ GBA, Neo Geo · trocar ou guardar outra");
+> a abertura mostra o ícone do app (a xícara do `icone.py` do antigo, em SVG; também o ícone da janela) e, no passo 2, a
+> lista de BIOS (GBA roda sem; Neo Geo guardado ou faltando).
 
 Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil · N.6 100–200 mil · N.7–N.8 90 mil. Com o N.9, o
 M12 encolhe (o canal e o processo já vêm do N.1).
