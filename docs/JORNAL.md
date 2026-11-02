@@ -21,6 +21,20 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-02 · Etapas M3–M8 · pacote aprovado
+
+**Pedido:** o Marcelo conferiu os saves do novo (save de cartucho, F5/F6/F8, Continuar de onde parou): "deu certo".
+Pediu a lista das próximas etapas com a estimativa de tokens de cada uma.
+**Feito:** M3–M8 marcados ✅ no ROADMAP e no README. Nenhuma mudança de código.
+**Decidido:** nada novo.
+**Medido / conferido:** teste do Marcelo no pacote da `teste-binarios` (Linux).
+**Deu errado / aprendido:** —
+**Onde parou:** próximo é o M9 (Jukebox). Estimativa passada ao Marcelo (tokens escritos, por etapa): M9 250–400 mil,
+M10 150–250 mil, M11 350–600 mil, M12 200–350 mil, M13 250–400 mil, M15 120–200 mil, M14 300–500 mil, Troca 40–80 mil.
+⏸ esperando ele dizer até onde seguir (um passo, a etapa inteira ou um lote).
+
+---
+
 ## 2026-11-02 · Pós-entrega dos Lotes A e B · "connection refused" e onde parou
 
 **Pedido:** o Marcelo instalou o pacote M3–M8; abriu uma vez e rodou liso, na segunda deu "connection refused". Depois

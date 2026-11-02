@@ -10,7 +10,7 @@ camada de experiência em volta deles.
 > [Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old) e continua sendo o produto até a troca.
 > A migração anda em etapas com paridade total: nada do antigo pode se perder ([docs/PARIDADE.md](docs/PARIDADE.md)).
 
-**Onde estamos (01/11/2026):** etapas **M3 a M8 feitas**, esperando o Marcelo testar — biblioteca e pasta Kof Games,
+**Onde estamos (02/11/2026):** etapas **M3 a M8 feitas**, aprovadas pelo Marcelo em 02/11 — biblioteca e pasta Kof Games,
 configurações em arquivo e backup `.kofsave` (abre nos dois apps), saves, estados, salvar automático, modos de jogo,
 rebobinar, painel de imagem (os mesmos pixels do antigo nas 42 predefinições), molduras, paletas, controles por console e
 por jogo e jogadores 2 a 4. Roda SNES, NES, Game Boy/Color, GBA, Mega Drive, Master System e Game Gear. Detalhe de cada etapa: [docs/ROADMAP.md](docs/ROADMAP.md). O que aconteceu em cada sessão:
@@ -117,12 +117,12 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 |---|---|
 | Casca: menus, barra lateral, Início, Guia, 126 temas, showcase, Voltar, atalhos, navegação por controle | ✅ M1 |
 | Jogo: núcleo no Worker, som, imagem com escala/proporção, teclado e controle, pausa, turbo, volume, menu rápido, painel F3, abrir arquivo/.zip/arrastar | ✅ M2 |
-| Biblioteca (busca, facetas, base de jogos, capas, sofá) e pasta Kof Games (organizar com plano) | ⏸ M3 (falta o Marcelo testar) |
-| Configurações em arquivo (camadas geral → console → jogo) e backup `.kofsave` (abre nos dois apps) | ⏸ M4 |
-| Save de bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos de jogo | ⏸ M5 |
-| Rebobinar (no Worker, igual ao antigo) | ⏸ M6 |
-| Painel de imagem (os mesmos pixels do antigo), passadas, molduras, paletas | ⏸ M7 |
-| Controles e teclas por console/jogo, analógico no teclado, jogadores 2–4 | ⏸ M8 |
+| Biblioteca (busca, facetas, base de jogos, capas, sofá) e pasta Kof Games (organizar com plano) | ✅ M3 |
+| Configurações em arquivo (camadas geral → console → jogo) e backup `.kofsave` (abre nos dois apps) | ✅ M4 |
+| Save de bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos de jogo | ✅ M5 |
+| Rebobinar (no Worker, igual ao antigo) | ✅ M6 |
+| Painel de imagem (os mesmos pixels do antigo), passadas, molduras, paletas | ✅ M7 |
+| Controles e teclas por console/jogo, analógico no teclado, jogadores 2–4 | ✅ M8 |
 | Jukebox e música, estatísticas, patches, caçador de bugs | ⬜ M9–M10 |
 | PS1, N64, Neo Geo, PS2 | ⬜ M11–M12 |
 | Rede e celular, pacotes e atualização, Android | ⬜ M13–M15 |

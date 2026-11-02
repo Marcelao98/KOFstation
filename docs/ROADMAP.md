@@ -76,63 +76,64 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 > **01/11:** Lotes A (M3–M6) e B (M7–M8) aprovados de uma vez: fazer tudo e parar só no fim, com um pacote pro
 > Marcelo testar. Cada passo = um commit com o nome da etapa.
-> **01/11 (fim do dia):** M3.1 → M8.4 feitos (⏸ = esperando o Marcelo testar o pacote). Commits juntos onde o código é um só: M4.2+M4.3,
+> **01/11 (fim do dia):** M3.1 → M8.4 feitos. Commits juntos onde o código é um só: M4.2+M4.3,
 > M7.1+M7.2, M7.3+M7.4. Conferido contra o antigo: estados nos dois sentidos, rebobinar passo a passo, `.kofsave`
 > (`guarda.js`), base de jogos e os pixels das 42 predefinições do painel de imagem.
+> **02/11:** pacote M3–M8 aprovado pelo Marcelo (saves do novo conferidos: cartucho, F5/F6/F8, Continuar). Próximo: M9.
 
 ## M3 — Biblioteca e Kof Games
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M3.1 | `domain`: detectar sistema, CRC No-Intro, ler zip e .cue (sem DOM) | testes com arquivos gerados | ⏸ |
-| M3.2 | Rust `kof-files`: escopos, árvore da Kof Games, varredura com progresso | você aponta pra tua Kof Games e vê a contagem | ⏸ |
-| M3.3 | Organizar (mostra o plano antes, depois aplica) | você confere o plano numa **cópia** da pasta | ⏸ |
-| M3.4 | Tela da biblioteca: lista em janela, ficha, abrir jogo, arrastar arquivo | 3.000 jogos sem travar (vídeo) | ⏸ |
-| M3.5 | Busca, `campo:valor`, facetas, ordenar, base de jogos | as mesmas buscas dão o mesmo resultado no antigo e no novo | ⏸ |
-| M3.6 | Capas (baixadas pelo Rust, com cache) | tua biblioteca com capas | ⏸ |
+| M3.1 | `domain`: detectar sistema, CRC No-Intro, ler zip e .cue (sem DOM) | testes com arquivos gerados | ✅ |
+| M3.2 | Rust `kof-files`: escopos, árvore da Kof Games, varredura com progresso | você aponta pra tua Kof Games e vê a contagem | ✅ |
+| M3.3 | Organizar (mostra o plano antes, depois aplica) | você confere o plano numa **cópia** da pasta | ✅ |
+| M3.4 | Tela da biblioteca: lista em janela, ficha, abrir jogo, arrastar arquivo | 3.000 jogos sem travar (vídeo) | ✅ |
+| M3.5 | Busca, `campo:valor`, facetas, ordenar, base de jogos | as mesmas buscas dão o mesmo resultado no antigo e no novo | ✅ |
+| M3.6 | Capas (baixadas pelo Rust, com cache) | tua biblioteca com capas | ✅ |
 
 ## M4 — Configurações e dados
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M4.1 | Esquema de configurações com camadas (geral → console → jogo) gravado em arquivo | testes + o arquivo de config legível | ⏸ |
-| M4.2 | Importar `.kofsave` | **o teu backup de verdade do antigo entra no novo** | ⏸ |
-| M4.3 | Exportar `.kofsave` | o antigo abre o backup feito no novo | ⏸ |
+| M4.1 | Esquema de configurações com camadas (geral → console → jogo) gravado em arquivo | testes + o arquivo de config legível | ✅ |
+| M4.2 | Importar `.kofsave` | **o teu backup de verdade do antigo entra no novo** | ✅ |
+| M4.3 | Exportar `.kofsave` | o antigo abre o backup feito no novo | ✅ |
 
 ## M5 — Saves, estados e modos
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M5.1 | Save de bateria em arquivo (formato do antigo) | um save teu continua de onde parou | ⏸ |
-| M5.2 | Savestates, tela de Estados, F5/F6/F8 | um estado salvo no antigo abre no novo | ⏸ |
-| M5.3 | Salvar automático e Continuar | você fecha no meio e continua | ⏸ |
-| M5.4 | Modos alegria/normal/raiz/hardcore, pergunta ao abrir, Opções de emulação | você testa as regras de cada modo | ⏸ |
+| M5.1 | Save de bateria em arquivo (formato do antigo) | um save teu continua de onde parou | ✅ |
+| M5.2 | Savestates, tela de Estados, F5/F6/F8 | um estado salvo no antigo abre no novo | ✅ |
+| M5.3 | Salvar automático e Continuar | você fecha no meio e continua | ✅ |
+| M5.4 | Modos alegria/normal/raiz/hardcore, pergunta ao abrir, Opções de emulação | você testa as regras de cada modo | ✅ |
 
 ## M6 — Rebobinar
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M6.1 | Rebobinador dentro do Worker | teste: volta bit a bit igual ao antigo | ⏸ |
-| M6.2 | Backspace/Select+Y, preto e branco, ampulheta de 30 s, limite por modo | **você rebobina** | ⏸ |
+| M6.1 | Rebobinador dentro do Worker | teste: volta bit a bit igual ao antigo | ✅ |
+| M6.2 | Backspace/Select+Y, preto e branco, ampulheta de 30 s, limite por modo | **você rebobina** | ✅ |
 
 ## M7 — Painel de imagem e molduras
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M7.1 | `visual.js` portado + shader sob medida | pixels iguais ao antigo nas 42 predefinições | ⏸ |
-| M7.2 | Passadas NTSC, Scale4x, bloom | prints antigo × novo | ⏸ |
-| M7.3 | Painel Simples (F4): categorias, cartões com prévia, intensidade | você usa | ⏸ |
-| M7.4 | Avançado, ⭐ meus, `.kofvisual`, por console e por jogo, comparar | um `.kofvisual` do antigo abre no novo | ⏸ |
-| M7.5 | Molduras (SVG, animação, PNG própria), paletas do GB e do NES | **você confere os filtros e as molduras** | ⏸ |
+| M7.1 | `visual.js` portado + shader sob medida | pixels iguais ao antigo nas 42 predefinições | ✅ |
+| M7.2 | Passadas NTSC, Scale4x, bloom | prints antigo × novo | ✅ |
+| M7.3 | Painel Simples (F4): categorias, cartões com prévia, intensidade | você usa | ✅ |
+| M7.4 | Avançado, ⭐ meus, `.kofvisual`, por console e por jogo, comparar | um `.kofvisual` do antigo abre no novo | ✅ |
+| M7.5 | Molduras (SVG, animação, PNG própria), paletas do GB e do NES | **você confere os filtros e as molduras** | ✅ |
 
 ## M8 — Controles
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M8.1 | Mapa de entrada com camadas (`domain`), teclas reservadas | testes | ⏸ |
-| M8.2 | Tela Controles e teclas (abas, escopo, captura de tecla e de botão) | você remapeia | ⏸ |
-| M8.3 | Analógico no teclado, L2/R2 | você testa num jogo de PS1/N64 | ⏸ |
-| M8.4 | Jogadores 2 a 4 e a tela Jogadores | você joga com 2 controles | ⏸ |
+| M8.1 | Mapa de entrada com camadas (`domain`), teclas reservadas | testes | ✅ |
+| M8.2 | Tela Controles e teclas (abas, escopo, captura de tecla e de botão) | você remapeia | ✅ |
+| M8.3 | Analógico no teclado, L2/R2 | você testa num jogo de PS1/N64 | ✅ |
+| M8.4 | Jogadores 2 a 4 e a tela Jogadores | você joga com 2 controles | ✅ |
 
 ## M9 — Jukebox e música
 
