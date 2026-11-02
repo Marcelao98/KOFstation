@@ -45,4 +45,37 @@ for (const [nome, n] of Object.entries(manifesto.nucleos)) {
   writeFileSync(alvo, dados);
   console.log(`✓ ${nome} (${Math.round(dados.length / 1024)} KB)`);
 }
+
+// Núcleos nativos (M11b): anexos da Release do KOFstation, por plataforma, em third_party/cores/nativos/<plataforma>/.
+// Só os da plataforma atual; KOF_NATIVOS=todas (ou "linux-x64,windows-x64") baixa outros (pra montar pacotes).
+const plataformaAtual = { 'linux-x64': 'linux-x64', 'win32-x64': 'windows-x64', 'linux-arm64': 'linux-arm64' }[
+  `${process.platform}-${process.arch}`
+];
+const querer = (process.env.KOF_NATIVOS ?? plataformaAtual ?? '').split(',').filter(Boolean);
+for (const [nome, n] of Object.entries(manifesto.nativos ?? {})) {
+  for (const [plat, a] of Object.entries(n.plataformas)) {
+    if (!querer.includes('todas') && !querer.includes(plat)) continue;
+    const pasta = join(raiz, 'third_party/cores/nativos', plat);
+    const alvo = join(pasta, a.arquivo);
+    if (existsSync(alvo) && sha(readFileSync(alvo)) === a.sha256) continue;
+    let dados;
+    try {
+      const r = await fetch(a.url);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      dados = Buffer.from(await r.arrayBuffer());
+    } catch (e) {
+      console.error(`✗ ${nome} nativo (${plat}): não consegui baixar (${e.message})`);
+      falhas++;
+      continue;
+    }
+    if (sha(dados) !== a.sha256) {
+      console.error(`✗ ${nome} nativo (${plat}): o arquivo baixado não confere com o manifesto (SHA-256 diferente)`);
+      falhas++;
+      continue;
+    }
+    mkdirSync(pasta, { recursive: true });
+    writeFileSync(alvo, dados, { mode: 0o755 });
+    console.log(`✓ ${nome} nativo ${plat} (${Math.round(dados.length / 1024)} KB)`);
+  }
+}
 process.exit(falhas ? 1 : 0);

@@ -24,6 +24,7 @@ pub struct Pedido {
     pub origem: Option<String>,
     pub variaveis: std::collections::BTreeMap<String, String>,
     pub sem_som: bool,
+    pub dispositivo: Option<u32>,
 }
 
 pub struct ProcessoNativo {
@@ -55,6 +56,7 @@ impl ProcessoNativo {
             origem: p.origem.clone(),
             variaveis: p.variaveis.clone(),
             sem_som: p.sem_som,
+            dispositivo: p.dispositivo,
         };
         let mut filho = Command::new(programa)
             .args(args)

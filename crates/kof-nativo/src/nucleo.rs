@@ -329,6 +329,8 @@ pub struct Abertura {
     pub sistema: PathBuf,
     pub saves: PathBuf,
     pub variaveis: BTreeMap<String, String>,
+    /// tipo de controle nas portas (libretro: 1 = controle, 517 = DualShock do PCSX); sem = controle comum
+    pub dispositivo: Option<u32>,
 }
 
 pub struct Nucleo {
@@ -488,11 +490,11 @@ impl Nucleo {
             return Err(erro(format!("o {} não abriu o jogo", info.nome)));
         }
         let mut av = retro_system_av_info::default();
-        // SAFETY: jogo carregado; portas no controle padrão (como o RetroArch faz por padrão)
+        // SAFETY: jogo carregado; portas no controle pedido (ou no padrão, como o RetroArch)
         unsafe {
             (f.get_system_av_info)(&mut av);
             for p in 0..JOGADORES as c_uint {
-                set_porta(p, RETRO_DEVICE_JOYPAD);
+                set_porta(p, a.dispositivo.unwrap_or(RETRO_DEVICE_JOYPAD));
             }
         }
         tracing::info!(nucleo = %info.nome, versao = %info.versao, ?av, "núcleo nativo aberto");

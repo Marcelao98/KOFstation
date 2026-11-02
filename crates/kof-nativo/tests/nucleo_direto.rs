@@ -17,6 +17,7 @@ fn frontend_no_processo() {
         sistema: dir.path().into(),
         saves: dir.path().into(),
         variaveis: BTreeMap::from([("minimo_cor".into(), "azul".into())]),
+        dispositivo: None,
     };
     let mut n = Nucleo::carregar(&a).expect("abriu");
     assert!(Nucleo::carregar(&a).is_err(), "um núcleo por processo");

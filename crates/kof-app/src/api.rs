@@ -18,6 +18,10 @@ pub struct Estado {
     pub exe: Option<PathBuf>,
     /// pasta do usuário (sugestão da Kof Games)
     pub casa: Option<PathBuf>,
+    /// o jogo nativo aberto (M11b)
+    pub nativos: crate::nativo::Nativos,
+    /// endereço da página (`http://127.0.0.1:<porta>`): a WebSocket do nativo só aceita esta origem
+    pub origem: std::sync::OnceLock<String>,
 }
 
 #[derive(serde::Deserialize)]
@@ -116,6 +120,8 @@ impl Estado {
             pasta_dados,
             exe: std::env::current_exe().ok(),
             casa,
+            nativos: Default::default(),
+            origem: std::sync::OnceLock::new(),
         }
     }
 
@@ -247,6 +253,18 @@ impl Estado {
                 let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
                 Ok(Saida::Bin(kof_files::escopo::ler(&p, a.offset, a.length)?))
             }
+            "nativo.disponivel" => json(serde_json::json!({ "sistemas": crate::nativo::sistemas() })),
+            "nativo.abrir" => {
+                let a: crate::nativo::ArgsAbrir = args(a)?;
+                let jogo = kof_files::escopo::resolver(&self.raiz()?, a.caminho())?;
+                let origem = self.origem.get().cloned().unwrap_or_default();
+                json(self.nativos.abrir(&self.pasta_dados, jogo, &self.lojas, origem, a)?)
+            }
+            "nativo.fechar" => {
+                self.nativos.fechar();
+                json(Value::Null)
+            }
+            "nativo.log" => json(self.nativos.log()),
             outro => Err(KofError::ComandoDesconhecido(outro.to_string())),
         }
     }

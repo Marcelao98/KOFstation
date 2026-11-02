@@ -67,5 +67,24 @@
       "tamanho": 4564926,
       "sha256": "66e195978cf81275fa3c7d92ebe263cfb53b6d8cc51c56f78516d9df3e912220"
     }
+  },
+  "nativos": {
+    "pcsx": {
+      "nota": "PCSX-ReARMed (GPL-2.0) com o recompilador lightrec, commit c8816799 (o mesmo do wasm do antigo); compilado por tools/nucleos-nativos.sh no workflow \"Núcleos nativos\" e publicado como anexo da Release",
+      "plataformas": {
+        "linux-x64": {
+          "arquivo": "pcsx_rearmed_libretro.so",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-nativos-c881679/pcsx_rearmed_libretro-linux-x64.so",
+          "tamanho": 2176552,
+          "sha256": "3a36c1f25fb74ea4c259a33251d27d0ff76421d6658b2b76c3f1f1248bb586e8"
+        },
+        "windows-x64": {
+          "arquivo": "pcsx_rearmed_libretro.dll",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-nativos-c881679/pcsx_rearmed_libretro-windows-x64.dll",
+          "tamanho": 7010816,
+          "sha256": "5c05ed5155184d6e4873cbe00e8a92a8a0bfe776f8333a14089ba8abfb7fbba2"
+        }
+      }
+    }
   }
 }

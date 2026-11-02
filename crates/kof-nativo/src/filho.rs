@@ -31,6 +31,8 @@ pub struct Config {
     /// sem placa de som (testes): o relógio do sistema dita o ritmo
     #[serde(default)]
     pub sem_som: bool,
+    #[serde(default)]
+    pub dispositivo: Option<u32>,
 }
 
 /// Som guardado que o laço mantém (o mesmo alvo do Worker do wasm).
@@ -93,6 +95,7 @@ pub fn rodar() -> i32 {
         sistema: cfg.sistema.clone(),
         saves: cfg.saves.clone(),
         variaveis: cfg.variaveis.clone(),
+        dispositivo: cfg.dispositivo,
     };
     let mut nucleo = match Nucleo::carregar(&abertura) {
         Ok(n) => n,

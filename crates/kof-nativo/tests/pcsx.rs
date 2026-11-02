@@ -91,6 +91,7 @@ fn pcsx_nativo_desenha_o_exe() {
         sistema: dir.path().into(),
         saves: dir.path().into(),
         variaveis: Default::default(),
+        dispositivo: None,
     };
     let mut n = Nucleo::carregar(&a).expect("o PCSX abriu o EXE");
     assert!(n.info.nome.contains("PCSX"), "{}", n.info.nome);

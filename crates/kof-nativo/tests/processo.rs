@@ -31,6 +31,7 @@ fn pedido(dir: &Path, variaveis: &[(&str, &str)]) -> Pedido {
             .map(|(k, v)| (k.to_string(), v.to_string()))
             .collect::<BTreeMap<_, _>>(),
         sem_som: true,
+        dispositivo: None,
     }
 }
 

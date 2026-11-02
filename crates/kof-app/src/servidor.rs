@@ -97,11 +97,13 @@ impl Servidor {
             .to_ip()
             .map(|a| a.port())
             .ok_or_else(|| std::io::Error::other("sem porta"))?;
+        let estado = Estado::novo(pasta_dados);
+        let _ = estado.origem.set(format!("http://127.0.0.1:{porta}")); // recém-criado: sempre vazio
         Ok(Self {
             srv,
             token,
             porta,
-            estado: Estado::novo(pasta_dados),
+            estado,
         })
     }
 

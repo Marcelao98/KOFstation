@@ -180,7 +180,7 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
 | N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ✅ |
-| N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ⬜ |
+| N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ✅ |
 | N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ⬜ |
 | N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ⬜ |
 | N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⬜ |
@@ -192,6 +192,10 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > **N.1 feito (02/11):** crate `kof-nativo` + `kofstation --nativo`; `cargo test -p kof-nativo` compila um núcleo libretro
 > mínimo em C e confere quadro, som (735 amostras/quadro, ~60 quadros/s), botões, estado, bateria, pausa, token/origem
 > recusados e núcleo que quebra derrubando só o filho. Página ainda não usa (entra no N.3).
+> **N.2 feito (02/11):** `tools/nucleos-nativos.sh` (PCSX-ReARMed c8816799 com lightrec, Linux + Windows por mingw-w64),
+> workflow "Núcleos nativos" → Release `nucleos-nativos-c881679`, manifesto (seção `nativos`) e `pnpm nucleos` baixando
+> a plataforma atual. `tests/pcsx.rs`: PS-X EXE montado no teste desenha vermelho + retângulo verde, pixels conferidos;
+> estado ida e volta 3x com o recompilador (o lightrec dava SIGILL ao carregar estado: reset antes contorna).
 
 Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil · N.6 100–200 mil · N.7–N.8 90 mil. Com o N.9, o
 M12 encolhe (o canal e o processo já vêm do N.1).
