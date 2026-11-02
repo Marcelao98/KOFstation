@@ -42,6 +42,7 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | Comando | Args → Data | Erros | Etapa |
 |---|---|---|---|
 | `app.info` | — → `{version, contractVersion, os, arch, dataDir}` | — | F4a |
+| `app.vivo` | — → `null` (a página manda a cada 5 s; sem sinal por 30 s, o `kofstation` encerra) | — | ✅ correção pós-M8 |
 | `log.write` | `{level: error\|warn\|info\|debug, target, message, fields?}` → `null` (texto cortado em 8 KB; vai pro log do dia com `target=tela`) | `INVALID_LEVEL`, `INVALID_ARGS` | ✅ M3 (pendente do F4a) |
 | `dialog.pick` | (adiado: no navegador em modo app não há diálogo nativo de pasta com caminho; a pasta é digitada/colada, ver D23) | — | — |
 | `library.root.get` | — → `{path: string\|null, ok, missing[], sugestao}` (sem escolha: a raiz pela posição do executável em `<Kof Games>/KOFstation/`) | — | ✅ M3.2 |

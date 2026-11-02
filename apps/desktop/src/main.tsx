@@ -12,6 +12,8 @@ if (!raiz) throw new Error('index.html sem o #raiz');
 const backend = escolherBackend(new URL(location.href));
 ligarLog(backend);
 ligarServicos(backend);
+// sinal de vida: o kofstation fica no ar enquanto esta janela estiver aberta (e fecha 30 s depois que ela sumir)
+setInterval(() => void backend.chamar('app.vivo').catch(() => undefined), 5000);
 addEventListener('error', (e) =>
   registrar('error', 'tela', textoDoErro(e.error ?? e.message), { arquivo: e.filename }),
 );

@@ -57,6 +57,7 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       t.log.push(a);
       return null;
     },
+    'app.vivo': () => null,
     'library.root.get': () => infoRaiz(),
     'library.root.set': (a) => {
       const p = String(a.path ?? '');

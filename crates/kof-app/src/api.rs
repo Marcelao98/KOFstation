@@ -150,6 +150,8 @@ impl Estado {
         let json = |v: Value| Ok(Saida::Json(v));
         match cmd {
             "app.info" => json(serde_json::to_value(kof_core::info::app_info(&self.pasta_dados)).expect("info")),
+            // sinal de vida da janela (a cada 5 s): o servidor fica no ar enquanto ele chega
+            "app.vivo" => json(Value::Null),
             "log.write" => {
                 kof_core::log::escrever(&args(a)?)?;
                 json(Value::Null)

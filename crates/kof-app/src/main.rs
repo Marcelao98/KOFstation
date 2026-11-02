@@ -7,6 +7,7 @@ mod navegador;
 mod servidor;
 
 fn main() {
+    servidor::agora_ms(); // o relógio do sinal de vida começa agora
     let sem_navegador = std::env::args().any(|a| a == "--sem-navegador");
     let pasta = kof_core::info::pasta_de_dados(|k| std::env::var(k).ok())
         .unwrap_or_else(|| std::env::temp_dir().join("KOFstation"));
@@ -42,15 +43,30 @@ fn main() {
 }
 
 /// Abre o navegador e encerra o programa quando a janela fechar.
+/// Abre o navegador e encerra o programa quando a janela fechar.
+///
+/// Se já tem um navegador aberto com o perfil do KOFstation (a primeira janela, ou o Chrome que ficou rodando em
+/// segundo plano), o processo novo entrega o endereço pra ele e sai na hora. Por isso o processo que termina não é
+/// prova de que a janela fechou: quem decide é o sinal de vida da página (`app.vivo` a cada 5 s).
 fn abrir_janela(url: &str, perfil: &std::path::Path) {
     let achado = navegador::achar(|k| std::env::var(k).ok(), |p| p.is_file());
     match achado.map(|n| (navegador::abrir(&n, url, perfil), n)) {
         Some((Ok(mut filho), n)) => {
             tracing::info!(?n, "navegador aberto");
             std::thread::spawn(move || {
+                let inicio = servidor::agora_ms();
                 let fim = filho.wait();
-                tracing::info!(?fim, "janela fechada: encerrando");
-                std::process::exit(0);
+                let durou = servidor::agora_ms() - inicio;
+                if durou > 15_000 {
+                    tracing::info!(?fim, "janela fechada: encerrando");
+                    std::process::exit(0);
+                }
+                tracing::info!(
+                    ?fim,
+                    durou,
+                    "o navegador entregou a janela pra um já aberto: vigiando pelo sinal de vida"
+                );
+                vigiar_sinal();
             });
         }
         outro => {
@@ -63,6 +79,22 @@ fn abrir_janela(url: &str, perfil: &std::path::Path) {
                  Pra escolher um: KOF_NAVEGADOR=/caminho/do/navegador kofstation"
             );
             abrir_padrao(url);
+            std::thread::spawn(vigiar_sinal);
+        }
+    }
+}
+
+/// Encerra quando a página para de dar sinal de vida: 30 s sem nenhum pedido (e, antes do primeiro, 2 min pra abrir).
+fn vigiar_sinal() {
+    use std::sync::atomic::Ordering;
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        let ultimo = servidor::ULTIMO_SINAL.load(Ordering::Relaxed);
+        let agora = servidor::agora_ms();
+        let limite = if ultimo == 0 { 120_000 } else { 30_000 };
+        if agora.saturating_sub(ultimo) > limite {
+            tracing::info!("a janela não dá sinal de vida há {} s: encerrando", limite / 1000);
+            std::process::exit(0);
         }
     }
 }

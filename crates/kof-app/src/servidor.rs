@@ -71,6 +71,14 @@ fn erro(status: u16, e: &KofError) -> Resp {
     )
 }
 
+/// Quando a página falou com o servidor pela última vez (ms desde que abriu). O `main` usa pra saber se ainda tem janela.
+pub static ULTIMO_SINAL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+pub fn agora_ms() -> u64 {
+    static INICIO: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    INICIO.get_or_init(std::time::Instant::now).elapsed().as_millis() as u64
+}
+
 pub struct Servidor {
     srv: Server,
     pub token: String,
@@ -140,6 +148,7 @@ impl Servidor {
                 .map(|x| x.value.as_str().to_string())
         };
         let origem_ok = format!("http://127.0.0.1:{}", self.porta);
+        ULTIMO_SINAL.store(agora_ms().max(1), std::sync::atomic::Ordering::Relaxed);
         if *req.method() != Method::Post {
             return json(
                 405,
