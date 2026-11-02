@@ -21,6 +21,32 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-02 · Etapa M11b N.1 · núcleo nativo num processo filho
+
+**Pedido:** começar o M11b pelo N.1 ("pode fazer tudo").
+**Feito:** crate `crates/kof-nativo`: frontend libretro em Rust (`nucleo.rs`, `libloading`; conversão de pixels igual ao
+`ponte.cpp` do antigo; padrão das opções do `SET_VARIABLES` guardado como no RetroArch; log do núcleo formatado por uma
+ponte em C, `ponte.c`, porque o printf do libretro é variádico), som pela placa (`som.rs`, cpal + reamostrador linear;
+sem placa, um relógio), WebSocket local com token e origem (`canal.rs`, tungstenite; só o quadro mais novo vai),
+protocolo (`protocolo.rs`), processo filho (`filho.rs`) e supervisor (`supervisor.rs`: token sorteado, config pelo stdin,
+log guardado, fecha junto). `kofstation --nativo` roda o filho (um executável só). Erro novo `CORE_FAILED` no `kof-core`.
+Lado da página: `packages/contracts/src/nativo.ts` (ler quadro/avisos, montar botões e blocos). CI e `rodar.sh` instalam
+/ conferem os cabeçalhos do ALSA; INSTALAR.md atualizado.
+**Decidido:** D32 (processo filho, som pela placa, imagem pela página). Protocolo em API_CONTRACTS §5.
+**Medido / conferido:** `cargo test -p kof-nativo` compila `tests/nucleo/minimo.c` e confere: quadro RGBA com a cor da
+opção e o 1º byte do jogo; som amostra por amostra; ~60 quadros/s e 735 amostras por quadro no relógio; botões; estado
+ida e volta; bateria; pausa (o quadro não anda); sem token, token errado e origem errada = 403; comando inválido vira
+erro; página nova derruba a antiga; núcleo que dá `abort()` derruba só o filho e o log fica; núcleo inexistente =
+`CORE_FAILED`. Fixtures `packages/contracts/fixtures/nativo.json` testadas no TS e no Rust. `pnpm check` e
+`pnpm check:rust` verdes. Sem placa de som no container: o caminho do cpal só foi conferido até "sem placa → relógio".
+**Deu errado / aprendido:** o "pronto" da página nova ia pra conexão antiga (fila compartilhada): agora a geração é
+conferida com a fila presa. cpal 0.18 mudou a API (config por valor, `cpal::Error`).
+**Onde parou:** N.1 ✅. Próximo: **N.2** (compilar o PCSX-ReARMed nativo com dynarec no commit do antigo:
+`nucleo-libretro/construir.sh` do `kofstation-old` diz qual; Release + manifesto; PS-X EXE gerado no teste) e **N.3**
+(o app usa: comandos `nativo.*` na API, a página conecta pelo `nativo.ts` e desenha com os filtros).
+
+---
+
 ## 2026-11-02 · Pós-entrega do M9–M11 · plano do PS nativo e do que ficou incompleto
 
 **Pedido:** o Marcelo não aceita o pacote M9–M11 assim: a jukebox tem que ser "igualzinha à outra" (no SNES faltam Ondas

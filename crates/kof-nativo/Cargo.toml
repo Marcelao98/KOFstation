@@ -1,0 +1,36 @@
+[package]
+name = "kof-nativo"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Núcleos libretro nativos (.so/.dll) num processo filho: laço, som nativo, imagem e botões por WebSocket local"
+
+[lib]
+path = "src/lib.rs"
+
+# o processo filho sozinho (o kofstation roda o mesmo código com `--nativo`); os testes usam este
+[[bin]]
+name = "kof-nativo"
+path = "src/main.rs"
+
+[dependencies]
+kof-core = { path = "../kof-core" }
+libloading = "0.9"
+tungstenite = { version = "0.30", default-features = false, features = ["handshake"] }
+cpal = "0.18"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+getrandom = "0.3"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+
+[build-dependencies]
+cc = "1"
+
+[dev-dependencies]
+cc = "1"
+tempfile = "3"
+
+[lints]
+workspace = true

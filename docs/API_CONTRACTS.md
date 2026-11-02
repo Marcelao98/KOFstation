@@ -84,7 +84,26 @@ interface BiosInfo { system: SystemId; file: string; sha256: string; size: numbe
 interface ContractError { code: string; message: string; details?: Record<string, unknown> }
 ```
 
-## 5. Contratos que continuam iguais ao antigo (compatibilidade)
+## 5. Núcleo nativo (M11b, D32; `crates/kof-nativo`, `packages/contracts/src/nativo.ts`)
+
+O `kofstation` abre `kofstation --nativo` (um processo por jogo). **stdin:** uma linha JSON
+`{nucleo, jogo?, sistema, saves, token, origem?, variaveis?, sem_som?}`; fechar o stdin = fechar o jogo. **stdout:** uma
+linha, `{porta, nucleo: {nome, versao, extensoes, caminho_inteiro}, taxaSaida}` ou `{erro: {codigo, mensagem}}`
+(`CORE_FAILED`, `INVALID_ARGS`). **stderr:** log (o supervisor guarda as últimas 300 linhas).
+
+A página conecta em `ws://127.0.0.1:<porta>/?t=<token>` (sem token, token errado ou `Origin` diferente da do app = HTTP
+403). Uma página por vez: a nova derruba a anterior e recebe `pronto` de novo.
+
+| Direção | Mensagem |
+|---|---|
+| página → | texto `{cmd: pausar\|continuar\|reiniciar\|fechar}`, `{cmd: volume, valor 0–1}`, `{cmd: turbo, fator 1–8}`, `{cmd: variavel, chave, valor}`, `{cmd: salvarEstado\|lerBateria, pedido}` |
+| página → | binário `[2, jogador, botões u16, eixos 4×i16]` (máscara do libretro); `[4\|6, 0,0,0, pedido u32, tamanho u32] + bytes` (carregar estado / gravar bateria) |
+| → página | texto `{tipo: pronto, nucleo, versao, largura, altura, proporcao, fps, taxa, taxaSaida}`, `geometria`, `desempenho {quadros, amostras, atrasoMs, faltas}` (1/s), `ok {pedido}`, `erro {pedido, codigo, mensagem}`, `fim {motivo}` |
+| → página | binário `[1, 0,0,0, largura u16, altura u16, número u32] + RGBA` (só o mais novo); `[3\|5, 0,0,0, pedido u32, tamanho u32] + bytes` (estado / bateria) |
+
+Números em little-endian. Exemplos testados dos dois lados: `packages/contracts/fixtures/nativo.json`.
+
+## 6. Contratos que continuam iguais ao antigo (compatibilidade)
 
 - `rede/PROTOCOLO.md` v1 (entre aparelhos): **igual**, pra parear com o APK atual.
 - Protocolo do kofnativo (cabeçalho de `pc-nativo/kofnativo.c`): igual por dentro; muda só quem conversa com ele (o

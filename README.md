@@ -62,6 +62,7 @@ flowchart TB
     KA["kof-app — servidor local (uma linha por pedido) + api.rs (os comandos) + abre o navegador"]
     KF["kof-files — escopos, Kof Games, varredura, CRC, organizar, lojas, config, capas"]
     KC["kof-core — app.info, erros com código, log em arquivo (inclusive o da tela)"]
+    KN["kof-nativo — núcleo libretro nativo num processo filho (kofstation --nativo): som pela placa, imagem e botões por WebSocket local com token"]
   end
   NU[("núcleos libretro do kofstation-old<br/>third_party/cores/manifest.json (SHA-256)")]
 
@@ -78,6 +79,9 @@ flowchart TB
   KA --> KF
   KA --> KC
   KF --> KC
+  KA -->|"abre e vigia o processo filho"| KN
+  KN --> KC
+  PL -.->|"WebSocket 127.0.0.1 + token (N.3)"| KN
   EN --> NU
 ```
 
@@ -126,6 +130,7 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Jukebox e música (trilha FM, violino, .spc, .wav), abertura, música do Início | ⏸ M9 (falta o Marcelo testar) |
 | Estatísticas, espaço usado, traduções, caçador de bugs (F9) e replay | ⏸ M10 |
 | BIOS, GBA com BIOS, Neo Geo, PS1, N64 (núcleo do SNES: Snes9x; o Kof quando a Mel liberar) | ⏸ M11 |
+| Núcleo nativo: processo filho, som pela placa, imagem/botões por WebSocket (base do PS1 nativo e do PS2) | 🟨 M11b (N.1 feito; PS1 nativo no N.2–N.3) |
 | PS2 | ⬜ M12 |
 | Rede e celular, pacotes e atualização, Android | ⬜ M13–M15 |
 

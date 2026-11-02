@@ -1,5 +1,9 @@
 # Instalar o ambiente de desenvolvimento
 
+> **Som dos núcleos nativos (M11b):** no Linux o Rust precisa dos cabeçalhos do ALSA pra compilar (`alsa-lib-devel` no
+> Fedora, `libasound2-dev` no Ubuntu; já estão nos comandos abaixo). Quem só usa o executável pronto não precisa: a
+> `libasound.so.2` já vem em qualquer Linux com som (PipeWire e PulseAudio passam por ela).
+
 Versões travadas: Node 22+, pnpm 10.28.0 (vem pelo `packageManager` do `package.json`), Rust 1.97.0 (pelo
 `rust-toolchain.toml`, o `rustup` baixa sozinho). As dependências do projeto ficam no `pnpm-lock.yaml` e no
 `Cargo.lock`.
@@ -7,7 +11,7 @@ Versões travadas: Node 22+, pnpm 10.28.0 (vem pelo `packageManager` do `package
 ## Fedora
 
 ```bash
-sudo dnf install -y nodejs git gcc gcc-c++ make
+sudo dnf install -y nodejs git gcc gcc-c++ make alsa-lib-devel pkgconf-pkg-config
 ```
 
 ```bash
@@ -27,7 +31,7 @@ sudo dnf install -y webkit2gtk4.1-devel gtk3-devel librsvg2-devel openssl-devel 
 ## Ubuntu / Debian
 
 ```bash
-sudo apt install -y nodejs npm git build-essential curl
+sudo apt install -y nodejs npm git build-essential curl libasound2-dev pkg-config
 ```
 
 ```bash

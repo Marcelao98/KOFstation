@@ -166,3 +166,20 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - O `somfm` (YM2612 + PSG) vem embutido no `KOFstation.html` publicado do antigo: o `pnpm nucleos` baixa o html de um
   commit fixo e guarda só o trecho do núcleo (conferido por SHA-256), e a `trilha.js` (comandos das 6 músicas) vem do
   mesmo commit. O violino é arquivo do `publicado/nucleos`, como os núcleos. Nada disso entra no git.
+
+## D32. Núcleo nativo num processo filho, imagem pela página, som pela placa — **aceita** (M11b N.1, 02/11)
+- O PS1 em wasm não tem dynarec e pesa. Núcleo libretro nativo (`.so`/`.dll`) roda no **processo filho** `kofstation
+  --nativo` (crate `kof-nativo`; o mesmo executável, um processo por jogo): se o núcleo quebrar, só o filho morre e o
+  supervisor guarda as últimas 300 linhas do log dele (o caçador de bugs manda junto). O filho recebe a configuração por
+  uma linha JSON no stdin (o token nunca aparece na linha de comando) e fecha sozinho quando o stdin fecha (o app morreu).
+- **Som pela placa** (cpal: ALSA/PulseAudio/PipeWire, WASAPI) ditando o ritmo, como o AudioWorklet do wasm (D22): o laço
+  roda quadros enquanto houver menos de 60 ms guardados; sem placa, um relógio imita o consumo (testes, máquina sem som).
+- **Imagem pra página** por uma WebSocket em 127.0.0.1 (porta aleatória, token de 128 bits na URL, `Origin` conferida),
+  em RGBA igual ao `ponte.cpp` do antigo: a página desenha com os mesmos filtros, passadas e molduras. Só o quadro mais
+  novo vai (quem está lento pula quadros, nunca acumula atraso). Botões, estados, bateria e comandos voltam pelo mesmo
+  canal (protocolo em `docs/API_CONTRACTS.md` §5, fixtures dos dois lados em `packages/contracts/fixtures/nativo.json`).
+- Imagem pela GPU (`SET_HW_RENDER`, N64 com GLideN64) ainda não: o núcleo que pede recebe "não" e cai pro software.
+- Núcleos que a gente compila vão como anexo de Release no repositório KOFStation, pelo manifesto (SHA-256), no mesmo
+  commit do núcleo que o antigo usa (N.2).
+- Custo: o Linux precisa dos cabeçalhos do ALSA pra compilar (`libasound2-dev`/`alsa-lib-devel`); o executável pronto só
+  precisa da `libasound.so.2`, que todo Linux com som tem.

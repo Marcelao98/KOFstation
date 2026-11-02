@@ -179,7 +179,7 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ⬜ |
+| N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ✅ |
 | N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ⬜ |
 | N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ⬜ |
 | N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ⬜ |
@@ -188,6 +188,10 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ⬜ |
 | N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ⬜ |
 | N.9 | PS2 nativo (o M12) em cima do N.1 (LRPS2 como núcleo libretro nativo, sem o kofnativo.c) | você joga PS2 | ⬜ |
+
+> **N.1 feito (02/11):** crate `kof-nativo` + `kofstation --nativo`; `cargo test -p kof-nativo` compila um núcleo libretro
+> mínimo em C e confere quadro, som (735 amostras/quadro, ~60 quadros/s), botões, estado, bateria, pausa, token/origem
+> recusados e núcleo que quebra derrubando só o filho. Página ainda não usa (entra no N.3).
 
 Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil · N.6 100–200 mil · N.7–N.8 90 mil. Com o N.9, o
 M12 encolhe (o canal e o processo já vêm do N.1).

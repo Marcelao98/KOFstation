@@ -8,12 +8,16 @@ falta=""
 command -v node >/dev/null 2>&1 || falta="$falta node"
 command -v cargo >/dev/null 2>&1 || falta="$falta rust"
 command -v cc >/dev/null 2>&1 || falta="$falta gcc"
+# som dos núcleos nativos (cpal): cabeçalhos do ALSA
+if [ "$(uname -s)" = Linux ]; then
+  pkg-config --exists alsa 2>/dev/null || falta="$falta alsa(cabeçalhos-do-som)"
+fi
 if [ -n "$falta" ]; then
   echo "Falta instalar:$falta"
   if command -v dnf >/dev/null 2>&1; then
-    echo "  sudo dnf install -y nodejs gcc git"
+    echo "  sudo dnf install -y nodejs gcc git alsa-lib-devel pkgconf-pkg-config"
   elif command -v apt-get >/dev/null 2>&1; then
-    echo "  sudo apt install -y nodejs npm gcc git curl"
+    echo "  sudo apt install -y nodejs npm gcc git curl libasound2-dev pkg-config"
   fi
   echo "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh   (Rust; depois abra um terminal novo)"
   exit 1

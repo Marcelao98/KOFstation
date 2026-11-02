@@ -1,0 +1,40 @@
+{
+  "botoes": { "jogador": 1, "botoes": 33153, "eixos": [-32768, 32767, 5, -5], "hex": "020181810080ff7f0500fbff" },
+  "quadro": {
+    "largura": 2,
+    "altura": 1,
+    "numero": 258,
+    "rgba": [255, 0, 0, 255, 0, 255, 0, 255],
+    "hex": "010000000200010002010000"
+  },
+  "bloco": { "tipo": 4, "pedido": 7, "dados": [1, 2, 3], "hex": "040000000700000003000000010203" },
+  "comandos": [
+    { "cmd": "pausar" },
+    { "cmd": "continuar" },
+    { "cmd": "reiniciar" },
+    { "cmd": "fechar" },
+    { "cmd": "volume", "valor": 0.5 },
+    { "cmd": "turbo", "fator": 4 },
+    { "cmd": "variavel", "chave": "pcsx_rearmed_drc", "valor": "enabled" },
+    { "cmd": "salvarEstado", "pedido": 1 },
+    { "cmd": "lerBateria", "pedido": 2 }
+  ],
+  "avisos": [
+    {
+      "tipo": "pronto",
+      "nucleo": "PCSX-ReARMed",
+      "versao": "r24",
+      "largura": 320,
+      "altura": 240,
+      "proporcao": 1.3333334,
+      "fps": 59.94,
+      "taxa": 44100,
+      "taxaSaida": 48000
+    },
+    { "tipo": "geometria", "largura": 640, "altura": 480, "proporcao": 1.3333334 },
+    { "tipo": "desempenho", "quadros": 600, "amostras": 441000, "atrasoMs": 61.5, "faltas": 0 },
+    { "tipo": "ok", "pedido": 3 },
+    { "tipo": "erro", "pedido": 3, "codigo": "CORE_FAILED", "mensagem": "o núcleo recusou o estado" },
+    { "tipo": "fim", "motivo": "a página pediu" }
+  ]
+}

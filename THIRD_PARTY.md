@@ -30,6 +30,9 @@ livres (ex.: Geolith pro Neo Geo).
 | SDL2 | zlib |
 | qrcode-generator (Kazuhiko Arase) | MIT |
 | jsQR | Apache-2.0 |
+| cpal (som nativo, `kof-nativo`) | Apache-2.0 |
+| tungstenite (WebSocket local, `kof-nativo`) | MIT / Apache-2.0 |
+| libloading (carrega o núcleo nativo) | ISC |
 
 ## Dados e mídia
 

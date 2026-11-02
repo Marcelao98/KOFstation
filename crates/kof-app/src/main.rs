@@ -1,5 +1,6 @@
 //! KOFstation (casca B, D2): serve o app em 127.0.0.1 e abre num navegador Chromium em modo app. Fecha junto com a
 //! janela. Uso: `kofstation` (normal) ou `kofstation --sem-navegador` (só mostra o endereço; pra testes).
+//! `kofstation --nativo` é o processo filho de um núcleo nativo (M11b): o próprio app abre, ninguém roda à mão.
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
 mod api;
@@ -7,6 +8,9 @@ mod navegador;
 mod servidor;
 
 fn main() {
+    if std::env::args().nth(1).as_deref() == Some("--nativo") {
+        std::process::exit(kof_nativo::filho::rodar());
+    }
     servidor::agora_ms(); // o relógio do sinal de vida começa agora
     let sem_navegador = std::env::args().any(|a| a == "--sem-navegador");
     let pasta = kof_core::info::pasta_de_dados(|k| std::env::var(k).ok())
