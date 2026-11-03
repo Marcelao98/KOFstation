@@ -7,7 +7,8 @@ React + TypeScript + Rust, etapa por etapa, sem perder nenhuma funcionalidade.
 
 1. **[docs/JORNAL.md](docs/JORNAL.md) — só a primeira entrada** (a mais nova): o que aconteceu por último e **onde parou**.
 2. **[docs/ROADMAP.md](docs/ROADMAP.md)** — a etapa atual, os passos e os checkpoints (⏸ = esperando o Marcelo).
-3. **[README.md](README.md)** — a arquitetura como está hoje (diagramas).
+3. **[README.md](README.md)** — a arquitetura como está hoje (diagramas). Pra humano: [docs/SITUACAO.md](docs/SITUACAO.md)
+   é o retrato da situação; atualize quando uma etapa for aprovada ou a ordem mudar.
 4. Só quando a etapa pedir: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/FRONTEND.md](docs/FRONTEND.md),
    [docs/DECISIONS.md](docs/DECISIONS.md), [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md), e a ficha da funcionalidade
    em [docs/auditoria/FEATURE_INVENTORY.md](docs/auditoria/FEATURE_INVENTORY.md) (diz os arquivos e linhas do antigo).

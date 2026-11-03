@@ -10,7 +10,7 @@ camada de experiência em volta deles.
 > [Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old) e continua sendo o produto até a troca.
 > A migração anda em etapas com paridade total: nada do antigo pode se perder ([docs/PARIDADE.md](docs/PARIDADE.md)).
 
-**Onde estamos (02/11/2026):** M11b feito até o N.8 (PS1 nativo padrão, jukebox do SNES com Ondas/Notas, N64
+**Onde estamos:** o retrato pra ler em 5 minutos está em [docs/SITUACAO.md](docs/SITUACAO.md). Resumo (03/11/2026): M11b feito até o N.8 (PS1 nativo padrão, jukebox do SNES com Ondas/Notas, N64
 desenhando), esperando o Marcelo testar; o PS2 nativo (N.9) é o próximo. Antes: M3 a M8 aprovados pelo Marcelo; **M9 a M11 feitos**, esperando ele testar — jukebox
 (F7, ondas, notas, .spc, .wav, trilha do KOFstation, música do Início), abertura da 1ª vez, estatísticas, espaço usado,
 traduções (IPS/BPS/UPS), caçador de bugs (F9) e a tela de BIOS. Roda SNES, NES, Game Boy/Color, GBA, Mega Drive, Master
