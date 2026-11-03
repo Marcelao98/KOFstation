@@ -21,6 +21,17 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-03 · Planejamento · ordem nova (PS2 pro fim)
+
+**Pedido:** o Marcelo achou o PS2 caro em token e pediu pra fazer antes o que sai mais rápido, e deixar documentado.
+**Feito:** só o plano: ROADMAP → "Ordem combinada em 03/11" (custo de cada etapa e por quê).
+**Decidido:** ordem 1) teste dele + correções, 2) M15 distribuição, 3) M13 rede/celular como controle, 4) M14 celular,
+5) N.9/M12 PS2 (+ N64 nativo), 6) Troca.
+**Onde parou:** ⏸ o Marcelo testa a `teste-binarios` (PS1 nativo, jukebox do SNES, N64) e abre o PR da
+`claude/busy-ritchie-wrvk8h`. Depois: **M15.1** (manifesto assinado e atualizador).
+
+---
+
 ## 2026-11-02 · Etapas M11b N.2–N.8 · PS1 nativo, jukebox do SNES igual, N64 desenhando
 
 **Pedido:** "segue até terminar" (depois do N.1).

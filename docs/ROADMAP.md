@@ -6,6 +6,20 @@
 > Onde está cada coisa no app antigo: [auditoria/PLANO_DETALHADO.md §4](auditoria/PLANO_DETALHADO.md) e
 > [auditoria/FEATURE_INVENTORY.md](auditoria/FEATURE_INVENTORY.md). Como o front é feito: [FRONTEND.md](FRONTEND.md).
 
+## Ordem combinada em 03/11 (do mais barato pro mais caro)
+
+> O Marcelo pediu pra deixar o PS2 (caro) pro fim e fazer antes o que sai rápido e com menos token. As seções abaixo
+> continuam com os mesmos números; **a ordem de execução é esta**:
+
+| # | O quê | Custo (tokens escritos, estimativa) | Por quê nessa posição |
+|---|---|---|---|
+| 1 | Teste do Marcelo no pacote da `teste-binarios` (M9, M10, M11, N.3, N.5, N.6) + correções | baixo (só o que aparecer) | aprova 19 passos de uma vez; bug achado cedo sai barato |
+| 2 | **M15 Distribuição** (atualizador com manifesto assinado, pacotes Linux e Windows, versão lado a lado com o antigo) | baixo–médio (~150–250 mil) | o executável já é um arquivo só; falta assinar, baixar, trocar e empacotar. Deixa você usar o novo no dia a dia sem compilar |
+| 3 | **M13 Rede e celular como controle** | médio (~250–400 mil) | o antigo já tem tudo pronto e pequeno: `rede/kofrede.c` (139 linhas + Monocypher) entra no Rust do jeito que ele é, o `kofservico.c` (773 linhas) vira Rust, `rede.js`/`jogarpc.js` (~370 linhas) viram telas. Protocolo igual: pareia com o APK atual |
+| 4 | **M14 Celular** (a casca Java atual servindo o app novo) | médio (~300–450 mil) | reaproveita a casca e as `.so` do antigo; o grosso é o layout de celular e o controle de toque |
+| 5 | **N.9 / M12 PS2 nativo** (+ N64 nativo junto) | alto (~400–700 mil) | OpenGL sem janela no processo do jogo, compilar o LRPS2 (Linux e Windows), sistema PS2 no app. O M12.1 e o M12.2 já saíram no N.1 |
+| 6 | **Troca** (PARIDADE 100% e o antigo levando pro novo) | baixo–médio | por último: precisa do PS2 pra paridade ser total |
+
 ## Como é cada checkpoint
 
 1. **Resumo curto** do que foi feito e do que ficou de fora.
@@ -224,7 +238,7 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > **N.8 feito (02/11):** cartão BIOS do Início diz quais estão guardadas ("✅ GBA, Neo Geo · trocar ou guardar outra");
 > a abertura mostra o ícone do app (a xícara do `icone.py` do antigo, em SVG; também o ícone da janela) e, no passo 2, a
 > lista de BIOS (GBA roda sem; Neo Geo guardado ou faltando).
-> **N.9 ⬜ (próxima sessão):** o `kof-nativo` precisa dar ao núcleo um OpenGL sem janela (`SET_HW_RENDER`: contexto EGL
+> **N.9 ⬜ (adiado pro item 5 da "Ordem combinada em 03/11", depois do M15, M13 e M14):** o `kof-nativo` precisa dar ao núcleo um OpenGL sem janela (`SET_HW_RENDER`: contexto EGL
 > no processo do jogo, framebuffer, `get_proc_address`) e ler a imagem de volta pra página; depois o LRPS2 (commit do
 > antigo) no `tools/nucleos-nativos.sh`. O mesmo caminho dá o N64 nativo.
 
