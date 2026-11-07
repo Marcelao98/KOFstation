@@ -21,6 +21,36 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-07 · Etapa M15 · atualizador assinado, pacotes do Linux e do Windows, lado a lado com o antigo
+
+**Pedido:** "segue até o M14", sem parar em cada checkpoint; parar só no que só o Marcelo faz (chave, celular, Windows).
+**Feito:** M15.1: o `kofstation` aplica a versão baixada no começo do `main` (executável trocado → abre o novo e sai),
+`app.atualizacao {procurar}` (procura numa linha separada; a página pergunta até terminar), versão do `versao.txt` no
+`app.info` (antes era sempre 0.1.0, então o "✨ atualizado!" nunca aparecia), `nao-atualizar` e `fonte.txt` como no
+antigo (`crates/kof-app/src/atualizacao.rs`); página: menu "🔄 Procurar atualização" e procura sozinha 10 s depois de
+abrir (`stores/atualizacao.ts`, `app-core/atualizacao.ts`); `tools/manifesto.mjs` (gera a chave; monta e assina; arquivo
+igual ao da versão anterior aponta pra Release antiga); workflow `versao.yml` (Linux + Windows, empacota, assina,
+Release `v<data>` como "latest"; sem o secret só compila). M15.2: `kofstation --instalar/--desinstalar`
+(`kofstation-novo.desktop`, `src/instalar.rs`), ícone da xícara do antigo (`tools/icone.py`), `tools/pacote-linux.sh`
+(`.tar.gz` com LEIA-ME). M15.3: `tools/pacote-windows.sh` + `tools/pacote/instalador.nsi` (NSIS sem administrador em
+`%LOCALAPPDATA%\Programs\KOFstation`, atalhos "KOFstation novo", desinstalador que não toca em saves) e o `.zip`.
+M15.4: nomes e pastas separados do antigo ("KOFstation novo"; dados em `KOFstation/`, o antigo em `KOFnes/`).
+**Decidido:** D34 (atualizador próprio, Ed25519 com o `ring`, troca na próxima abertura, publicação a cada envio na
+`main`).
+**Medido / conferido:** `crates/kof-atualiza/tests/ciclo.rs` (5 testes: troca, núcleo velho apagado, assinatura de outra
+chave, manifesto mexido, arquivo alterado, caminho `../`); `tools/testar-atualizacao.mjs` (no CI): o `kofstation` de
+verdade com chave de teste, versão 2 servida por HTTP local com os 13 núcleos reais (28 MB): baixa, troca o
+executável na abertura seguinte, apaga o núcleo que saiu, `app.info` diz "2", depois "em dia"; arquivo alterado e
+assinatura falsa recusados sem deixar nada pela metade. Pacotes: `.tar.gz` 13,9 MB, instalador 11,6 MB, `.zip` 15 MB;
+o `.tar.gz` baixado da `teste-binarios` extrai, `--instalar` grava o `.desktop` certo e o app serve os núcleos.
+`check`, `check:rust` e 40 e2e verdes.
+**Deu errado / aprendido:** neste container o teste `kof-nativo --test pcsx` morre com SIGILL (CPU do container; não
+mexi no kof-nativo, no CI do GitHub ele passa). O instalador do Windows só foi montado (makensis no Linux), não rodado.
+**Onde parou:** ⏸ Marcelo: (1) **criar a chave** (comando no SITUACAO, "Pra você fazer"); (2) instalar o pacote do
+Linux; (3) Windows quando der. Seguindo pro M13 (rede).
+
+---
+
 ## 2026-11-07 · M15.1 começado · onde parou pra próxima sessão
 
 **Pedido:** o Marcelo autorizou seguir os próximos (M15 em diante) e pediu pra deixar tudo salvo: a sessão ficou grande e

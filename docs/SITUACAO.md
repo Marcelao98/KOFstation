@@ -16,9 +16,9 @@ atual; depois vêm distribuição, celular e, por último, o PS2.
 
 | | Passos | O que quer dizer |
 |---|---|---|
-| ✅ Pronto | **68** | Você aprovou, ou o checkpoint era teste automático e passou |
-| ⏸ Esperando você | **3** | Feito e testado por mim; falta você jogar e dizer "ok" |
-| ⬜ Por fazer | **20** | Distribuição, rede/celular como controle, celular, PS2, a troca |
+| ✅ Pronto | **69** | Você aprovou, ou o checkpoint era teste automático e passou |
+| ⏸ Esperando você | **6** | Feito e testado por mim; falta você jogar e dizer "ok" |
+| ⬜ Por fazer | **16** | Rede/celular como controle, celular, PS2, a troca |
 
 Na lista de paridade com o antigo ([PARIDADE.md](PARIDADE.md)): 28 itens ✅ conferidos, 17 🟨 feitos com alguma
 diferença anotada, 15 ⬜ que dependem das etapas que faltam.
@@ -89,9 +89,41 @@ flowchart LR
 | **M6 Rebobinar** | Igual ao antigo (preto e branco, ampulheta) |
 | **M7 Imagem** | Painel de filtros (os mesmos pixels do antigo), NTSC, Scale4x, bloom, molduras, paletas |
 | **M8 Controles** | Teclas e botões por console e por jogo, analógico no teclado, jogadores 2 a 4 |
+| **M15.1 Atualizador** | Manifesto assinado, baixa só o que mudou, troca na próxima abertura (liga quando a chave existir) |
 | **M11b (parte)** | O núcleo nativo, o PCSX compilado, o Snes9x com sonda, PS1 wasm conferido pela imagem, cartão de BIOS e abertura |
 
+## Pra você fazer (só você pode) 🔑
+
+**A chave do atualizador** (uma vez só). Sem ela o app novo não se atualiza sozinho (o menu "🔄 Procurar atualização"
+diz "compilada sem a chave"). No teu Linux, na pasta do KOFStation (o repositório):
+
+```bash
+git pull && node tools/manifesto.mjs chave ~/kofstation-chave.pem
+```
+
+Isso cria a chave **privada** em `~/kofstation-chave.pem` (guarde; não mande pra ninguém, nem pra mim) e grava a
+**pública** em `crates/kof-app/chave-atualizacao.txt`. Depois:
+
+1. No GitHub: KOFStation → Settings → Secrets and variables → Actions → **New repository secret**. Nome
+   `KOF_CHAVE_ATUALIZACAO`; valor: tudo que sai de `cat ~/kofstation-chave.pem` (com as linhas BEGIN/END).
+2. Mande a pública pro repositório: `git add crates/kof-app/chave-atualizacao.txt && git commit -m "Chave pública do atualizador" && git push`
+   (ou cole na conversa a linha que o comando mostrou como "chave pública": ela pode ser vista por todo mundo).
+
+A partir daí, cada envio na `main` publica uma versão (workflow "Versão") e o app instalado se atualiza sozinho.
+
 ## Esperando você testar ⏸
+
+**Novo (M15):** o pacote da `teste-binarios` agora instala. No Linux:
+
+```bash
+mkdir -p ~/Programas/"Kof Games" && curl -fL https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/KOFstation-linux.tar.gz | tar -xz -C ~/Programas/"Kof Games" && ~/Programas/"Kof Games"/KOFstation/kofstation --instalar && ~/Programas/"Kof Games"/KOFstation/kofstation
+```
+
+Confira: aparece **KOFstation novo** no menu de aplicativos (com a xícara), abre por ali, e o antigo continua lá, do
+jeito que estava, com os saves dele. No Windows: o `KOFstation-instalar.exe` da mesma branch (instala sem pedir
+administrador, atalho na área de trabalho) ou o `.zip`.
+
+**De antes:**
 
 O pacote está na branch `teste-binarios`: é a pasta `KOFstation/` (o executável, `nucleos/`, `nativo/`,
 `versao.txt`, igual ao antigo), que vai dentro da sua Kof Games. No Linux:
@@ -131,7 +163,7 @@ O PS2 ficou pro fim porque é o mais caro em token. Os custos são estimativa (t
 | 5 | **PS2 nativo** (N.9 / M12) | ~400–700 mil | Dar OpenGL ao processo do jogo, compilar o LRPS2, criar o sistema PS2. O N64 nativo sai junto |
 | 6 | **Troca** | baixo–médio | Conferir a paridade 100% e o app antigo publicar a última versão, que leva pro novo |
 
-**Próximo depois do seu teste:** M15.1 (manifesto assinado e atualizador).
+**Agora:** M15 feito (falta a chave e o teu teste); seguindo pro M13 (rede e celular como controle).
 
 ---
 
