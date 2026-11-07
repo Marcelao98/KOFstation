@@ -1,4 +1,4 @@
-# Onde está o KOFstation novo (03/11/2026)
+# Onde está o KOFstation novo (07/11/2026)
 
 Um retrato, pra gente ler: o que já funciona, como o app funciona por dentro, como o trabalho anda, o que está
 esperando teste e o que falta, na ordem combinada. O detalhe técnico de cada coisa está nos outros documentos (lista no
@@ -29,7 +29,7 @@ diferença anotada, 15 ⬜ que dependem das etapas que faltam.
 
 ```mermaid
 flowchart LR
-  EXE["kofstation<br/>(um arquivo só)"]
+  EXE["kofstation<br/>(+ nucleos/ e nativo/ do lado)"]
   NAV["Chrome / Chromium / Edge<br/>em modo app"]
   WASM["núcleos em WebAssembly<br/>(SNES, NES, GB, GBA, MD, SMS, GG,<br/>Neo Geo, N64, PS1 de reserva)"]
   NAT["processo do jogo nativo<br/>PS1 (PCSX-ReARMed com recompilador)"]
@@ -43,7 +43,7 @@ flowchart LR
   NAT -- "lê o CD direto" --> KG
 ```
 
-- **Um executável só** (Linux ou Windows). Ele sobe um servidor só dentro do computador (127.0.0.1, com senha
+- **Uma pasta, como no antigo** (D33): o executável (~8 MB, o app e o Rust), `nucleos/`, `nativo/` e `versao.txt`. Ele sobe um servidor só dentro do computador (127.0.0.1, com senha
   aleatória) e abre o app numa janela do navegador. Fechou a janela, ele fecha.
 - **A maioria dos consoles** roda em WebAssembly dentro do navegador, com os **mesmos núcleos do antigo** (conferidos
   por SHA-256). O som dita o ritmo, como no antigo depois da otimização.
@@ -91,18 +91,20 @@ flowchart LR
 
 ## Esperando você testar ⏸
 
-O pacote está na branch `teste-binarios`. No Linux:
+O pacote está na branch `teste-binarios`: é a pasta `KOFstation/` (o executável, `nucleos/`, `nativo/`,
+`versao.txt`, igual ao antigo), que vai dentro da sua Kof Games. No Linux:
 
 ```bash
-mkdir -p ~/Programas/"Kof Games"/KOFstation && curl -fL -o ~/Programas/"Kof Games"/KOFstation/kofstation https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/kofstation && chmod +x ~/Programas/"Kof Games"/KOFstation/kofstation && ~/Programas/"Kof Games"/KOFstation/kofstation
+mkdir -p ~/Programas/"Kof Games" && curl -fL https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/KOFstation-linux.tar.gz | tar -xz -C ~/Programas/"Kof Games" && ~/Programas/"Kof Games"/KOFstation/kofstation
 ```
 
-No Windows: o `KOFstation.exe` da mesma branch.
+No Windows: o `KOFstation-windows.zip` da mesma branch, descompactado dentro da Kof Games.
 
 O que conferir, do mais importante pro menos:
 
-1. **PS1 nativo** (N.3): um jogo de verdade (`.cue` com os `.bin` do lado, na Kof Games). Roda liso? Tem som? Estados
-   e cartão de memória salvam? No Linux e, se der, no Windows (lá eu só consegui testar compilando, não jogando).
+1. **PS1 nativo** (N.3): o "sem memória" de 07/11 foi corrigido (a página lia o CD inteiro). Um jogo de verdade pela
+   **Biblioteca** (`.cue` + `.bin`, e um `.chd` se tiver) e um **arrastado** de fora (ele é guardado na Kof Games e
+   abre). Roda liso? Tem som? Estados e cartão de memória salvam? No Linux e, se der, no Windows.
 2. **N64** (N.6): um jogo de verdade. O "não roda" de antes era a ROM de teste, não o núcleo.
 3. **Jukebox** (M9, N.5): F7 num jogo de SNES e num de Mega Drive; na jukebox, as vistas Capa, Ondas e Notas; um `.spc`
    de fora; exportar `.wav`.

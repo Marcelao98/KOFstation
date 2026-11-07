@@ -216,6 +216,8 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > desenho (filtros, molduras), botões e analógico (DualShock), estados, cartão de memória (conferido 1x/s), pausa,
 > turbo, volume, painel F3. `tools/testar-nativo.mjs` (também no CI): app de verdade + Chromium + PS-X EXE gerado,
 > pixels da tela do app conferidos, 60 fps.
+> **Correção 07/11:** PS1 estourava a memória (a página lia o CD inteiro): agora só a cabeça do CD passa pela página,
+> arrastado vai pra Kof Games aos pedaços, e os núcleos ficam na pasta ao lado do executável (D33). Ver o JORNAL.
 > **N.4 feito (02/11):** `tools/remendos/snes9x-sonda.patch` (a saída de cada voz do DSP antes do volume, 32 kHz, e o
 > mudo por voz) + `tools/nucleos-wasm.sh` (o `construir.sh` e a `ponte.cpp` do antigo num commit fixo); Release
 > `nucleos-2`; o Snes9x do app passa a ser este. Conferido: o mesmo `.spc` toca **byte a byte igual** ao Snes9x publicado

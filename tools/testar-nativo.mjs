@@ -15,6 +15,7 @@ import {
   openSync,
   readFileSync,
   readdirSync,
+  rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -262,6 +263,7 @@ try {
 } finally {
   await nav.close();
   app.kill();
+  rmSync(tmp, { recursive: true, force: true }); // os CDs gerados (centenas de MB)
 }
 if (falhas.length) {
   console.error(`\n${falhas.length} falha(s):\n- ${falhas.join('\n- ')}`);

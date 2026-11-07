@@ -21,6 +21,34 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-07 · Correção · PS1 sem memória e a pasta de núcleos igual ao antigo
+
+**Pedido:** o Marcelo testou: o PS1 estoura a memória. Pediu pra achar a causa, corrigir e documentar, e deixar os
+núcleos numa pasta ao lado do executável como no antigo (`nativo/`, `nucleos/`, `versao.txt`).
+**Causa:** a página lia o CD inteiro antes de abrir o jogo. Reproduzido no pacote anterior com um CD gerado de 300 MB:
+arrastado de fora, a página foi a **1,2 GB** (com 700 MB, a aba morre) e o CD nem era guardado na Kof Games (limite de
+256 MB por pedido); imagem única (`.iso`/`.chd`/`.bin`) pela biblioteca também era lida inteira. (Eu tinha testado só
+com um programa de PS1 de poucos KB.)
+**Feito:** `cabecaDoCd` (app-core): com o nativo, só o `.cue` ou 64 KB da imagem passam pela página; o tamanho de
+verdade fica em `JogoAberto.tamanho` (a identidade e a chave do save não mudam). CD arrastado: vai pra Kof Games aos
+pedaços de 16 MB direto do disco (`library.import.parte` no Rust, `enviarArquivo` com `Blob` no `fetch`) e abre no
+nativo. WebAssembly (reserva): o CD vai pro Worker transferido, sem cópia. **D33:** núcleos fora do executável
+(38 → 8 MB): `KOFstation/{kofstation, nucleos/ (hash no nome + lista.json), nativo/, versao.txt}`,
+`crates/kof-app/src/pastas.rs`, `tools/empacotar.sh`; rodando do código, usa as pastas do repositório.
+**Medido / conferido:** `tools/testar-nativo.mjs` (também no CI, com `genisoimage`): CD de 300 MB de verdade (ISO com
+SYSTEM.CNF e o programa que desenha) pela biblioteca (`.cue` e `.iso`) e arrastado: imagem certa no nativo, 60 fps,
+página ~300 MB (igual a antes de abrir), `kofstation` < 60 MB, CD guardado inteiro na Kof Games. `check`, `check:rust`,
+39 e2e verdes. O pacote baixado da `teste-binarios` abre e serve os núcleos da pasta.
+**Deu errado / aprendido:** testar sempre com arquivo do tamanho de verdade. Ler os pedaços como `ArrayBuffer` ainda
+subia a página (~730 MB: o coletor de lixo demora); mandando o `Blob` direto no `fetch` não sobe. Uma vez o `page.goto`
+do teste estourou 60 s (já tinha acontecido no CI): não reproduziu depois; ficar de olho. O executável novo é maior que
+o lançador do antigo (que só abria o navegador): o perfil de compilação enxuto (~6 MB) ficou pra depois, a pedido.
+**Onde parou:** ⏸ o Marcelo testa a `teste-binarios` nova (`fc73f93`: `KOFstation-linux.tar.gz` /
+`KOFstation-windows.zip`): **PS1 de verdade** (pela biblioteca e arrastado), depois N64, jukebox do SNES e Neo Geo.
+Depois: M15.1 (o atualizador já tem a pasta pronta).
+
+---
+
 ## 2026-11-03 · Planejamento · ordem nova (PS2 pro fim)
 
 **Pedido:** o Marcelo achou o PS2 caro em token e pediu pra fazer antes o que sai mais rápido, e deixar documentado.
