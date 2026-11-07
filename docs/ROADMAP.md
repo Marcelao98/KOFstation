@@ -195,7 +195,7 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 |---|---|---|---|
 | N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ✅ |
 | N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ✅ |
-| N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ⏸ |
+| N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ✅ |
 | N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ✅ |
 | N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⏸ |
 | N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⏸ |
@@ -216,6 +216,9 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > desenho (filtros, molduras), botões e analógico (DualShock), estados, cartão de memória (conferido 1x/s), pausa,
 > turbo, volume, painel F3. `tools/testar-nativo.mjs` (também no CI): app de verdade + Chromium + PS-X EXE gerado,
 > pixels da tela do app conferidos, 60 fps.
+> **N.3 aprovado no Linux (07/11):** o Marcelo jogou o FF9 pelo PS1 nativo: "liso liso liso", 60 fps, cartão de memória
+> salvando dentro do jogo e estado indo e voltando. Falta conferir no Windows (ele não tem Windows agora). Correções do
+> caminho: o CD (inclusive dentro de `.zip`) não passa mais pela página; estado não volta mais preto. Ver o JORNAL.
 > **Correção 07/11:** PS1 estourava a memória (a página lia o CD inteiro): agora só a cabeça do CD passa pela página,
 > arrastado vai pra Kof Games aos pedaços, e os núcleos ficam na pasta ao lado do executável (D33). Ver o JORNAL.
 > **N.4 feito (02/11):** `tools/remendos/snes9x-sonda.patch` (a saída de cada voz do DSP antes do volume, 32 kHz, e o
