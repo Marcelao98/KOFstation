@@ -1,6 +1,7 @@
 //! Comandos do núcleo nativo (M11b, D32): o núcleo fica na pasta `nativo/` ao lado do executável (D33) e o
 //! `kofstation` abre um processo filho (`kofstation --nativo`) por jogo. A página conecta na WebSocket dele com o token devolvido.
-//! O jogo é lido pelo próprio processo direto da Kof Games (o CD não passa pela página).
+//! O jogo é lido pelo próprio processo direto da Kof Games (o CD não passa pela página); o CD zipado é extraído
+//! antes numa pasta de cache (`<dados>/nativo/cache/<sistema>/`, um CD por vez).
 use kof_core::KofError;
 use kof_nativo::ProcessoNativo;
 use serde_json::Value;
@@ -78,6 +79,13 @@ impl Nativos {
                 std::fs::write(&alvo, &dados).map_err(|e| KofError::de_io(alvo.display(), e))?;
             }
         }
+        // CD de PS1 zipado: o núcleo não abre zip; o CD sai numa pasta de cache (um por vez) e o núcleo lê de lá
+        let jogo = if jogo.extension().is_some_and(|x| x.eq_ignore_ascii_case("zip")) {
+            let cache = pasta_dados.join("nativo").join("cache").join(&a.sistema);
+            kof_files::zip::extrair_cd(&jogo, &cache)?
+        } else {
+            jogo
+        };
         let exe =
             std::env::current_exe().map_err(|e| KofError::Nucleo(format!("não achei o próprio executável: {e}")))?;
         let p = ProcessoNativo::abrir(

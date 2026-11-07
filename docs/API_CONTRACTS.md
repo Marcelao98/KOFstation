@@ -50,6 +50,9 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | `library.scan` | `{exts[]}` → `{root, files: RomFile[]}` (Games até 2 níveis; `.zip` traz o diretório; `.bin/.img/.iso` trazem `cd`) | `ROOT_MISSING` | ✅ M3.2 (sem eventos de progresso: a varredura não lê os arquivos inteiros) |
 | `library.crc` | `{items: {path, sistema}[]}` → `{crcs: {path: crc}}` (No-Intro; cache em `<dados>/cache/crc.json`) | `ROOT_MISSING`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
 | `file.read` | `{scope: "kof-games", path, offset?, length?}` → binário | `NOT_FOUND`, `INVALID_ARGS`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
+| `file.stat` | `{scope: "kof-games", path}` → `{size, dir}` (o tamanho dos .bin de um .cue sem ler) | `NOT_FOUND`, `PATH_OUTSIDE_SCOPE` | ✅ correção 07/11 |
+| `file.zip.list` | `{scope: "kof-games", path}` → `{size, itens: {nome, tamanho, crc}[]}` (o diretório do zip, sem descompactar) | `NOT_FOUND`, `PATH_OUTSIDE_SCOPE` | ✅ correção 07/11 |
+| `file.zip.read` | `{scope: "kof-games", path, entrada, length?}` → binário (os primeiros `length` bytes de uma entrada, descompactados; guardado ou deflate) | `NOT_FOUND`, `BAD_ZIP`, `PATH_OUTSIDE_SCOPE` | ✅ correção 07/11 |
 | `library.inventory` | — → `{files: (RomFile & {cue?: string[]})[], dirs[]}` (tudo de Games e Novos, até 6 níveis) | `ROOT_MISSING` | ✅ M3.3 |
 | `library.organize.plan` | **no TS** (`domain/organizar.ts` `planejarOrganizacao`, sobre o `library.inventory`): `{moves: Move[], limpar[]}` | — | ✅ M3.3 |
 | `library.organize.apply` | `{moves, limpar?}` → `{done, failed: {move, code, message}[], removed[]}` (nome repetido vira "nome (2).ext"; pasta inteira junta com a que já existe) | por movimento: `NOT_FOUND`, `PATH_OUTSIDE_SCOPE`, `IO_ERROR` | ✅ M3.3 |

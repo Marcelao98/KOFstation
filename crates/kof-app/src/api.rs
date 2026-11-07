@@ -117,6 +117,25 @@ struct ArgsLer {
     length: Option<u64>,
 }
 
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsCaminho {
+    scope: String,
+    path: String,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsLerZip {
+    scope: String,
+    /// o .zip, relativo ao escopo
+    path: String,
+    /// o arquivo de dentro (só o nome)
+    entrada: String,
+    #[serde(default)]
+    length: Option<u64>,
+}
+
 pub fn args<T: DeserializeOwned>(v: Value) -> Result<T, KofError> {
     serde_json::from_value(v).map_err(|e| KofError::argumento("args", e.to_string()))
 }
@@ -267,6 +286,24 @@ impl Estado {
                 let a: ArgsLer = args(a)?;
                 let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
                 Ok(Saida::Bin(kof_files::escopo::ler(&p, a.offset, a.length)?))
+            }
+            "file.stat" => {
+                let a: ArgsCaminho = args(a)?;
+                let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
+                let m = std::fs::metadata(&p).map_err(|e| KofError::de_io(&a.path, e))?;
+                json(serde_json::json!({ "size": m.len(), "dir": m.is_dir() }))
+            }
+            "file.zip.list" => {
+                let a: ArgsCaminho = args(a)?;
+                let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
+                let mut f = std::fs::File::open(&p).map_err(|e| KofError::de_io(&a.path, e))?;
+                let tamanho = f.metadata().map_err(|e| KofError::de_io(&a.path, e))?.len();
+                json(serde_json::json!({ "size": tamanho, "itens": kof_files::zip::itens(&mut f, tamanho) }))
+            }
+            "file.zip.read" => {
+                let a: ArgsLerZip = args(a)?;
+                let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
+                Ok(Saida::Bin(kof_files::zip::ler_entrada(&p, &a.entrada, a.length)?))
             }
             "nativo.disponivel" => json(serde_json::json!({ "sistemas": crate::nativo::sistemas() })),
             "nativo.abrir" => {

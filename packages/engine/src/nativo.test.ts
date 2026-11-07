@@ -115,4 +115,36 @@ describe('JogoNativo (página ↔ processo nativo)', () => {
     expect(erros).toEqual(['o núcleo nativo fechou: o núcleo pediu pra fechar']);
     j.fechar();
   });
+
+  it('a conexão cai com o processo vivo: reconecta sozinha e segue recebendo quadros', async () => {
+    const erros: string[] = [];
+    let quadros = 0;
+    const j = await abrir({ erro: (m: string) => erros.push(m), quadro: () => quadros++ });
+    const antiga = WsFalsa.ultima;
+    antiga.onclose?.();
+    await new Promise((r) => setTimeout(r, 20));
+    const nova = WsFalsa.ultima;
+    expect(nova).not.toBe(antiga);
+    expect(nova.comandos()).toContainEqual({ cmd: 'volume', valor: 0.5 });
+    const px = new Uint8Array(12 + 4);
+    new DataView(px.buffer).setUint8(0, NATIVO.QUADRO);
+    new DataView(px.buffer).setUint16(4, 1, true);
+    new DataView(px.buffer).setUint16(6, 1, true);
+    nova.binario(px);
+    expect(quadros).toBe(1);
+    expect(erros).toEqual([]);
+    j.fechar();
+    expect(nova.comandos().at(-1)).toEqual({ cmd: 'fechar' });
+  });
+
+  it('o processo avisou "fim": não reconecta e dá um erro só', async () => {
+    const erros: string[] = [];
+    await abrir({ erro: (m: string) => erros.push(m) });
+    const ws = WsFalsa.ultima;
+    ws.texto({ tipo: 'fim', motivo: 'o núcleo caiu' });
+    ws.onclose?.();
+    await new Promise((r) => setTimeout(r, 20));
+    expect(WsFalsa.ultima).toBe(ws);
+    expect(erros).toEqual(['o núcleo nativo fechou: o núcleo caiu']);
+  });
 });

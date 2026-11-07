@@ -49,6 +49,8 @@ export class JogoNativo {
   private botoes = [0, 0, 0, 0];
   private eixos = [0, 1, 2, 3].map(() => [0, 0, 0, 0]);
   private fechando = false;
+  /** o processo avisou que acabou: a conexão que cai depois não volta */
+  private acabou = false;
   private sramAntes: Uint8Array | null = null;
   private relogioSram = 0;
   private medAntes: { t: number; quadros: number; faltas: number } | null = null;
@@ -102,11 +104,7 @@ export class JogoNativo {
       proporcao: p.proporcao,
     };
     j.comSom = p.taxaSaida > 0;
-    j.ws.onmessage = (ev: MessageEvent) => j.receber(ev.data as string | ArrayBuffer);
-    j.ws.onclose = () => {
-      if (!j.fechando) j.eventos.erro?.('o núcleo nativo fechou sem avisar', []);
-      j.falharTudo('o jogo fechou');
-    };
+    j.ligar();
     j.aplicarVolume();
     if (o.sram?.length) {
       j.sramAntes = o.sram;
@@ -114,6 +112,41 @@ export class JogoNativo {
     }
     j.relogioSram = setInterval(() => j.conferirSram(), 1000) as unknown as number;
     return j;
+  }
+
+  /** Liga a conexão atual à sessão (quadros, avisos e o que fazer se ela cair). */
+  private ligar() {
+    const ws = this.ws;
+    ws.onmessage = (ev: MessageEvent) => this.receber(ev.data as string | ArrayBuffer);
+    ws.onclose = () => {
+      if (this.fechando || ws !== this.ws) return;
+      this.falharTudo('a conexão com o núcleo nativo caiu');
+      if (!this.acabou) this.religar(1);
+    };
+  }
+
+  /**
+   * A conexão caiu sem o processo avisar: tenta de novo (o processo segue rodando e responde "pronto" pra página que
+   * conecta). Só depois de 3 tentativas sem resposta vira erro.
+   */
+  private religar(tentativa: number) {
+    if (this.fechando) return;
+    const WS = this.o.WebSocket ?? WebSocket;
+    const ws = new WS(`ws://127.0.0.1:${this.o.porta}/?t=${encodeURIComponent(this.o.token)}`);
+    ws.binaryType = 'arraybuffer';
+    let pronto = false;
+    ws.onmessage = (ev: MessageEvent) => {
+      if (typeof ev.data !== 'string' || lerAviso(ev.data)?.tipo !== 'pronto') return;
+      pronto = true;
+      this.ws = ws;
+      this.ligar();
+      this.aplicarVolume();
+    };
+    ws.onclose = () => {
+      if (pronto || this.fechando) return;
+      if (tentativa < 3) setTimeout(() => this.religar(tentativa + 1), 300 * tentativa);
+      else this.eventos.erro?.('o núcleo nativo fechou sem avisar', []);
+    };
   }
 
   private receber(d: string | ArrayBuffer) {
@@ -125,7 +158,10 @@ export class JogoNativo {
       else if (a.tipo === 'erro') {
         if (a.pedido !== null && this.esperando.has(a.pedido)) this.recusar(a.pedido, a.mensagem);
         else this.eventos.erro?.(a.mensagem, []);
-      } else if (a.tipo === 'fim' && !this.fechando) this.eventos.erro?.(`o núcleo nativo fechou: ${a.motivo}`, []);
+      } else if (a.tipo === 'fim') {
+        this.acabou = true;
+        if (!this.fechando) this.eventos.erro?.(`o núcleo nativo fechou: ${a.motivo}`, []);
+      }
       return;
     }
     let b;

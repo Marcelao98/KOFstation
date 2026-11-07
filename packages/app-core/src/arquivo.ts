@@ -40,6 +40,11 @@ export interface JogoAberto {
    */
   parcial?: boolean;
   tamanho?: number;
+  /**
+   * Bytes do CD no disco (o .cue com os .bin, o zip descompactado, a imagem), quando só a cabeça foi lida. Decide se o
+   * WebAssembly pode ser a reserva do nativo (CD grande não: teria que passar inteiro pela página).
+   */
+  pesoCd?: number;
 }
 
 /** O tamanho de verdade do jogo (a `rom` pode ser só a cabeça). */

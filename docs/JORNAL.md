@@ -21,6 +21,58 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-07 · Correção · PS1 sem memória de novo: o jogo zipado (e o estado que voltava preto)
+
+**Pedido:** o Marcelo pediu pra fazer o PS1 rodar no Linux dele, com os jogos dele, sem estourar a memória, sozinho
+até resolver (suspeitos em ordem: reserva no wasm, lightrec sem o endereço 0, processo caindo, formato não coberto,
+pacote velho).
+**Erro de verdade:** o único PS1 dele é um **`.zip`** (CD de 740 MB dentro: `.cue` + `.bin`). O `cabecaDoCd` só
+cobria `cue|bin|img|iso|chd|pbp`: o zip era lido inteiro pela página e o jogo ia pro **WebAssembly** (nem tentava o
+nativo; o log não tinha nenhuma linha "nativo"). Reproduzido no pacote `689755e` como usuário comum: página com pico de
+**3,6 GB** (1,2 GB presos depois), `kofstation` **971 MB** (servindo o zip), 47 fps com 26 engasgos/s.
+**Feito:**
+- Rust (`kof-files/src/zip.rs`): entradas do zip com método e posição; `ler_entrada` (o começo de uma entrada,
+  descompactado: guardado ou deflate, com o `flate2` que já vinha pelo `ureq`); `extrair_cd` (o CD sai em
+  `<dados>/nativo/cache/<sistema>/<nome>-<tamanho>-<data>/`, CRC conferido, um CD por vez no cache, reaproveita se o zip
+  é o mesmo). Erro novo `BAD_ZIP`. Comandos `file.stat`, `file.zip.list`, `file.zip.read` (API_CONTRACTS). O
+  `nativo.abrir` extrai quando o caminho é `.zip`.
+- Página (`app-core/jogos.ts`): `cabecaDoZip` monta o mesmo `JogoAberto` que o zip lido inteiro (mesmo nome, mesma rom
+  = o `.cue`/a cabeça/o `.cue` montado das faixas: **mesma identidade e chave do save**), lendo só o `.cue` ou 64 KB.
+  `pesoCd` = o tamanho do CD no disco (do zip, da imagem, ou do `.cue` + os `.bin` pelo `file.stat`).
+- Reserva (`stores/jogo.ts`): CD acima de **100 MB** não cai mais pro WebAssembly; mostra o erro do nativo e o log do
+  processo vai pro log do app. A reserva dos CDs pequenos agora lê o jogo inteiro antes (antes ia só a cabeça de 64 KB
+  pro wasm).
+- **Segundo bug, achado no caminho:** carregar estado num jogo de verdade deixava a **tela preta e o jogo recomeçava**.
+  O `reset` antes do `unserialize` (posto no N.2 contra o SIGILL do lightrec) faz a BIOS HLE deixar o boot do CD pro
+  próximo quadro, e esse boot passava por cima do estado. Agora: `reset` → **um quadro** (o boot acontece; som e imagem
+  dele descartados) → `unserialize` (`kof-nativo/src/nucleo.rs`).
+- `JogoNativo` (engine): a WebSocket que cai com o processo vivo reconecta sozinha (3 tentativas); depois de um "fim" do
+  processo não reconecta. Uma vez a conexão caiu sozinha nos primeiros 10 s (o servidor viu EOF do navegador); não
+  reproduziu em mais 8 rodadas.
+- Teste `crates/kof-nativo/tests/jogo_de_verdade.rs` (ignorado; `KOF_JOGO=<cue>`): roda, salva, anda, carrega 3 vezes e
+  confere que a imagem volta e o jogo anda. Não cita jogo nenhum.
+**Suspeitos descartados:** (2) o lightrec não consegue o 0x0 como usuário (`vm.mmap_min_addr = 65536`), cai pro mapa
+em 0x10000000 ("Memory map is sub-par") e funciona: 1500 quadros do FF9 em 0,7 s, muito acima do tempo real. Não
+precisou recompilar o PCSX (sem Release nova). Sem o reset, o `pcsx.rs` também passa como usuário (o SIGILL foi visto
+como root, no mapa em 0x0: por isso o reset ficou, com o quadro depois). (3) o processo não caiu. (5) o pacote
+instalado era o `81f859e`.
+**Medido / conferido (FF9 do Marcelo, só na máquina dele, BIOS HLE porque ele não tem a do PS1):** pela Biblioteca:
+abre em 0,2 s, **página com pico de 190–320 MB, `kofstation` com 14–21 MB, processo do jogo com 44 MB** (não crescem com o
+CD), 60 fps, 0 engasgos, 0 falta de som, controle responde, estado F5/F8 volta na mesma tela. Arrastado de fora: guardado
+inteiro na Kof Games (cópia byte a byte) e abre no nativo, página 191 MB, `kofstation` 28 MB. A extração do zip leva
+alguns segundos só na primeira vez. Cartão: o jogo lê o cartão ("No FF9 save data") e o app guarda e devolve ele entre
+duas aberturas. `pnpm check`, `pnpm check:rust`, testes novos (zip no Rust e no TS, reconexão), `testar-nativo.mjs` no
+pacote (sem `genisoimage`: só o PS-X EXE) e `pnpm e2e` 39/39 verdes (cada um precisou de uma segunda rodada uma vez: o
+`page.goto` de 60 s do `testar-nativo` e o `visual.spec` do F4, que não mudou; os dois passaram na segunda).
+**Deu errado / aprendido:** o teste do JORNAL anterior gerava `.cue`/`.iso` soltos; o jogo de verdade era zip. Testar
+com o formato que a pessoa tem. A máquina dele não tinha Rust nem pnpm: instalados no usuário (rustup, pnpm pelo npx) e
+o `alsa-lib-devel` extraído do RPM em `~/.local/kof-alsa` (`PKG_CONFIG_PATH`), sem sudo.
+**Onde parou:** ⏸ o Marcelo joga o FF9 pela pasta dele: **salvar no cartão dentro do jogo** e ver se volta depois de
+fechar e abrir (não deu pra chegar num ponto de save no teste); um `.chd` se tiver; o Windows. Sem `.chd` aqui, ele
+só passou pelos testes gerados. Depois: M15.1.
+
+---
+
 ## 2026-11-07 · Correção · PS1 sem memória e a pasta de núcleos igual ao antigo
 
 **Pedido:** o Marcelo testou: o PS1 estoura a memória. Pediu pra achar a causa, corrigir e documentar, e deixar os

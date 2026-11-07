@@ -50,7 +50,9 @@ flowchart LR
 - **O PlayStation** agora roda **nativo**: o executável abre um processo só pro jogo, com o PCSX-ReARMed de verdade
   (com recompilador, o mesmo commit que o antigo usa). O som sai direto pela placa; a imagem vai pra página, então os
   filtros e as molduras continuam iguais. Se o núcleo quebrar, só esse processo cai: o app fica de pé. Se o nativo não
-  abrir, o PS1 roda no WebAssembly sozinho.
+  abrir, um jogo pequeno roda no WebAssembly sozinho; um CD grande (acima de 100 MB) mostra o erro com o log, em vez de
+  estourar a memória. CD zipado (`.zip` com `.cue`+`.bin`, `.iso`, `.chd`...) também vai pro nativo: o CD é extraído
+  numa pasta de cache (um por vez) e a página nunca lê o zip inteiro.
 - **Núcleos que a gente compila** (o PCSX nativo e o Snes9x com a "sonda" da jukebox) ficam como anexo de Release no
   GitHub, com o SHA-256 no manifesto. Nada de binário no histórico do git, nada de ROM nem BIOS em lugar nenhum.
 - O desenho completo (camadas, quem fala com quem, por que não é Tauri): [README](../README.md) e
@@ -102,9 +104,11 @@ No Windows: o `KOFstation-windows.zip` da mesma branch, descompactado dentro da 
 
 O que conferir, do mais importante pro menos:
 
-1. **PS1 nativo** (N.3): o "sem memória" de 07/11 foi corrigido (a página lia o CD inteiro). Um jogo de verdade pela
-   **Biblioteca** (`.cue` + `.bin`, e um `.chd` se tiver) e um **arrastado** de fora (ele é guardado na Kof Games e
-   abre). Roda liso? Tem som? Estados e cartão de memória salvam? No Linux e, se der, no Windows.
+1. **PS1 nativo** (N.3): o "sem memória" de 07/11 foi corrigido de novo: era o **jogo zipado** (o FF9 `.zip`), que a
+   página ainda lia inteiro. Agora ele abre no nativo, pela Biblioteca e arrastado, e o estado carrega certo (antes
+   ficava a tela preta). Conferido aqui no Linux com o FF9 (imagem, som, controle, estado, cartão lido). Falta você:
+   **gravar um save de verdade no cartão** dentro do jogo e ver se ele volta depois de fechar e abrir; um `.chd` se
+   tiver; e o Windows.
 2. **N64** (N.6): um jogo de verdade. O "não roda" de antes era a ROM de teste, não o núcleo.
 3. **Jukebox** (M9, N.5): F7 num jogo de SNES e num de Mega Drive; na jukebox, as vistas Capa, Ondas e Notas; um `.spc`
    de fora; exportar `.wav`.

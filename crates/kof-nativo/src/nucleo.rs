@@ -337,7 +337,8 @@ pub struct Nucleo {
     f: Funcoes,
     /// PCSX-ReARMed com o recompilador lightrec (x86_64): carregar estado sem reset antes faz ele pular pra um bloco
     /// de código já descartado (SIGILL; acontece também no upstream mais novo). O reset limpa o cache do recompilador
-    /// inteiro e o estado sobrescreve tudo depois (teste `pcsx.rs`).
+    /// inteiro, um quadro deixa o boot da BIOS HLE acontecer, e o estado sobrescreve tudo depois (testes `pcsx.rs` e
+    /// `jogo_de_verdade.rs`).
     resetar_antes_do_estado: bool,
     pub info: InfoNucleo,
     pub av: retro_system_av_info,
@@ -585,9 +586,19 @@ impl Nucleo {
         let ok = unsafe {
             if self.resetar_antes_do_estado {
                 (self.f.reset)();
+                // com a BIOS HLE o reset deixa o boot do CD pro próximo quadro, e esse boot passaria por cima do estado
+                // (jogo de verdade: tela preta e o jogo recomeça). Um quadro aqui faz o boot acontecer antes; o som e
+                // a imagem dele não vão pra página.
+                (self.f.run)();
             }
             (self.f.unserialize)(dados.as_ptr() as *const c_void, dados.len())
         };
+        if self.resetar_antes_do_estado {
+            com(|c| {
+                c.som.clear();
+                c.quadro_novo = false;
+            });
+        }
         if ok {
             Ok(())
         } else {

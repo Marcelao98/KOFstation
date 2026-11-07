@@ -118,6 +118,20 @@ async function jogoInteiro(aberto: JogoAberto, path: string | undefined): Promis
   return lerArquivoDeJogo(nome, await lerDaKofGames(servicos().backend, path));
 }
 
+/** CD acima disso não cai pro WebAssembly quando o nativo falha (teria que passar inteiro pela página). */
+const MAX_RESERVA_WASM = 100 << 20;
+const mb = (n: number) => Math.round(n / (1 << 20));
+
+/** Últimas linhas do log do processo nativo (vazio se não tem). */
+async function logDoNativo(): Promise<string[]> {
+  try {
+    const l = await servicos().backend.chamar<{ vivo: boolean; saida: string | null; linhas: string[] }>('nativo.log');
+    return [`processo ${l.vivo ? 'vivo' : `fechou (${l.saida ?? '?'})`}`, ...l.linhas.slice(-15)];
+  } catch (e) {
+    return [`sem o log do processo nativo: ${textoDoErro(e)}`];
+  }
+}
+
 /** Arquivos maiores que isso vão pra Kof Games aos pedaços (não passam inteiros pela memória da página). */
 const GRANDE = 32 << 20;
 
@@ -239,12 +253,32 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
             eventos,
           );
         } catch (e) {
-          // reserva automática: o wasm continua no app
-          registrar('warn', 'nativo', `o núcleo nativo não abriu (${textoDoErro(e)}): usando o WebAssembly`);
-          av.avisar('PS1 nativo não abriu: usando o WebAssembly', 3500);
+          const linhas = await logDoNativo();
           void servicos()
             .backend.chamar('nativo.fechar')
-            .catch(() => undefined);
+            .catch(() => undefined); // já fechado ou nem abriu: nada a fazer
+          const peso = aberto.pesoCd ?? 0;
+          // CD grande: o WebAssembly teria que ler ele inteiro na página (estoura a memória); mostra o erro e para
+          if (peso > MAX_RESERVA_WASM) {
+            registrar(
+              'error',
+              'nativo',
+              `o núcleo nativo não abriu (${textoDoErro(e)}); CD de ${mb(peso)} MB, sem reserva no WebAssembly · ${linhas.join(' | ')}`,
+            );
+            av.avisarErro(
+              `PS1 nativo não abriu: ${textoDoErro(e)}. O CD tem ${mb(peso)} MB, grande demais pro WebAssembly; ` +
+                'o log do processo foi pro log do app (Ajuda → Reportar bug)',
+            );
+            return false;
+          }
+          // reserva automática: o wasm continua no app
+          registrar(
+            'warn',
+            'nativo',
+            `o núcleo nativo não abriu (${textoDoErro(e)}): usando o WebAssembly · ${linhas.join(' | ')}`,
+          );
+          av.avisar('PS1 nativo não abriu: usando o WebAssembly', 3500);
+          aberto = await jogoInteiro(aberto, origem.path);
           aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
         }
       // CD de PS1 no WebAssembly: vai pro Worker sem cópia (o aberto fica com o tamanho guardado)
@@ -401,16 +435,7 @@ function fecharSessao(j: SessaoDeJogo | null) {
 
 /** O núcleo nativo deu erro: o log do processo vai pro log do app (e o caçador de bugs junta). */
 async function anotarLogNativo(m: string) {
-  try {
-    const l = await servicos().backend.chamar<{ vivo: boolean; saida: string | null; linhas: string[] }>('nativo.log');
-    registrar(
-      'error',
-      'nativo',
-      `${m} · processo ${l.vivo ? 'vivo' : `fechou (${l.saida ?? '?'})`} · ${l.linhas.slice(-15).join(' | ')}`,
-    );
-  } catch (e) {
-    registrar('warn', 'nativo', `sem o log do processo nativo: ${textoDoErro(e)}`);
-  }
+  registrar('error', 'nativo', `${m} · ${(await logDoNativo()).join(' | ')}`);
 }
 
 /**
