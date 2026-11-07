@@ -539,6 +539,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "kof-atualiza"
+version = "0.1.0"
+dependencies = [
+ "kof-core",
+ "ring",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tracing",
+]
+
+[[package]]
 name = "kof-core"
 version = "0.1.0"
 dependencies = [

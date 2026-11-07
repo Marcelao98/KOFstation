@@ -21,6 +21,30 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-07 · M15.1 começado · onde parou pra próxima sessão
+
+**Pedido:** o Marcelo autorizou seguir os próximos (M15 em diante) e pediu pra deixar tudo salvo: a sessão ficou grande e
+ele vai abrir outra.
+**Feito:** só o começo do M15.1: o crate `crates/kof-atualiza` (compila, clippy limpo, 2 testes de unidade; **ainda não
+ligado ao `kofstation`**): manifesto por plataforma (`caminho → {tamanho, sha256, url}`), assinatura Ed25519 conferida com
+o `ring` (já vinha pelo TLS), `procurar` (baixa manifesto + `.sig`, compara a pasta pelo SHA-256, baixa só o que mudou
+pra `.atualizacao/`, cada arquivo conferido, `pronto.json`), `aplicar` (na abertura: troca os arquivos, o executável
+rodando vira `.velho`, apaga os núcleos que saíram da lista, grava o `versao.txt`), `atualizacao.log` como o antigo.
+**Falta no M15.1 (plano):** (1) teste de integração com chave gerada no teste (assinatura falsa e arquivo alterado
+recusados; troca e núcleo velho apagado); (2) `kof-app`: `aplicar` no começo do `main` (antes do servidor; se trocou o
+executável, abre o novo e sai), comando `app.atualizacao {procurar}` no `api.rs` com o `ureq` das capas, a versão do
+`versao.txt` no `app.info`; (3) página: o menu "🔄 Procurar atualização" (hoje `ETAPA.atualizacao = 'M15'` em
+`app/acoes.ts`) e a procura sozinha uns 15 s depois de abrir, com os avisos ("baixando…", "pronta: vale na próxima vez",
+"já está na última"); (4) `tools/manifesto.mjs` (monta o manifesto das pastas do `tools/empacotar.sh`; núcleos com hash
+no nome sobem uma vez só, compartilhados) + workflow `versao.yml` (compila Linux e Windows, empacota, assina com o
+secret, Release "latest" com os arquivos soltos); (5) **chave**: a pública num arquivo do repositório
+(`crates/kof-app/chave-atualizacao.txt`, hex de 32 bytes); a privada é um secret do GitHub que **o Marcelo cria**
+(`openssl genpkey -algorithm ed25519`); sem chave, o atualizador fica desligado e anota no log.
+**Onde parou:** ⏸ Marcelo testa Neo Geo e N64 (no Wi-Fi). Próxima sessão: terminar o M15.1 pelos itens acima, depois
+M15.2–M15.4 (ordem combinada em 03/11, no ROADMAP).
+
+---
+
 ## 2026-11-07 · Aprovações · M9, M10, M11 e a jukebox do SNES
 
 **Pedido:** o Marcelo testou o pacote: "falta testar N64 e Neo Geo, o resto passou". Pediu os próximos passos.

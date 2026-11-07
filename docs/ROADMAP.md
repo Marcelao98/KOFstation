@@ -274,7 +274,7 @@ M12 encolhe (o canal e o processo já vêm do N.1).
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M15.1 | Manifesto assinado e atualizador | teste: arquivo alterado é recusado | ⬜ |
+| M15.1 | Manifesto assinado e atualizador | teste: arquivo alterado é recusado | 🟨 |
 | M15.2 | Pacote do Linux | **você instala no teu Linux** | ⬜ |
 | M15.3 | Pacote do Windows | você instala num Windows | ⬜ |
 | M15.4 | Versão de teste lado a lado com o app antigo | você usa as duas | ⬜ |
