@@ -1,0 +1,75 @@
+# Publica uma versão do KOFstation (M15): compila Linux e Windows, monta as pastas (tools/empacotar.sh), o manifesto
+# assinado (tools/manifesto.mjs) e a Release `v<VERSAO>` marcada como a mais nova. O atualizador do app lê
+# releases/latest/download/manifesto.json. Arquivo que não mudou desde a versão anterior (mesmo SHA-256) não sobe de
+# novo: o manifesto aponta pra Release onde ele já está (por isso as Releases antigas ficam).
+# Roda a cada envio na main (como o publicado/ do antigo) ou à mão. Sem o secret KOF_CHAVE_ATUALIZACAO, só compila.
+name: Versão
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: versao
+  cancel-in-progress: false
+jobs:
+  publicar:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Ferramentas (ALSA, mingw pro Windows, NSIS pro instalador)
+        run: sudo apt-get update -q && sudo apt-get install -y -q libasound2-dev mingw-w64 nsis python3-pil zip
+      - name: Rust (Linux e Windows)
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add x86_64-pc-windows-gnu
+      - uses: Swatinem/rust-cache@v2
+      - name: Versão
+        id: v
+        run: |
+          echo "versao=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+      - run: pnpm install --frozen-lockfile
+      - name: Núcleos (todas as plataformas)
+        run: KOF_NATIVOS=todas pnpm nucleos
+      - run: pnpm build
+      - name: Compilar
+        run: |
+          cargo build --release -p kof-app
+          cargo build --release -p kof-app --target x86_64-pc-windows-gnu
+      - name: Empacotar
+        env:
+          VERSAO: ${{ steps.v.outputs.versao }}
+        run: |
+          sh tools/empacotar.sh linux-x64
+          sh tools/empacotar.sh windows-x64
+          sh tools/pacote-linux.sh target/pacote/linux-x64/KOFstation target/saida
+          sh tools/pacote-windows.sh target/pacote/windows-x64/KOFstation target/saida
+          ls -l target/saida
+      - name: Manifesto assinado e Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KOF_CHAVE_ATUALIZACAO: ${{ secrets.KOF_CHAVE_ATUALIZACAO }}
+          VERSAO: ${{ steps.v.outputs.versao }}
+          COMMIT: ${{ steps.v.outputs.commit }}
+        run: |
+          if [ -z "$KOF_CHAVE_ATUALIZACAO" ] || [ ! -s crates/kof-app/chave-atualizacao.txt ]; then
+            echo "::warning::sem a chave do atualizador (secret KOF_CHAVE_ATUALIZACAO e crates/kof-app/chave-atualizacao.txt): só compilei, não publiquei"
+            exit 0
+          fi
+          gh release download --pattern manifesto.json --dir anterior 2>/dev/null || echo "primeira versão: sem manifesto anterior"
+          BASE="https://github.com/${GITHUB_REPOSITORY}/releases/download/v$VERSAO"
+          node tools/manifesto.mjs montar --versao "$VERSAO" --commit "$COMMIT" --base "$BASE" \
+            $( [ -f anterior/manifesto.json ] && echo --anterior anterior/manifesto.json ) \
+            --saida target/manifesto linux-x64=target/pacote/linux-x64/KOFstation windows-x64=target/pacote/windows-x64/KOFstation
+          gh release create "v$VERSAO" --target "$GITHUB_SHA" --latest --title "KOFstation $VERSAO" \
+            --notes "Versão $VERSAO (commit $COMMIT). Pra instalar: Linux, KOFstation-linux.tar.gz (extraia e rode ./kofstation --instalar); Windows, KOFstation-instalar.exe. Depois ele se atualiza sozinho. Jogos, BIOS e ROMs não vêm junto: use os seus."
+          gh release upload "v$VERSAO" target/manifesto/subir/* target/saida/*
+          # o manifesto por último: quem baixar ele já acha todos os arquivos no lugar
+          gh release upload "v$VERSAO" target/manifesto/manifesto.json target/manifesto/manifesto.json.sig

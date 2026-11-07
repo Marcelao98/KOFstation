@@ -19,3 +19,4 @@ export * from './musicas';
 export * from './stats';
 export * from './traducao';
 export * from './bios';
+export * from './atualizacao';

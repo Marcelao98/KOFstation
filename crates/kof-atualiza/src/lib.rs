@@ -264,6 +264,9 @@ pub fn aplicar(app: &Path, executavel: &str) -> Result<Option<Aplicado>, KofErro
         let rel_p = caminho_seguro(rel)?;
         let de = nova.join(&rel_p);
         let para = app.join(&rel_p);
+        if !de.exists() {
+            continue; // já trocado numa abertura que parou no meio
+        }
         if let Some(pai) = para.parent() {
             std::fs::create_dir_all(pai).map_err(|e| io(pai, e))?;
         }

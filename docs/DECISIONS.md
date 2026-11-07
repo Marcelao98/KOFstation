@@ -194,3 +194,20 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   e o Marcelo enxerga o que tem, como no antigo.
 - Rodando do código (`cargo run`, `rodar.sh`) sem essas pastas do lado, usa as do repositório
   (`apps/desktop/public/nucleos/`, `third_party/cores/nativos/<plataforma>/`). Quem monta a pasta: `tools/empacotar.sh`.
+
+## D34. Atualizador próprio com manifesto assinado (Ed25519), troca na próxima abertura — **aceita** (M15.1, 07/11)
+- O que o lançador do antigo fazia (comparar a versão, baixar o que mudou, trocar, apagar núcleo velho, `atualizacao.log`,
+  `nao-atualizar`, `fonte.txt`), agora no próprio `kofstation` (`crates/kof-atualiza` + `crates/kof-app/src/atualizacao.rs`)
+  e **com assinatura**: o manifesto (`plataforma → caminho → {tamanho, sha256, url}`) é assinado com Ed25519 e cada
+  arquivo é conferido pelo SHA-256 antes de entrar. Conferido com o `ring`, que já vinha pelo TLS (nada de crate novo).
+- A chave pública mora em `crates/kof-app/chave-atualizacao.txt` e entra no executável; a privada é o secret
+  `KOF_CHAVE_ATUALIZACAO` do GitHub (gerada pelo Marcelo com `node tools/manifesto.mjs chave`). Sem chave, compila e
+  roda com o atualizador desligado (a página diz o motivo).
+- Publicação: workflow `versao.yml` a cada envio na `main` (como o `publicado/` do antigo): Release `v<data>` marcada
+  como a mais nova; o app lê `releases/latest/download/manifesto.json`. Arquivo igual ao da versão anterior não sobe de
+  novo (o manifesto aponta pra Release antiga), então as Releases antigas não são apagadas.
+- Troca: baixa pra `.atualizacao/` (com `pronto.json`) e só troca na próxima abertura, antes do servidor subir; o
+  executável que roda muda de nome pra `.velho` (Windows deixa) e o novo é aberto na hora. Nada de Tauri updater: o
+  app não é Tauri (D2) e o formato da pasta é o do antigo (D33).
+- Por que não o "tem versão nova: feche e abra" do antigo só avisando: aqui ele já baixa por trás, e o aviso diz que
+  vale na próxima abertura.

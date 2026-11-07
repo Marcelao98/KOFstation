@@ -58,6 +58,15 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       return null;
     },
     'app.vivo': () => null,
+    'app.atualizacao': () => ({
+      versao: '',
+      commit: '',
+      ligado: false,
+      motivo: 'rodando do código (sem versao.txt do pacote)',
+      situacao: 'parado',
+      baixados: 0,
+      bytes: 0,
+    }),
     'library.root.get': () => infoRaiz(),
     'library.root.set': (a) => {
       const p = String(a.path ?? '');

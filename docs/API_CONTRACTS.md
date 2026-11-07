@@ -71,7 +71,7 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | `native.ps2.start` / `.stop` | `{}` → `{session}` | `SIDECAR_MISSING`, `SIDECAR_CRASHED` | M12 |
 | `native.ps2.send` | um dos comandos tipados do protocolo kofnativo | `NOT_RUNNING` | M12 |
 | `net.*` | os pedidos da API local de `rede/PROTOCOLO.md` (`eu`, `lista`, `parear`, `conectar`, `enviar`...) | os do protocolo, enumerados | M13 |
-| `update.check` / `update.apply` | — → `UpdateInfo` | `SIGNATURE_INVALID`, `NETWORK` | M15 |
+| `app.atualizacao` | `{procurar?: bool}` → `{versao, commit, ligado, motivo?, situacao: parado\|procurando\|emDia\|pronta\|erro, nova?, baixados, bytes, erro?}`. `procurar: true` começa a procurar numa linha separada (a página pergunta de novo até sair de `procurando`); a versão baixada entra na **próxima abertura** (`kof-atualiza::aplicar` no começo do `main`). Desligado rodando do código, sem a chave compilada ou com `nao-atualizar` na pasta. Num pacote, o `app.info.version` é a do `versao.txt` | no `erro`: `NETWORK` (inclui assinatura que não confere e arquivo diferente do manifesto), `PATH_OUTSIDE_SCOPE`, `IO_ERROR` | ✅ M15.1 (D34) |
 
 Eventos previstos: `library.scan.progress`, `native.ps2.state`, `native.ps2.frame` (binário), `native.ps2.read`
 (pedido de pedaço de disco), `net.*` (os do PROTOCOLO.md), `update.progress`, `backend.error` (erro sem pedido).

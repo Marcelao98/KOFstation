@@ -46,3 +46,9 @@ test('patch IPS no jogo aberto: abre o traduzido e marca 🇧🇷 na biblioteca'
   await expect(page.locator('#biblioteca')).toBeVisible();
   await expect(page.locator('.sis-tag', { hasText: '🇧🇷' })).toHaveCount(1, { timeout: 10_000 });
 });
+
+test('🔄 Procurar atualização: pergunta ao backend e diz por que está desligado (rodando do código)', async ({ page }) => {
+  await page.locator('#menu .m', { has: page.locator('[data-acao="atualizacao"]') }).locator('> button').click();
+  await page.locator('#menu .m.aberto [data-acao="atualizacao"]').click();
+  await expect(page.locator('#aviso')).toContainText('atualizador desligado: rodando do código');
+});

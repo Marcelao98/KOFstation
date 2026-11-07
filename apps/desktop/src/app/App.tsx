@@ -1,3 +1,4 @@
+import { procurarDepoisDeAbrir } from '../stores/atualizacao';
 import { mensagemDoErro, obterInfo, paraBackendError, type Backend } from '@kof/app-core';
 import { EXTENSOES, ehPacote, principal as principalDoCd } from '@kof/domain';
 import { useEffect, useRef } from 'react';
@@ -221,6 +222,7 @@ export function App({ backend }: { backend: Backend }) {
             1200,
           );
         config().guardar('versaoVista', info.version);
+        procurarDepoisDeAbrir();
       },
       (e: unknown) => {
         const b = paraBackendError(e);

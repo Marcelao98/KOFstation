@@ -1,0 +1,21 @@
+KOFstation (versão nova) - Super Nintendo, NES, Game Boy, GBA, Sega, Neo Geo, N64 e PlayStation (Linux)
+
+1. Extraia esta pasta onde quiser. Dica: dentro da sua pasta "Kof Games" (a de cima vira a Kof Games e ele já acha
+   os jogos); em outro lugar, ele pergunta onde está a Kof Games na primeira vez.
+2. Abra: dois cliques no "kofstation" ou, num terminal nesta pasta:   ./kofstation
+3. Pra aparecer no menu de aplicativos:   ./kofstation --instalar
+   (pra tirar:   ./kofstation --desinstalar)
+
+O que precisa: um navegador baseado em Chromium (Google Chrome, Chromium, Microsoft Edge ou Brave). Ele abre o
+KOFstation numa janela própria, sem barra de endereço. Pra escolher um:  KOF_NAVEGADOR=/caminho/do/navegador ./kofstation
+
+Atualização: ele procura sozinho uns segundos depois de abrir (e no menu "🔄 Procurar atualização"), baixa só o que
+mudou, confere a assinatura e cada arquivo, e a versão nova entra na próxima vez que abrir. O que aconteceu fica em
+atualizacao.log. Pra não atualizar, crie um arquivo vazio chamado "nao-atualizar" nesta pasta.
+
+Deixe as pastas "nucleos" e "nativo" junto do kofstation: são os emuladores.
+
+Lado a lado com o KOFstation antigo: pode ter os dois. Os dados ficam separados (o novo guarda em
+~/.local/share/KOFstation; o antigo, no perfil do navegador dele). No menu, este aparece como "KOFstation novo".
+
+Jogos (ROMs), BIOS e CDs não vêm junto: use os seus.

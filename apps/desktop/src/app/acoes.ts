@@ -16,6 +16,7 @@ import { usarJukebox } from '../stores/jukebox';
 import { usarAbertura } from '../stores/abertura';
 import { usarBug } from '../stores/bug';
 import { usarBios } from '../stores/bios';
+import { procurar as procurarAtualizacao } from '../stores/atualizacao';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
 const TELAS: Partial<Record<string, TelaId>> = {
@@ -34,7 +35,6 @@ const TELAS: Partial<Record<string, TelaId>> = {
 /** Etapa em que cada ação ainda não feita chega. */
 export const ETAPA: Readonly<Record<string, string>> = {
   'controle-celular': 'M13',
-  atualizacao: 'M15',
   aparelhos: 'M13',
 };
 
@@ -64,6 +64,9 @@ export function acao(nome: string, valor?: string): boolean {
   const telas = usarTelas.getState();
   const j = usarJogo.getState();
   switch (nome) {
+    case 'atualizacao':
+      void procurarAtualizacao(true);
+      return true;
     case 'abrir':
       document.getElementById('arquivo')?.click();
       return true;

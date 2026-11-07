@@ -22,6 +22,8 @@ pub struct Estado {
     pub nativos: crate::nativo::Nativos,
     /// endereço da página (`http://127.0.0.1:<porta>`): a WebSocket do nativo só aceita esta origem
     pub origem: std::sync::OnceLock<String>,
+    /// o atualizador (M15.1)
+    pub atualizador: crate::atualizacao::Atualizador,
 }
 
 #[derive(serde::Deserialize)]
@@ -136,6 +138,14 @@ struct ArgsLerZip {
     length: Option<u64>,
 }
 
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsAtualizacao {
+    /// true: começa a procurar; false: só diz como está
+    #[serde(default)]
+    procurar: bool,
+}
+
 pub fn args<T: DeserializeOwned>(v: Value) -> Result<T, KofError> {
     serde_json::from_value(v).map_err(|e| KofError::argumento("args", e.to_string()))
 }
@@ -150,6 +160,7 @@ impl Estado {
             casa,
             nativos: Default::default(),
             origem: std::sync::OnceLock::new(),
+            atualizador: crate::atualizacao::Atualizador::novo(crate::pastas::do_executavel().as_deref()),
         }
     }
 
@@ -183,7 +194,23 @@ impl Estado {
     pub fn chamar(&self, cmd: &str, a: Value, corpo: Vec<u8>) -> Result<Saida, KofError> {
         let json = |v: Value| Ok(Saida::Json(v));
         match cmd {
-            "app.info" => json(serde_json::to_value(kof_core::info::app_info(&self.pasta_dados)).expect("info")),
+            "app.info" => {
+                let mut info = kof_core::info::app_info(&self.pasta_dados);
+                // num pacote, a versão é a do versao.txt (a que o atualizador troca); rodando do código, a do Cargo
+                if let Some(v) = self.atualizador.versao() {
+                    info.version = v;
+                }
+                json(serde_json::to_value(info).expect("info"))
+            }
+            "app.atualizacao" => {
+                let a: ArgsAtualizacao = args(a)?;
+                let s = if a.procurar {
+                    self.atualizador.procurar()
+                } else {
+                    self.atualizador.situacao()
+                };
+                json(serde_json::to_value(s).expect("json"))
+            }
             // sinal de vida da janela (a cada 5 s): o servidor fica no ar enquanto ele chega
             "app.vivo" => json(Value::Null),
             "log.write" => {

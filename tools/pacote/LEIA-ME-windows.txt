@@ -1,0 +1,20 @@
+KOFstation (versão nova) - Super Nintendo, NES, Game Boy, GBA, Sega, Neo Geo, N64 e PlayStation (Windows)
+
+Instalado pelo KOFstation-instalar.exe: atalhos "KOFstation novo" na área de trabalho e no Menu Iniciar. Pra tirar:
+Configurações > Aplicativos > KOFstation novo > Desinstalar (seus jogos e saves não são apagados).
+Na primeira vez ele pergunta onde está a sua pasta "Kof Games".
+Versão sem instalar (KOFstation-windows.zip): extraia onde quiser (dentro da Kof Games, ele já acha os jogos) e abra
+o KOFstation.exe.
+
+Ele abre numa janela do Edge (vem no Windows), sem barra de endereço; também serve Chrome ou Brave.
+
+Atualização: ele procura sozinho uns segundos depois de abrir (e no menu "🔄 Procurar atualização"), baixa só o que
+mudou, confere a assinatura e cada arquivo, e a versão nova entra na próxima vez que abrir. O que aconteceu fica em
+atualizacao.log. Pra não atualizar, crie um arquivo vazio chamado "nao-atualizar" nesta pasta.
+
+Deixe as pastas "nucleos" e "nativo" junto do KOFstation.exe: são os emuladores.
+
+Lado a lado com o KOFstation antigo: pode ter os dois. Os dados ficam separados (o novo guarda em
+%LOCALAPPDATA%\KOFstation; o antigo, em %LOCALAPPDATA%\KOFnes).
+
+Jogos (ROMs), BIOS e CDs não vêm junto: use os seus.
