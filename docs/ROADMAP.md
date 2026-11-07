@@ -155,32 +155,32 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M9.1 | Tocador numa 2ª instância do núcleo, guardar música (F7) | você guarda e toca uma música | ⏸ |
-| M9.2 | Tela da jukebox com barras e capa, `.spc` (importar/exportar) | um `.spc` do antigo toca igual | ⏸ |
-| M9.3 | Ondas, Mudo/Solo, notas, sincronia, exportar `.wav` | `.wav` igual ao do antigo | ⏸ |
-| M9.4 | Trilha FM, 8 bits, Air em violino, música do Início | você ouve | ⏸ |
-| M9.5 | Abertura da primeira vez | print/vídeo antigo × novo | ⏸ |
+| M9.1 | Tocador numa 2ª instância do núcleo, guardar música (F7) | você guarda e toca uma música | ✅ |
+| M9.2 | Tela da jukebox com barras e capa, `.spc` (importar/exportar) | um `.spc` do antigo toca igual | ✅ |
+| M9.3 | Ondas, Mudo/Solo, notas, sincronia, exportar `.wav` | `.wav` igual ao do antigo | ✅ |
+| M9.4 | Trilha FM, 8 bits, Air em violino, música do Início | você ouve | ✅ |
+| M9.5 | Abertura da primeira vez | print/vídeo antigo × novo | ✅ |
 
 ## M10 — Estatísticas e extras
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M10.1 | Estatísticas (por dia/mês/hora/aparelho) e a tela | as tuas estatísticas importadas aparecem iguais | ⏸ |
-| M10.2 | Espaço usado | você vê | ⏸ |
-| M10.3 | Patches de tradução IPS/BPS/UPS | um jogo traduzido abre com o selo 🇧🇷 | ⏸ |
-| M10.4 | Caçador de bugs (F9) e replay | um pacote do antigo reproduz no novo | ⏸ |
-| M10.5 | Avisos de atualização e de mudo | você vê | ⏸ |
+| M10.1 | Estatísticas (por dia/mês/hora/aparelho) e a tela | as tuas estatísticas importadas aparecem iguais | ✅ |
+| M10.2 | Espaço usado | você vê | ✅ |
+| M10.3 | Patches de tradução IPS/BPS/UPS | um jogo traduzido abre com o selo 🇧🇷 | ✅ |
+| M10.4 | Caçador de bugs (F9) e replay | um pacote do antigo reproduz no novo | ✅ |
+| M10.5 | Avisos de atualização e de mudo | você vê | ✅ |
 
 ## M11 — Sistemas com BIOS
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M11.1 | Tela de BIOS e importação (por nome, tamanho e conteúdo) | tuas BIOS reconhecidas | ⏸ |
-| M11.2 | GBA | você joga | ⏸ |
+| M11.1 | Tela de BIOS e importação (por nome, tamanho e conteúdo) | tuas BIOS reconhecidas | ✅ |
+| M11.2 | GBA | você joga | ✅ |
 | M11.3 | Neo Geo (zip inteiro + pai, AES) | você joga KOF | ⏸ |
-| M11.4 | PS1 em wasm (CD sem cópia) | você joga | ⏸ |
+| M11.4 | PS1 em wasm (CD sem cópia) | você joga | ✅ |
 | M11.5 | N64 em wasm | você joga | ⏸ |
-| M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ⏸ |
+| M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ✅ |
 
 ## M11b — PS nativo e o que ficou incompleto no M9–M11 (aprovado em 02/11: "pode fazer tudo")
 
@@ -197,7 +197,7 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ✅ |
 | N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ✅ |
 | N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ✅ |
-| N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⏸ |
+| N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ✅ |
 | N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⏸ |
 | N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ✅ |
 | N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ✅ |
@@ -216,6 +216,8 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 > desenho (filtros, molduras), botões e analógico (DualShock), estados, cartão de memória (conferido 1x/s), pausa,
 > turbo, volume, painel F3. `tools/testar-nativo.mjs` (também no CI): app de verdade + Chromium + PS-X EXE gerado,
 > pixels da tela do app conferidos, 60 fps.
+> **Aprovados em 07/11:** M9 (jukebox), M10 (estatísticas e extras), M11 (menos Neo Geo e N64) e o N.5 (jukebox do SNES).
+> Ainda ⏸: **Neo Geo** (M11.3) e **N64** (M11.5, N.6), que o Marcelo testa quando estiver no Wi-Fi.
 > **N.3 aprovado no Linux (07/11):** o Marcelo jogou o FF9 pelo PS1 nativo: "liso liso liso", 60 fps, cartão de memória
 > salvando dentro do jogo e estado indo e voltando. Falta conferir no Windows (ele não tem Windows agora). Correções do
 > caminho: o CD (inclusive dentro de `.zip`) não passa mais pela página; estado não volta mais preto. Ver o JORNAL.

@@ -21,6 +21,15 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-07 · Aprovações · M9, M10, M11 e a jukebox do SNES
+
+**Pedido:** o Marcelo testou o pacote: "falta testar N64 e Neo Geo, o resto passou". Pediu os próximos passos.
+**Feito:** ROADMAP: M9.1–M9.5, M10.1–M10.5, M11.1, M11.2, M11.4, M11.6 e N.5 ✅. SITUACAO: 68 ✅, 3 ⏸, 20 ⬜.
+**Onde parou:** ⏸ Neo Geo (M11.3) e N64 (M11.5, N.6): ele testa no Wi-Fi. PS1 no Windows quando ele tiver um.
+Próximo: **M15.1** (atualizador com manifesto assinado), na ordem combinada em 03/11.
+
+---
+
 ## 2026-11-07 · Correção · PS1 sem memória de novo: o jogo zipado (e o estado que voltava preto)
 
 **Pedido:** o Marcelo pediu pra fazer o PS1 rodar no Linux dele, com os jogos dele, sem estourar a memória, sozinho

@@ -16,8 +16,8 @@ atual; depois vêm distribuição, celular e, por último, o PS2.
 
 | | Passos | O que quer dizer |
 |---|---|---|
-| ✅ Pronto | **53** | Você aprovou, ou o checkpoint era teste automático e passou |
-| ⏸ Esperando você | **18** | Feito e testado por mim; falta você jogar e dizer "ok" |
+| ✅ Pronto | **68** | Você aprovou, ou o checkpoint era teste automático e passou |
+| ⏸ Esperando você | **3** | Feito e testado por mim; falta você jogar e dizer "ok" |
 | ⬜ Por fazer | **20** | Distribuição, rede/celular como controle, celular, PS2, a troca |
 
 Na lista de paridade com o antigo ([PARIDADE.md](PARIDADE.md)): 28 itens ✅ conferidos, 17 🟨 feitos com alguma
