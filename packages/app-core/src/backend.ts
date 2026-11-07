@@ -9,6 +9,11 @@ export interface Backend {
   lerBinario(cmd: string, args?: Record<string, unknown>): Promise<Uint8Array>;
   /** Comando que leva bytes junto (gravar save, estado, arquivo). */
   enviarBinario<T>(cmd: string, args: Record<string, unknown>, dados: Uint8Array): Promise<T>;
+  /**
+   * Igual ao `enviarBinario`, mas com um pedaço de arquivo (`Blob`): o navegador manda direto do disco, sem passar pela
+   * memória do JavaScript (CD de centenas de MB). Opcional: quem não tem cai no `enviarBinario`.
+   */
+  enviarArquivo?<T>(cmd: string, args: Record<string, unknown>, dados: Blob): Promise<T>;
 }
 
 /** Erro do backend com o código do contrato (nunca um erro genérico). */

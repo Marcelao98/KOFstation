@@ -8,14 +8,17 @@ import {
   guardarNaKofGames,
   lerDaKofGames,
   varrerKofGames,
+  cabecaDoCd,
+  guardarNaKofGamesAosPedacos,
   identidade,
   lerArquivoDeJogo,
   registrar,
+  tamanhoDoJogo,
   registrarJogo,
   textoDoErro,
   type JogoAberto,
 } from '@kof/app-core';
-import { chaveSramDe, fatosDe, SISTEMAS, type RegistroJogo } from '@kof/domain';
+import { chaveSramDe, fatosDe, sistemaDoArquivo, SISTEMAS, type RegistroJogo } from '@kof/domain';
 import {
   Jogo,
   JogoNativo,
@@ -97,11 +100,26 @@ function nativos(): Promise<string[]> {
   return nativosDisponiveis;
 }
 
-/** O jogo vai no núcleo nativo? PS1 por padrão (Opções de emulação troca), só com o jogo na Kof Games. */
-async function querNativo(sistema: string, path: string | undefined): Promise<boolean> {
-  if (sistema !== 'ps1' || !path || config().ler('nucleoPs1') === 'wasm') return false;
+/** O núcleo nativo desse sistema está ligado (Opções de emulação) e existe neste executável? */
+export async function nativoLigado(sistema: string): Promise<boolean> {
+  if (sistema !== 'ps1' || config().ler('nucleoPs1') === 'wasm') return false;
   return (await nativos()).includes(sistema);
 }
+
+/** O jogo vai no núcleo nativo? PS1 por padrão (Opções de emulação troca), só com o jogo na Kof Games. */
+async function querNativo(sistema: string, path: string | undefined): Promise<boolean> {
+  return !!path && (await nativoLigado(sistema));
+}
+
+/** O jogo veio só com a cabeça (o CD ficou no disco) e vai pro WebAssembly: aí sim lê inteiro. */
+async function jogoInteiro(aberto: JogoAberto, path: string | undefined): Promise<JogoAberto> {
+  if (!aberto.parcial || !path) return aberto;
+  const nome = path.split('/').pop() ?? aberto.arquivo;
+  return lerArquivoDeJogo(nome, await lerDaKofGames(servicos().backend, path));
+}
+
+/** Arquivos maiores que isso vão pra Kof Games aos pedaços (não passam inteiros pela memória da página). */
+const GRANDE = 32 << 20;
 
 export interface EstadoJogo {
   jogo: SessaoDeJogo | null;
@@ -153,6 +171,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   abrirArquivo: async (arquivo, soltos = []) => {
     const av = usarAvisos.getState();
     try {
+      if (await abrirCdDeFora(arquivo, soltos)) return;
       const outros = await Promise.all(
         soltos.map(async (s) => ({ nome: s.name, bytes: new Uint8Array(await s.arrayBuffer()) })),
       );
@@ -177,14 +196,19 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         return false;
       }
       const nativo = await querNativo(aberto.sistema, origem.path);
-      // nativo: o processo lê o CD direto da Kof Games (os .bin do .cue não passam pela página)
-      if (!nativo) aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
+      // nativo: o processo lê o CD direto da Kof Games (o CD e os .bin do .cue não passam pela página)
+      if (!nativo) {
+        aberto = await jogoInteiro(aberto, origem.path);
+        aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
+      }
       const bios = await biosDoSistema(armazem, aberto.sistema);
       if (get().jogo) await antesDeTrocar();
       fecharSessao(get().jogo);
       const { volume, mudo } = get();
-      const ident = identidade(aberto.sistema, aberto.rom, aberto.nome);
-      const chaveSram = chaveSramDe(ident.titulo || aberto.nome, aberto.rom.length);
+      // o tamanho de verdade (com o CD lido só na cabeça, a rom é o começo): a chave do save não muda
+      const tamanho = tamanhoDoJogo(aberto);
+      const ident = identidade(aberto.sistema, aberto.rom, aberto.nome, tamanho);
+      const chaveSram = chaveSramDe(ident.titulo || aberto.nome, tamanho);
       const sram = await saveDoJogo(chaveSram);
       const opcoes = opcoesDoNucleo(aberto.sistema);
       const eventos: EventosDoJogo = {
@@ -223,8 +247,12 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
             .catch(() => undefined);
           aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
         }
+      // CD de PS1 no WebAssembly: vai pro Worker sem cópia (o aberto fica com o tamanho guardado)
+      const transferir = aberto.sistema === 'ps1';
+      if (transferir) aberto = { ...aberto, tamanho };
       jogo ??= await Jogo.abrir(
         {
+          transferir,
           sistema: aberto.sistema,
           rom: aberto.rom,
           baseNucleos: new URL('nucleos/', document.baseURI),
@@ -245,7 +273,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         nome: aberto.nome,
         arquivo: aberto.arquivo,
         sistema: aberto.sistema,
-        tamanho: aberto.rom.length,
+        tamanho,
         ultimo: Date.now(),
       };
       abertoAgora = aberto;
@@ -331,6 +359,37 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   fecharRapido: () => set({ rapidoAberto: false }),
 }));
 
+/**
+ * CD de PS1 arrastado/aberto de fora com o nativo ligado: vai pra Kof Games aos pedaços (nunca inteiro na memória) e
+ * abre de lá, no nativo. false = não é o caso (outro sistema, sem nativo, sem Kof Games): segue o caminho normal.
+ */
+async function abrirCdDeFora(arquivo: File, soltos: File[]): Promise<boolean> {
+  if (!(await nativoLigado('ps1'))) return false;
+  const ler = async (o: number, n: number) => new Uint8Array(await arquivo.slice(o, o + n).arrayBuffer());
+  const fato = await fatosDe(arquivo.name, arquivo.size, ler);
+  if (sistemaDoArquivo(fato) !== 'ps1') return false;
+  const { backend } = servicos();
+  const av = usarAvisos.getState();
+  let g;
+  try {
+    av.avisar(`📁 guardando ${arquivo.name} na Kof Games…`, 4000);
+    g = await guardarNaKofGamesAosPedacos(backend, fato, arquivo);
+    if (!g) return false;
+    // os .bin do .cue vão pra mesma pasta (as faixas de áudio não parecem PS1 sozinhas)
+    const pasta = g.path.split('/')[1];
+    for (const sol of soltos)
+      await guardarNaKofGamesAosPedacos(backend, { nome: sol.name, tamanho: sol.size }, sol, pasta ? { pasta } : {});
+  } catch (e) {
+    if ((e as { code?: string }).code === 'ROOT_MISSING') return false; // sem Kof Games: abre do jeito de antes
+    throw e;
+  }
+  const aberto = await cabecaDoCd(backend, g.path, arquivo.size);
+  if (!aberto) return false;
+  if (g.novo) av.avisar(`📁 ${arquivo.name} guardado em Kof Games/${g.path.split('/').slice(0, -1).join('/')}`, 3500);
+  await usarJogo.getState().abrirJogo(aberto, { path: g.path });
+  return true;
+}
+
 /** Fecha a sessão; a nativa também fecha o processo dela. */
 function fecharSessao(j: SessaoDeJogo | null) {
   j?.fechar();
@@ -384,14 +443,17 @@ async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<
   if (!path && f) {
     try {
       const fato = await fatosDe(f.name, f.size, async (o, n) => new Uint8Array(await f.slice(o, o + n).arrayBuffer()));
-      const bytes = new Uint8Array(await f.arrayBuffer());
-      const guardado = await guardarNaKofGames(backend, fato, bytes);
+      // arquivo grande (CD): aos pedaços, sem ler inteiro de novo
+      const guardado =
+        f.size > GRANDE
+          ? await guardarNaKofGamesAosPedacos(backend, fato, f)
+          : await guardarNaKofGames(backend, fato, new Uint8Array(await f.arrayBuffer()));
       path = guardado?.path;
       // os .bin do .cue vão pra mesma pasta (senão o jogo da biblioteca não acha eles)
       const pasta = guardado?.path.split('/')[1];
       if (pasta)
         for (const s of origem.soltos ?? [])
-          await backend.enviarBinario('library.import', { pasta, nome: s.name }, new Uint8Array(await s.arrayBuffer()));
+          await guardarNaKofGamesAosPedacos(backend, { nome: s.name, tamanho: s.size }, s, { pasta });
       if (guardado?.novo)
         usarAvisos
           .getState()

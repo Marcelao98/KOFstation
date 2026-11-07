@@ -183,3 +183,14 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   commit do núcleo que o antigo usa (N.2).
 - Custo: o Linux precisa dos cabeçalhos do ALSA pra compilar (`libasound2-dev`/`alsa-lib-devel`); o executável pronto só
   precisa da `libasound.so.2`, que todo Linux com som tem.
+
+## D33. Núcleos numa pasta ao lado do executável, como no antigo — **aceita** (Marcelo, 07/11)
+- Antes o `kofstation` embutia o app web **e** os núcleos (38–46 MB num arquivo só). Agora fica igual ao antigo:
+  `KOFstation/kofstation` (ou `KOFstation.exe`, ~8 MB, só o app web e o Rust), `nucleos/` (núcleos em WebAssembly e
+  dados, um arquivo por núcleo com o hash no nome, mais a `lista.json` que diz qual é qual), `nativo/` (PCSX-ReARMed
+  `.so`/`.dll`) e `versao.txt`. O `kofstation` serve `/nucleos/<nome>` lendo da pasta (`crates/kof-app/src/pastas.rs`,
+  só nome simples, nada de `..`); o núcleo nativo é aberto direto da `nativo/` (não extrai mais na pasta de dados).
+- Por quê: o executável fica pequeno, dá pra trocar um núcleo sem baixar o app inteiro (a base do atualizador, M15.1)
+  e o Marcelo enxerga o que tem, como no antigo.
+- Rodando do código (`cargo run`, `rodar.sh`) sem essas pastas do lado, usa as do repositório
+  (`apps/desktop/public/nucleos/`, `third_party/cores/nativos/<plataforma>/`). Quem monta a pasta: `tools/empacotar.sh`.

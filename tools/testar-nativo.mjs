@@ -1,9 +1,22 @@
 // Ponta a ponta do PS1 nativo (M11b N.3), com o app de verdade: sobe o `kofstation` (com o PCSX nativo embutido), uma
 // Kof Games temporária com um PS-X EXE gerado aqui (pinta a tela de vermelho com um retângulo verde; nada de ROM nem
 // BIOS de ninguém), abre pela biblioteca no Chromium e confere os pixels da tela do app, o estado salvo e o fechar.
+// Com o genisoimage instalado, também um CD GRANDE (~300 MB: o programa num ISO com SYSTEM.CNF + enchimento), aberto pela
+// biblioteca e arrastado de fora, medindo o pico de memória do kofstation e da página (o CD não pode passar inteiro).
 // Uso: pnpm build && cargo build -p kof-app && node tools/testar-nativo.mjs [executável] [pasta-dos-prints]
-import { spawn } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+// (o executável pode ser o do pacote: target/pacote/linux-x64/KOFstation/kofstation, com os núcleos na pasta do lado)
+import { execFileSync, spawn } from 'node:child_process';
+import {
+  closeSync,
+  existsSync,
+  linkSync,
+  mkdirSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -47,6 +60,64 @@ const tmp = mkdtempSync(join(tmpdir(), 'kof-nativo-'));
 const raiz = join(tmp, 'Kof Games');
 mkdirSync(join(raiz, 'Games', 'psx'), { recursive: true });
 writeFileSync(join(raiz, 'Games', 'psx', 'Desenha.exe'), psxExe());
+
+/** CD de verdade (ISO 9660 com SYSTEM.CNF apontando pro programa) com `mb` de enchimento; .cue MODE1/2048 do lado. */
+function cdGrande(pasta, nome, mb) {
+  const iso = join(tmp, `iso-${nome}`);
+  mkdirSync(iso, { recursive: true });
+  writeFileSync(
+    join(iso, 'SYSTEM.CNF'),
+    'BOOT = cdrom:\\DESENHA.EXE;1\r\nTCB = 4\r\nEVENT = 10\r\nSTACK = 801FFFF0\r\n',
+  );
+  writeFileSync(join(iso, 'DESENHA.EXE'), psxExe());
+  const enche = openSync(join(iso, 'ENCHE.DAT'), 'w');
+  const bloco = Buffer.alloc(1 << 20, 0x5a);
+  for (let i = 0; i < mb; i++) writeFileSync(enche, bloco);
+  closeSync(enche);
+  mkdirSync(pasta, { recursive: true });
+  execFileSync('genisoimage', ['-quiet', '-V', 'KOFTESTE', '-o', join(pasta, `${nome}.bin`), iso]);
+  writeFileSync(
+    join(pasta, `${nome}.cue`),
+    `FILE "${nome}.bin" BINARY\n  TRACK 01 MODE1/2048\n    INDEX 01 00:00:00\n`,
+  );
+}
+let temIso = false;
+try {
+  execFileSync('genisoimage', ['-version'], { stdio: 'ignore' });
+  temIso = true;
+} catch {
+  console.log('aviso: sem genisoimage: só o PS-X EXE pequeno (instale o genisoimage pro teste do CD grande)');
+}
+const MB_CD = 300;
+if (temIso) {
+  cdGrande(join(raiz, 'Games', 'psx'), 'Grande', MB_CD);
+  cdGrande(join(tmp, 'fora'), 'Fora', MB_CD);
+  // a mesma imagem como arquivo único (.iso; o caminho é o mesmo de um .chd ou .bin sozinho), sem gastar disco
+  linkSync(join(raiz, 'Games', 'psx', 'Grande.bin'), join(raiz, 'Games', 'psx', 'Imagem.iso'));
+}
+
+/** Pico de memória (VmHWM, MB) de um processo do Linux. */
+const picoMb = (pid) => {
+  try {
+    const m = /VmHWM:\s+(\d+) kB/.exec(readFileSync(`/proc/${pid}/status`, 'utf8'));
+    return m ? Math.round(Number(m[1]) / 1024) : 0;
+  } catch {
+    return 0; // fora do Linux: sem medida
+  }
+};
+/** O maior pico entre os processos de página (renderer) do Chromium. */
+const picoPaginaMb = () => {
+  let max = 0;
+  for (const d of readdirSync('/proc')) {
+    if (!/^\d+$/.test(d)) continue;
+    try {
+      if (readFileSync(`/proc/${d}/cmdline`, 'utf8').includes('--type=renderer')) max = Math.max(max, picoMb(d));
+    } catch {
+      // o processo acabou no meio: ignora
+    }
+  }
+  return max;
+};
 
 const app = spawn(exe, ['--sem-navegador'], {
   env: { ...process.env, XDG_DATA_HOME: join(tmp, 'dados'), KOF_SEM_SOM: '1' },
@@ -92,17 +163,6 @@ try {
   await api('library.root.set', { path: raiz });
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForSelector('#home', { timeout: 60000 });
-  await page.keyboard.press('Control+KeyL');
-  await page.waitForSelector('#roms li');
-  await page.locator('#roms li', { hasText: 'Desenha' }).first().click();
-  await page.keyboard.press('Enter');
-  await page.waitForFunction(() => document.querySelector('#st-jogo')?.textContent === 'Desenha', null, {
-    timeout: 15000,
-  });
-  // o modo de jogo pode perguntar: escolhe o primeiro
-  const modo = page.locator('#modo-tela button').first();
-  if (await modo.isVisible().catch(() => false)) await modo.click();
-
   const cor = (fx, fy) =>
     page.evaluate(
       ([fx, fy]) => {
@@ -118,7 +178,7 @@ try {
     );
   const vermelho = ([r, g, b]) => r > 200 && g < 50 && b < 50;
   const verde = ([r, g, b]) => g > 200 && r < 50 && b < 50;
-  const ate = async (f, ms = 15000) => {
+  const ate = async (f, ms = 20000) => {
     const fim = Date.now() + ms;
     while (Date.now() < fim) {
       if (await f()) return true;
@@ -126,9 +186,60 @@ try {
     }
     return false;
   };
-  conferir(await ate(async () => vermelho(await cor(0.8, 0.8))), 'tela vermelha pelo PCSX nativo');
-  // retângulo verde em (16..80, 16..48) de 320x240: o meio dele é (48/320, 32/240)
-  conferir(verde(await cor(48 / 320, 32 / 240)), 'retângulo verde no lugar certo');
+  const esperarJogo = async (nome) => {
+    await page.waitForFunction((n) => document.querySelector('#st-jogo')?.textContent === n, nome, { timeout: 60000 });
+    // o modo de jogo pode perguntar: escolhe o primeiro
+    const modo = page.locator('#modo-tela button').first();
+    if (await modo.isVisible().catch(() => false)) await modo.click();
+  };
+  const conferirImagem = async (qual) => {
+    conferir(await ate(async () => vermelho(await cor(0.8, 0.8))), `${qual}: tela vermelha pelo PCSX nativo`);
+    // retângulo verde em (16..80, 16..48) de 320x240: o meio dele é (48/320, 32/240)
+    conferir(verde(await cor(48 / 320, 32 / 240)), `${qual}: retângulo verde no lugar certo`);
+  };
+  const daBiblioteca = async (nome) => {
+    await page.keyboard.press('Control+KeyL');
+    await page.waitForSelector('#roms li');
+    await page.locator('#roms li', { hasText: nome }).first().click();
+    await page.keyboard.press('Enter');
+    await esperarJogo(nome);
+  };
+
+  await daBiblioteca('Desenha');
+  await conferirImagem('PS-X EXE');
+
+  if (temIso) {
+    // CD grande pela biblioteca: o CD fica no disco (o processo nativo lê); nem o kofstation nem a página carregam ele
+    await page.keyboard.press('Home');
+    await daBiblioteca('Grande');
+    await conferirImagem(`CD de ${MB_CD} MB pela biblioteca`);
+    const kof = picoMb(app.pid);
+    const pag = picoPaginaMb();
+    console.log(`  pico de memória: kofstation ${kof} MB, página ${pag} MB`);
+    conferir(kof < MB_CD / 2, `o kofstation não carregou o CD (pico ${kof} MB)`);
+    conferir(pag < 600, `a página não carregou o CD (pico ${pag} MB)`);
+    // imagem única pela biblioteca (.iso/.chd/.bin sozinho): antes a página lia ela inteira
+    await page.keyboard.press('Home');
+    await daBiblioteca('Imagem');
+    await conferirImagem(`imagem única (.iso) de ${MB_CD} MB pela biblioteca`);
+    conferir(picoMb(app.pid) < MB_CD / 2, `o kofstation não carregou a imagem (pico ${picoMb(app.pid)} MB)`);
+    conferir(picoPaginaMb() < 600, `a página não carregou a imagem (pico ${picoPaginaMb()} MB)`);
+    // o mesmo CD arrastado de fora (.cue + .bin juntos): vai pra Kof Games aos pedaços e abre no nativo
+    await page.keyboard.press('Home');
+    await page.setInputFiles('#arquivo', [join(tmp, 'fora', 'Fora.cue'), join(tmp, 'fora', 'Fora.bin')]);
+    await esperarJogo('Fora');
+    await conferirImagem(`CD de ${MB_CD} MB arrastado`);
+    const copia = join(raiz, 'Games', 'psx', 'Fora.bin');
+    conferir(
+      existsSync(copia) && readFileSync(join(tmp, 'fora', 'Fora.bin')).equals(readFileSync(copia)),
+      'o CD arrastado foi guardado inteiro na Kof Games (aos pedaços)',
+    );
+    const pag2 = picoPaginaMb();
+    console.log(`  pico de memória depois de arrastar: página ${pag2} MB, kofstation ${picoMb(app.pid)} MB`);
+    conferir(pag2 < 600, `arrastar não carregou o CD inteiro na página (pico ${pag2} MB)`);
+    conferir(picoMb(app.pid) < MB_CD / 2, 'o kofstation guardou aos pedaços (sem o CD inteiro na memória)');
+  }
+
   const log = await api('nativo.log', {});
   conferir(log.vivo === true, 'processo nativo vivo');
   if (prints) {

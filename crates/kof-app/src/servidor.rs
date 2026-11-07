@@ -132,6 +132,20 @@ impl Servidor {
             return self.api(req, cmd);
         }
         let rel = caminho.trim_start_matches('/');
+        // núcleos: da pasta nucleos/ ao lado do executável (D33), não de dentro dele
+        if let Some(nome) = rel.strip_prefix("nucleos/") {
+            return match crate::pastas::nucleo_wasm(nome).map(std::fs::read) {
+                Some(Ok(d)) => isolado(Response::from_data(d)).with_header(cabecalho("Content-Type", tipo(nome))),
+                Some(Err(e)) => {
+                    tracing::error!(nome, "não consegui ler o núcleo: {e}");
+                    isolado(Response::from_string("erro ao ler o núcleo").with_status_code(500))
+                }
+                None => {
+                    tracing::warn!(nome, "núcleo não achado na pasta nucleos/");
+                    isolado(Response::from_string("núcleo não encontrado").with_status_code(404))
+                }
+            };
+        }
         let arq = APP.get_file(rel).or_else(|| APP.get_file("index.html")); // telas sem arquivo: o app
         match arq {
             Some(f) => isolado(Response::from_data(f.contents().to_vec())).with_header(cabecalho(

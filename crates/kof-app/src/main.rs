@@ -6,6 +6,7 @@
 mod api;
 mod nativo;
 mod navegador;
+mod pastas;
 mod servidor;
 
 fn main() {

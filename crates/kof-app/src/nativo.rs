@@ -1,5 +1,5 @@
-//! Comandos do núcleo nativo (M11b, D32): o `kofstation` leva os núcleos nativos dentro dele, extrai na pasta de dados
-//! e abre um processo filho (`kofstation --nativo`) por jogo. A página conecta na WebSocket dele com o token devolvido.
+//! Comandos do núcleo nativo (M11b, D32): o núcleo fica na pasta `nativo/` ao lado do executável (D33) e o
+//! `kofstation` abre um processo filho (`kofstation --nativo`) por jogo. A página conecta na WebSocket dele com o token devolvido.
 //! O jogo é lido pelo próprio processo direto da Kof Games (o CD não passa pela página).
 use kof_core::KofError;
 use kof_nativo::ProcessoNativo;
@@ -8,13 +8,12 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-mod embutidos {
-    include!(concat!(env!("OUT_DIR"), "/nativos.rs"));
-}
-
-/// Sistemas com núcleo nativo neste executável.
+/// Sistemas com núcleo nativo na pasta `nativo/` (ou no repositório, rodando do código).
 pub fn sistemas() -> Vec<&'static str> {
-    embutidos::NUCLEOS.iter().map(|(s, _, _)| *s).collect()
+    ["ps1"]
+        .into_iter()
+        .filter(|s| crate::pastas::nucleo_nativo(s).is_some())
+        .collect()
 }
 
 #[derive(serde::Deserialize)]
@@ -50,24 +49,6 @@ fn nome_simples(n: &str) -> Result<&str, KofError> {
         .ok_or_else(|| KofError::argumento("bios", format!("nome de BIOS inválido: {n}")))
 }
 
-/// Extrai o núcleo embutido (uma vez; o nome tem o hash do conteúdo) e devolve o caminho.
-fn extrair(pasta_dados: &Path, sistema: &str) -> Result<PathBuf, KofError> {
-    let (_, nome, bytes) = embutidos::NUCLEOS
-        .iter()
-        .find(|(s, _, _)| *s == sistema)
-        .ok_or_else(|| KofError::Nucleo(format!("este executável não tem núcleo nativo pra {sistema}")))?;
-    let pasta = pasta_dados.join("nativo").join("nucleos");
-    let alvo = pasta.join(nome);
-    if std::fs::metadata(&alvo).is_ok_and(|m| m.len() == bytes.len() as u64) {
-        return Ok(alvo);
-    }
-    std::fs::create_dir_all(&pasta).map_err(|e| KofError::de_io(pasta.display(), e))?;
-    let tmp = pasta.join(format!("{nome}.tmp"));
-    std::fs::write(&tmp, bytes).map_err(|e| KofError::de_io(tmp.display(), e))?;
-    std::fs::rename(&tmp, &alvo).map_err(|e| KofError::de_io(alvo.display(), e))?;
-    Ok(alvo)
-}
-
 impl Nativos {
     pub fn abrir(
         &self,
@@ -78,7 +59,12 @@ impl Nativos {
         a: ArgsAbrir,
     ) -> Result<Value, KofError> {
         self.fechar(); // um jogo nativo por vez
-        let nucleo = extrair(pasta_dados, &a.sistema)?;
+        let nucleo = crate::pastas::nucleo_nativo(&a.sistema).ok_or_else(|| {
+            KofError::Nucleo(format!(
+                "falta o núcleo nativo de {} na pasta nativo/ do KOFstation",
+                a.sistema
+            ))
+        })?;
         let sistema = pasta_dados.join("nativo").join("sistema").join(&a.sistema);
         let saves = pasta_dados.join("nativo").join("saves").join(&a.sistema);
         for d in [&sistema, &saves] {

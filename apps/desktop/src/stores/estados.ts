@@ -20,7 +20,7 @@ import { create } from 'zustand';
 import { fotoDoQuadro } from '../app/foto';
 import { usarAvisos } from './avisos';
 import { config } from './config';
-import { usarJogo } from './jogo';
+import { nativoLigado, usarJogo } from './jogo';
 import { servicos } from './servicos';
 import { usarTelas } from './telas';
 
@@ -56,7 +56,7 @@ export interface Estados {
 /** Abre o jogo do registro (pela Kof Games ou pela cópia guardada). */
 export async function abrirDoRegistro(j: RegistroJogo): Promise<boolean> {
   const { backend, armazem } = servicos();
-  const aberto = await bytesDoJogo(backend, armazem, j);
+  const aberto = await bytesDoJogo(backend, armazem, j, { soCabeca: !!j.path && (await nativoLigado(j.sistema)) });
   return usarJogo.getState().abrirJogo(aberto, j.path ? { path: j.path } : {});
 }
 export { bytesDaPasta };

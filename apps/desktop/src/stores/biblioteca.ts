@@ -32,7 +32,7 @@ import {
 import type { Plano } from '@kof/domain';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
-import { usarJogo } from './jogo';
+import { nativoLigado, usarJogo } from './jogo';
 import { config } from './config';
 import { servicos } from './servicos';
 import { usarTelas } from './telas';
@@ -196,10 +196,12 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
       const { autoLigado, continuar } = await import('./auto');
       if (r.jogo && autoLigado() && r.jogo.temAuto && !doZero) await continuar(r.jogo);
       else if (r.jogo) {
-        const aberto = await bytesDoJogo(backend, armazem, r.jogo);
+        const aberto = await bytesDoJogo(backend, armazem, r.jogo, {
+          soCabeca: !!r.jogo.path && (await nativoLigado(r.jogo.sistema)),
+        });
         await usarJogo.getState().abrirJogo(aberto, r.jogo.path ? { path: r.jogo.path } : {});
       } else if (r.pasta) {
-        const aberto = await bytesDaPasta(backend, r.pasta);
+        const aberto = await bytesDaPasta(backend, r.pasta, { soCabeca: await nativoLigado(r.pasta.sistema ?? '') });
         await usarJogo.getState().abrirJogo(aberto, { path: r.pasta.path });
       }
     } catch (e) {

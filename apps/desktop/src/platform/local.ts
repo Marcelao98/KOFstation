@@ -21,7 +21,7 @@ export function tokenDaPagina(url: URL): string | null {
 }
 
 export function criarBackendLocal(token: string, buscar: typeof fetch = fetch): Backend {
-  const pedir = async (cmd: string, args: Record<string, unknown>, dados?: Uint8Array) => {
+  const pedir = async (cmd: string, args: Record<string, unknown>, dados?: Uint8Array | Blob) => {
     const headers: Record<string, string> = { 'X-Kof-Token': token };
     if (dados) {
       headers['Content-Type'] = 'application/octet-stream';
@@ -30,7 +30,7 @@ export function criarBackendLocal(token: string, buscar: typeof fetch = fetch): 
     const r = await buscar(`/api/${cmd}`, {
       method: 'POST',
       headers,
-      body: dados ? (dados as Uint8Array<ArrayBuffer>) : JSON.stringify(args),
+      body: dados ? (dados as Uint8Array<ArrayBuffer> | Blob) : JSON.stringify(args),
     });
     if (!r.ok) {
       const corpo: unknown = await r.json().catch(() => null);
@@ -48,6 +48,11 @@ export function criarBackendLocal(token: string, buscar: typeof fetch = fetch): 
       return new Uint8Array(await r.arrayBuffer());
     },
     async enviarBinario<T>(cmd: string, args: Record<string, unknown>, dados: Uint8Array): Promise<T> {
+      const r = await pedir(cmd, args, dados);
+      return (await r.json()) as T;
+    },
+    // o Blob vai como corpo do fetch: o navegador lê do disco e manda, sem ArrayBuffer no JavaScript
+    async enviarArquivo<T>(cmd: string, args: Record<string, unknown>, dados: Blob): Promise<T> {
       const r = await pedir(cmd, args, dados);
       return (await r.json()) as T;
     },

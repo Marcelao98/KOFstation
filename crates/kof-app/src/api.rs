@@ -59,6 +59,15 @@ struct ArgsGuardar {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
+struct ArgsParte {
+    pasta: String,
+    nome: String,
+    offset: u64,
+    total: u64,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ArgsLoja {
     store: String,
     #[serde(default)]
@@ -189,6 +198,12 @@ impl Estado {
             "library.organize.apply" => {
                 let a: ArgsAplicar = args(a)?;
                 let r = kof_files::organizar::aplicar(&self.raiz()?, &a.moves, &a.limpar);
+                json(serde_json::to_value(r).expect("json"))
+            }
+            "library.import.parte" => {
+                let a: ArgsParte = args(a)?;
+                let r =
+                    kof_files::organizar::guardar_parte(&self.raiz()?, &a.pasta, &a.nome, a.offset, a.total, &corpo)?;
                 json(serde_json::to_value(r).expect("json"))
             }
             "library.import" => {

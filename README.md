@@ -139,11 +139,14 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 
 ## Rodar
 
-Só testar (sem compilar nada), instalando em `~/Programas/Kof Games/KOFstation` (a pasta de cima vira a Kof Games):
+Só testar (sem compilar nada): a pasta `KOFstation` (o executável, `nucleos/`, `nativo/` e `versao.txt`, igual ao app
+antigo) vai pra `~/Programas/Kof Games/` (a pasta de cima vira a Kof Games):
 
 ```bash
-mkdir -p ~/Programas/"Kof Games"/KOFstation && curl -fL -o ~/Programas/"Kof Games"/KOFstation/kofstation https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/kofstation && chmod +x ~/Programas/"Kof Games"/KOFstation/kofstation && ~/Programas/"Kof Games"/KOFstation/kofstation
+mkdir -p ~/Programas/"Kof Games" && curl -fL https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/KOFstation-linux.tar.gz | tar -xz -C ~/Programas/"Kof Games" && ~/Programas/"Kof Games"/KOFstation/kofstation
 ```
+
+No Windows: `KOFstation-windows.zip` da mesma branch, descompactado dentro da pasta Kof Games.
 
 Pelo código (precisa de Node 22+, Rust pelo rustup e um navegador Chromium; detalhes em
 [docs/INSTALAR.md](docs/INSTALAR.md)):

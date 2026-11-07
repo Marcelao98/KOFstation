@@ -3,7 +3,7 @@
 // sem a Kof Games escolhida, numa cópia na loja `roms` (como antes: abre sem diálogo nenhum da próxima vez).
 import { crcRom, jogoIdDe, tituloInterno, type ArquivoDaPasta, type RegistroJogo, type SistemaId } from '@kof/domain';
 import type { Armazem } from './armazem';
-import { lerArquivoDeJogo, type JogoAberto } from './arquivo';
+import { lerArquivoDeJogo, tamanhoDoJogo, type JogoAberto } from './arquivo';
 import type { Backend } from './backend';
 import { lerDaKofGames } from './kofgames';
 
@@ -24,9 +24,9 @@ export function naFila<T>(id: string, f: () => Promise<T>): Promise<T> {
 }
 
 /** Identidade do jogo aberto (as mesmas chaves do antigo). */
-export function identidade(sistema: SistemaId, rom: Uint8Array, nome: string) {
+export function identidade(sistema: SistemaId, rom: Uint8Array, nome: string, tamanho = rom.length) {
   const titulo = tituloInterno(rom, sistema).trim();
-  return { titulo, id: jogoIdDe(titulo || nome, rom.length) };
+  return { titulo, id: jogoIdDe(titulo || nome, tamanho) };
 }
 
 /** Grava/atualiza o registro do jogo que acabou de abrir. */
@@ -35,7 +35,7 @@ export async function registrarJogo(
   aberto: JogoAberto,
   extra: { path?: string; semCopia?: boolean } = {},
 ): Promise<RegistroJogo> {
-  const { titulo, id } = identidade(aberto.sistema, aberto.rom, aberto.nome);
+  const { titulo, id } = identidade(aberto.sistema, aberto.rom, aberto.nome, tamanhoDoJogo(aberto));
   return naFila(id, () => registrarJogoJa(arm, aberto, extra, titulo, id));
 }
 
@@ -54,7 +54,7 @@ async function registrarJogoJa(
     arquivo: aberto.arquivo,
     sistema: aberto.sistema,
     titulo,
-    tamanho: aberto.rom.length,
+    tamanho: tamanhoDoJogo(aberto),
     ultimo: Date.now(),
   };
   if (!GRANDES.includes(aberto.sistema)) novo.crc = crcRom(aberto.sistema, aberto.rom);
@@ -89,9 +89,41 @@ export class JogoSemRom extends Error {
 }
 
 /** Os bytes de um jogo da biblioteca (pela Kof Games ou pela cópia guardada). */
-export async function bytesDoJogo(b: Backend, arm: Armazem, j: RegistroJogo): Promise<JogoAberto> {
+/** O que ler do jogo: tudo (padrão) ou só a cabeça do CD de PS1 (vai pro núcleo nativo, que lê o disco sozinho). */
+export interface ComoLer {
+  soCabeca?: boolean;
+}
+
+/** Bytes do começo que bastam pra reconhecer um CD (o `cdPs1` olha até 0x9000) e o cabeçalho de um PS-X EXE. */
+const CABECA = 64 << 10;
+const CD_PS1 = /\.(cue|bin|img|iso|chd|pbp)$/i;
+
+/**
+ * Só a cabeça de um CD de PS1 da Kof Games: o `.cue` inteiro (é pequeno) ou os primeiros 64 KB da imagem. `tamanho` é
+ * o do arquivo inteiro (entra na identidade e na chave do save, igual a quando a página lia tudo). null = não é CD de
+ * PS1 (lê do jeito normal).
+ */
+export async function cabecaDoCd(b: Backend, path: string, tamanho: number): Promise<JogoAberto | null> {
+  const nome = path.split('/').pop() ?? path;
+  if (!CD_PS1.test(nome)) return null;
+  const cue = /\.cue$/i.test(nome);
+  const bytes = await lerDaKofGames(b, path, 0, cue ? undefined : Math.min(tamanho || CABECA, CABECA));
+  const j = await lerArquivoDeJogo(nome, bytes);
+  if (j.sistema !== 'ps1') return null; // um .bin de Mega Drive, por exemplo
+  if (cue) return j; // o .cue foi lido inteiro: igual ao jeito normal (os .bin ficam pro núcleo)
+  const r: JogoAberto = { ...j, parcial: true };
+  // imagem única (.chd, .iso, .pbp): a rom era a imagem inteira; .bin sem .cue: a rom é o .cue montado (já certo)
+  if (/\.(chd|pbp|iso|img)$/i.test(nome) || !j.arquivos) r.tamanho = tamanho;
+  return r;
+}
+
+export async function bytesDoJogo(b: Backend, arm: Armazem, j: RegistroJogo, como: ComoLer = {}): Promise<JogoAberto> {
   if (j.path) {
     try {
+      if (como.soCabeca && j.sistema === 'ps1') {
+        const c = await cabecaDoCd(b, j.path, j.tamanho);
+        if (c) return c;
+      }
       const bytes = await lerDaKofGames(b, j.path);
       return await lerArquivoDeJogo(j.path.split('/').pop() ?? j.arquivo, bytes);
     } catch (e) {
@@ -105,6 +137,10 @@ export async function bytesDoJogo(b: Backend, arm: Armazem, j: RegistroJogo): Pr
 }
 
 /** Os bytes de um arquivo da pasta (ainda não jogado). */
-export async function bytesDaPasta(b: Backend, a: ArquivoDaPasta): Promise<JogoAberto> {
+export async function bytesDaPasta(b: Backend, a: ArquivoDaPasta, como: ComoLer = {}): Promise<JogoAberto> {
+  if (como.soCabeca) {
+    const c = await cabecaDoCd(b, a.path, a.tamanho);
+    if (c) return c;
+  }
   return lerArquivoDeJogo(a.arquivo, await lerDaKofGames(b, a.path));
 }

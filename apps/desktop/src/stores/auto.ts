@@ -7,7 +7,7 @@ import { fotoDoQuadro } from '../app/foto';
 import { usarAvisos } from './avisos';
 import { config } from './config';
 import { restaurar } from './estados';
-import { antesDeTrocarJogo, usarJogo } from './jogo';
+import { antesDeTrocarJogo, nativoLigado, usarJogo } from './jogo';
 import { servicos } from './servicos';
 
 export const autoLigado = (): boolean => config().ler('autoSalvar') !== '0';
@@ -47,7 +47,7 @@ export function salvarAuto(): Promise<void> {
 /** Abre o jogo e continua do estado automático (sem automático: só abre). */
 export async function continuar(j: RegistroJogo): Promise<void> {
   const { backend, armazem } = servicos();
-  const aberto = await bytesDoJogo(backend, armazem, j);
+  const aberto = await bytesDoJogo(backend, armazem, j, { soCabeca: !!j.path && (await nativoLigado(j.sistema)) });
   const auto = j.temAuto ? await lerAuto(armazem, j.id) : null;
   if (!(await usarJogo.getState().abrirJogo(aberto, j.path ? { path: j.path } : {}))) return;
   if (!auto) return;

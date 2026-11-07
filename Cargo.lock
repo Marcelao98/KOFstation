@@ -533,6 +533,7 @@ dependencies = [
  "kof-nativo",
  "serde",
  "serde_json",
+ "tempfile",
  "tiny_http",
  "tracing",
 ]

@@ -29,6 +29,10 @@ export interface OpcoesDoJogo {
   opcoes?: Record<string, string>;
   /** BIOS e os outros arquivos do jogo (Neo Geo: o zip do pai; PS1: os .bin do .cue) */
   extras?: ExtrasDoJogo;
+  /**
+   * Passa a ROM e os arquivos pro Worker sem copiar (CD de PS1: centenas de MB). Depois disso eles ficam vazios aqui.
+   */
+  transferir?: boolean;
 }
 
 export class Jogo {
@@ -66,17 +70,29 @@ export class Jogo {
       };
       j.worker.onerror = (e) => falhou(new Error(e.message || 'o Worker do núcleo caiu'));
     });
-    j.mandar({
-      tipo: 'iniciar',
-      sistema: opcoes.sistema,
-      rom: opcoes.rom,
-      urlNucleo: new URL(`${c.nucleo}.js`, opcoes.baseNucleos).href,
-      sab,
-      taxaSaida: j.ctx?.sampleRate ?? 48000,
-      sram: opcoes.sram ?? null,
-      opcoes: opcoes.opcoes ?? {},
-      extras: opcoes.extras ?? {},
-    });
+    const transf: Transferable[] = [];
+    if (opcoes.transferir) {
+      const vistos = new Set<ArrayBufferLike>();
+      for (const u of [opcoes.rom, ...(opcoes.extras?.arquivos ?? []).map((a) => a.bytes)])
+        if (u.buffer instanceof ArrayBuffer && !vistos.has(u.buffer)) {
+          vistos.add(u.buffer);
+          transf.push(u.buffer);
+        }
+    }
+    j.mandar(
+      {
+        tipo: 'iniciar',
+        sistema: opcoes.sistema,
+        rom: opcoes.rom,
+        urlNucleo: new URL(`${c.nucleo}.js`, opcoes.baseNucleos).href,
+        sab,
+        taxaSaida: j.ctx?.sampleRate ?? 48000,
+        sram: opcoes.sram ?? null,
+        opcoes: opcoes.opcoes ?? {},
+        extras: opcoes.extras ?? {},
+      },
+      transf,
+    );
     try {
       j.info = await pronto;
     } catch (e) {
@@ -175,8 +191,8 @@ export class Jogo {
     this.mandar({ tipo: 'sram-escrever', bytes });
   }
 
-  private mandar(m: ParaWorker) {
-    this.worker.postMessage(m);
+  private mandar(m: ParaWorker, transferir: Transferable[] = []) {
+    this.worker.postMessage(m, transferir);
   }
 
   /** Botões do jogador (bits do controle virtual). Só manda quando muda. */

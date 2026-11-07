@@ -216,3 +216,74 @@ pub fn guardar(raiz: &Path, pasta: &str, nome: &str, dados: &[u8]) -> Result<Opt
     std::fs::write(&p, dados).map_err(|e| KofError::de_io(p.display(), e))?;
     Ok(Some(relativo(raiz, &p)))
 }
+
+/// O que `guardar_parte` respondeu.
+#[derive(Debug, PartialEq, Eq, serde::Serialize)]
+pub struct Parte {
+    /// caminho na Kof Games quando terminou (o último pedaço chegou, ou o arquivo já estava lá)
+    pub stored: Option<String>,
+    /// o arquivo já estava lá com o mesmo tamanho: pode parar de mandar
+    pub ja: bool,
+}
+
+/// Guarda um arquivo grande na Kof Games aos pedaços (um CD de 700 MB não cabe num pedido só, nem deve passar inteiro
+/// pela memória da página). Os pedaços vão, em ordem, pra `<nome>.kofparcial`; o último troca pelo nome certo.
+pub fn guardar_parte(
+    raiz: &Path,
+    pasta: &str,
+    nome: &str,
+    offset: u64,
+    total: u64,
+    dados: &[u8],
+) -> Result<Parte, KofError> {
+    use std::io::{Seek, SeekFrom, Write};
+    if pasta.contains('/') || nome.contains('/') || nome.contains('\\') || nome.ends_with(".kofparcial") {
+        return Err(KofError::ForaDoEscopo(format!("{pasta}/{nome}")));
+    }
+    let dest = resolver(raiz, &format!("Games/{pasta}"))?;
+    std::fs::create_dir_all(&dest).map_err(|e| KofError::de_io(dest.display(), e))?;
+    let p = dest.join(nome);
+    let tmp = dest.join(format!("{nome}.kofparcial"));
+    if offset == 0 && std::fs::metadata(&p).is_ok_and(|m| m.len() == total) {
+        return Ok(Parte {
+            stored: Some(relativo(raiz, &p)),
+            ja: true,
+        });
+    }
+    let mut f = if offset == 0 {
+        std::fs::File::create(&tmp)
+    } else {
+        std::fs::OpenOptions::new().write(true).open(&tmp)
+    }
+    .map_err(|e| KofError::de_io(tmp.display(), e))?;
+    let tem = f.metadata().map_err(|e| KofError::de_io(tmp.display(), e))?.len();
+    if tem != offset {
+        return Err(KofError::Conflito(format!(
+            "{nome}: o pedaço começa em {offset}, mas já tem {tem} bytes (comece de novo)"
+        )));
+    }
+    f.seek(SeekFrom::Start(offset))
+        .and_then(|_| f.write_all(dados))
+        .and_then(|_| f.flush())
+        .map_err(|e| KofError::de_io(tmp.display(), e))?;
+    drop(f);
+    let fim = offset + dados.len() as u64;
+    if fim > total {
+        let _ = std::fs::remove_file(&tmp); // pedido errado: não deixa sobra
+        return Err(KofError::argumento(
+            "total",
+            format!("passou do tamanho ({fim} > {total})"),
+        ));
+    }
+    if fim < total {
+        return Ok(Parte {
+            stored: None,
+            ja: false,
+        });
+    }
+    std::fs::rename(&tmp, &p).map_err(|e| KofError::de_io(p.display(), e))?;
+    Ok(Parte {
+        stored: Some(relativo(raiz, &p)),
+        ja: false,
+    })
+}

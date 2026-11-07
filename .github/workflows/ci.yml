@@ -18,9 +18,9 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - name: Cabeçalhos do som (ALSA, pro cpal do kof-nativo)
+      - name: Cabeçalhos do som (ALSA, pro cpal do kof-nativo) e genisoimage (CD grande no teste do PS1)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -q && sudo apt-get install -y -q libasound2-dev
+        run: sudo apt-get update -q && sudo apt-get install -y -q libasound2-dev genisoimage
       - name: Rust (versão do rust-toolchain.toml)
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@v2
