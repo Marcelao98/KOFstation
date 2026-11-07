@@ -67,9 +67,10 @@ pacote (sem `genisoimage`: só o PS-X EXE) e `pnpm e2e` 39/39 verdes (cada um pr
 **Deu errado / aprendido:** o teste do JORNAL anterior gerava `.cue`/`.iso` soltos; o jogo de verdade era zip. Testar
 com o formato que a pessoa tem. A máquina dele não tinha Rust nem pnpm: instalados no usuário (rustup, pnpm pelo npx) e
 o `alsa-lib-devel` extraído do RPM em `~/.local/kof-alsa` (`PKG_CONFIG_PATH`), sem sudo.
-**Onde parou:** ⏸ o Marcelo joga o FF9 pela pasta dele: **salvar no cartão dentro do jogo** e ver se volta depois de
-fechar e abrir (não deu pra chegar num ponto de save no teste); um `.chd` se tiver; o Windows. Sem `.chd` aqui, ele
-só passou pelos testes gerados. Depois: M15.1.
+**Teste do Marcelo (07/11, pacote `a88d370` na Kof Games dele):** FF9 "rodou liso liso liso, 60 fps, sem stuttering".
+✅ PS1 nativo aprovado no Linux.
+**Onde parou:** falta conferir **salvar no cartão dentro do jogo** e ver se volta depois de fechar e abrir (não deu pra
+chegar num ponto de save no teste); um `.chd` se tiver; o Windows. Depois: M15.1.
 
 ---
 

@@ -106,7 +106,7 @@ O que conferir, do mais importante pro menos:
 
 1. **PS1 nativo** (N.3): o "sem memória" de 07/11 foi corrigido de novo: era o **jogo zipado** (o FF9 `.zip`), que a
    página ainda lia inteiro. Agora ele abre no nativo, pela Biblioteca e arrastado, e o estado carrega certo (antes
-   ficava a tela preta). Conferido aqui no Linux com o FF9 (imagem, som, controle, estado, cartão lido). Falta você:
+   ficava a tela preta). ✅ Você testou o FF9 no Linux: liso, 60 fps, sem engasgo. Falta:
    **gravar um save de verdade no cartão** dentro do jogo e ver se ele volta depois de fechar e abrir; um `.chd` se
    tiver; e o Windows.
 2. **N64** (N.6): um jogo de verdade. O "não roda" de antes era a ROM de teste, não o núcleo.
