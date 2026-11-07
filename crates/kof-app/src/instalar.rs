@@ -92,7 +92,7 @@ pub fn rodar(tirar: bool) -> i32 {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))] // o .desktop é coisa do Linux (no Windows quem põe os atalhos é o instalador)
 mod testes {
     use super::*;
 
