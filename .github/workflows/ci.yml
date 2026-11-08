@@ -43,6 +43,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cargo build -p kof-app
+          node tools/testar-conexoes.mjs target/debug/kofstation
           node tools/testar-nativo.mjs target/debug/kofstation
           node tools/testar-ps2.mjs target/debug/kofstation
       - name: Atualizador de ponta a ponta (chave de teste, servidor local, núcleos de verdade; só no Linux)

@@ -91,7 +91,7 @@ fn lrps2_abre_com_opengl_bios_e_dvd() {
     };
     let mut n = match Nucleo::carregar(&a) {
         Ok(n) => n,
-        Err(e) if std::env::var_os("KOF_EXIGIR_GL").is_none() => {
+        Err(e) if std::env::var("KOF_EXIGIR_GL").unwrap_or_default().is_empty() => {
             eprintln!("aviso: o LRPS2 não abriu aqui ({e})");
             return;
         }

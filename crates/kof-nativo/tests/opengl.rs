@@ -18,7 +18,7 @@ fn nucleo_que_desenha_na_placa() {
     };
     let mut n = match Nucleo::carregar(&a) {
         Ok(n) => n,
-        Err(e) if std::env::var_os("KOF_EXIGIR_GL").is_none() => {
+        Err(e) if std::env::var("KOF_EXIGIR_GL").unwrap_or_default().is_empty() => {
             eprintln!("aviso: sem OpenGL aqui ({e}); defina KOF_EXIGIR_GL=1 pra falhar");
             return;
         }
