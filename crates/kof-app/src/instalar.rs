@@ -28,7 +28,8 @@ pub fn entrada(exe: &Path, icone: &Path) -> String {
     format!(
         "[Desktop Entry]\nType=Application\nName=KOFstation novo\nGenericName=Emulador de videogame\n\
          Comment=Super Nintendo, NES, Game Boy, GBA, Sega, Neo Geo, N64 e PlayStation (versão nova)\n\
-         Exec=\"{exec}\"\nIcon={}\nTerminal=false\nCategories=Game;Emulator;\nKeywords=snes;nes;gba;emulador;kof;\n",
+         Exec=\"{exec}\"\nIcon={}\nTerminal=false\nCategories=Game;Emulator;\nKeywords=snes;nes;gba;emulador;kof;\n\
+         StartupWMClass=KOFstation\n",
         icone.display()
     )
 }
@@ -110,6 +111,8 @@ mod testes {
             t.path().join("Meus Jogos/KOFstation/icone.png").display()
         )));
         assert!(d.contains("Name=KOFstation novo"));
+        // a janela abre com --class=KOFstation: sem isso o KDE/GNOME mostra um Chromium à parte na barra
+        assert!(d.contains("StartupWMClass=KOFstation"), "{d}");
         desinstalar(&menu).unwrap();
         assert!(!p.exists());
         desinstalar(&menu).unwrap(); // de novo: não é erro
