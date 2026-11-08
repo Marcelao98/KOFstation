@@ -68,5 +68,79 @@ contrato do nativo, docs fora desta pasta.
 
 ## Relatório
 
-_(preencha ao terminar: o que mudou e por quê, os números de antes e depois do novo e do antigo, o que ficou de fora,
-e os comandos pra conferir)_
+Branch: `claude/stoic-bardeen-ed0dvt` (a da sessão, a partir da `claude/busy-ritchie-wrvk8h`, com o ok do Marcelo).
+
+### Números (Game Boy, Chromium do container, tela de 60 Hz, `tools/medir-ritmo.mjs`)
+
+| | novos/s | repetidos/min | pulados/min | intervalo p50 / p95 / p99 (ms) | falta de som |
+|---|---|---|---|---|---|
+| **novo antes** | 51–53 | 432–529 | 414–511 | 16,67 / 33,33 / 33,34 | 0 ms |
+| **antigo** | 59,7 | 16–18 | 0 | 16,7 / 16,8 / 16,8 | 0 ms |
+| **novo depois** (10 s) | 60 | **0** | **0** | 16,66 / 16,67 / 16,67 | 0 ms |
+| **novo depois** (30 s) | 59,8 | 4 | 0 | 16,67 / 16,67 / 16,67 | 0 ms |
+| **novo depois** (CPU 4x mais lenta) | 60 | 0 | 0 | 16,66 / 16,67 / 16,67 | 0 ms |
+
+Os 16–18 repetidos/min do antigo são inevitáveis no jeito dele: o GB tem 59,73 quadros/s e a tela 60, então ~16 vsyncs
+por minuto não têm quadro novo (coluna `inevitaveisSemTravaPorMin`). Os 4/min do novo em 30 s são um vsync que o
+próprio Chromium perdeu (a tela deu 59,87 Hz nessa medida). Rodei várias vezes; nos trancos do container os dois apps
+perdem alguns quadros iguais.
+
+### A causa
+
+O Worker rodava pelo **som** (encher o anel até 60 ms, `setTimeout(4)`), num relógio que não tem nada a ver com o vsync
+da tela. Os quadros saíam em rajadas (0, 1 ou 2 por passo) e a página desenhava o último que tinha chegado: num vsync
+chegavam dois (um some = pulado), no seguinte nenhum (repetido). O antigo não tinha isso porque rodava o quadro dentro
+do `requestAnimationFrame`.
+
+### O que mudou
+
+- **Ritmo pelo vsync** (`jogo.ts`, `worker.ts`, `mensagens.ts`): a página manda `{tipo:'vsync', t}` a cada
+  `requestAnimationFrame` e o Worker roda o quadro na hora; a imagem chega antes do vsync seguinte e o
+  `useTelaDoJogo` (sem mudança) desenha. Igual ao antigo, só que o núcleo continua no Worker.
+- **Trava no monitor** (`tempo.ts`, `criarRitmoDoVsync`): mede o período do vsync; se o fps do console está a até 1% do
+  monitor (GB 59,73 / NES 60,1 / SNES 60,1 num de 60 Hz; também 120 Hz = 1 quadro a cada 2 vsyncs), roda exatamente
+  1 quadro por vsync. Por isso o novo fica **melhor** que o antigo (0 repetidos em vez de 16/min). O jogo anda até 1%
+  mais rápido/lento que o console (GB +0,46%), como o RetroArch com sincronia de vídeo. Sem trava (144 Hz, PAL 50 Hz)
+  soma o tempo como o antigo. A sobra começa em meio quadro, então tremido de vsync não vira 0/2 quadros.
+- **O som segue a imagem** (`reamostrador.ts` ganhou `velocidade`; `worker.ts` `ajusteDoSom`): o reamostrador compensa o
+  fator da trava e mais ±0,5% pra manter o anel em ~60 ms (controle dinâmico de taxa do RetroArch). Som quase acabando
+  (começo, volta da pausa) é completado com silêncio até o alvo (`encherComSilencio`).
+- **Sem vsync, o de antes:** aba escondida/minimizada (100 ms sem vsync) volta ao passo de 4 ms pelo som (ou relógio).
+  E se a página trava um pouco com o vsync ligado (o salvar automático a cada 30 s fazia isso: dava ~15–30 ms de falta
+  de som na primeira versão), o Worker roda pelo som enquanto o anel estiver abaixo de 15 ms e o vsync seguinte não
+  corre atrás (`rodouNoBuraco`). Resultado: 0 ms de falta de som em todas as medidas.
+- Turbo (4 por vsync, como o antigo), rebobinar (60 voltas/s pelo tempo do vsync), pausa, caçador/replay (os botões
+  continuam por quadro), `porQuadro` do M16 e o PS1 de reserva passam pelo mesmo caminho; os nativos não mudaram.
+
+Arquivos fora da lista da tarefa (mínimo): `packages/engine/src/reamostrador.ts` (o campo `velocidade`) e
+`apps/desktop/e2e/roms.ts` (a `romGbContador`, usada pelo script e pelo e2e).
+
+### Testes
+
+- `tempo.test.ts`: trava em 1 por vsync (GB/NES, com vsync tremendo ±3 ms), vsync perdido roda 2, 120 Hz alterna, 144 Hz e
+  PAL não travam, engasgo grande no máximo 4. `som.test.ts`: velocidade do reamostrador.
+- `apps/desktop/e2e/ritmo.spec.ts`: 5 s de GB, no máximo 12 repetidos e 12 pulados em ~300 vsyncs (sem a correção dá 53).
+- `pnpm check` verde; `pnpm e2e` 45 passaram, 1 pulado (o `visual-paridade`, que já pulava). Não mexi no Rust.
+
+### Ficou de fora
+
+- Medi só o Game Boy (é o que tem uma ROM-contador). Núcleos pesados (N64, PS1 de reserva) também rodam 1 por vsync, mas
+  se o quadro levar mais que ~16 ms o Worker atrasa e a página repete; o antigo também. Uma fila de 1 quadro na página
+  seria o próximo passo se o M16 mostrar isso.
+- O headless tem vsync perfeito; num monitor de verdade (Linux/Windows do Marcelo) vale rodar o 🩺 diagnóstico ou o F3.
+
+### Pra conferir
+
+```bash
+pnpm build && node tools/medir-ritmo.mjs --antigo ../kofstation-old
+```
+
+```bash
+node tools/medir-ritmo.mjs --segundos 30 --lento 4
+```
+
+```bash
+pnpm --filter @kof/desktop exec playwright test e2e/ritmo.spec.ts
+```
+
+(`KOF_RITMO_FILA=1` mostra o som no anel segundo a segundo do novo.)

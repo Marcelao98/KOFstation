@@ -180,3 +180,31 @@ export function romN64QueDesenha(): Buffer {
   if (0x40 + code.length * 4 > 0x1000) throw new Error('o programa não cabe no lugar do IPL3');
   return r;
 }
+
+/**
+ * Game Boy que troca a cor da tela inteira a cada quadro (BGP: branco, cinza claro, cinza escuro, preto, de novo):
+ * o tom na tela diz o número do quadro (mod 4), então dá pra contar quadro repetido e pulado (tools/medir-ritmo.mjs).
+ */
+export function romGbContador(): Buffer {
+  const r = Buffer.alloc(0x8000);
+  r.set([0x00, 0xc3, 0x50, 0x01], 0x100); // nop; jp $0150
+  r.write('KOFRITMO', 0x134, 'latin1');
+  const programa = [
+    [0xf3], // di
+    [0xf0, 0x44, 0xfe, 0x90, 0x38, 0xfa], // espera o vblank (LY >= 144)
+    [0xaf, 0xe0, 0x40], // LCD desligado
+    [0x21, 0x00, 0x80, 0x01, 0x00, 0x20], // hl = $8000, bc = $2000
+    [0xaf, 0x22, 0x0b, 0x78, 0xb1, 0x20, 0xf9], // zera a VRAM inteira (tile 0 vazio, mapa todo no tile 0)
+    [0xaf, 0xe0, 0x47], // BGP = 0
+    [0x3e, 0x91, 0xe0, 0x40], // LCD ligado, fundo ligado, tiles em $8000
+    [0xf0, 0x44, 0xfe, 0x90, 0x20, 0xfa], // laço: espera LY == 144
+    [0x1c, 0x7b, 0xe6, 0x03, 0xe0, 0x47], // e++; BGP = e & 3 (a cor 0 vira o tom e & 3)
+    [0xf0, 0x44, 0xfe, 0x90, 0x28, 0xfa], // espera sair da linha 144
+    [0x18, 0xec], // volta pro laço
+  ];
+  r.set(programa.flat(), 0x150);
+  let x = 0;
+  for (let i = 0x134; i <= 0x14c; i++) x = (x - (r[i] ?? 0) - 1) & 0xff;
+  r[0x14d] = x;
+  return r;
+}

@@ -1,13 +1,17 @@
-// Worker do núcleo: carrega o núcleo do kofstation-old, roda os quadros e manda imagem e som. O ritmo é o do SOM quando
-// ele está tocando (mantém ~60 ms no anel; o AudioWorklet consome no relógio da placa de som); sem som, um relógio
-// pelo fps do núcleo. No máximo 4 quadros de uma vez (igual ao antigo); turbo = 4 por passo.
+// Worker do núcleo: carrega o núcleo do kofstation-old, roda os quadros e manda imagem e som. O ritmo é o do VSYNC da
+// página (como o laco() do antigo no requestAnimationFrame): a cada vsync a página manda 'vsync' e o núcleo roda os
+// quadros que couberem (criarRitmoDoVsync: travado em 1 por vsync quando o monitor tem quase o fps do console). O som
+// segue a imagem: o reamostrador estica ou encolhe até 1,5% pra manter ~60 ms no anel. Sem vsync (aba escondida,
+// janela minimizada), um passo a cada 4 ms no ritmo do SOM (mantém ~60 ms no anel; o AudioWorklet consome no relógio
+// da placa de som) ou, sem som, num relógio pelo fps do núcleo. No máximo 4 quadros de uma vez (igual ao antigo);
+// turbo = 4 por passo.
 import { criarAnel, escrever, ocupacao, type Anel } from './anel';
 import { SessaoLibretro, type FabricaDeNucleo } from './libretro';
 import { assinaturaDoQuadro } from './bug';
 import type { DoWorker, ParaWorker, ReplayDoBug } from './mensagens';
 import { Reamostrador } from './reamostrador';
 import { Rebobinador } from './rebobinador';
-import { criarRelogio, MAX_QUADROS_POR_PASSO, type Relogio } from './tempo';
+import { criarRelogio, criarRitmoDoVsync, MAX_QUADROS_POR_PASSO, type Relogio, type RitmoDoVsync } from './tempo';
 
 const eu = self as unknown as {
   postMessage(m: DoWorker, t?: Transferable[]): void;
@@ -19,6 +23,16 @@ let sessao: SessaoLibretro | null = null;
 let anel: Anel | null = null;
 let reamostrador: Reamostrador | null = null;
 let relogio: Relogio | null = null;
+let ritmo: RitmoDoVsync | null = null;
+/** quando chegou o último vsync (relógio do Worker) e o tempo dele (relógio da página); 0 = sem vsync */
+let vsyncAqui = 0;
+let vsyncLa = 0;
+/** sem vsync há mais que isso, o Worker anda sozinho (aba escondida) */
+const SEM_VSYNC_MS = 100;
+/** o Worker rodou quadros sozinho no meio do vsync (a página travou e o som ia acabar): o próximo vsync não corre atrás */
+let rodouNoBuraco = false;
+/** som no anel que o ritmo pelo vsync procura manter (ms) */
+const ALVO_SOM_MS = 60;
 let taxaSaida = 48000;
 let pausado = false;
 let turbo = false;
@@ -119,6 +133,7 @@ function terminarRebobinar() {
   rb.rebobinou = 0;
   rb.desdeFoto = 0;
   relogio = sessao ? criarRelogio(sessao.info.fps) : null; // o tempo voltando não vira quadros atrasados
+  ritmo?.zerar();
   avisarRebob();
 }
 /** Um passo pra trás (no ritmo de 60 por segundo). false = não deu (acabou o tempo). */
@@ -228,10 +243,54 @@ function umQuadro(s: SessaoLibretro, comSom: boolean) {
   faltasDoQuadro = faltas;
 }
 
-function passo() {
+/** O passo de reserva (sem vsync da página): a cada 4 ms. */
+function passoSozinho() {
   if (parado) return;
+  setTimeout(passoSozinho, 4);
+  const agora = performance.now();
+  if (vsyncAqui && agora - vsyncAqui < SEM_VSYNC_MS) {
+    // a página está mandando o vsync; mas se ela travou um pouco (salvar automático, coleta de lixo) e o som vai
+    // acabar, roda pelo som até o vsync voltar: pula quadro na tela, mas o som não picota
+    if (
+      somTocando &&
+      anel &&
+      !pausado &&
+      !turbo &&
+      agora - vsyncAqui > 20 &&
+      ocupacao(anel) < (taxaSaida * ALVO_SOM_MS) / 4000
+    ) {
+      rodouNoBuraco = true;
+      passo(0, false);
+    }
+    return;
+  }
+  if (vsyncAqui) {
+    vsyncAqui = 0; // perdeu o vsync: o relógio recomeça daqui, sem correr atrás
+    relogio = sessao ? criarRelogio(sessao.info.fps) : null;
+    ultimoPasso = agora;
+  }
+  const dt = Math.min(agora - ultimoPasso, 100);
+  ultimoPasso = agora;
+  passo(dt, false);
+}
+
+/** Um vsync da página (t = tempo do requestAnimationFrame). */
+function vsync(t: number) {
+  if (parado) return;
+  const agora = performance.now();
+  const voltou = !vsyncAqui || agora - vsyncAqui >= SEM_VSYNC_MS || rodouNoBuraco;
+  rodouNoBuraco = false;
+  const dt = voltou ? 0 : t - vsyncLa;
+  if (voltou) ritmo?.zerar();
+  vsyncAqui = agora;
+  vsyncLa = t;
+  ultimoPasso = agora;
+  passo(dt, true);
+}
+
+function passo(dt: number, porVsync: boolean) {
   try {
-    passoSemErro();
+    passoSemErro(dt, porVsync);
   } catch (e) {
     // o núcleo quebrou no meio do quadro: para (sem tentar de novo a cada 4 ms) e manda o que ele escreveu
     parado = true;
@@ -239,12 +298,24 @@ function passo() {
   }
 }
 
-function passoSemErro() {
-  setTimeout(passo, 4);
+/** Quanto mais rápido o som tem de sair pra o anel voltar ao alvo (até ±0,5%; o resto é o fator do ritmo). */
+function ajusteDoSom(a: Anel): number {
+  const ms = (ocupacao(a) * 1000) / taxaSaida;
+  return 1 + Math.max(-1, Math.min(1, (ms - ALVO_SOM_MS) / ALVO_SOM_MS)) * 0.005;
+}
+
+/** Som quase acabando (começo, depois da pausa, depois de um engasgo): completa com silêncio até o alvo. Um buraco
+ *  curto agora em vez de picote: o vsync só traz um quadro de som por vez e não daria pra encher rodando. */
+function encherComSilencio(a: Anel) {
+  const alvo = Math.round((taxaSaida * ALVO_SOM_MS) / 1000);
+  const tem = ocupacao(a);
+  if (tem >= alvo / 4) return;
+  escrever(a, new Float32Array((alvo - tem) * 2));
+}
+
+function passoSemErro(dt: number, porVsync: boolean) {
   const s = sessao;
   const agora = performance.now();
-  const dt = Math.min(agora - ultimoPasso, 100);
-  ultimoPasso = agora;
   if (!s || pausado) return;
   if (rb.querendo && rb.r && (rb.rebobinou || prontoPraVoltar())) {
     rb.acumulado += dt;
@@ -263,8 +334,16 @@ function passoSemErro() {
   let vezes = 0;
   if (turbo) {
     for (; vezes < MAX_QUADROS_POR_PASSO; vezes++) umQuadro(s, false);
+  } else if (porVsync && ritmo) {
+    const n = ritmo.passo(dt);
+    if (somTocando && anel && reamostrador) {
+      if (n) encherComSilencio(anel);
+      reamostrador.velocidade = ritmo.fator * ajusteDoSom(anel);
+    }
+    for (; vezes < n; vezes++) umQuadro(s, true);
   } else if (somTocando && anel) {
-    const alvo = taxaSaida * 0.06;
+    if (reamostrador) reamostrador.velocidade = 1;
+    const alvo = (taxaSaida * ALVO_SOM_MS) / 1000;
     while (ocupacao(anel) < alvo && vezes < MAX_QUADROS_POR_PASSO) {
       umQuadro(s, true);
       vezes++;
@@ -314,11 +393,12 @@ eu.onmessage = async ({ data: m }) => {
         anel = m.sab ? criarAnel((m.sab.byteLength - 16) / 8, m.sab) : null;
         reamostrador = new Reamostrador(info.taxaAudio, taxaSaida);
         relogio = criarRelogio(info.fps);
+        ritmo = criarRitmoDoVsync(info.fps);
         ultimoPasso = med.desde = performance.now();
         porQuadro = [];
         faltasDoQuadro = anel ? Atomics.load(anel.ctl, 2) : 0;
         enviar({ tipo: 'pronto', info });
-        passo();
+        passoSozinho();
       } catch (e) {
         enviar({ tipo: 'erro', mensagem: e instanceof Error ? e.message : String(e), log: sessao?.log ?? [] });
       }
@@ -329,9 +409,15 @@ eu.onmessage = async ({ data: m }) => {
     case 'eixos':
       if (sessao) sessao.eixos[m.jogador] = m.e.slice(0, 4);
       break;
+    case 'vsync':
+      vsync(m.t);
+      break;
     case 'pausar':
       pausado = m.sim;
-      if (!pausado) relogio = sessao ? criarRelogio(sessao.info.fps) : null; // voltou: sem correr atrás do tempo parado
+      if (!pausado) {
+        relogio = sessao ? criarRelogio(sessao.info.fps) : null; // voltou: sem correr atrás do tempo parado
+        ritmo?.zerar();
+      }
       break;
     case 'turbo':
       turbo = m.sim;

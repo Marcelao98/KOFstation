@@ -27,6 +27,13 @@ describe('reamostrador', () => {
     for (let q = 0; q < 60; q++) total += r.converter(new Int16Array(534 * 2)).length / 2;
     expect(Math.abs(total - (48000 * (534 * 60)) / 32040)).toBeLessThan(3);
   });
+  it('velocidade: 1% mais rápido sai 1% menos som (o ritmo pelo vsync segura o anel assim)', () => {
+    const r = new Reamostrador(48000, 48000);
+    r.velocidade = 1.01;
+    let total = 0;
+    for (let q = 0; q < 60; q++) total += r.converter(new Int16Array(800 * 2)).length / 2;
+    expect(Math.abs(total - 48000 / 1.01)).toBeLessThan(3);
+  });
   it('mesma taxa: copia (em float)', () => {
     const r = new Reamostrador(48000, 48000);
     const s = r.converter(new Int16Array([16384, -16384, 0, 0]));

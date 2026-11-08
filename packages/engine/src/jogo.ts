@@ -51,6 +51,8 @@ export class Jogo {
   private acordar = () => void this.ctx?.resume();
   private proximoId = 1;
   private esperando = new Map<number, { ok: (b: Uint8Array | null) => void; falhou: (e: Error) => void }>();
+  /** o requestAnimationFrame que manda o vsync pro Worker (0 = parado) */
+  private pedidoVsync = 0;
 
   private constructor(
     private eventos: EventosDoJogo,
@@ -104,7 +106,21 @@ export class Jogo {
     }
     j.worker.onmessage = ({ data }: MessageEvent<DoWorker>) => j.receber(data);
     j.worker.onerror = (e) => j.eventos.erro?.(e.message || 'o Worker do núcleo caiu', []);
+    j.ligarVsync();
     return j;
+  }
+
+  /**
+   * O ritmo dos quadros é o do monitor (como o laco() do antigo): cada vsync vai pro Worker, que roda o quadro na hora e
+   * devolve a imagem pro próximo vsync. Aba escondida = sem requestAnimationFrame: o Worker segue sozinho no ritmo do som.
+   */
+  private ligarVsync() {
+    if (typeof requestAnimationFrame !== 'function') return;
+    const laco = (t: number) => {
+      this.pedidoVsync = requestAnimationFrame(laco);
+      this.mandar({ tipo: 'vsync', t });
+    };
+    this.pedidoVsync = requestAnimationFrame(laco);
   }
 
   private async ligarSom(): Promise<SharedArrayBuffer | null> {
@@ -278,6 +294,8 @@ export class Jogo {
   fechar() {
     for (const p of this.esperando.values()) p.falhou(new Error('o jogo fechou'));
     this.esperando.clear();
+    if (this.pedidoVsync) cancelAnimationFrame(this.pedidoVsync);
+    this.pedidoVsync = 0;
     this.mandar({ tipo: 'parar' });
     this.worker.terminate();
     removeEventListener('pointerdown', this.acordar, true);

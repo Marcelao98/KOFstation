@@ -5,6 +5,11 @@ export class Reamostrador {
   private antE = 0;
   private antD = 0;
   private saida = new Float32Array(8192);
+  /**
+   * Quantas vezes mais rápido o som chega do que a taxa dele diz (1 = certo). O ritmo pelo vsync roda o jogo até 1% fora
+   * do fps do console e segura o anel de som no alvo mexendo aqui (>1 = sai menos som, o anel esvazia).
+   */
+  velocidade = 1;
   constructor(
     private entrada: number,
     private saidaHz: number,
@@ -13,7 +18,7 @@ export class Reamostrador {
   /** Devolve quadros estéreo intercalados (vista reaproveitada: use antes da próxima chamada). */
   converter(pcm: Int16Array): Float32Array {
     const n = pcm.length / 2;
-    const passo = this.entrada / this.saidaHz;
+    const passo = (this.entrada / this.saidaHz) * this.velocidade;
     const max = Math.ceil((n + 1) / passo) + 2;
     if (this.saida.length < max * 2) this.saida = new Float32Array(max * 2);
     let k = 0;

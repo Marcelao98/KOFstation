@@ -29,6 +29,8 @@ export type ParaWorker =
   | { tipo: 'pad'; jogador: number; bits: number }
   /** analógicos (-32767..32767: esquerdo x, y, direito x, y) */
   | { tipo: 'eixos'; jogador: number; e: number[] }
+  /** a página teve um vsync (t = tempo do requestAnimationFrame): o núcleo roda os quadros dele */
+  | { tipo: 'vsync'; t: number }
   | { tipo: 'pausar'; sim: boolean }
   | { tipo: 'turbo'; sim: boolean }
   /** caçador de bugs: marco a cada 10 s + botões de cada quadro */
