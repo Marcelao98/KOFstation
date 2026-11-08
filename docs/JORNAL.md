@@ -21,6 +21,45 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · Etapa M13 · rede entre aparelhos, celular como controle e Jogar no PC
+
+**Pedido:** o mesmo lote ("segue até o M14"): M13 reaproveitando o `kofrede.c` e com o mesmo protocolo do APK atual.
+**Feito:** M13.1 `crates/kof-net`: `kofrede.c` + Monocypher do antigo sem mudança (`third_party/kofrede`) por FFI
+(`ffi.rs`), o `kofservico.c` em Rust (`servico.rs`: UDP achar, TCP parear/conectar, pareados em arquivo, ping 15 s,
+religar PC×PC), a WebSocket da página (`pagina.rs`, token ou o modo do antigo) e o `kof-rede` (o serviço sozinho com as
+opções do kofservico). M13.2: o `kofstation` abre a rede junto (`crates/kof-app/src/rede.rs`, `rede.ligar`), tela
+📡 Aparelhos (`screens/Aparelhos`, QR com o mesmo gerador do antigo, código, lista, nome, procurar), cartão do Início
+(`app-core/rede.ts`, `stores/rede.ts`, backend de teste com serviço de mentira). M13.3: `domain/celular.ts` (formatos do
+antigo) e `stores/celular.ts`: celular pela rede (canal `pad`, `pad-ok` com jogador e console) e pelo servidor do APK
+(Arquivo → 📱 Celular como controle, senha de 4 números, religa sozinho), os celulares entram nos Jogadores. M13.4:
+`stores/transmissao.ts` (o `jogarpc.js`): pedir/oferta/resposta/fim pelo canal `jogo`, imagem crua em pixels inteiros,
+H.264, 12 Mbps, som no celular (`Jogo.somPraTransmitir`, o PC fica mudo; no PS1 nativo vai sem som), canal de dados com
+os 6 bytes, ping, menu do PC no celular, 💾⟲🏠, 📱 Levar pro celular / 📺 Voltar pra TV no menu rápido, a navegação
+por controle aceita o celular, sair da janela não pausa enquanto transmite.
+**Decidido:** D35 (FFI + serviço em Rust, mesma API JSON, WebSocket da página com token).
+**Medido / conferido:** `tools/testar-rede.mjs` (CI): o `servicos.cjs` do antigo contra o novo; novo × `kofservico`
+antigo nos dois papéis; o `celular.cjs` do antigo (o `Rede.java` do APK + `libkofrede.so`) contra o novo — tudo verde.
+`tools/testar-aparelhos.mjs --antigo` (CI): app de verdade + Chromium, outro aparelho pareia digitando o código da
+tela e aparece 🟢; o `ControleServidor.java` do APK conecta com a senha e o A acende na tela Jogadores. e2e novos:
+`aparelhos.spec.ts`, `jogar-no-pc.spec.ts` (um "celular" WebRTC noutra página recebe a imagem vermelha, manda botão,
+ping e menu). 43 e2e, `check`, `check:rust` (menos o SIGILL do pcsx neste container) verdes.
+**Deu errado / aprendido:** (1) importar stores no topo do `main.tsx` cria elas antes da configuração carregar (o tema
+voltava pro padrão ao recarregar): as da rede entram depois do `carregarConfig`. (2) O MSVC não tem os `__builtin_` que
+o `kofrede.c` usa: o `build.rs` define pras funções do C no Windows (o arquivo continua igual). (3) **Aberto:** o
+`testar-nativo` às vezes estoura o `page.goto` (1 em ~4 aqui): um arquivo da página (`react-*.js`) fica sem resposta do
+servidor HTTP local logo depois dos 600 MB de CD gravados; sem a carga de disco não reproduz (0 em 12). O teste tenta de
+novo uma vez; investigar o `tiny_http` (ver se um pedido fica preso atrás de outro na mesma conexão).
+**Onde parou:** ⏸ Marcelo: testar a rede com o celular (abaixo e no SITUACAO), a chave do atualizador e os pacotes.
+**Próximo: M14** (não começado), plano: M14.1 adaptador `android` (`platform/android.ts`) implementando o `Backend`
+sobre a ponte `KOFnesApk` da casca Java atual (CASCA 14; a página nova vai nos assets e no `publicado/android` da
+casca, sem mexer no `kofstation-old`: o APK novo é montado aqui com a casca copiada, como os núcleos); as lojas e a
+config no celular ficam no IndexedDB/OPFS (sem Rust lá) com a mesma interface; a rede pela `KOFnesApk.redeCmd` +
+`window.__rede` (o mesmo `CanalRede`). M14.2: controle de toque (6 modelos do `android.css`/`android.js`) e layout do
+celular. M14.3: pasta de ROMs (`Pasta.java`). M14.4: PS1/N64 nativos pela ponte (`Ps1Jogo`/`N64Jogo`). M14.5:
+atualizador do APK (`Atualizador.java` lendo um manifesto nosso). Tudo precisa do Marcelo no celular de verdade.
+
+---
+
 ## 2026-11-07 · Etapa M15 · atualizador assinado, pacotes do Linux e do Windows, lado a lado com o antigo
 
 **Pedido:** "segue até o M14", sem parar em cada checkpoint; parar só no que só o Marcelo faz (chave, celular, Windows).

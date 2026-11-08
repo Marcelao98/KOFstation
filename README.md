@@ -64,6 +64,8 @@ flowchart TB
     KF["kof-files — escopos, Kof Games, varredura, CRC, organizar, lojas, config, capas"]
     KC["kof-core — app.info, erros com código, log em arquivo (inclusive o da tela)"]
     KN["kof-nativo — núcleo libretro nativo num processo filho (kofstation --nativo): som pela placa, imagem e botões por WebSocket local com token"]
+    KU["kof-atualiza — atualizador: manifesto assinado (Ed25519), baixa só o que mudou, troca na próxima abertura"]
+    KR["kof-net — rede entre aparelhos: kofrede.c do antigo (FFI) + o serviço do kofservico em Rust (UDP/TCP 8650), mesmo protocolo do APK; WebSocket da página com token"]
   end
   NU[("núcleos libretro do kofstation-old<br/>third_party/cores/manifest.json (SHA-256)")]
 
@@ -82,6 +84,10 @@ flowchart TB
   KF --> KC
   KA -->|"abre e vigia o processo filho"| KN
   KN --> KC
+  KA --> KU
+  KA -->|"abre junto (linhas próprias)"| KR
+  PL -.->|"WebSocket 127.0.0.1 + token (M13)"| KR
+  KR <-.->|"TCP/UDP 8650, cifrado (rede de casa)"| CEL(["celular (APK) ou outro PC"])
   PL -.->|"WebSocket 127.0.0.1 + token (N.3)"| KN
   EN --> NU
 ```
@@ -133,7 +139,9 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | BIOS, GBA com BIOS, Neo Geo, PS1, N64 (núcleo do SNES: Snes9x; o Kof quando a Mel liberar) | ⏸ M11 |
 | PS1 nativo (PCSX-ReARMed com recompilador, processo à parte, som pela placa, imagem pela página), jukebox do SNES com Ondas/Notas, N64 conferido | ⏸ M11b (N.1–N.8; falta o Marcelo testar) |
 | PS2 | ⬜ M12 |
-| Rede e celular, pacotes e atualização, Android | ⬜ M13–M15 |
+| Atualizador assinado (liga com a chave), pacote do Linux (`--instalar`), instalador do Windows, lado a lado com o antigo | ⏸ M15 (falta a chave e o Marcelo instalar) |
+| Rede entre aparelhos (📡 Aparelhos, QR e código, pareia com o APK atual), celular como controle (rede e servidor do APK), 🖥 Jogar no PC (WebRTC), Levar pro celular | ⏸ M13 (falta o Marcelo testar com o celular) |
+| Android (o APK servindo o app novo) | ⬜ M14 |
 
 ---
 

@@ -211,3 +211,16 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   app não é Tauri (D2) e o formato da pasta é o do antigo (D33).
 - Por que não o "tem versão nova: feche e abra" do antigo só avisando: aqui ele já baixa por trás, e o aviso diz que
   vale na próxima abertura.
+
+## D35. Rede: o `kofrede.c` do antigo por FFI e o serviço em Rust dentro do `kofstation` — **aceita** (M13, 08/11)
+- O núcleo do protocolo (`kofrede.c` + Monocypher) entra **sem mudar um byte** (`third_party/kofrede`, SHA-256 no
+  LEIA-ME de lá), compilado pelo `cc` no `crates/kof-net` e chamado por FFI (o `unsafe` fica todo em `ffi.rs`). É o
+  mesmo código da `libkofrede.so` do APK atual: o pareamento é igual byte a byte, sem reescrever cripto.
+- O serviço (`kofservico.c`, 773 linhas) virou Rust (`servico.rs`) com o mesmo comportamento e a **mesma API JSON**;
+  a prova é rodar os testes do próprio antigo contra ele (`rede/teste/servicos.cjs` e `celular.cjs`, com o `Rede.java`
+  do APK) e o novo contra o `kofservico` antigo nos dois sentidos (`tools/testar-rede.mjs`, no CI).
+- Abre junto com o `kofstation` (como o kofservico abria com o lançador), nas portas do antigo (TCP/UDP 8650, TCP pula
+  até +9 se ocupada). A página fala por uma WebSocket local em porta qualquer, com token e só a origem da página
+  (`rede.ligar`), em vez da 8644 fixa e sem senha do antigo.
+- Dados em `<pasta de dados>/rede` (`identidade.bin`, `pareados.txt`, `config.txt`, o formato do antigo), separados
+  do antigo (`KOFnes/rede`): o celular pareia de novo com o PC novo. Os dois abertos juntos disputam a 8650.

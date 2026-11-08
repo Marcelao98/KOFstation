@@ -16,9 +16,9 @@ atual; depois vêm distribuição, celular e, por último, o PS2.
 
 | | Passos | O que quer dizer |
 |---|---|---|
-| ✅ Pronto | **69** | Você aprovou, ou o checkpoint era teste automático e passou |
-| ⏸ Esperando você | **6** | Feito e testado por mim; falta você jogar e dizer "ok" |
-| ⬜ Por fazer | **16** | Rede/celular como controle, celular, PS2, a troca |
+| ✅ Pronto | **70** | Você aprovou, ou o checkpoint era teste automático e passou |
+| ⏸ Esperando você | **9** | Feito e testado por mim; falta você jogar e dizer "ok" |
+| ⬜ Por fazer | **12** | Celular (M14), PS2, a troca |
 
 Na lista de paridade com o antigo ([PARIDADE.md](PARIDADE.md)): 28 itens ✅ conferidos, 17 🟨 feitos com alguma
 diferença anotada, 15 ⬜ que dependem das etapas que faltam.
@@ -89,6 +89,7 @@ flowchart LR
 | **M6 Rebobinar** | Igual ao antigo (preto e branco, ampulheta) |
 | **M7 Imagem** | Painel de filtros (os mesmos pixels do antigo), NTSC, Scale4x, bloom, molduras, paletas |
 | **M8 Controles** | Teclas e botões por console e por jogo, analógico no teclado, jogadores 2 a 4 |
+| **M13.1 Rede** | O protocolo de rede do antigo (o mesmo do APK), provado contra os testes do antigo |
 | **M15.1 Atualizador** | Manifesto assinado, baixa só o que mudou, troca na próxima abertura (liga quando a chave existir) |
 | **M11b (parte)** | O núcleo nativo, o PCSX compilado, o Snes9x com sonda, PS1 wasm conferido pela imagem, cartão de BIOS e abertura |
 
@@ -112,6 +113,14 @@ Isso cria a chave **privada** em `~/kofstation-chave.pem` (guarde; não mande pr
 A partir daí, cada envio na `main` publica uma versão (workflow "Versão") e o app instalado se atualiza sozinho.
 
 ## Esperando você testar ⏸
+
+**Novo (M13, rede):** com o pacote abaixo instalado e o **KOFstation antigo fechado** (os dois usam a porta 8650):
+1. PC: 📡 Aparelhos → ➕ Parear um celular. Celular (APK atual): 📡 Aparelhos → Ler o QR do PC (ou escolha o PC na
+   lista e digite o código). O celular tem que aparecer 🟢 conectado no PC.
+2. Abra um jogo no PC; no celular, Controles → "Usar este celular como controle do PC": ele vira um jogador.
+3. No celular, 🎮 Jogar no PC (na tela Aparelhos ou na ficha do jogo): o jogo roda no PC e aparece no celular, com som.
+   No PC, menu rápido → 📱 Levar pro celular / 📺 Voltar pra TV.
+4. O jeito antigo também: Arquivo → 📱 Celular como controle… com o endereço e a senha que o celular mostra.
 
 **Novo (M15):** o pacote da `teste-binarios` agora instala. No Linux:
 
@@ -163,7 +172,7 @@ O PS2 ficou pro fim porque é o mais caro em token. Os custos são estimativa (t
 | 5 | **PS2 nativo** (N.9 / M12) | ~400–700 mil | Dar OpenGL ao processo do jogo, compilar o LRPS2, criar o sistema PS2. O N64 nativo sai junto |
 | 6 | **Troca** | baixo–médio | Conferir a paridade 100% e o app antigo publicar a última versão, que leva pro novo |
 
-**Agora:** M15 feito (falta a chave e o teu teste); seguindo pro M13 (rede e celular como controle).
+**Agora:** M15 e M13 feitos (falta a chave e os teus testes). Próximo: M14 (o APK com o app novo).
 
 ---
 
