@@ -45,3 +45,4 @@ O plano do resto do roadmap em tarefas (ondas, dependências, quem mexe em quê)
 |---|---|---|---|
 | A · Ritmo dos quadros no WebAssembly (o "antigo mais liso") | [A-ritmo-wasm.md](A-ritmo-wasm.md) | `agente-a/ritmo-wasm` | ✅ junta em 08/11 (`cbe109e`) |
 | B · Catálogo das opções de emulação (dados do M16.4) | [B-opcoes-nucleo.md](B-opcoes-nucleo.md) | `agente-b/opcoes-nucleo` | aberta |
+| C · Ritmo dos quadros do PS2/PS1 nativo (PS2 liso) | [C-ritmo-nativo.md](C-ritmo-nativo.md) | `agente-c/ritmo-nativo` | aberta |
