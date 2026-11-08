@@ -1,7 +1,8 @@
 // Os aparelhos de controle ligados agora (aparelhosDeControle do antigo): o teclado sempre e cada controle da
-// Gamepad API. Celulares pela rede chegam no M13.
+// Gamepad API, e os celulares (M13.3).
 import { bitsDoControle, nomeDoPad, semOpostos, type Aparelho } from '@kof/domain';
 import { controlesDoNavegador } from '@kof/engine';
+import { aparelhosCelular } from '../stores/celular';
 
 export interface LeituraDoTeclado {
   b: number;
@@ -26,5 +27,6 @@ export function aparelhosDeControle(
       e: [0, 1, 2, 3].map((i) => eixoPad(gp.axes[i] ?? 0)),
     });
   }
+  l.push(...aparelhosCelular()); // M13.3: celular pelo servidor do APK e celulares pela rede pareada
   return l;
 }

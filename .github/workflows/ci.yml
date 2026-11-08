@@ -50,4 +50,4 @@ jobs:
           git init -q /tmp/kofstation-old && cd /tmp/kofstation-old
           git fetch -q --depth 1 https://github.com/Marcelao98/kofstation-old ceba493fc494165de6f561b77a699fb8c22b295f && git checkout -q FETCH_HEAD
           cd - && node tools/testar-rede.mjs /tmp/kofstation-old
-          cargo build -p kof-app && node tools/testar-aparelhos.mjs
+          cargo build -p kof-app && node tools/testar-aparelhos.mjs --antigo /tmp/kofstation-old

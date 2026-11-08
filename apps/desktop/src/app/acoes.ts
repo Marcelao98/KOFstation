@@ -16,6 +16,7 @@ import { usarJukebox } from '../stores/jukebox';
 import { usarAbertura } from '../stores/abertura';
 import { usarBug } from '../stores/bug';
 import { usarBios } from '../stores/bios';
+import { menuControleCelular } from '../stores/celular';
 import { procurar as procurarAtualizacao } from '../stores/atualizacao';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
@@ -33,9 +34,7 @@ const TELAS: Partial<Record<string, TelaId>> = {
 };
 
 /** Etapa em que cada ação ainda não feita chega. */
-export const ETAPA: Readonly<Record<string, string>> = {
-  'controle-celular': 'M13',
-};
+export const ETAPA: Readonly<Record<string, string>> = {};
 
 export const avisoEtapa = (acao: string): string =>
   `⏳ Isso ainda não chegou no app novo: vem na etapa ${ETAPA[acao] ?? '?'} (o app antigo continua tendo).`;
@@ -63,6 +62,9 @@ export function acao(nome: string, valor?: string): boolean {
   const telas = usarTelas.getState();
   const j = usarJogo.getState();
   switch (nome) {
+    case 'controle-celular':
+      menuControleCelular();
+      return true;
     case 'atualizacao':
       void procurarAtualizacao(true);
       return true;

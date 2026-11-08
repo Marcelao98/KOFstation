@@ -1,8 +1,10 @@
 // Ponta a ponta da tela 📡 Aparelhos (M13.2) com o app de verdade: o kofstation (serviço de rede dentro), a página no
 // Chromium, e um "outro aparelho" (o kof-rede, com o mesmo protocolo do APK) que pareia digitando o código que a tela
 // mostra, conecta e aparece 🟢 na lista. Grava um print.
-// Uso: pnpm build && cargo build -p kof-app -p kof-net && node tools/testar-aparelhos.mjs [print.png]
-import { spawn } from 'node:child_process';
+// Com o kofstation-old (só leitura), também o celular como controle pelo servidor do APK (o ControleServidor.java de
+// verdade, compilado numa pasta temporária): o PC conecta com a senha, o celular aperta A e a tela Jogadores acende.
+// Uso: pnpm build && cargo build -p kof-app -p kof-net && node tools/testar-aparelhos.mjs [--print x.png] [--antigo dir]
+import { execFileSync, spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -12,6 +14,7 @@ const { chromium } = createRequire(join(import.meta.dirname, '../apps/desktop/pa
 const RAIZ = join(import.meta.dirname, '..');
 const tmp = mkdtempSync(join(tmpdir(), 'kof-aparelhos-'));
 const procs = [];
+const arg = (n) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : undefined);
 const ok = (c, m) => {
   if (!c) throw new Error('FALHOU: ' + m);
   console.log('✓ ' + m);
@@ -65,12 +68,41 @@ try {
   ws.send(JSON.stringify({ t: 'conectar', id: pc }));
   await page.locator('#ap-lista li.tem', { hasText: '🟢 conectado' }).waitFor({ timeout: 10000 });
   ok(true, 'conectou (cifrado) e a tela mostra 🟢 conectado');
-  if (process.argv[2]) await page.screenshot({ path: process.argv[2] });
+  if (arg('--print')) await page.screenshot({ path: arg('--print') });
   await page.click('#aparelhos .x');
   ok(
     (await page.textContent('#hm-aparelhos')) === '🟢 conectado: Celular B',
     'cartão do Início: 🟢 conectado: Celular B',
   );
+  const antigo = arg('--antigo');
+  if (antigo) {
+    // o celular do jeito antigo: o ControleServidor do APK (senha de 4 números, porta 8642), sem parear
+    const cls = join(tmp, 'java');
+    execFileSync(
+      'javac',
+      ['-nowarn', '-d', cls, join(antigo, 'android/src/dev/kofnes/android/ControleServidor.java')],
+      { stdio: 'ignore' },
+    );
+    const cel = spawn('java', ['-cp', cls, 'dev.kofnes.android.ControleServidor', '4821', '18642', 'entrada'], {
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    procs.push(cel);
+    let est = '';
+    cel.stdout.on('data', (d) => (est += d));
+    for (let i = 0; i < 100 && !/porta 18642/.test(est); i++) await new Promise((r) => setTimeout(r, 100));
+    page.once('dialog', (d) => void d.accept('127.0.0.1:18642 4821'));
+    await page.click('#menu >> text=Arquivo');
+    await page.click('#menu [data-acao="controle-celular"]');
+    await page.locator('#aviso', { hasText: 'celular conectado' }).waitFor({ timeout: 10000 });
+    ok(true, 'o PC conectou no servidor do APK com a senha');
+    for (let i = 0; i < 50 && !/ESTADO 1\t/.test(est); i++) await new Promise((r) => setTimeout(r, 100));
+    ok(/ESTADO 1\t/.test(est), `o celular viu o PC conectado (${est.match(/ESTADO 1\t[^\n]*/)?.[0].trim()})`);
+    await page.click('#menu >> text=Arquivo');
+    await page.click('#menu [data-acao="jogadores"]');
+    cel.stdin.write('128 0\n'); // A apertado
+    await page.locator('#jog-lista li.apertando', { hasText: 'Celular (controle do PC)' }).waitFor({ timeout: 5000 });
+    ok(true, 'o celular aperta A e a luz dele acende na tela Jogadores');
+  }
   console.log('\naparelhos: tudo certo');
 } finally {
   await browser.close();
