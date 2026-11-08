@@ -21,6 +21,35 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · Planejamento · M16 (desempenho, diagnóstico, opções de emulação) · onde parou pra próxima sessão
+
+**Pedido:** o Marcelo testou o PS2 (Shadow of the Colossus "rodou relativamente bem, umas engasgadas aqui e ali") e
+pediu, antes de corrigir, medição de verdade: modo diagnóstico que grava logs e estatísticas, e opções de emulação do
+PS1 em diante. "Não basta rodar, tem que rodar bem." Etapa essencial, no meio da migração, antes do M14. Pediu pra
+pesquisar quem já faz, desenhar a arquitetura e parar (contexto grande): a implementação fica pra próxima sessão.
+**Feito:** só planejamento. `docs/DIAGNOSTICO.md` (pesquisa no PCSX2 `PerformanceMetrics.cpp` e no DuckStation
+`performance_counters.cpp` + a arquitetura), M16.1–M16.5 no ROADMAP (antes do M14), D37.
+**Decidido:** D37 (medir antes de otimizar; estatística pura no `domain`; gravação pelo Rust em `diag.*`).
+**Onde parou:** **próximo é o M16.1** (medidor quadro a quadro), na ordem do `DIAGNOSTICO.md`:
+1. `domain/desempenho.ts` primeiro (puro, com teste): percentis p50/p95/p99, fps suavizado, engasgo (> 1,5× o tempo de
+   um quadro ou falta de som) e o culpado (a etapa que mais passou do normal dela).
+2. `crates/kof-nativo/src/medidor.rs`: histórico de 600 quadros sem alocar; o `filho.rs` já mede núcleo, leitura
+   (`gl::LEITURA_US`) e imagem por segundo: passar a guardar por quadro e mandar o bloco do segundo no aviso
+   `desempenho` (campo novo, opcional, nos dois lados do contrato e nas fixtures de `packages/contracts/fixtures`).
+3. CPU por linha (Linux `/proc/self/task/*/stat`, Windows `GetThreadTimes`), agrupada pelo nome da linha.
+4. O mesmo formato no Worker do WebAssembly (`packages/engine`) e o tempo de desenho/chegada na página.
+Depois M16.2 (F3 com gráfico), M16.3 (modo diagnóstico; ⏸ o Marcelo grava o SotC e manda), M16.4 (opções de
+emulação), M16.5 (otimizar pelos relatórios). Pergunta em aberto pro Marcelo: os engasgos do SotC foram na primeira
+vez que aparece um lugar/efeito (shader sendo montado) ou espalhados?
+**Também esperando o Marcelo:** a chave do atualizador (SITUACAO, "Pra você fazer"), o teste da rede com o celular,
+os pacotes do Linux/Windows, e o PS2 nos outros dois jogos (Zone of the Enders 2, Gran Turismo 4) com print do F3.
+**Ambiente da próxima sessão:** `pnpm install`, `KOF_NATIVOS=todas pnpm nucleos` (traz o LRPS2), e pros testes
+nativos/PS2: `sudo apt-get install -y libasound2-dev genisoimage libegl1 libegl-mesa0 libgl1-mesa-dri`. O teste
+`kof-nativo --test pcsx` morre com SIGILL em container (CPU), no CI passa. Pros testes de paridade da rede:
+`git clone https://github.com/Marcelao98/kofstation-old` (só leitura) e `node tools/testar-rede.mjs <pasta>`.
+
+---
+
 ## 2026-11-08 · Correção · a página que às vezes não abria (tiny_http)
 
 **Pedido:** o CI quebrou de novo com a página sem carregar (agora no teste dos Aparelhos); o Marcelo pediu pra tentar de
