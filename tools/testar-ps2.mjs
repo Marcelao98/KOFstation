@@ -46,7 +46,7 @@ writeFileSync(join(d, 'SYSTEM.CNF'), 'BOOT2 = cdrom0:\\SLUS_000.00;1\r\nVER = 1.
 writeFileSync(join(d, 'SLUS_000.00'), Buffer.from([0x7f, 0x45, 0x4c, 0x46]));
 const iso = join(raiz, 'Games', 'ps2', 'Teste PS2.iso');
 execFileSync('genisoimage', ['-quiet', '-V', 'KOFPS2', '-o', iso, d]);
-const DVD = Math.round(4.3 * 2 ** 30 / 2048) * 2048;
+const DVD = Math.round((4.3 * 2 ** 30) / 2048) * 2048;
 truncateSync(iso, DVD);
 
 const picoMb = (pid) => {
