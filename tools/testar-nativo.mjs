@@ -146,7 +146,16 @@ const nav = await chromium.launch({
 try {
   const page = await nav.newPage({ viewport: { width: 1100, height: 700 } });
   page.on('pageerror', (e) => falhas.push(`erro na página: ${e.message}`));
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  if (process.env.DEPURAR) page.on('request', (r) => console.log('>', r.url().slice(0, 80)));
+  if (process.env.DEPURAR) page.on('requestfinished', (r) => console.log('<', r.url().slice(0, 80)));
+  // às vezes um arquivo da página fica sem resposta logo depois dos 600 MB de CD gravados (o servidor HTTP local; ver
+  // o JORNAL de 08/11): tenta de novo uma vez antes de dar como falha
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  } catch (e) {
+    console.log(`aviso: a página não abriu de primeira (${e.message.split('\n')[0]}); tentando de novo`);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  }
   await page.waitForSelector('#home', { timeout: 60000 });
   const api = (cmd, args) =>
     page.evaluate(
