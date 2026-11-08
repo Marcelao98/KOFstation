@@ -287,3 +287,86 @@ impl<W: Write> Write for Crc<'_, W> {
         self.w.flush()
     }
 }
+
+/// Monta um .zip (deflate) em memória com os arquivos dados (nome com `/` pra pasta). É o que o modo diagnóstico
+/// exporta (M16.3); data e hora das entradas fixas em 1980-01-01 (o conteúdo é que importa).
+pub fn montar(itens: &[(String, Vec<u8>)]) -> std::io::Result<Vec<u8>> {
+    let mut saida = Vec::new();
+    let mut central = Vec::new();
+    for (nome, dados) in itens {
+        let mut c = flate2::write::DeflateEncoder::new(Vec::new(), flate2::Compression::default());
+        c.write_all(dados)?;
+        let comprimido = c.finish()?;
+        let crc = crc32fast::hash(dados);
+        let n = nome.as_bytes();
+        let grande = |v: usize| {
+            u32::try_from(v).map_err(|_| std::io::Error::other(format!("{nome}: grande demais pro zip (4 GB)")))
+        };
+        let (tc, tn, desl) = (grande(comprimido.len())?, grande(dados.len())?, grande(saida.len())?);
+        let cab = |assinatura: u32, central: bool| {
+            let mut h = Vec::with_capacity(46 + n.len());
+            h.extend_from_slice(&assinatura.to_le_bytes());
+            if central {
+                h.extend_from_slice(&20u16.to_le_bytes()); // feito por
+            }
+            h.extend_from_slice(&20u16.to_le_bytes()); // versão pra abrir
+            h.extend_from_slice(&0x0800u16.to_le_bytes()); // nomes em UTF-8
+            h.extend_from_slice(&8u16.to_le_bytes()); // deflate
+            h.extend_from_slice(&0u16.to_le_bytes()); // hora
+            h.extend_from_slice(&0x0021u16.to_le_bytes()); // 1980-01-01
+            h.extend_from_slice(&crc.to_le_bytes());
+            h.extend_from_slice(&tc.to_le_bytes());
+            h.extend_from_slice(&tn.to_le_bytes());
+            h.extend_from_slice(&(n.len() as u16).to_le_bytes());
+            h.extend_from_slice(&0u16.to_le_bytes()); // extra
+            if central {
+                h.extend_from_slice(&[0; 6]); // comentário, disco, atributos internos
+                h.extend_from_slice(&0u32.to_le_bytes()); // atributos externos
+                h.extend_from_slice(&desl.to_le_bytes());
+            }
+            h.extend_from_slice(n);
+            h
+        };
+        saida.extend_from_slice(&cab(0x0403_4b50, false));
+        saida.extend_from_slice(&comprimido);
+        central.extend_from_slice(&cab(0x0201_4b50, true));
+    }
+    let inicio_central = saida.len() as u32;
+    saida.extend_from_slice(&central);
+    saida.extend_from_slice(&0x0605_4b50u32.to_le_bytes());
+    saida.extend_from_slice(&[0; 4]);
+    saida.extend_from_slice(&(itens.len() as u16).to_le_bytes());
+    saida.extend_from_slice(&(itens.len() as u16).to_le_bytes());
+    saida.extend_from_slice(&(central.len() as u32).to_le_bytes());
+    saida.extend_from_slice(&inicio_central.to_le_bytes());
+    saida.extend_from_slice(&0u16.to_le_bytes());
+    Ok(saida)
+}
+
+#[cfg(test)]
+mod testes_montar {
+    use super::*;
+
+    #[test]
+    fn monta_e_le_de_volta() {
+        let d = tempfile::tempdir().unwrap();
+        let p = d.path().join("r.zip");
+        let texto = "t_ms,nucleo_ms\n".repeat(500).into_bytes();
+        let z = montar(&[
+            ("sessao/quadros.csv".into(), texto.clone()),
+            ("resumo.txt".into(), b"oi".to_vec()),
+        ])
+        .unwrap();
+        assert!(z.len() < texto.len() / 4, "comprime");
+        std::fs::write(&p, &z).unwrap();
+        let mut f = std::fs::File::open(&p).unwrap();
+        let itens = itens(&mut f, z.len() as u64);
+        assert_eq!(itens.len(), 2);
+        assert_eq!(
+            itens[0].nome, "quadros.csv",
+            "o leitor daqui mostra só o nome, sem a pasta"
+        );
+        assert_eq!(ler_entrada(&p, "quadros.csv", None).unwrap(), texto);
+        assert_eq!(ler_entrada(&p, "resumo.txt", None).unwrap(), b"oi");
+    }
+}

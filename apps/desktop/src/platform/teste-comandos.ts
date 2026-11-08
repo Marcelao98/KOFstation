@@ -1,7 +1,16 @@
 // Os comandos do Rust, imitados em memória pro backend de teste. Cada etapa acrescenta os seus aqui (o mesmo nome,
 // os mesmos argumentos e os mesmos códigos de erro de crates/kof-app/src/api.rs). Os testes de fluxo enchem a Kof
 // Games falsa por `window.__kofTeste` (só existe com este backend, nunca no app de verdade).
-import { cdPs1, crcRom, extensao, isoDePs2, itensDoZipInteiro, PASTAS_CONSOLE, type SistemaId } from '@kof/domain';
+import {
+  cdPs1,
+  crc32,
+  crcRom,
+  extensao,
+  isoDePs2,
+  itensDoZipInteiro,
+  PASTAS_CONSOLE,
+  type SistemaId,
+} from '@kof/domain';
 
 export type ComandoTeste = (args: Record<string, unknown>, dados: Uint8Array) => unknown;
 
@@ -19,10 +28,75 @@ export interface KofTeste {
   lojas: Map<string, Map<string, [unknown, Uint8Array]>>;
   /** capas oficiais de mentira (nome do jogo → png) */
   capas: Map<string, Uint8Array>;
+  /** modo diagnóstico: sessão → arquivo → texto */
+  diag: Map<string, Map<string, string>>;
+}
+
+/** .zip sem compressão (o backend de teste não tem deflate; o Rust comprime). */
+function zipGuardado(itens: [string, Uint8Array][]): Uint8Array {
+  const partes: Uint8Array[] = [];
+  const central: Uint8Array[] = [];
+  let desl = 0;
+  const cab = (sig: number, nome: Uint8Array, d: Uint8Array, ehCentral: boolean, ofs: number) => {
+    const b = new Uint8Array((ehCentral ? 46 : 30) + nome.length);
+    const v = new DataView(b.buffer);
+    let i = 0;
+    const u16 = (x: number) => (v.setUint16(i, x, true), (i += 2));
+    const u32 = (x: number) => (v.setUint32(i, x >>> 0, true), (i += 4));
+    u32(sig);
+    if (ehCentral) u16(20);
+    u16(20);
+    u16(0x0800);
+    u16(0);
+    u16(0);
+    u16(0x21);
+    u32(crc32(d));
+    u32(d.length);
+    u32(d.length);
+    u16(nome.length);
+    u16(0);
+    if (ehCentral) {
+      u16(0);
+      u16(0);
+      u16(0);
+      u32(0);
+      u32(ofs);
+    }
+    b.set(nome, i);
+    return b;
+  };
+  for (const [n, d] of itens) {
+    const nome = new TextEncoder().encode(n);
+    const l = cab(0x04034b50, nome, d, false, 0);
+    central.push(cab(0x02014b50, nome, d, true, desl));
+    partes.push(l, d);
+    desl += l.length + d.length;
+  }
+  const tamCentral = central.reduce((s, c) => s + c.length, 0);
+  const fim = new Uint8Array(22);
+  const v = new DataView(fim.buffer);
+  v.setUint32(0, 0x06054b50, true);
+  v.setUint16(8, itens.length, true);
+  v.setUint16(10, itens.length, true);
+  v.setUint32(12, tamCentral, true);
+  v.setUint32(16, desl, true);
+  const tudo = [...partes, ...central, fim];
+  const r = new Uint8Array(tudo.reduce((s, p) => s + p.length, 0));
+  let o = 0;
+  for (const p of tudo) {
+    r.set(p, o);
+    o += p.length;
+  }
+  return r;
 }
 
 export function criarComandosTeste(): Record<string, ComandoTeste> {
-  const t: KofTeste = { arquivos: new Map(), raiz: null, log: [], lojas: new Map(), capas: new Map() };
+  const t: KofTeste = { arquivos: new Map(), raiz: null, log: [], lojas: new Map(), capas: new Map(), diag: new Map() };
+  const sessaoDiag = (a: Record<string, unknown>) => {
+    const s = t.diag.get(String(a.sessao));
+    if (!s) throw erro('NOT_FOUND', `sessão de diagnóstico ${String(a.sessao)}`);
+    return s;
+  };
   const loja = (a: Record<string, unknown>) => {
     const n = String(a.store);
     if (!LOJAS.includes(n)) throw erro('INVALID_ARGS', `loja desconhecida: ${n}`);
@@ -212,6 +286,41 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       const png = t.capas.get(String(a.chave));
       if (!png) throw erro('NOT_FOUND', `capa ${String(a.chave)}`);
       return png.slice();
+    },
+    'diag.maquina': () => ({ sistema: 'navegador', arquitetura: 'teste', nucleos: navigator.hardwareConcurrency }),
+    'diag.abrir': (a) => {
+      const base = String(a.nome);
+      if (!/^[\w-]{1,80}$/.test(base) || base.startsWith('-'))
+        throw erro('INVALID_ARGS', `nome de sessão inválido: ${base}`);
+      let nome = base;
+      for (let i = 2; t.diag.has(nome); i++) nome = `${base}-${i}`;
+      t.diag.set(nome, new Map([['sessao.json', JSON.stringify(a.sessao, null, 2)]]));
+      return { sessao: nome };
+    },
+    'diag.anotar': (a, dados) => {
+      const arq = String(a.arquivo);
+      if (!['resumo.txt', 'quadros.csv', 'segundos.csv', 'engasgos.csv', 'log.txt'].includes(arq))
+        throw erro('INVALID_ARGS', `arquivo de diagnóstico desconhecido: ${arq}`);
+      const s = sessaoDiag(a);
+      const txt = new TextDecoder().decode(dados);
+      s.set(arq, a.trocar ? txt : (s.get(arq) ?? '') + txt);
+      return { cheio: false };
+    },
+    'diag.listar': () =>
+      [...t.diag].reverse().map(([sessao, s]) => ({
+        sessao,
+        bytes: [...s.values()].reduce((n, x) => n + x.length, 0),
+        quando: Date.now(),
+        resumo: s.get('resumo.txt')?.trimEnd() ?? null,
+      })),
+    'diag.exportar': (a) => {
+      const sessoes = (a.sessoes as unknown[] | undefined) ?? [];
+      if (!sessoes.length) throw erro('INVALID_ARGS', 'escolha pelo menos uma sessão');
+      const itens: [string, Uint8Array][] = [];
+      for (const n of sessoes)
+        for (const [arq, txt] of sessaoDiag({ sessao: n }))
+          itens.push([`${String(n)}/${arq}`, new TextEncoder().encode(txt)]);
+      return zipGuardado(itens);
     },
     'file.read': (a) => {
       if (a.scope !== 'kof-games') throw erro('INVALID_ARGS', `escopo desconhecido: ${String(a.scope)}`);

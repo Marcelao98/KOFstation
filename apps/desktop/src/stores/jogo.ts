@@ -131,8 +131,22 @@ async function jogoInteiro(aberto: JogoAberto, path: string | undefined): Promis
 const MAX_RESERVA_WASM = 100 << 20;
 const mb = (n: number) => Math.round(n / (1 << 20));
 
+/** As opções de emulação que o núcleo do sistema recebe (as fixas do núcleo + as do jogador). */
+export const opcoesEmUso = (sistema: string): Record<string, string> => ({
+  ...NUCLEOS[sistema as keyof typeof NUCLEOS]?.opcoes,
+  ...opcoesDoNucleo(sistema),
+});
+
+/** O núcleo do jogo aberto (nome, versão, se é nativo e a placa de vídeo dele), pro diagnóstico. */
+export function sobreONucleo(): { nome: string; versao: string; nativo: boolean; placa?: string } {
+  const j = usarJogo.getState();
+  if (j.jogo instanceof JogoNativo) return { ...j.jogo.sobreNucleo, nativo: true };
+  const sis = j.info?.sistema;
+  return { nome: (sis && NUCLEOS[sis]?.nucleo) || '?', versao: 'WebAssembly', nativo: false };
+}
+
 /** Últimas linhas do log do processo nativo (vazio se não tem). */
-async function logDoNativo(): Promise<string[]> {
+export async function logDoNativo(): Promise<string[]> {
   try {
     const l = await servicos().backend.chamar<{ vivo: boolean; saida: string | null; linhas: string[] }>('nativo.log');
     return [`processo ${l.vivo ? 'vivo' : `fechou (${l.saida ?? '?'})`}`, ...l.linhas.slice(-15)];

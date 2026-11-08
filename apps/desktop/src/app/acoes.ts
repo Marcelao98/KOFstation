@@ -15,6 +15,7 @@ import { usarMoldura } from '../stores/moldura';
 import { usarJukebox } from '../stores/jukebox';
 import { usarAbertura } from '../stores/abertura';
 import { usarBug } from '../stores/bug';
+import { usarDiagnostico } from '../stores/diagnostico';
 import { usarBios } from '../stores/bios';
 import { menuControleCelular } from '../stores/celular';
 import { procurar as procurarAtualizacao } from '../stores/atualizacao';
@@ -219,6 +220,12 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     case 'bug-fechar':
       usarBug.getState().fechar();
+      return true;
+    case 'diagnostico':
+      usarDiagnostico.getState().abrir();
+      return true;
+    case 'diagnostico-fechar':
+      usarDiagnostico.getState().fechar();
       return true;
     case 'cacador-toggle':
       usarBug.getState().alternarCacador();

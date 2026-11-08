@@ -100,6 +100,7 @@ export const MENUS: Menu[] = [
       'hr',
       { a: 'bug', t: '🐞 Reportar bug…', k: 'F9' },
       { a: 'cacador-toggle', t: 'Caçador de bugs: ligado' },
+      { a: 'diagnostico', t: '🩺 Modo diagnóstico…' },
       'hr',
       { a: 'atualizacao', t: '🔄 Procurar atualização' },
     ],

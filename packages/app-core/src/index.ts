@@ -22,3 +22,4 @@ export * from './bios';
 export * from './atualizacao';
 export * from './rede';
 export * from './desempenho';
+export * from './diagnostico';

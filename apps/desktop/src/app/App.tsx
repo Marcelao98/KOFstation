@@ -26,8 +26,10 @@ import { Jukebox } from '../screens/Jukebox/Jukebox';
 import { Abertura } from '../screens/Abertura/Abertura';
 import { Estatisticas } from '../screens/Estatisticas/Estatisticas';
 import { Bug } from '../screens/Bug/Bug';
+import { Diagnostico } from '../screens/Diagnostico/Diagnostico';
 import { BiosTela } from '../screens/Bios/BiosTela';
 import { usarBug } from '../stores/bug';
+import { usarDiagnostico } from '../stores/diagnostico';
 import '../stores/estatisticas';
 import { abrirPatch } from '../stores/traducao';
 import { primeiraVez, usarAbertura } from '../stores/abertura';
@@ -107,6 +109,10 @@ function teclaGlobal(e: KeyboardEvent) {
   if (usarBug.getState().aberto) {
     if (e.code === 'Escape') usarBug.getState().fechar();
     return; // escrevendo a descrição do bug
+  }
+  if (usarDiagnostico.getState().aberto) {
+    if (e.code === 'Escape') usarDiagnostico.getState().fechar();
+    return; // a janela do diagnóstico está por cima
   }
   if (usarAbertura.getState().aberta) {
     if (e.code === 'Escape') usarAbertura.getState().fechar(true);
@@ -262,6 +268,7 @@ export function App({ backend }: { backend: Backend }) {
         <PedirPasta />
         <Backup />
         <Bug />
+        <Diagnostico />
         <PlanoDeOrganizacao />
         <Ampulheta />
         <MenuRapido />

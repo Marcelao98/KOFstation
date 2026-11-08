@@ -21,3 +21,4 @@ export * from './patch';
 export * from './bios';
 export * from './celular';
 export * from './desempenho';
+export * from './diagnostico';

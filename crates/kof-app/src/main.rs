@@ -6,6 +6,7 @@
 
 mod api;
 mod atualizacao;
+mod diag;
 mod instalar;
 mod nativo;
 mod navegador;

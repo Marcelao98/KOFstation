@@ -351,6 +351,22 @@ impl Estado {
                 json(Value::Null)
             }
             "nativo.log" => json(self.nativos.log()),
+            // modo diagnóstico (M16.3): só a pasta <dados>/diagnostico, só os arquivos da lista
+            "diag.maquina" => json(crate::diag::maquina()),
+            "diag.abrir" => {
+                let s = crate::diag::abrir(&self.pasta_dados, args(a)?)?;
+                json(serde_json::json!({ "sessao": s }))
+            }
+            "diag.anotar" => {
+                let cheio = crate::diag::anotar(&self.pasta_dados, &args(a)?, &corpo)?;
+                json(serde_json::json!({ "cheio": cheio }))
+            }
+            "diag.listar" => json(serde_json::to_value(crate::diag::listar(&self.pasta_dados)).expect("json")),
+            "diag.exportar" => Ok(Saida::Bin(crate::diag::exportar(
+                &self.pasta_dados,
+                &args(a)?,
+                self.casa.as_deref(),
+            )?)),
             outro => Err(KofError::ComandoDesconhecido(outro.to_string())),
         }
     }

@@ -54,6 +54,8 @@ export class JogoNativo {
   private sramAntes: Uint8Array | null = null;
   private relogioSram = 0;
   private medAntes: { t: number; quadros: number; faltas: number } | null = null;
+  /** o núcleo que o processo abriu e a placa de vídeo dele (pro diagnóstico) */
+  sobreNucleo: { nome: string; versao: string; placa?: string } = { nome: '?', versao: '?' };
   private volume: number;
   private mudo: boolean;
 
@@ -104,6 +106,7 @@ export class JogoNativo {
       proporcao: p.proporcao,
     };
     j.comSom = p.taxaSaida > 0;
+    j.sobreNucleo = { nome: p.nucleo, versao: p.versao, ...(p.placa ? { placa: p.placa } : {}) };
     j.ligar();
     j.aplicarVolume();
     if (o.sram?.length) {

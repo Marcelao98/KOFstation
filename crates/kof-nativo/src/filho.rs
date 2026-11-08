@@ -143,6 +143,7 @@ fn pronto(n: &Nucleo, taxa_saida: u32) -> Aviso {
         fps: n.av.timing.fps,
         taxa: n.av.timing.sample_rate,
         taxa_saida,
+        placa: crate::gl::placa(),
     }
 }
 

@@ -21,6 +21,42 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · M16.1–M16.3 · medidor quadro a quadro, F3 com gráfico e modo diagnóstico
+
+**Pedido:** fazer o M16 na ordem, sem parar nos checkpoints até o M16.3 (lá o Marcelo grava o Shadow of the
+Colossus). No meio: "o PCSX2 está em WebAssembly?" (não: o PS2 é só nativo, `soNativo` em `engine/nucleos.ts`; o
+"mesmo formato no Worker do wasm" é pros outros consoles); "que diabos é o kof-nativo, deixa o núcleo separado" (é o
+suporte que roda o `.so`/`.dll` num processo filho; o núcleo segue arquivo à parte, vindo pelo manifesto, D32). Contou
+que **o antigo roda bem mais liso** e que o **Zone of the Enders 2 deu problema de memória**. Pediu pra salvar a sessão
+e estimar o que falta.
+**Feito:**
+- M16.1: `domain/desempenho.ts` (p50/p95/p99, fps suavizado como o PCSX2, engasgo > 1,5× o quadro ou falta de som, o
+  culpado: núcleo, leitura da placa, envio, página, som ou ritmo); `kof-nativo/src/medidor.rs` (600 quadros sem alocar)
+  e `cpu.rs` (CPU por linha: `/proc/self/task` no Linux, `GetThreadTimes` no Windows; **o Windows só foi conferido pelo
+  CI**); aviso `desempenho` com `porQuadro` (6 números/quadro em µs) e `cpu`, opcionais nos dois lados do contrato +
+  fixtures; o Worker do wasm manda o mesmo `porQuadro`; `app-core/desempenho.ts` (`MedidorDaSessao`) junta o tempo de
+  desenho da página a cada quadro mandado.
+- M16.2: F3 com p50/p99, pior quadro, engasgos/min com o culpado, CPU por linha e o gráfico dos últimos 600 quadros.
+- M16.3: `domain/diagnostico.ts` (CSVs com ponto no decimal, resumo da sessão em memória fixa por histograma,
+  `resumo.txt`); `app-core/diagnostico.ts` (`GravadorDiagnostico`: lotes a cada 5 s); Rust `kof-app/src/diag.rs`
+  (`diag.maquina|abrir|anotar|listar|exportar`, só a pasta `<dados>/diagnostico`, nomes conferidos, limite de 20 MB por
+  sessão, apaga as de 30 dias, tira a pasta do usuário dos logs); `kof-files::zip::montar` (zip com deflate, conferido
+  pelo `zipfile` do Python); placa de vídeo do núcleo (`GL_RENDERER`) no aviso `pronto`; janela Ajuda → 🩺 Modo
+  diagnóstico, selo 🩺 na barra, resumo num aviso ao fechar/trocar de jogo, F9 baixa o `.zip` junto quando ligado.
+**Medido / conferido:** `pnpm check` (domain 77, app-core 33 testes), testes Rust novos (medidor, cpu, zip, diag) e o
+`processo.rs` (o `porQuadro` chega com 1 registro por quadro), e2e `jogo.spec` (F3 com p99 e gráfico) e o novo
+`diagnostico.spec` (liga, grava, resume, exporta). Primeiro número de verdade: no Game Boy (wasm), **p50 18,75 ms com
+o certo 16,74**: o laço do Worker (setTimeout de 4 ms + ritmo pelo som) solta quadros desiguais. Suspeita pro "antigo
+mais liso": olhar isso no M16.5 com o antigo lado a lado.
+**Deu errado / aprendido:** um commit saiu com o Prettier reclamando (o `| tail` escondeu o código de saída: rodar o
+`pnpm format:check` sem pipe). O `cargo test` todo para no `pcsx` (SIGILL do container, já sabido): usar
+`--no-fail-fast` pra ver o resto.
+**Onde parou:** M16.1 e M16.2 commitados (`91fe2c2`, `2238270`); M16.3 commitado nesta entrada, **falta**: rodar o
+`pnpm check:rust` inteiro e o `pnpm e2e` inteiro (rodados por partes), conferir o CI (Linux e Windows: o `cpu.rs` do
+Windows só compila lá), gerar o pacote na `teste-binarios` e **parar no ⏸ do M16.3**: o Marcelo grava o SotC (e o
+ZoE2, mandando o erro de memória: texto do aviso, `log.txt` da sessão e quanto de RAM tem). Depois: M16.4 (opções de
+emulação) e M16.5 (otimizar; prioridade: a memória do ZoE2 e o ritmo desigual dos quadros).
+
 ## 2026-11-08 · Planejamento · M16 (desempenho, diagnóstico, opções de emulação) · onde parou pra próxima sessão
 
 **Pedido:** o Marcelo testou o PS2 (Shadow of the Colossus "rodou relativamente bem, umas engasgadas aqui e ali") e

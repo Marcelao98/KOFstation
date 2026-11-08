@@ -1,4 +1,5 @@
 import { usePausado } from '../hooks/usePausa';
+import { usarDiagnostico } from '../stores/diagnostico';
 import { usarJogo } from '../stores/jogo';
 import { usarJukebox } from '../stores/jukebox';
 import { usarTelas } from '../stores/telas';
@@ -7,9 +8,20 @@ import { acao } from '../app/acoes';
 export function Status() {
   const { nome, medicao, jogo } = usarJogo();
   const pausado = usePausado();
+  const diag = usarDiagnostico((d) => d.ligado);
   return (
     <footer id="status">
       <span id="st-jogo">{jogo ? nome : 'nenhum jogo'}</span>
+      {diag && (
+        <button
+          className="x"
+          id="st-diag"
+          title="modo diagnóstico ligado: gravando os jogos"
+          onClick={() => acao('diagnostico')}
+        >
+          🩺
+        </button>
+      )}
       <MiniJuke />
       <span id="st-fps">{jogo ? `${pausado ? 'pausado · ' : ''}${medicao ? `${medicao.fps} fps` : ''}` : ''}</span>
     </footer>
