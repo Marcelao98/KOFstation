@@ -4,6 +4,7 @@
 // do arquivo entre as duas marcas (o núcleo só de som, que o antigo embute no KOFstation.html).
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -63,6 +64,7 @@ for (const [nome, n] of Object.entries(manifesto.nativos ?? {})) {
       const r = await fetch(a.url);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       dados = Buffer.from(await r.arrayBuffer());
+      if (a.gzip) dados = gunzipSync(dados); // o do antigo publicado gzipado: o SHA-256 conferido é o do arquivo aberto
     } catch (e) {
       console.error(`✗ ${nome} nativo (${plat}): não consegui baixar (${e.message})`);
       falhas++;

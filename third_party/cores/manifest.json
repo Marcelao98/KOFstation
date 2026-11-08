@@ -94,6 +94,24 @@
           "sha256": "d71e1f665787a3aa8f27c73e02965563ef951e54e1389d1506ccb4df3853e991"
         }
       }
+    },
+    "pcsx2": {
+      "nota": "LRPS2 (o PCSX2 do libretro, github.com/libretro/ps2, GPL-3.0), commit 38d3a83f, o mesmo que o antigo publica e o Marcelo já jogou; compilado pelo pc-nativo/construir.sh e construir-windows.sh do kofstation-old (sem Vulkan: o desenho é OpenGL, dado pelo kof-nativo). O do Linux vem gzipado: o pnpm nucleos descompacta e confere o SHA-256 do .so",
+      "plataformas": {
+        "linux-x64": {
+          "arquivo": "pcsx2_libretro.so",
+          "url": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/ceba493fc494165de6f561b77a699fb8c22b295f/publicado/nativo/pcsx2_libretro-405610ed.so.gz",
+          "gzip": true,
+          "tamanho": 9590504,
+          "sha256": "c28993f7a6eacb837673f6560687a5e42cfc553a1a1fa8b47e7632faba801178"
+        },
+        "windows-x64": {
+          "arquivo": "pcsx2_libretro.dll",
+          "url": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/ceba493fc494165de6f561b77a699fb8c22b295f/publicado/nativo/pcsx2_libretro-31718abe.dll",
+          "tamanho": 12388352,
+          "sha256": "31718abedfae144f11f9bea99a53ca15bd81fe4b8269c5df6c474e055f3152d0"
+        }
+      }
     }
   }
 }

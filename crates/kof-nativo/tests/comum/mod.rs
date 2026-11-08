@@ -1,8 +1,14 @@
 //! Compila o núcleo mínimo (`tests/nucleo/minimo.c`) numa biblioteca dinâmica pro alvo atual.
 use std::path::{Path, PathBuf};
 
+#[allow(dead_code)] // cada arquivo de teste usa uma parte
 pub fn compilar_minimo(pasta: &Path) -> PathBuf {
-    let fonte = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/nucleo/minimo.c");
+    compilar(pasta, "minimo")
+}
+
+/// Compila `tests/nucleo/<nome>.c` numa biblioteca dinâmica.
+pub fn compilar(pasta: &Path, nome: &str) -> PathBuf {
+    let fonte = Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/nucleo/{nome}.c"));
     let alvo = env!("KOF_ALVO");
     let cc = cc::Build::new()
         .target(alvo)
@@ -11,7 +17,7 @@ pub fn compilar_minimo(pasta: &Path) -> PathBuf {
         .out_dir(pasta)
         .cargo_metadata(false)
         .get_compiler();
-    let saida = pasta.join(if cfg!(windows) { "minimo.dll" } else { "minimo.so" });
+    let saida = pasta.join(format!("{nome}.{}", if cfg!(windows) { "dll" } else { "so" }));
     let mut cmd = cc.to_command();
     if cc.is_like_msvc() {
         cmd.arg("/LD").arg(&fonte).arg(format!("/Fe:{}", saida.display()));

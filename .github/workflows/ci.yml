@@ -20,7 +20,7 @@ jobs:
           cache: pnpm
       - name: Cabeçalhos do som (ALSA, pro cpal do kof-nativo) e genisoimage (CD grande no teste do PS1)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -q && sudo apt-get install -y -q libasound2-dev genisoimage
+        run: sudo apt-get update -q && sudo apt-get install -y -q libasound2-dev genisoimage libegl1 libegl-mesa0 libgl1-mesa-dri
       - name: Rust (versão do rust-toolchain.toml)
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@v2
@@ -31,6 +31,9 @@ jobs:
         run: pnpm check
       - name: Rust (formato, clippy, testes)
         run: pnpm check:rust
+        env:
+          # no Linux o OpenGL sem janela (Mesa) tem que existir: o teste do núcleo que desenha na placa não pode pular
+          KOF_EXIGIR_GL: ${{ runner.os == 'Linux' && '1' || '' }}
       - name: Testes de fluxo (Playwright, só no Linux)
         if: runner.os == 'Linux'
         run: |

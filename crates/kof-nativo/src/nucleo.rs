@@ -46,6 +46,17 @@ struct Contexto {
     geometria_mudou: Option<retro_game_geometry>,
     pediu_fim: bool,
     pediu_gpu: bool,
+    /// o núcleo desenha na placa (OpenGL sem janela, `gl.rs`)
+    hw: Option<Hw>,
+}
+
+#[derive(Clone, Copy)]
+struct Hw {
+    reset: Option<HwResetFn>,
+    destruir: Option<HwResetFn>,
+    profundidade: bool,
+    estencil: bool,
+    embaixo: bool,
 }
 
 static CTX: Mutex<Option<Contexto>> = Mutex::new(None);
@@ -199,7 +210,36 @@ unsafe extern "C" fn cb_environment(cmd: c_uint, data: *mut c_void) -> bool {
         }
         ENV_SET_HW_RENDER => {
             c.pediu_gpu = true;
-            false // imagem pela GPU ainda não (o núcleo que aceita cai pro desenho por software)
+            let h = &mut *(data as *mut retro_hw_render_callback);
+            if h.context_type != RETRO_HW_CONTEXT_OPENGL && h.context_type != RETRO_HW_CONTEXT_OPENGL_CORE {
+                return false; // Vulkan, GLES...: o núcleo escolhe outro ou desenha por software
+            }
+            let core = h.context_type == RETRO_HW_CONTEXT_OPENGL_CORE;
+            let (ma, mi) = match (h.version_major, core) {
+                (0, true) => (3, 2),
+                (0, false) => (2, 1),
+                v => (v.0, h.version_minor),
+            };
+            if !crate::gl::existe() {
+                if let Err(e) = crate::gl::criar(ma, mi, core) {
+                    tracing::error!(target: "nucleo", "sem OpenGL pro núcleo: {e}");
+                    return false;
+                }
+            }
+            h.get_current_framebuffer = Some(crate::gl::fbo_atual);
+            h.get_proc_address = Some(crate::gl::funcao);
+            c.hw = Some(Hw {
+                reset: h.context_reset,
+                destruir: h.context_destroy,
+                profundidade: h.depth,
+                estencil: h.stencil,
+                embaixo: h.bottom_left_origin,
+            });
+            true
+        }
+        ENV_GET_PREFERRED_HW_RENDER => {
+            *(data as *mut c_uint) = RETRO_HW_CONTEXT_OPENGL_CORE;
+            true
         }
         ENV_GET_INPUT_BITMASKS => true,
         ENV_GET_AUDIO_VIDEO_ENABLE => {
@@ -244,6 +284,18 @@ unsafe extern "C" fn cb_environment(cmd: c_uint, data: *mut c_void) -> bool {
 }
 
 unsafe extern "C" fn cb_video(dados: *const c_void, w: c_uint, h: c_uint, pitch: usize) {
+    if dados as usize == RETRO_HW_FRAME_BUFFER_VALID && w > 0 && h > 0 {
+        // desenhou na placa: lê de volta (assíncrono; pode entregar o quadro de 2 atrás, nunca acumula)
+        let mut g = ctx();
+        let Some(c) = g.as_mut() else { return };
+        let embaixo = c.hw.is_some_and(|x| x.embaixo);
+        let mut dim = (0, 0);
+        if crate::gl::quadro(w, h, embaixo, &mut c.quadro.rgba, &mut dim) {
+            (c.quadro.largura, c.quadro.altura) = dim;
+            c.quadro_novo = true;
+        }
+        return;
+    }
     if dados.is_null() || dados as usize == RETRO_HW_FRAME_BUFFER_VALID || w == 0 || h == 0 {
         return; // quadro repetido (CAN_DUPE): fica o anterior
     }
@@ -494,6 +546,19 @@ impl Nucleo {
         // SAFETY: jogo carregado; portas no controle pedido (ou no padrão, como o RetroArch)
         unsafe {
             (f.get_system_av_info)(&mut av);
+            // desenho pela placa: o framebuffer no tamanho máximo e o context_reset (como o RetroArch faz depois do
+            // load_game); fora do lock: o núcleo chama o get_proc_address lá dentro
+            let hw = com(|c| c.hw).flatten();
+            if let Some(hw) = hw {
+                let (w, h) = (av.geometry.max_width, av.geometry.max_height);
+                if let Err(e) = crate::gl::preparar(w, h, hw.profundidade, hw.estencil) {
+                    (f.deinit)();
+                    return Err(erro(format!("o OpenGL não preparou a imagem do núcleo: {e}")));
+                }
+                if let Some(r) = hw.reset {
+                    r();
+                }
+            }
             for p in 0..JOGADORES as c_uint {
                 set_porta(p, a.dispositivo.unwrap_or(RETRO_DEVICE_JOYPAD));
             }
@@ -635,6 +700,9 @@ impl Drop for Nucleo {
     fn drop(&mut self) {
         // SAFETY: desfaz na ordem do libretro.h; depois disso nenhum callback é chamado
         unsafe {
+            if let Some(d) = com(|c| c.hw.and_then(|h| h.destruir)).flatten() {
+                d(); // o núcleo solta o que criou no OpenGL antes do jogo fechar
+            }
             (self.f.unload_game)();
             (self.f.deinit)();
         }

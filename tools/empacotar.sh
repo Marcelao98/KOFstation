@@ -1,7 +1,7 @@
 #!/bin/sh
 # Monta a pasta do KOFstation pra distribuir, igual à do antigo (D33):
 #   KOFstation/kofstation (ou KOFstation.exe), nucleos/ (núcleos wasm com o hash no nome + lista.json),
-#   nativo/ (PCSX nativo), versao.txt
+#   nativo/ (PCSX do PS1 e LRPS2 do PS2, nativos), versao.txt
 # Uso (depois de `pnpm nucleos`, `KOF_NATIVOS=todas` se for montar pro Windows, `pnpm build` e o cargo build):
 #   [VERSAO=202611071200] sh tools/empacotar.sh linux-x64|windows-x64 [pasta-de-saída]
 #   (padrão: target/pacote/<plataforma>/KOFstation; sem VERSAO, a data e hora de agora)
@@ -30,8 +30,11 @@ for f in apps/desktop/public/nucleos/*; do
   sep=", "
 done
 printf '%s}\n' "$lista" > "$SAIDA/nucleos/lista.json"
-NATIVO="third_party/cores/nativos/$PLAT/$NAT"
-if [ -f "$NATIVO" ]; then cp "$NATIVO" "$SAIDA/nativo/$NAT"; else echo "aviso: sem $NATIVO (o PS1 roda só no WebAssembly)"; fi
+# núcleos nativos da plataforma (PCSX-ReARMed do PS1, LRPS2 do PS2)
+for NATIVO in third_party/cores/nativos/$PLAT/*; do
+  [ -f "$NATIVO" ] && cp "$NATIVO" "$SAIDA/nativo/"
+done
+[ -f "$SAIDA/nativo/$NAT" ] || echo "aviso: sem o $NAT (o PS1 roda só no WebAssembly)"
 {
   echo "versao=${VERSAO:-$(date -u +%Y%m%d%H%M)}"
   echo "commit=$(git rev-parse --short HEAD 2>/dev/null || echo desconhecido)"

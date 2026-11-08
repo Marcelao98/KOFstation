@@ -6,6 +6,7 @@
 //! voltam pelo mesmo canal.
 pub mod canal;
 pub mod filho;
+pub mod gl;
 pub mod libretro;
 pub mod nucleo;
 pub mod protocolo;

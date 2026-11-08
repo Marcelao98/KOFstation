@@ -122,3 +122,28 @@ pub type AudioSampleFn = unsafe extern "C" fn(l: i16, r: i16);
 pub type AudioSampleBatchFn = unsafe extern "C" fn(data: *const i16, frames: usize) -> usize;
 pub type InputPollFn = unsafe extern "C" fn();
 pub type InputStateFn = unsafe extern "C" fn(port: c_uint, device: c_uint, index: c_uint, id: c_uint) -> i16;
+
+pub const ENV_GET_PREFERRED_HW_RENDER: c_uint = 56;
+pub const RETRO_HW_CONTEXT_OPENGL: c_uint = 1;
+pub const RETRO_HW_CONTEXT_OPENGL_CORE: c_uint = 3;
+
+pub type HwResetFn = unsafe extern "C" fn();
+pub type HwFboFn = extern "C" fn() -> usize;
+pub type HwProcFn = unsafe extern "C" fn(*const c_char) -> *const c_void;
+
+/// `struct retro_hw_render_callback` (o núcleo pede OpenGL; o frontend preenche o framebuffer e o get_proc_address).
+#[repr(C)]
+pub struct retro_hw_render_callback {
+    pub context_type: c_uint,
+    pub context_reset: Option<HwResetFn>,
+    pub get_current_framebuffer: Option<HwFboFn>,
+    pub get_proc_address: Option<HwProcFn>,
+    pub depth: bool,
+    pub stencil: bool,
+    pub bottom_left_origin: bool,
+    pub version_major: c_uint,
+    pub version_minor: c_uint,
+    pub cache_context: bool,
+    pub context_destroy: Option<HwResetFn>,
+    pub debug_context: bool,
+}
