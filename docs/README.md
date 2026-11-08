@@ -13,6 +13,7 @@
 | [SPIKE_D2.md](SPIKE_D2.md) | o teste que decidiu Rust + Chromium em vez de Tauri | se a casca for rediscutida |
 | [EXPANDIR.md](EXPANDIR.md) | como acrescentar coisas (comando do Rust, tela, configuração, loja, sistema) e como achar defeito | ao criar algo novo ou caçar bug |
 | [INSTALAR.md](INSTALAR.md) | ambiente de desenvolvimento no Fedora, Ubuntu e Windows | pra compilar |
+| [ATALHO_KDE_WAYLAND.md](ATALHO_KDE_WAYLAND.md) | pin/atalho do Linux no KDE Wayland: app_id do Chromium, `StartupWMClass`, como reaplicar depois de atualizar | se o ícone da barra abrir um Chrome vazio ou a janela não agrupar |
 | [auditoria/](auditoria/) | a análise completa do app antigo (fase 1): arquitetura, dependências, 42 funcionalidades com arquivo e linha, mapa, plano | pra migrar uma funcionalidade |
 | [../THIRD_PARTY.md](../THIRD_PARTY.md) | licenças de terceiros (núcleos, bibliotecas, mídia) | antes de distribuir |
 | [../AGENTS.md](../AGENTS.md) | manual pra agentes de IA | agentes: primeiro |

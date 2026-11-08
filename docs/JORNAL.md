@@ -21,6 +21,30 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · Correção · atalho do KDE/Wayland: o pin abre o KOFstation, não um Chrome vazio
+
+**Pedido:** o Marcelo confirmou que o pin passou a abrir o KOFstation e pediu pra registrar a correção no repositório,
+numa branch separada (`opencode`), sem PR: “o apk sempre vai mudar com as atualizações, mas deixa detalhado na
+documentação pra o Claude ler depois”.
+**Feito:** documentação em `docs/ATALHO_KDE_WAYLAND.md` (sintoma, causa, prova do KWin, correção local, comandos,
+como testar, como reaplicar depois de atualizar e o que falta no `--instalar`). Índice em `docs/README.md` e esta
+entrada. **Nenhuma mudança de código nesta branch**; a correção foi feita na máquina do Marcelo.
+**Causa:** no Wayland o Chromium ignora `--class=KOFstation` no modo `--app=`; o app_id real é
+`chrome-127.0.0.1__-Default` (a porta não entra; o perfil é `Default`). O `.desktop` tinha `StartupWMClass=KOFstation`
+e o pin guardava o executável cru do Chrome (`file:///opt/google/chrome/chrome`), que abre uma janela vazia.
+**Correção local:** `~/.local/share/applications/kofstation.desktop` com
+`StartupWMClass=chrome-127.0.0.1__-Default`; pin do painel em `launchers=applications:kofstation.desktop`;
+`~/.local/share/KOFstation/config/raiz.json` de `~/Programas/Kof Games` para `~/Jogos/Kof Games` (erro de “pasta
+desconhecida”). Conferido com `desktop-file-validate`, `update-desktop-database`, `kbuildsycoca6`, script do KWin
+(`resourceClass`/`desktopFileName`), `kioclient exec` e fechar/abrir pelo pin.
+**Deu errado / aprendido:** a branch `fix/atalho-janela-na-barra` (commit `4be2cad`) usa
+`StartupWMClass=KOFstation`, que só casa no X11; no Wayland precisa do app_id (ou de um `.desktop` com o nome do
+app_id). Não fixar o Chrome cru. Não usar `pkill -f` com padrão que aparece na linha de comando do próprio shell.
+**Onde parou:** documentação commitada e enviada na branch `opencode`. O instalador do app novo
+(`crates/kof-app/src/instalar.rs`) continua sem a correção de Wayland; as opções estão no fim do documento.
+
+---
+
 ## 2026-11-08 · Planejamento · M16 (desempenho, diagnóstico, opções de emulação) · onde parou pra próxima sessão
 
 **Pedido:** o Marcelo testou o PS2 (Shadow of the Colossus "rodou relativamente bem, umas engasgadas aqui e ali") e
