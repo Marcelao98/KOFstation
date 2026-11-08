@@ -24,6 +24,10 @@
 > primeiro teste do PS2 entrou o **M16 Desempenho, diagnóstico e opções de emulação** ("não basta rodar, tem que rodar
 > bem"), **no meio da migração, antes do M14**: é a base pra otimizar todos os emuladores com número, não com chute.
 > Ordem agora: PS2 (⏸) → **M16** → M14 → Troca. Arquitetura em [DIAGNOSTICO.md](DIAGNOSTICO.md).
+>
+> **Agentes em paralelo (08/11):** o orquestrador segue este ROADMAP; tarefas fechadas vão pra outros agentes em
+> [agentes/](agentes/LEIA-ME.md): **A** ritmo dos quadros no WebAssembly e **B** catálogo das opções de emulação (a
+> parte de dados do M16.4). O orquestrador revisa as branches deles e traz pra dele.
 
 ## Como é cada checkpoint
 
@@ -281,7 +285,7 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 |---|---|---|---|
 | M16.1 | Medidor quadro a quadro (nativo e WebAssembly), CPU por linha, `domain/desempenho.ts` (p50/p95/p99, engasgos e culpado) | testes com tempos fabricados; números no CI | ✅ feito (08/11) |
 | M16.2 | F3 com gráfico dos últimos quadros, p99, engasgos/min, CPU por linha | print do F3 com PS2 e SNES | ⏸ feito; print do SNES no e2e, falta o PS2 no teu PC |
-| M16.3 | Modo diagnóstico: grava a sessão (`resumo.txt`, `sessao.json`, `quadros.csv`, `segundos.csv`, `engasgos.csv`, `log.txt`), resumo ao fechar, exportar `.zip`, junto do F9 | **você grava o Shadow of the Colossus e me manda** | 🟨 código e testes prontos; falta o pacote na `teste-binarios` |
+| M16.3 | Modo diagnóstico: grava a sessão (`resumo.txt`, `sessao.json`, `quadros.csv`, `segundos.csv`, `engasgos.csv`, `log.txt`), resumo ao fechar, exportar `.zip`, junto do F9 | **você grava o Shadow of the Colossus e me manda** | ⏸ pacote na `teste-binarios` (`4058e25`); falta você gravar o SotC e o ZoE2 |
 | M16.4 | Opções de emulação por console (PS1 em diante): catálogo em português, perfis Rápido/Equilibrado/Fiel, Avançado, por jogo, na hora quando dá | você troca uma opção e vê o efeito no F3 | ⬜ |
 | M16.5 | Otimizar pelos relatórios (PS2 primeiro: shaders, EE, som, ritmo, leitura) | antes × depois medido no teu PC | ⬜ |
 

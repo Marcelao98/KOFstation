@@ -114,6 +114,12 @@ A partir daí, cada envio na `main` publica uma versão (workflow "Versão") e o
 
 ## Esperando você testar ⏸
 
+**Novo (M16.3, 08/11): gravar o Shadow of the Colossus.** Pacote novo na `teste-binarios`. Em **Ajuda → 🩺 Modo
+diagnóstico**, marque "gravar cada jogo que eu abrir", jogue uns 5–10 minutos e depois clique em **Exportar
+relatório (.zip)** e me mande. Faça o mesmo com o **Zone of the Enders 2** até o erro de memória (manda também o texto
+do aviso e quanto de RAM o PC tem). O **F3** agora mostra p50/p99, engasgos por minuto e quem causou, a CPU de cada
+linha e o gráfico dos últimos 10 s.
+
 **Novo (PS2):** no pacote da `teste-binarios`: guarde a BIOS do PS2 (🔑 BIOS → PS2), ponha o jogo em
 `Kof Games/Games/ps2`, abra pela Biblioteca e aperte **F3** numa cena pesada: me mande o print (fps, núcleo, leitura da
 placa, imagem pra página). Se der, rode o mesmo jogo no PCSX2 sozinho pra comparar.
@@ -176,7 +182,10 @@ O PS2 ficou pro fim porque é o mais caro em token. Os custos são estimativa (t
 | 5 | **PS2 nativo** (N.9 / M12) | ~400–700 mil | Dar OpenGL ao processo do jogo, compilar o LRPS2, criar o sistema PS2. O N64 nativo sai junto |
 | 6 | **Troca** | baixo–médio | Conferir a paridade 100% e o app antigo publicar a última versão, que leva pro novo |
 
-**Agora:** M15, M13 e o **PS2** feitos (faltam a chave e os teus testes). Próximo: os números do PS2 no teu PC; depois M14.
+**Agora:** M15, M13 e o **PS2** feitos (faltam a chave e os teus testes). Entrou o **M16** (desempenho, antes do M14):
+M16.1–M16.3 feitos, ⏸ você grava o SotC e o ZoE2; depois M16.4 (opções de emulação) e M16.5 (otimizar), ~300–550
+mil tokens, 2–3 sessões. Em paralelo, dois agentes com tarefa (`docs/agentes/`): **A** ritmo dos quadros no
+WebAssembly (o "antigo mais liso") e **B** o catálogo das opções de emulação.
 
 ---
 

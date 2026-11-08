@@ -51,11 +51,15 @@ mais liso": olhar isso no M16.5 com o antigo lado a lado.
 **Deu errado / aprendido:** um commit saiu com o Prettier reclamando (o `| tail` escondeu o código de saída: rodar o
 `pnpm format:check` sem pipe). O `cargo test` todo para no `pcsx` (SIGILL do container, já sabido): usar
 `--no-fail-fast` pra ver o resto.
-**Onde parou:** M16.1 e M16.2 commitados (`91fe2c2`, `2238270`); M16.3 commitado nesta entrada, **falta**: rodar o
-`pnpm check:rust` inteiro e o `pnpm e2e` inteiro (rodados por partes), conferir o CI (Linux e Windows: o `cpu.rs` do
-Windows só compila lá), gerar o pacote na `teste-binarios` e **parar no ⏸ do M16.3**: o Marcelo grava o SotC (e o
-ZoE2, mandando o erro de memória: texto do aviso, `log.txt` da sessão e quanto de RAM tem). Depois: M16.4 (opções de
-emulação) e M16.5 (otimizar; prioridade: a memória do ZoE2 e o ritmo desigual dos quadros).
+**Orquestração (pedido no fim):** o Marcelo passa a usar este agente como orquestrador e dois outros (Codex etc.) com
+tarefas fechadas: `docs/agentes/LEIA-ME.md` (regras: branch própria a partir desta, só os arquivos da tarefa, não
+mexer em JORNAL/ROADMAP/README, relatório no fim do arquivo da tarefa), **A** `A-ritmo-wasm.md` (branch
+`agente-a/ritmo-wasm`) e **B** `B-opcoes-nucleo.md` (branch `agente-b/opcoes-nucleo`); aviso no topo do AGENTS.md.
+**Onde parou:** M16.1–M16.3 feitos e enviados; CI do M16.1/M16.2 verde no Linux e no Windows (o `cpu.rs` do Windows
+compila e passa lá). Pacote novo na `teste-binarios` (`4058e25`), com o executável do pacote passando no
+`tools/testar-ps2.mjs`. **⏸ M16.3:** o Marcelo grava o SotC e o ZoE2 (o erro de memória: texto do aviso, o `.zip` e
+quanto de RAM tem). **Próximo do orquestrador:** revisar as branches dos agentes A e B quando o Marcelo avisar; depois
+M16.4 (a tela das opções em cima do catálogo do B) e M16.5 (prioridade: a memória do ZoE2; o ritmo do wasm é do A).
 
 ## 2026-11-08 · Planejamento · M16 (desempenho, diagnóstico, opções de emulação) · onde parou pra próxima sessão
 
