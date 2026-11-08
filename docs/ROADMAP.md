@@ -201,7 +201,7 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 | N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⏸ |
 | N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ✅ |
 | N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ✅ |
-| N.9 | PS2 nativo (o M12) em cima do N.1 (LRPS2 como núcleo libretro nativo, sem o kofnativo.c) | você joga PS2 | ⬜ |
+| N.9 | PS2 nativo (o M12) em cima do N.1 (LRPS2 como núcleo libretro nativo, sem o kofnativo.c) | você joga PS2 | ⏸ (P.1–P.6 feitos em 08/11; falta o teu teste com BIOS e jogo de verdade) |
 
 > **N.1 feito (02/11):** crate `kof-nativo` + `kofstation --nativo`; `cargo test -p kof-nativo` compila um núcleo libretro
 > mínimo em C e confere quadro, som (735 amostras/quadro, ~60 quadros/s), botões, estado, bateria, pausa, token/origem
@@ -253,6 +253,13 @@ Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil
 M12 encolhe (o canal e o processo já vêm do N.1).
 
 ## M12 — PS2 nativo
+
+> **08/11 (pedido do Marcelo: PS2 antes do M14, "liso igual ao PCSX2"):** plano P.1–P.8. Feitos: **P.1** o LRPS2 do
+> antigo pelo manifesto (sem compilar); **P.2** OpenGL sem janela no `kof-nativo` (EGL/WGL, `gl.rs`); **P.3** leitura
+> assíncrona com 3 buffers em rodízio; **P.4** o LRPS2 abre com BIOS e DVD, cache de shaders na pasta de dados;
+> **P.5** o sistema PS2 no app (biblioteca, BIOS obrigatória, DVD lido do disco, controles do PS1); **P.6** ritmo pelo
+> som e o F3 com núcleo/leitura/imagem. **P.7** (modo direto: janela nativa sem cópia) só se os números do Marcelo
+> pedirem; **P.8** pacote na `teste-binarios` ✅, falta ele jogar. M12.1 e M12.2 já tinham saído no N.1.
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|

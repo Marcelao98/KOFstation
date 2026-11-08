@@ -21,6 +21,37 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · PS2 (N.9/M12) · LRPS2 com OpenGL sem janela, o sistema PS2 no app
+
+**Pedido:** o Marcelo trocou a ordem: PS2 antes do M14 ("quero jogar PS2, eu uso mais PC"), "liso igual ao PCSX2", no
+jeito mais eficiente, num núcleo separado como os outros. Aprovou o plano P.1–P.8 e mandou executar tudo.
+**Feito:** P.1 `pcsx2_libretro` do `publicado/nativo/` do antigo no manifesto (o `.so` vem gzipado: o `pnpm nucleos`
+descompacta e confere), `empacotar.sh` leva todos os nativos. P.2/P.3 `crates/kof-nativo/src/gl.rs`: OpenGL sem
+janela (Linux EGL: tela do usuário ou surfaceless; Windows: janela escondida + WGL, só compilado aqui), framebuffer com
+profundidade/estêncil, `SET_HW_RENDER`/`GET_PREFERRED_HW_RENDER`, `context_reset` depois do `load_game`,
+`context_destroy` ao fechar, leitura assíncrona (3 PBOs + cerca). P.4 o LRPS2 abre no frontend novo (teste com BIOS
+falsa: só a ROMDIR + um laço no vetor de reset, e DVD gerado). P.5 `NUCLEOS.ps2` (só nativo), cabeça do DVD (64 KB; o
+sistema pelo SYSTEM.CNF lido aos pedaços), DVD arrastado vai pra Kof Games aos pedaços, BIOS do PS2 obrigatória (vai
+pra `sistema/pcsx2/bios`), mensagens quando falta o núcleo ou o jogo está fora da Kof Games. P.6 o aviso de desempenho
+traz o tempo do núcleo, da leitura da placa e do quadro pra página; o F3 mostra. P.8 pacote na `teste-binarios`.
+**Decidido:** D36 (LRPS2 do antigo, OpenGL sem janela, imagem pela página; modo direto só se os números pedirem).
+**Medido / conferido:** `tests/opengl.rs` (núcleo de teste que desenha com OpenGL core 3.3: imagem virada certa, 120 de
+120 quadros entregues, no máximo 2 de atraso, 0,64 ms por quadro no Mesa sem placa); `tests/lrps2.rs` (o LRPS2 de
+verdade: abre, pede a placa, 60 quadros, ~958 amostras de som por quadro); `tools/testar-ps2.mjs` (no CI): app de
+verdade e o executável do pacote, DVD de 4,3 GB (esparso) pela biblioteca, processo vivo, página 339 → 339 MB,
+`kofstation` 17 MB. `check`, `check:rust`, 43 e2e verdes.
+**Deu errado / aprendido:** (1) com a BIOS falsa só de zeros o PCSX2 cai (o antigo anotava o mesmo no RetroArch): um
+`j 0xBFC00000` no vetor de reset deixa ele parado e o resto do caminho testável. (2) PS2 agora "roda": a BIOS
+obrigatória fazia a tela de BIOS abrir antes de avisar que falta o núcleo; o aviso do núcleo vem primeiro. (3) Imagem
+de verdade só com BIOS de verdade (a falsa não liga o vídeo do PS2): **não vi um quadro de PS2 aqui**.
+**Onde parou:** ⏸ Marcelo: BIOS + um jogo de verdade (Shadow of the Colossus) no pacote novo, print do F3 numa cena
+pesada, e se possível o mesmo jogo no PCSX2 sozinho pra comparar. Com os números: decidir o P.7 (modo direto) e
+ajustar opções. Também pendente: cartão de memória do PS2 no backup `.kofsave` (hoje fica em
+`<dados>/nativo/saves/ps2`, persistente), conferir no Windows (WGL nunca rodou), estados do PS2 com jogo de verdade.
+Depois: M14 (celular), plano na entrada do M13.
+
+---
+
 ## 2026-11-08 · Etapa M13 · rede entre aparelhos, celular como controle e Jogar no PC
 
 **Pedido:** o mesmo lote ("segue até o M14"): M13 reaproveitando o `kofrede.c` e com o mesmo protocolo do APK atual.

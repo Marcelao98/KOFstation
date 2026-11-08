@@ -114,6 +114,10 @@ A partir daí, cada envio na `main` publica uma versão (workflow "Versão") e o
 
 ## Esperando você testar ⏸
 
+**Novo (PS2):** no pacote da `teste-binarios`: guarde a BIOS do PS2 (🔑 BIOS → PS2), ponha o jogo em
+`Kof Games/Games/ps2`, abra pela Biblioteca e aperte **F3** numa cena pesada: me mande o print (fps, núcleo, leitura da
+placa, imagem pra página). Se der, rode o mesmo jogo no PCSX2 sozinho pra comparar.
+
 **Novo (M13, rede):** com o pacote abaixo instalado e o **KOFstation antigo fechado** (os dois usam a porta 8650):
 1. PC: 📡 Aparelhos → ➕ Parear um celular. Celular (APK atual): 📡 Aparelhos → Ler o QR do PC (ou escolha o PC na
    lista e digite o código). O celular tem que aparecer 🟢 conectado no PC.
@@ -172,7 +176,7 @@ O PS2 ficou pro fim porque é o mais caro em token. Os custos são estimativa (t
 | 5 | **PS2 nativo** (N.9 / M12) | ~400–700 mil | Dar OpenGL ao processo do jogo, compilar o LRPS2, criar o sistema PS2. O N64 nativo sai junto |
 | 6 | **Troca** | baixo–médio | Conferir a paridade 100% e o app antigo publicar a última versão, que leva pro novo |
 
-**Agora:** M15 e M13 feitos (falta a chave e os teus testes). Próximo: M14 (o APK com o app novo).
+**Agora:** M15, M13 e o **PS2** feitos (faltam a chave e os teus testes). Próximo: os números do PS2 no teu PC; depois M14.
 
 ---
 

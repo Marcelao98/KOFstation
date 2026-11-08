@@ -224,3 +224,16 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   (`rede.ligar`), em vez da 8644 fixa e sem senha do antigo.
 - Dados em `<pasta de dados>/rede` (`identidade.bin`, `pareados.txt`, `config.txt`, o formato do antigo), separados
   do antigo (`KOFnes/rede`): o celular pareia de novo com o PC novo. Os dois abertos juntos disputam a 8650.
+
+## D36. PS2: o LRPS2 já compilado do antigo, OpenGL sem janela no processo do jogo, imagem pela página — **aceita** (08/11)
+- O núcleo é o `pcsx2_libretro` que o antigo publica (commit 38d3a83f, o mesmo que o Marcelo já jogou), baixado pelo
+  manifesto e conferido por SHA-256: nada de compilar o PCSX2 (20–30 min por plataforma). Fica na pasta `nativo/`.
+- O `kof-nativo` dá ao núcleo um contexto OpenGL sem janela (`gl.rs`: EGL no Linux, com a tela do usuário ou sem
+  nenhuma; WGL com uma janela escondida no Windows), um framebuffer no tamanho máximo e lê a imagem de volta com três
+  buffers em rodízio e cerca (a placa nunca espera a CPU; no máximo 2 quadros de atraso). Não usa o `kofnativo.c`
+  (SDL2) do antigo: um processo nativo só pra manter, e o DVD lido direto do disco (o antigo lia pela página).
+- A imagem vai pra página como a do PS1 nativo (filtros e molduras iguais). Na resolução nativa (640×448) são ~70 MB/s
+  dentro do PC. Se o Marcelo precisar de resolução aumentada ou os números mostrarem gargalo na cópia, entra o "modo
+  direto" (janela nativa sem cópia, P.7).
+- Opções iniciais como o antigo: renderer OpenGL e `pcsx2_ee_cycle_skip = Mild Underclock` (60 fps no Shadow of the
+  Colossus no Ryzen 5 4600H). Pra comparar com o PCSX2 sozinho, ele pode desligar pela opção do núcleo.
