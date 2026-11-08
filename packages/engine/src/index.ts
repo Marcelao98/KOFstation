@@ -5,6 +5,7 @@ export * from './libretro';
 export * from './nucleos';
 export * from './quadro';
 export * from './anel';
+export * from './fila-de-quadros';
 export * from './jogo';
 export * from './nativo';
 export * from './mensagens';
