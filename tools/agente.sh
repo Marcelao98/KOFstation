@@ -8,6 +8,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 BASE=claude/busy-ritchie-wrvk8h
+PRINCIPAL=$(pwd)
 LETRA=$(printf '%s' "${1:?diga a tarefa: A, B, ... (lista em docs/agentes/LEIA-ME.md)}" | tr '[:lower:]' '[:upper:]')
 git fetch -q origin "$BASE"
 ARQ=$(git ls-tree --name-only "origin/$BASE" docs/agentes/ | grep "^docs/agentes/$LETRA-" | head -n 1 || true)
@@ -27,13 +28,16 @@ else
   else
     git worktree add -q -b "$BRANCH" "$PASTA" "origin/$BASE"
   fi
-  echo "▶ pasta $PASTA na branch $BRANCH"
-  (cd "$PASTA" && pnpm install --frozen-lockfile > /dev/null)
-  # os núcleos: copia da pasta principal se já tiver (conferidos pelo SHA-256 do manifesto); senão baixa
-  if [ -d third_party/cores/nativos ]; then
-    cp -R third_party/cores/. "$PASTA/third_party/cores/"
+  echo "▶ pasta $PASTA na branch $BRANCH: instalando as dependências…"
+  (cd "$PASTA" && pnpm install --frozen-lockfile --reporter=silent)
+  # os núcleos: baixa uma vez na pasta principal (só os desta plataforma) e copia; o pnpm nucleos confere o SHA-256
+  if [ ! -d third_party/cores/nativos ] || [ ! -d apps/desktop/public/nucleos ]; then
+    echo "▶ baixando os núcleos (uma vez só, na pasta principal)…"
+    [ -d node_modules ] || pnpm install --frozen-lockfile --reporter=silent
+    pnpm nucleos
   fi
-  (cd "$PASTA" && KOF_NATIVOS=todas pnpm nucleos > /dev/null)
+  cp -R third_party/cores/. "$PASTA/third_party/cores/"
+  (cd "$PASTA" && KOF_NUCLEOS_DE="$PRINCIPAL/apps/desktop/public/nucleos" pnpm nucleos > /dev/null)
 fi
 
 PEDIDO="Repositório Marcelao98/KOFStation. Você está na pasta $(cd "$PASTA" && pwd), branch $BRANCH (criada a partir da $BASE). Leia o AGENTS.md, depois docs/agentes/LEIA-ME.md e faça a tarefa de $ARQ. Trabalhe e faça push só na branch $BRANCH (git push -u origin $BRANCH), sem abrir PR. Antes de cada push: pnpm check (e pnpm check:rust se mexer no Rust, pnpm e2e se mexer em tela ou jogo). Ao terminar, preencha a seção Relatório no fim de $ARQ e faça o último push."
