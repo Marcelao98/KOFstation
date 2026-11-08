@@ -5,7 +5,7 @@ import { bordasDe, ehDeTv, RenderizadorVisual, svgMoldura, tamanhoNaTela } from 
 import { usarMoldura } from '../stores/moldura';
 import { useEffect, useRef } from 'react';
 import { usarAvisos } from '../stores/avisos';
-import { ultimoQuadro, usarJogo } from '../stores/jogo';
+import { medidorDoJogo, ultimoQuadro, usarJogo } from '../stores/jogo';
 import { usarRender } from '../stores/visual';
 
 export function useTelaDoJogo(canvas: React.RefObject<HTMLCanvasElement | null>) {
@@ -30,7 +30,9 @@ export function useTelaDoJogo(canvas: React.RefObject<HTMLCanvasElement | null>)
       if (!t) return;
       if (ultimoQuadro.novo && ultimoQuadro.pixels) {
         ultimoQuadro.novo = false;
+        const t0 = performance.now();
         t.desenhar(ultimoQuadro.pixels, ultimoQuadro.largura, ultimoQuadro.altura);
+        medidorDoJogo()?.desenhou(performance.now() - t0);
       } else if (t.animado()) t.pintar(false); // chiado/fita mexendo mesmo parado
     };
     pedido = requestAnimationFrame(laco);

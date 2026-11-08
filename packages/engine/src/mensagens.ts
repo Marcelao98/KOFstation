@@ -65,6 +65,11 @@ export interface Medicao {
   leituraMs?: number;
   /** núcleo nativo: ms preparando o quadro pra página */
   imagemMs?: number;
+  /** cada quadro do último segundo (M16): 6 números por quadro, em µs, [t, núcleo, leitura, envio, som na fila,
+   *  faltas] (lerPorQuadro do domain/desempenho.ts). `t` conta do começo do Worker/processo. */
+  porQuadro?: number[];
+  /** núcleo nativo: % de um núcleo do processador por linha (thread) do processo do jogo */
+  cpu?: { linha: string; pct: number }[];
 }
 
 export type DoWorker =

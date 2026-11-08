@@ -33,6 +33,21 @@
     },
     { "tipo": "geometria", "largura": 640, "altura": 480, "proporcao": 1.3333334 },
     { "tipo": "desempenho", "quadros": 600, "amostras": 441000, "atrasoMs": 61.5, "faltas": 0 },
+    {
+      "tipo": "desempenho",
+      "quadros": 602,
+      "amostras": 442470,
+      "atrasoMs": 60.2,
+      "faltas": 1,
+      "nucleoMs": 8.5,
+      "leituraMs": 1.2,
+      "imagemMs": 0.4,
+      "porQuadro": [16667, 8000, 1000, 400, 60000, 0, 33334, 9000, 1400, 0, 59500, 1],
+      "cpu": [
+        { "linha": "EE Core", "pct": 92.5 },
+        { "linha": "MTGS", "pct": 40.1 }
+      ]
+    },
     { "tipo": "ok", "pedido": 3 },
     { "tipo": "erro", "pedido": 3, "codigo": "CORE_FAILED", "mensagem": "o núcleo recusou o estado" },
     { "tipo": "fim", "motivo": "a página pediu" }

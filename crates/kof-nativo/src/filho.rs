@@ -172,8 +172,10 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
     let (mut quadros, mut amostras, mut numero) = (0u64, 0u64, 0u32);
     let mut geo = n.av.geometry;
     let mut ultimo_relatorio = Instant::now();
-    // tempo do núcleo (s, quadros) e do preparo da imagem (s, quadros) no último segundo
-    let mut med = (0.0f64, 0u64, 0.0f64, 0u64);
+    // cada quadro (núcleo, leitura da placa, envio, som) e o processador de cada linha (M16)
+    let mut med = crate::medidor::Medidor::new();
+    let mut cpu = crate::cpu::Cpu::new();
+    let leitura_agora = || crate::gl::LEITURA_US.swap(0, std::sync::atomic::Ordering::Relaxed);
     loop {
         loop {
             let p = match rx.try_recv() {
@@ -245,9 +247,9 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
             for _ in 0..turbo {
                 som.clear();
                 let t = Instant::now();
+                leitura_agora(); // o que sobrou fora de um quadro não conta
                 novo |= n.rodar(&mut som);
-                med.0 += t.elapsed().as_secs_f64();
-                med.1 += 1;
+                med.quadro(t.elapsed(), leitura_agora(), saida.guardado_ms(), saida.faltas());
                 quadros += 1;
             }
             if som.is_empty() {
@@ -263,9 +265,8 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
             let t = Instant::now();
             if let Some(()) = n.com_quadro(|q| protocolo::quadro(q, numero, &mut buf)) {
                 canal.publicar_quadro(std::mem::take(&mut buf));
+                med.envio(t.elapsed());
             }
-            med.2 += t.elapsed().as_secs_f64();
-            med.3 += 1;
         }
         let g = n.av.geometry;
         if g.base_width != geo.base_width || g.base_height != geo.base_height || g.aspect_ratio != geo.aspect_ratio {
@@ -278,18 +279,29 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
         }
         if ultimo_relatorio.elapsed() >= Duration::from_secs(1) {
             ultimo_relatorio = Instant::now();
-            let ms = |s: f64, n: u64| (n > 0).then(|| (s * 1000.0 / n as f64 * 100.0).round() / 100.0);
-            let leitura = crate::gl::LEITURA_US.swap(0, std::sync::atomic::Ordering::Relaxed) as f64 / 1e6;
+            // as médias do segundo (o F3 de sempre) saem dos mesmos quadros que vão no `porQuadro`
+            let (mut nuc, mut lei, mut env, mut q, mut e) = (0u64, 0u64, 0u64, 0u64, 0u64);
+            for r in med.novos() {
+                nuc += r.nucleo as u64;
+                lei += r.leitura as u64;
+                q += 1;
+                if r.envio > 0 {
+                    env += r.envio as u64;
+                    e += 1;
+                }
+            }
+            let ms = |us: u64, n: u64| (n > 0).then(|| (us as f64 / 1000.0 / n as f64 * 100.0).round() / 100.0);
             canal.avisar(&Aviso::Desempenho {
                 quadros,
                 amostras,
                 atraso_ms: saida.guardado_ms(),
                 faltas: saida.faltas(),
-                nucleo_ms: ms(med.0, med.1),
-                leitura_ms: crate::gl::existe().then(|| ms(leitura, med.1)).flatten(),
-                imagem_ms: ms(med.2, med.3),
+                nucleo_ms: ms(nuc, q),
+                leitura_ms: crate::gl::existe().then(|| ms(lei, q)).flatten(),
+                imagem_ms: ms(env, e),
+                por_quadro: Some(med.bloco()),
+                cpu: Some(cpu.ler()),
             });
-            med = (0.0, 0, 0.0, 0);
         }
         if rodou == 0 {
             let espera = (saida.guardado_ms() - ALVO_MS).clamp(0.5, 4.0);

@@ -82,6 +82,13 @@ pub enum Aviso {
         leitura_ms: Option<f64>,
         #[serde(rename = "imagemMs", default, skip_serializing_if = "Option::is_none")]
         imagem_ms: Option<f64>,
+        /// cada quadro do último segundo (M16): 6 números por quadro, em µs, `[t, núcleo, leitura, envio, som na fila,
+        /// faltas]` (o formato do `medidor` e do `packages/domain/src/desempenho.ts`)
+        #[serde(rename = "porQuadro", default, skip_serializing_if = "Option::is_none")]
+        por_quadro: Option<Vec<u64>>,
+        /// % de um núcleo do processador que cada linha (thread) do processo usou no último segundo
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        cpu: Option<Vec<crate::cpu::Linha>>,
     },
     Ok {
         pedido: u32,

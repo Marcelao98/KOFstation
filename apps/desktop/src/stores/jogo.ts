@@ -16,7 +16,9 @@ import {
   tamanhoDoJogo,
   registrarJogo,
   textoDoErro,
+  MedidorDaSessao,
   type JogoAberto,
+  type LeituraDeDesempenho,
 } from '@kof/app-core';
 import { chaveSramDe, fatosDe, sistemaDoArquivo, SISTEMAS, type RegistroJogo } from '@kof/domain';
 import {
@@ -50,6 +52,9 @@ export const PROPORCOES: [Proporcao, string][] = [
 /** Último quadro chegado do Worker (o hook da tela desenha no próximo quadro do monitor). */
 /** Quem quer cada quadro novo na hora (Jogar no PC transmite cada um). */
 export const aoQuadroNovo = new Set<() => void>();
+/** Medidor de desempenho do jogo aberto (M16): o laço de imagem anota o desenho de cada quadro aqui. */
+let medidor: MedidorDaSessao | null = null;
+export const medidorDoJogo = () => medidor;
 
 export const ultimoQuadro: { pixels: Uint32Array | null; largura: number; altura: number; novo: boolean } = {
   pixels: null,
@@ -151,6 +156,8 @@ export interface EstadoJogo {
   pausaManual: boolean;
   rapidoAberto: boolean;
   medicao: Medicao | null;
+  /** quadro a quadro do último segundo (percentis, engasgos, CPU por linha); null = ainda não chegou */
+  leitura: LeituraDeDesempenho | null;
   desempenho: boolean;
   volume: number;
   mudo: boolean;
@@ -180,6 +187,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   pausaManual: false,
   rapidoAberto: false,
   medicao: null,
+  leitura: null,
   desempenho: lerNum('desempenho', 0) === 1,
   volume: lerNum('volume', 100),
   mudo: lerNum('mudo', 0) === 1,
@@ -238,12 +246,14 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       const chaveSram = chaveSramDe(ident.titulo || aberto.nome, tamanho);
       const sram = await saveDoJogo(chaveSram);
       const opcoes = opcoesDoNucleo(aberto.sistema);
+      const med = new MedidorDaSessao();
       const eventos: EventosDoJogo = {
         quadro: (pixels, largura, altura) => {
           Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true });
+          med.chegou();
           for (const f of aoQuadroNovo) f();
         },
-        medicao: (medicao) => set({ medicao }),
+        medicao: (medicao) => set({ medicao, leitura: med.medicao(medicao) ?? get().leitura }),
         sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
         rebob: (r) => aoMudarRebob.forEach((f) => f(r)),
         erro: (m, log) => {
@@ -330,6 +340,8 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         ultimo: Date.now(),
       };
       abertoAgora = aberto;
+      med.fpsDoJogo = jogo.info.fps;
+      medidor = med;
       set({
         jogo,
         nome: aberto.nome,
@@ -338,6 +350,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         info: jogo.info,
         pausaManual: false,
         medicao: null,
+        leitura: null,
       });
       const telas = usarTelas.getState();
       usarTelas.setState({ temJogo: true });
@@ -368,7 +381,8 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     fecharSessao(get().jogo);
     abertoAgora = null;
     ultimoQuadro.pixels = null;
-    set({ jogo: null, nome: '', registro: null, info: null, medicao: null, rapidoAberto: false });
+    medidor = null;
+    set({ jogo: null, nome: '', registro: null, info: null, medicao: null, leitura: null, rapidoAberto: false });
     usarTelas.setState({ temJogo: false });
   },
   alternarPausa: () => set({ pausaManual: !get().pausaManual }),

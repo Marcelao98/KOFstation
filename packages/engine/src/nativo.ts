@@ -194,6 +194,8 @@ export class JogoNativo {
       nucleoMs: a.nucleoMs ?? 0, // medido no processo do jogo
       ...(a.leituraMs !== undefined ? { leituraMs: a.leituraMs } : {}),
       ...(a.imagemMs !== undefined ? { imagemMs: a.imagemMs } : {}),
+      ...(a.porQuadro ? { porQuadro: a.porQuadro } : {}),
+      ...(a.cpu ? { cpu: a.cpu } : {}),
       atrasos: 0,
       faltasDeSom: a.faltas - antes.faltas,
       somNaFilaMs: Math.round(a.atrasoMs),

@@ -5,9 +5,11 @@
 //! local com token (`canal`, formato em `protocolo`), e a página desenha com os mesmos filtros e molduras; os botões
 //! voltam pelo mesmo canal.
 pub mod canal;
+pub mod cpu;
 pub mod filho;
 pub mod gl;
 pub mod libretro;
+pub mod medidor;
 pub mod nucleo;
 pub mod protocolo;
 pub mod som;

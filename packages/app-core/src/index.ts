@@ -21,3 +21,4 @@ export * from './traducao';
 export * from './bios';
 export * from './atualizacao';
 export * from './rede';
+export * from './desempenho';

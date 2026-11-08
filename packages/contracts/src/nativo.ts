@@ -42,6 +42,11 @@ export type AvisoNativo =
       nucleoMs?: number;
       leituraMs?: number;
       imagemMs?: number;
+      /** cada quadro do último segundo (M16): 6 números por quadro, em µs, [t, núcleo, leitura, envio, som na fila,
+       *  faltas] (o formato do domain/desempenho.ts) */
+      porQuadro?: number[];
+      /** % de um núcleo do processador que cada linha (thread) do processo usou no último segundo */
+      cpu?: { linha: string; pct: number }[];
     }
   | { tipo: 'ok'; pedido: number }
   | { tipo: 'erro'; pedido: number | null; codigo: string; mensagem: string }

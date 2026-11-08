@@ -129,12 +129,23 @@ fn quadro_som_botoes_e_token() {
         _ => None,
     });
     assert_eq!(amostras, quadros * 735);
-    let (q2, _) = esperar(&mut ws, |m| match aviso(m) {
-        Some(Aviso::Desempenho { quadros, amostras, .. }) => Some((quadros, amostras)),
+    let (q2, por_quadro, cpu) = esperar(&mut ws, |m| match aviso(m) {
+        Some(Aviso::Desempenho {
+            quadros,
+            por_quadro,
+            cpu,
+            ..
+        }) => Some((quadros, por_quadro, cpu)),
         _ => None,
     });
     let por_segundo = q2 - quadros;
     assert!((50..=70).contains(&por_segundo), "{por_segundo} quadros/s");
+    // M16: cada quadro do segundo, 6 números (µs), o tempo andando pra frente; a CPU por linha vem (pode ser vazia)
+    let pq = por_quadro.expect("porQuadro no aviso de desempenho");
+    assert_eq!(pq.len() as u64, por_segundo * 6, "um registro por quadro rodado");
+    assert!(pq.chunks(6).zip(pq.chunks(6).skip(1)).all(|(a, b)| b[0] >= a[0]));
+    assert!(pq.chunks(6).any(|q| q[3] > 0), "algum quadro foi mandado pra página");
+    assert!(cpu.is_some());
 
     // estado e bateria
     mandar(&mut ws, &Comando::SalvarEstado { pedido: 9 });
