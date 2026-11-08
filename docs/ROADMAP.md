@@ -20,6 +20,11 @@
 | 5 | **N.9 / M12 PS2 nativo** (+ N64 nativo junto) | alto (~400–700 mil) | OpenGL sem janela no processo do jogo, compilar o LRPS2 (Linux e Windows), sistema PS2 no app. O M12.1 e o M12.2 já saíram no N.1 |
 | 6 | **Troca** (PARIDADE 100% e o antigo levando pro novo) | baixo–médio | por último: precisa do PS2 pra paridade ser total |
 
+> **Atualização de 08/11 (Marcelo):** o PS2 (item 5) veio antes do M14 e já está no pacote (⏸ teste dele). Depois do
+> primeiro teste do PS2 entrou o **M16 Desempenho, diagnóstico e opções de emulação** ("não basta rodar, tem que rodar
+> bem"), **no meio da migração, antes do M14**: é a base pra otimizar todos os emuladores com número, não com chute.
+> Ordem agora: PS2 (⏸) → **M16** → M14 → Troca. Arquitetura em [DIAGNOSTICO.md](DIAGNOSTICO.md).
+
 ## Como é cada checkpoint
 
 1. **Resumo curto** do que foi feito e do que ficou de fora.
@@ -267,6 +272,18 @@ M12 encolhe (o canal e o processo já vêm do N.1).
 | M12.2 | Canal com token e protocolo tipado | teste: conexão sem token é recusada | ⬜ |
 | M12.3 | Modo página com filtros, disco lido aos pedaços | DVD de teste roda | ⬜ |
 | M12.4 | Cartão de memória, savestate, pausa | você joga PS2 (quando quiser) | ⬜ |
+
+## M16 — Desempenho, diagnóstico e opções de emulação (essencial; antes do M14)
+
+Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M16.1 | Medidor quadro a quadro (nativo e WebAssembly), CPU por linha, `domain/desempenho.ts` (p50/p95/p99, engasgos e culpado) | testes com tempos fabricados; números no CI | ⬜ |
+| M16.2 | F3 com gráfico dos últimos quadros, p99, engasgos/min, CPU por linha | print do F3 com PS2 e SNES | ⬜ |
+| M16.3 | Modo diagnóstico: grava a sessão (máquina, placa, opções, por segundo, cada engasgo), resumo ao fechar, exportar `.zip`, junto do F9 | **você grava o Shadow of the Colossus e me manda** | ⬜ |
+| M16.4 | Opções de emulação por console (PS1 em diante): catálogo em português, perfis Rápido/Equilibrado/Fiel, Avançado, por jogo, na hora quando dá | você troca uma opção e vê o efeito no F3 | ⬜ |
+| M16.5 | Otimizar pelos relatórios (PS2 primeiro: shaders, EE, som, ritmo, leitura) | antes × depois medido no teu PC | ⬜ |
 
 ## M13 — Rede e celular como controle
 

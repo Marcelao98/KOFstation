@@ -237,3 +237,12 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   direto" (janela nativa sem cópia, P.7).
 - Opções iniciais como o antigo: renderer OpenGL e `pcsx2_ee_cycle_skip = Mild Underclock` (60 fps no Shadow of the
   Colossus no Ryzen 5 4600H). Pra comparar com o PCSX2 sozinho, ele pode desligar pela opção do núcleo.
+
+## D37. Medir antes de otimizar: medidor por quadro, modo diagnóstico e opções de emulação no meio da migração — **aceita** (Marcelo, 08/11)
+- Depois do primeiro teste do PS2 ("relativamente bem, umas engasgadas"), o Marcelo pôs o M16 antes do M14: medição
+  quadro a quadro com o culpado de cada engasgo, um modo diagnóstico que grava a sessão pra ele mandar, e opções de
+  emulação por console com perfis. Vale pra todos os emuladores.
+- Desenho no [DIAGNOSTICO.md](DIAGNOSTICO.md), seguindo o que PCSX2 e DuckStation fazem (histórico circular, CPU por
+  linha, intervalo de 0,5–1 s) mais o que eles não têm (percentis, cada engasgo com momento e culpado, arquivo).
+- Estatística pura no `domain` (testável sem emulador); medição no processo/Worker; gravação pelo Rust com comandos
+  com nome (`diag.*`); nada de ROM nem caminho completo no relatório.
