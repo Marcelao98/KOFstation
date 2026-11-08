@@ -47,6 +47,10 @@ test('roda: imagem vermelha, quadros andando e som saindo', async ({ page }) => 
   const painel = (await page.locator('#desempenho').textContent()) ?? '';
   expect(painel).not.toContain('sem som');
   expect(Number(/(\d+) fps/.exec(painel)?.[1])).toBeGreaterThan(30);
+  // M16: o quadro a quadro (percentis e engasgos) e o gráfico dos últimos quadros
+  await expect(page.locator('#desempenho-quadros')).toContainText('p99', { timeout: 5000 });
+  await expect(page.locator('#desempenho-grafico')).toBeVisible();
+  await page.locator('#desempenho').screenshot({ path: 'test-results/f3-desempenho.png' });
   await expect(page.locator('#st-fps')).toContainText('fps');
 });
 

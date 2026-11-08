@@ -84,9 +84,7 @@ export function Desempenho() {
         </div>
       )}
       {leitura && leitura.cpu.length > 0 && (
-        <div id="desempenho-cpu">
-          CPU: {leitura.cpu.map((c) => `${c.linha} ${Math.round(c.pct)}%`).join(' · ')}
-        </div>
+        <div id="desempenho-cpu">CPU: {leitura.cpu.map((c) => `${c.linha} ${Math.round(c.pct)}%`).join(' · ')}</div>
       )}
       {leitura && (
         <>
