@@ -33,13 +33,13 @@ flowchart LR
     F3["F3: números + gráfico dos últimos quadros"]
     DG["modo diagnóstico: grava a sessão"]
   end
-  RS["kof-app: diag.*<br/>&lt;dados&gt;/diagnostico/*.jsonl"]
+  RS["kof-app: diag.*<br/>&lt;dados&gt;/diagnostico/&lt;sessão&gt;/*.csv, sessao.json"]
   MQ -->|"a cada 1 s: os tempos do segundo (compacto)"| EST
   CPU --> EST
   PG --> EST
   EST --> F3
   EST --> DG
-  DG -->|"lotes a cada 5 s"| RS
+  DG -->|"lotes a cada 5 s (linhas de CSV)"| RS
 ```
 
 ### 1. Medidor quadro a quadro (M16.1)
@@ -62,19 +62,27 @@ flowchart LR
 
 ### 3. Modo diagnóstico (M16.3)
 - Liga em **Ajuda → 🩺 Modo diagnóstico** (fica ligado até desligar; um selo 🩺 na barra de baixo avisa).
-- **Grava, por jogo aberto,** `<dados>/diagnostico/AAAA-MM-DD_HHMM_<jogo>.jsonl` (uma linha JSON por registro):
-  - a máquina: processador, núcleos, memória, sistema, **placa de vídeo e driver** (o `GL_RENDERER`/`GL_VERSION` do
-    contexto do núcleo nativo e o renderizador do WebGL da página);
-  - o jogo: sistema, núcleo e versão, **as opções de emulação usadas**, o tamanho do disco (nunca a ROM nem o
-    caminho completo);
-  - por segundo: fps, p50/p95/p99, CPU por linha, som;
-  - cada engasgo com o momento (segundos desde o começo) e o culpado;
-  - o log do núcleo (as linhas do processo nativo).
-- Ao fechar o jogo: um resumo (média, p99, engasgos por minuto, culpado mais comum) no arquivo e num aviso.
-- **Exportar relatório** (na mesma tela): um `.zip` com as sessões e os logs do dia, pra mandar. Também entra no
-  pacote do 🐞 Reportar bug (F9) quando o modo está ligado.
+- **Grava, por jogo aberto,** uma pasta `<dados>/diagnostico/AAAA-MM-DD_HHMM_<jogo>/`, escrita aos pedaços durante o
+  jogo (nada trava), com arquivos simples, cada um com uma função (formato decidido com o Marcelo em 08/11):
+
+  | Arquivo | O que tem | Por que nesse formato |
+  |---|---|---|
+  | `resumo.txt` | média, p99, engasgos/min, culpado mais comum, quanto tempo jogou | ler direto |
+  | `sessao.json` | máquina (processador, núcleos, memória, sistema, **placa de vídeo e driver**: `GL_RENDERER`/`GL_VERSION` do núcleo nativo e o renderizador do WebGL), jogo (sistema, nome, tamanho do disco), núcleo e versão, **as opções de emulação usadas** | dado aninhado; as opções mudam de núcleo pra núcleo |
+  | `quadros.csv` | uma linha por quadro: `t_ms,nucleo_ms,leitura_ms,envio_ms,pagina_ms,som_fila_ms,faltas` | a tabela grande; abre em planilha e no pandas |
+  | `segundos.csv` | uma linha por segundo: `t_s,fps,p50_ms,p95_ms,p99_ms,max_ms,engasgos,cpu_<linha>_pct…` | visão geral, fácil de plotar |
+  | `engasgos.csv` | `t_ms,duracao_ms,culpado,nucleo_ms,leitura_ms,envio_ms,pagina_ms,som_fila_ms` | filtrar e achar padrão (lugar, efeito) |
+  | `log.txt` | as linhas do processo nativo / do núcleo | texto |
+
+  CSV com cabeçalho, vírgula entre colunas e **ponto** no decimal (o LibreOffice em português pergunta ao importar; o
+  Google Sheets abre direto). **Parquet não:** seria menor e tipado, mas pede biblioteca pesada no Rust e não abre
+  em planilha; o tamanho não pede (1 h a 60 fps ≈ 216 mil linhas ≈ 10 MB de CSV, ~2 MB zipado).
+- Ao fechar o jogo: o `resumo.txt` e um aviso com ele.
+- **Exportar relatório** (na mesma tela): um `.zip` com as pastas das sessões escolhidas e os logs do dia, pra mandar.
+  Também entra no pacote do 🐞 Reportar bug (F9) quando o modo está ligado.
 - Rust: comandos com nome e escopo, nada de caminho solto: `diag.maquina`, `diag.abrir {jogo, sistema, …}` →
-  `{sessao}`, `diag.anotar {sessao}` + lote, `diag.fechar`, `diag.exportar` → binário (zip). Limite de tamanho por
+  `{sessao}`, `diag.anotar {sessao, arquivo: quadros|segundos|engasgos}` + linhas, `diag.fechar {sessao, resumo}`,
+  `diag.exportar {sessoes}` → binário (zip). Limite de tamanho por
   sessão (ex.: 20 MB) e apaga as de mais de 30 dias.
 
 ### 4. Opções de emulação por console (M16.4)

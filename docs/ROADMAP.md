@@ -281,7 +281,7 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 |---|---|---|---|
 | M16.1 | Medidor quadro a quadro (nativo e WebAssembly), CPU por linha, `domain/desempenho.ts` (p50/p95/p99, engasgos e culpado) | testes com tempos fabricados; números no CI | ⬜ |
 | M16.2 | F3 com gráfico dos últimos quadros, p99, engasgos/min, CPU por linha | print do F3 com PS2 e SNES | ⬜ |
-| M16.3 | Modo diagnóstico: grava a sessão (máquina, placa, opções, por segundo, cada engasgo), resumo ao fechar, exportar `.zip`, junto do F9 | **você grava o Shadow of the Colossus e me manda** | ⬜ |
+| M16.3 | Modo diagnóstico: grava a sessão (`resumo.txt`, `sessao.json`, `quadros.csv`, `segundos.csv`, `engasgos.csv`, `log.txt`), resumo ao fechar, exportar `.zip`, junto do F9 | **você grava o Shadow of the Colossus e me manda** | ⬜ |
 | M16.4 | Opções de emulação por console (PS1 em diante): catálogo em português, perfis Rápido/Equilibrado/Fiel, Avançado, por jogo, na hora quando dá | você troca uma opção e vê o efeito no F3 | ⬜ |
 | M16.5 | Otimizar pelos relatórios (PS2 primeiro: shaders, EE, som, ritmo, leitura) | antes × depois medido no teu PC | ⬜ |
 
