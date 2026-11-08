@@ -234,7 +234,11 @@ function transmitirQuadro() {
     Object.assign(t.cv, { width: l * K, height: a * K });
     t.cx.imageSmoothingEnabled = false;
   }
-  t.pcx.putImageData(new ImageData(new Uint8ClampedArray(q.pixels.buffer as ArrayBuffer, q.pixels.byteOffset, l * a * 4), l, a), 0, 0);
+  t.pcx.putImageData(
+    new ImageData(new Uint8ClampedArray(q.pixels.buffer as ArrayBuffer, q.pixels.byteOffset, l * a * 4), l, a),
+    0,
+    0,
+  );
   t.cx.drawImage(t.peq, 0, 0, t.cv.width, t.cv.height);
   t.track.requestFrame();
   if (t.dc.readyState === 'open' && performance.now() - t.infoQuando > 1000) {
