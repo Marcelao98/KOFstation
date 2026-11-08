@@ -43,5 +43,5 @@ O plano do resto do roadmap em tarefas (ondas, dependências, quem mexe em quê)
 
 | Tarefa | Arquivo | Branch | Situação |
 |---|---|---|---|
-| A · Ritmo dos quadros no WebAssembly (o "antigo mais liso") | [A-ritmo-wasm.md](A-ritmo-wasm.md) | `agente-a/ritmo-wasm` | aberta |
+| A · Ritmo dos quadros no WebAssembly (o "antigo mais liso") | [A-ritmo-wasm.md](A-ritmo-wasm.md) | `agente-a/ritmo-wasm` | ✅ junta em 08/11 (`cbe109e`) |
 | B · Catálogo das opções de emulação (dados do M16.4) | [B-opcoes-nucleo.md](B-opcoes-nucleo.md) | `agente-b/opcoes-nucleo` | aberta |

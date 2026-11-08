@@ -21,6 +21,22 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · Orquestração · tarefa A junta (ritmo do WebAssembly) · B não chegou
+
+**Pedido:** o Marcelo rodou os dois agentes (Sonnet, sessões na nuvem; o Codex pelo `tools/agentes.sh` não enviou
+nada, causa ainda não vista: falta o log) e pediu pra conferir.
+**Feito:** revisada e junta a branch do A (`claude/fervent-brahmagupta-zq12qz` → `cbe109e`): a causa era a falta de
+fila entre a chegada dos quadros do Worker (em rajadas, pelo `setTimeout(4)` + ritmo pelo som) e o vsync; agora
+`engine/jogo.ts` guarda os quadros e solta um por vsync, com 1 quadro de folga (máx. 3 na fila). `tools/medir-ritmo.mjs`
+mede antigo × novo com a mesma ROM gerada.
+**Medido / conferido (aqui):** 15 s, Game Boy, 60 Hz: novo 0 pulados e 17 repetidos/min (antes ~450 pulados), antigo
+0 e 0; p50/p95/p99 16,67 nos dois. `pnpm check` e 44 e2e verdes. Custo: ~1 quadro (16 ms) a mais de atraso de imagem
+(a folga da fila); o laço da fila roda antes do desenho no mesmo vsync (registrado primeiro). Num jogo de luta pode
+pesar: medir a latência do botão até a tela antes de dar como fechado (fica pro M16.5).
+**Não afeta o PS2** (nativo, outro caminho): a tarefa era só dos consoles em WebAssembly.
+**Onde parou:** **B** (catálogo de opções) não chegou no GitHub: pedir ao Marcelo a branch ou rodar de novo. ⏸ o
+Marcelo grava o SotC e o ZoE2 com o pacote da `teste-binarios` (o pacote ainda não tem o A: sai no próximo).
+
 ## 2026-11-08 · M16.1–M16.3 · medidor quadro a quadro, F3 com gráfico e modo diagnóstico
 
 **Pedido:** fazer o M16 na ordem, sem parar nos checkpoints até o M16.3 (lá o Marcelo grava o Shadow of the
