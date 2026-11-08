@@ -97,8 +97,15 @@ fn lrps2_abre_com_opengl_bios_e_dvd() {
         }
         Err(e) => panic!("o LRPS2 não abriu: {e}"),
     };
-    eprintln!("{} {} · {:?}", n.info.nome, n.info.versao, n.av.geometry);
+    eprintln!(
+        "{} {} · {:?} · need_fullpath={}",
+        n.info.nome, n.info.versao, n.av.geometry, n.info.caminho_inteiro
+    );
     assert!(n.pediu_gpu(), "o LRPS2 desenha pela placa");
+    assert!(
+        n.info.caminho_inteiro,
+        "o PS2 lê o DVD do disco: o frontend nunca carrega o DVD inteiro na memória"
+    );
     let mut som = Vec::new();
     let inicio = std::time::Instant::now();
     let mut novos = 0;
