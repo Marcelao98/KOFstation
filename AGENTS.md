@@ -3,6 +3,8 @@
 Você está no **KOFstation novo**: a reconstrução do app `Marcelao98/kofstation-old` (o produto atual) numa arquitetura
 React + TypeScript + Rust, etapa por etapa, sem perder nenhuma funcionalidade.
 
+> **Continuando a sessão de 08/11 à noite?** Comece por [docs/agentes/CONTINUAR.md](docs/agentes/CONTINUAR.md).
+>
 > **Recebeu uma tarefa de [docs/agentes/](docs/agentes/LEIA-ME.md)?** Então você não é o orquestrador: leia este
 > arquivo (as regras valem pra todos), o [LEIA-ME de lá](docs/agentes/LEIA-ME.md) e **só a sua tarefa**. A lista
 > abaixo é pro orquestrador.

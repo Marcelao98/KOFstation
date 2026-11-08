@@ -21,6 +21,15 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · Passagem · onde parou pro próximo orquestrador (Codex local)
+
+**Pedido:** o limite do Marcelo estava acabando; salvar exatamente onde parou pra continuar pelo Codex.
+**Feito:** `docs/agentes/CONTINUAR.md` (o que ele quer hoje: SotC liso; o que foi descartado na falta de memória do
+ZoE2: DVD na RAM, opções, envio de imagens, troca de resolução; a causa achada das engasgadas; os passos em ordem).
+Tarefa C (ritmo do nativo) e B (opções) disparadas em sessões na nuvem (branches `agente-c/ritmo-nativo`,
+`agente-b/opcoes-nucleo`). `tests/lrps2.rs` garante `need_fullpath` (`eb4980a`).
+**Onde parou:** ver `docs/agentes/CONTINUAR.md`, "Próximos passos".
+
 ## 2026-11-08 · Orquestração · tarefa A junta (ritmo do WebAssembly) · B não chegou
 
 **Pedido:** o Marcelo rodou os dois agentes (Sonnet, sessões na nuvem; o Codex pelo `tools/agentes.sh` não enviou
