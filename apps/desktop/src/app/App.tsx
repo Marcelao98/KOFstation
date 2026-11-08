@@ -21,6 +21,7 @@ import { ModoTela } from '../screens/Modo/ModoTela';
 import { Visual } from '../screens/Visual/Visual';
 import { Teclas } from '../screens/Teclas/Teclas';
 import { Jogadores } from '../screens/Jogadores/Jogadores';
+import { Aparelhos } from '../screens/Aparelhos/Aparelhos';
 import { Jukebox } from '../screens/Jukebox/Jukebox';
 import { Abertura } from '../screens/Abertura/Abertura';
 import { Estatisticas } from '../screens/Estatisticas/Estatisticas';
@@ -60,6 +61,7 @@ const PRONTAS: string[] = [
   'estados',
   'teclas',
   'jogadores',
+  'aparelhos',
   'jukebox',
   'estatisticas',
   'bios-tela',
@@ -245,6 +247,7 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'estados' && <Estados />}
         {atual === 'teclas' && <Teclas />}
         {atual === 'jogadores' && <Jogadores />}
+        {atual === 'aparelhos' && <Aparelhos />}
         {atual === 'jukebox' && <Jukebox />}
         {atual === 'estatisticas' && <Estatisticas />}
         {atual === 'bios-tela' && <BiosTela />}

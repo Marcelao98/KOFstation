@@ -10,6 +10,7 @@ mod instalar;
 mod nativo;
 mod navegador;
 mod pastas;
+mod rede;
 mod servidor;
 
 fn main() {
@@ -45,6 +46,7 @@ fn main() {
             std::process::exit(1);
         }
     };
+    srv.abrir_rede(); // o celular acha o PC mesmo antes de abrir a tela Aparelhos (como o kofservico do antigo)
     let url = srv.url();
     tracing::info!(
         porta = srv.porta,

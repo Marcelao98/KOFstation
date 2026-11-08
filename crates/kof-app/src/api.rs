@@ -24,6 +24,8 @@ pub struct Estado {
     pub origem: std::sync::OnceLock<String>,
     /// o atualizador (M15.1)
     pub atualizador: crate::atualizacao::Atualizador,
+    /// a rede entre aparelhos (M13)
+    pub rede: crate::rede::Rede,
 }
 
 #[derive(serde::Deserialize)]
@@ -161,6 +163,7 @@ impl Estado {
             nativos: Default::default(),
             origem: std::sync::OnceLock::new(),
             atualizador: crate::atualizacao::Atualizador::novo(crate::pastas::do_executavel().as_deref()),
+            rede: crate::rede::Rede::nova(),
         }
     }
 
@@ -201,6 +204,10 @@ impl Estado {
                     info.version = v;
                 }
                 json(serde_json::to_value(info).expect("info"))
+            }
+            "rede.ligar" => {
+                let origem = self.origem.get().cloned().unwrap_or_default();
+                json(self.rede.ligar(&self.pasta_dados, &origem)?)
             }
             "app.atualizacao" => {
                 let a: ArgsAtualizacao = args(a)?;

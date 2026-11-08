@@ -14,6 +14,8 @@ export interface Backend {
    * memória do JavaScript (CD de centenas de MB). Opcional: quem não tem cai no `enviarBinario`.
    */
   enviarArquivo?<T>(cmd: string, args: Record<string, unknown>, dados: Blob): Promise<T>;
+  /** O caminho até o serviço de rede entre aparelhos (M13). Opcional: plataforma sem rede não tem. */
+  rede?(): Promise<import('./rede').CanalRede>;
 }
 
 /** Erro do backend com o código do contrato (nunca um erro genérico). */

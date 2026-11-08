@@ -532,6 +532,7 @@ dependencies = [
  "kof-core",
  "kof-files",
  "kof-nativo",
+ "kof-net",
  "serde",
  "serde_json",
  "tempfile",

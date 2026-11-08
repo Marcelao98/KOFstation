@@ -1,6 +1,6 @@
 // O Início (#home) do antigo: jogando agora / continuar de onde parou / primeira vez, os atalhos e os jogados
 // recentemente (montarHome do antigo).
-import { listarJogos } from '@kof/app-core';
+import { listarJogos, textoDoInicio } from '@kof/app-core';
 import { DICAS_PC, FRASES, LOGOS, SISTEMAS, TODOS_TEMAS, quando, saudacao, type RegistroJogo } from '@kof/domain';
 import { useEffect, useRef, useState } from 'react';
 import { acao } from '../../app/acoes';
@@ -11,6 +11,7 @@ import { autoLigado, continuar } from '../../stores/auto';
 import { usarAvisos } from '../../stores/avisos';
 import { usarBiblioteca } from '../../stores/biblioteca';
 import { usarBios } from '../../stores/bios';
+import { usarRede } from '../../stores/rede';
 import { servicos } from '../../stores/servicos';
 import { INICIO, usarJukebox } from '../../stores/jukebox';
 import { srcCapa } from '../Biblioteca/Capas';
@@ -99,6 +100,10 @@ export function Inicio() {
   const textoBios = comBios.length
     ? '✅ ' + comBios.map((x) => x.curto || x.nome).join(', ') + ' · trocar ou guardar outra'
     : null;
+  // o cartão de Aparelhos: quantos pareados e conectados (o redeEvento do antigo)
+  const aparelhos = usarRede((r) => r.aparelhos);
+  const redeOk = usarRede((r) => r.ok);
+  const textoRede = redeOk ? textoDoInicio(aparelhos) : null;
   const jogo = usarJogo((j) => j.jogo);
   const idAberto = usarJogo((j) => j.registro?.id);
   const jogos = useJogosRecentes();
@@ -209,7 +214,9 @@ export function Inicio() {
             <button key={x.a} data-acao={x.a} onClick={() => acao(x.a)}>
               <i>{x.i}</i>
               <b>{x.b}</b>
-              <small id={x.id}>{x.a === 'bios-tela' ? (textoBios ?? x.s) : x.s}</small>
+              <small id={x.id}>
+                {x.a === 'bios-tela' ? (textoBios ?? x.s) : x.a === 'aparelhos' ? (textoRede ?? x.s) : x.s}
+              </small>
             </button>
           ))}
         </div>

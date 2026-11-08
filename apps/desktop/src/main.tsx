@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { escolherBackend } from './platform/escolher';
 import { carregarConfig } from './stores/config';
 import { ligarServicos } from './stores/servicos';
+import { ligarARede } from './stores/rede';
 import './styles/antigo/estilo.css';
 import './styles/base.css';
 
@@ -12,6 +13,7 @@ if (!raiz) throw new Error('index.html sem o #raiz');
 const backend = escolherBackend(new URL(location.href));
 ligarLog(backend);
 ligarServicos(backend);
+ligarARede();
 // sinal de vida: o kofstation fica no ar enquanto esta janela estiver aberta (e fecha 30 s depois que ela sumir)
 setInterval(() => void backend.chamar('app.vivo').catch(() => undefined), 5000);
 addEventListener('error', (e) =>

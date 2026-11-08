@@ -4,6 +4,7 @@
 import type { Backend } from '@kof/app-core';
 import type { AppInfo } from '@kof/contracts';
 import { criarComandosTeste } from './teste-comandos';
+import { criarRedeTeste } from './teste-rede';
 
 export function criarBackendTeste(opcoes: { falhar?: boolean } = {}): Backend {
   const info: AppInfo = { version: '0.1.0', contractVersion: 1, os: 'other', arch: 'navegador', dataDir: '(memória)' };
@@ -24,5 +25,6 @@ export function criarBackendTeste(opcoes: { falhar?: boolean } = {}): Backend {
     },
     enviarBinario: async <T>(cmd: string, args: Record<string, unknown>, dados: Uint8Array) =>
       (await rodar(cmd, args, dados)) as T,
+    ...(opcoes.falhar ? {} : { rede: criarRedeTeste() }),
   };
 }

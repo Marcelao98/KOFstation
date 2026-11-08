@@ -15,6 +15,7 @@ kof-core = { path = "../kof-core" }
 kof-files = { path = "../kof-files" }
 kof-nativo = { path = "../kof-nativo" }
 kof-atualiza = { path = "../kof-atualiza" }
+kof-net = { path = "../kof-net" }
 ureq = { version = "3", features = ["platform-verifier"] }
 tiny_http = "0.12"
 getrandom = "0.3"

@@ -35,7 +35,6 @@ const TELAS: Partial<Record<string, TelaId>> = {
 /** Etapa em que cada ação ainda não feita chega. */
 export const ETAPA: Readonly<Record<string, string>> = {
   'controle-celular': 'M13',
-  aparelhos: 'M13',
 };
 
 export const avisoEtapa = (acao: string): string =>

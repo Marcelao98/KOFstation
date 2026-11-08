@@ -107,6 +107,18 @@ impl Servidor {
         })
     }
 
+    /// Abre a rede entre aparelhos numa linha separada (porta ocupada só fica no log; a tela Aparelhos explica).
+    pub fn abrir_rede(&self) {
+        let (pasta, origem) = (
+            self.estado.pasta_dados.clone(),
+            format!("http://127.0.0.1:{}", self.porta),
+        );
+        let r = self.estado.rede.abrir(&pasta, &origem);
+        if let Err(e) = r {
+            tracing::warn!(target: "rede", "a rede entre aparelhos não abriu: {e}");
+        }
+    }
+
     pub fn url(&self) -> String {
         format!("http://127.0.0.1:{}/?t={}", self.porta, self.token)
     }
