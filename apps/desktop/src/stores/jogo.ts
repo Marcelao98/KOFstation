@@ -48,6 +48,9 @@ export const PROPORCOES: [Proporcao, string][] = [
 ];
 
 /** Último quadro chegado do Worker (o hook da tela desenha no próximo quadro do monitor). */
+/** Quem quer cada quadro novo na hora (Jogar no PC transmite cada um). */
+export const aoQuadroNovo = new Set<() => void>();
+
 export const ultimoQuadro: { pixels: Uint32Array | null; largura: number; altura: number; novo: boolean } = {
   pixels: null,
   largura: 0,
@@ -226,7 +229,10 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       const sram = await saveDoJogo(chaveSram);
       const opcoes = opcoesDoNucleo(aberto.sistema);
       const eventos: EventosDoJogo = {
-        quadro: (pixels, largura, altura) => Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true }),
+        quadro: (pixels, largura, altura) => {
+          Object.assign(ultimoQuadro, { pixels, largura, altura, novo: true });
+          for (const f of aoQuadroNovo) f();
+        },
         medicao: (medicao) => set({ medicao }),
         sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
         rebob: (r) => aoMudarRebob.forEach((f) => f(r)),

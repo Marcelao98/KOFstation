@@ -9,8 +9,9 @@ import { usarModo } from '../stores/modo';
 import { MOLDURAS, usarMoldura } from '../stores/moldura';
 import { FILTROS, usarVisual } from '../stores/visual';
 import { PALETAS_GB, PALETAS_NES } from '@kof/app-core';
+import { celularOnline, levarProCelular, pararTransmissao, usarTransmissao } from '../stores/transmissao';
 
-interface Item {
+export interface Item {
   t: string;
   f?: () => void;
   v?: () => string;
@@ -38,6 +39,16 @@ function itens(): Item[] {
   const p = usarPrefs.getState();
   const l: Item[] = [
     { t: '▶ Continuar', f: fechar },
+    {
+      t: '📱 Levar pro celular',
+      so: () => !!j.jogo && !usarTransmissao.getState().ligada && !!celularOnline(),
+      f: depois(() => levarProCelular()),
+    },
+    {
+      t: '📺 Voltar pra TV',
+      so: () => usarTransmissao.getState().ligada,
+      f: depois(() => pararTransmissao('o jogo voltou pra TV')),
+    },
     { t: '💾 Salvar estado', f: depois(() => acao('salvar-estado')) },
     { t: '⟲ Carregar último estado', f: depois(() => acao('carregar-ultimo')) },
     { t: '🎵 Guardar esta música', f: depois(() => acao('guardar-musica')) },
@@ -116,6 +127,11 @@ function itens(): Item[] {
 }
 
 /** Teclas do menu rápido (também usadas pelo controle). Devolve true se tratou. */
+/** Os itens que o celular pode usar no Jogar no PC: os ajustes ◀▶ e o que mexe no jogo sem abrir tela no PC. */
+export function itensRemotos(): Item[] {
+  return itens().filter((it) => it.aj || /^(💾|⟲|↺)/.test(it.t));
+}
+
 export const teclaDoRapido: { tratar: ((code: string) => boolean) | null } = { tratar: null };
 
 export function MenuRapido() {

@@ -6,7 +6,7 @@ export interface RedeTeste {
   /** o que a página mandou pros aparelhos */
   enviados: { para: string; canal: string; dados: string }[];
   /** um celular digita o código (devolve false se a janela não está aberta ou o código está errado) */
-  parearCelular(codigo: string, nome?: string): boolean;
+  parearCelular(codigo: string, nome?: string, ip?: string): boolean;
   /** um aparelho manda uma mensagem pela rede */
   mensagem(de: string, canal: string, dados: string): void;
   ligar(id: string, online: boolean): void;
@@ -22,7 +22,7 @@ export function criarRedeTeste(): () => Promise<CanalRede> {
   let n = 0;
   const t: RedeTeste = {
     enviados: [],
-    parearCelular(codigo, nome = 'Celular de teste') {
+    parearCelular(codigo, nome = 'Celular de teste', ip = '192.168.0.20') {
       if (!janela || janela.codigo !== codigo) return false;
       const id = `cel${String(++n).padStart(13, '0')}`;
       aparelhos.push({
@@ -31,7 +31,7 @@ export function criarRedeTeste(): () => Promise<CanalRede> {
         tipo: 'celular',
         online: true,
         visto: Math.floor(Date.now() / 1000),
-        ip: '192.168.0.20',
+        ip,
       });
       janela = null;
       emitir({ t: 'pareado', aparelho: { id, nome, tipo: 'celular' } });

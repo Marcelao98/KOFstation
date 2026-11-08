@@ -195,11 +195,22 @@ export function religarControleNaAbertura() {
   }, 1500);
 }
 
+/** Jogar no PC (M13.4): os botões que chegam pelo canal de dados do WebRTC entram como o celular do PC. */
+const transmissao = { ativa: false, pad: { b: 0, e: [0, 0, 0, 0] } as PadCelular };
+export function padDaTransmissao(ativa: boolean, pad?: PadCelular) {
+  transmissao.ativa = ativa;
+  transmissao.pad = pad ?? { b: 0, e: [0, 0, 0, 0] };
+}
+
 // ---------------------------------------------------------------- pros jogadores
 /** Os celulares ligados agora, como aparelhos de controle (o celular sem mandar nada por 5 s sai). */
 export function aparelhosCelular(agora = performance.now()): Aparelho[] {
   const l: Aparelho[] = [];
-  if (remoto.ligado) l.push({ k: 'cel-pc', nome: '📱 Celular (controle do PC)', b: remoto.pad.b, e: remoto.pad.e });
+  if (remoto.ligado || transmissao.ativa) {
+    const b = remoto.pad.b | transmissao.pad.b;
+    const e = transmissao.pad.e.some((x) => x) ? transmissao.pad.e : remoto.pad.e;
+    l.push({ k: 'cel-pc', nome: '📱 Celular (controle do PC)', b, e });
+  }
   for (const [id, c] of celRede) {
     if (agora - c.quando > 5000) {
       celRede.delete(id);

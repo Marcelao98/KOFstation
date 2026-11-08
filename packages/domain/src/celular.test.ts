@@ -23,3 +23,21 @@ describe('celular como controle (formatos do antigo)', () => {
     expect(linhaDoJogo('snes', 'Jogo\tcom tab')).toBe('JOGO snes\tJogo com tab');
   });
 });
+
+describe('Jogar no PC', () => {
+  it('escala, .local e o jogo pedido', async () => {
+    const { escalaTransmissao, trocarLocal, acharJogoPedido } = await import('./celular');
+    expect(escalaTransmissao(256, 224)).toBe(4);
+    expect(escalaTransmissao(640, 480)).toBe(2);
+    expect(trocarLocal('c=IN IP4 0f1e2d3c-1111-2222-3333-444455556666.local', '192.168.0.9')).toBe(
+      'c=IN IP4 192.168.0.9',
+    );
+    const l = [
+      { crc: 'aa', arquivo: 'Mario.sfc', nome: 'Mario', sistema: 'snes' },
+      { arquivo: 'Sonic.md', nome: 'Sonic', sistema: 'md' },
+    ];
+    expect(acharJogoPedido(l, { crc: 'aa' })?.nome).toBe('Mario');
+    expect(acharJogoPedido(l, { arquivo: 'sonic.bin', sistema: 'md' })?.nome).toBe('Sonic');
+    expect(acharJogoPedido(l, { nome: 'Zelda', sistema: 'snes' })).toBeUndefined();
+  });
+});

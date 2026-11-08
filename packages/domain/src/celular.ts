@@ -45,3 +45,30 @@ export function enderecoDoControle(texto: string): { url: string; senha: string 
 export function linhaDoJogo(sis: string, nome: string): string {
   return 'JOGO ' + sis + '\t' + nome.replace(/[\t\n]/g, ' ').slice(0, 80);
 }
+
+// ---------------------------------------------------------------- Jogar no PC (M13.4; o jogarpc.js do antigo)
+/** Quanto ampliar a imagem crua do jogo pra transmitir: pixels inteiros, até ~1280 de lado. */
+export function escalaTransmissao(l: number, a: number): number {
+  return Math.max(1, Math.min(4, Math.floor(1280 / Math.max(l, a, 1))));
+}
+
+/** O Chrome esconde o IP da rede de casa atrás de um nome .local: troca pelo IP que a rede já conhece. */
+export function trocarLocal(sdp: string, ip?: string): string {
+  return ip ? sdp.replace(/[0-9a-f-]{36}\.local/gi, ip) : sdp;
+}
+
+/** O jogo que o celular pediu, na biblioteca do PC: pelo CRC (mesma ROM), senão pelo nome do arquivo ou do jogo. */
+export function acharJogoPedido<T extends { crc?: string; arquivo: string; nome: string; sistema: string }>(
+  jogos: readonly T[],
+  p: { crc?: string; arquivo?: string; nome?: string; sistema?: string },
+): T | undefined {
+  const base = (s?: string) =>
+    String(s ?? '')
+      .toLowerCase()
+      .replace(/\.[a-z0-9]{2,4}$/, '');
+  return (
+    (p.crc ? jogos.find((x) => x.crc === p.crc) : undefined) ??
+    jogos.find((x) => x.sistema === p.sistema && base(x.arquivo) === base(p.arquivo)) ??
+    jogos.find((x) => x.sistema === p.sistema && base(x.nome) === base(p.nome))
+  );
+}
