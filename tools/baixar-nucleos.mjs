@@ -10,6 +10,21 @@ import { fileURLToPath } from 'node:url';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifesto = JSON.parse(readFileSync(join(raiz, 'third_party/cores/manifest.json'), 'utf8'));
+/** fetch com 3 tentativas (o GitHub às vezes responde 5xx ou cai a conexão): espera 2 s, depois 6 s. */
+async function baixar(url) {
+  for (let t = 1; ; t++) {
+    try {
+      const r = await fetch(url);
+      if (r.ok || r.status < 500 || t >= 3) return r;
+      console.warn(`… ${url}: HTTP ${r.status}, tentando de novo (${t}/3)`);
+    } catch (e) {
+      if (t >= 3) throw e;
+      console.warn(`… ${url}: ${e.message}, tentando de novo (${t}/3)`);
+    }
+    await new Promise((ok) => setTimeout(ok, t * 2000 + (t - 1) * 2000));
+  }
+}
+
 const destino = join(raiz, 'apps/desktop/public/nucleos');
 mkdirSync(destino, { recursive: true });
 const sha = (b) => createHash('sha256').update(b).digest('hex');
@@ -23,7 +38,7 @@ for (const [nome, n] of Object.entries(manifesto.nucleos)) {
       dados = readFileSync(join(process.env.KOF_NUCLEOS_DE, n.destino ?? `${nome}.js`));
     else if (process.env.KOF_NUCLEOS_DE && n.arquivo) dados = readFileSync(join(process.env.KOF_NUCLEOS_DE, n.arquivo));
     else {
-      const r = await fetch(n.url ?? manifesto.origem + n.arquivo);
+      const r = await baixar(n.url ?? manifesto.origem + n.arquivo);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       dados = Buffer.from(await r.arrayBuffer());
       if (n.trecho) {
@@ -61,7 +76,7 @@ for (const [nome, n] of Object.entries(manifesto.nativos ?? {})) {
     if (existsSync(alvo) && sha(readFileSync(alvo)) === a.sha256) continue;
     let dados;
     try {
-      const r = await fetch(a.url);
+      const r = await baixar(a.url);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       dados = Buffer.from(await r.arrayBuffer());
       if (a.gzip) dados = gunzipSync(dados); // o do antigo publicado gzipado: o SHA-256 conferido é o do arquivo aberto
