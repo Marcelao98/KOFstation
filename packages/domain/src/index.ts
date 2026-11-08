@@ -22,3 +22,4 @@ export * from './bios';
 export * from './celular';
 export * from './desempenho';
 export * from './diagnostico';
+export * from './opcoes-nucleo';
