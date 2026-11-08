@@ -1,0 +1,44 @@
+diff --git a/apu/bapu/dsp/SPC_DSP.cpp b/apu/bapu/dsp/SPC_DSP.cpp
+index 38d9f81..0ef8f54 100644
+--- a/apu/bapu/dsp/SPC_DSP.cpp
++++ b/apu/bapu/dsp/SPC_DSP.cpp
+@@ -20,6 +20,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
+ 
+ #include "blargg_source.h"
+ 
++/* KOFstation: sonda do osciloscópio e mudo por voz (a ponte do KOFstation lê e liga) */
++extern "C" {
++	int kof_sonda = 0;
++	unsigned kof_mudas = 0;
++	int16_t kof_onda[8 * 4096];
++	unsigned kof_ondaPos = 0;
++	int kof_canais = 8;
++}
++
+ #ifdef BLARGG_ENABLE_OPTIMIZER
+ 	#include BLARGG_ENABLE_OPTIMIZER
+ #endif
+@@ -721,6 +730,8 @@ MISC_CLOCK( 29 )
+ }
+ MISC_CLOCK( 30 )
+ {
++	if ( kof_sonda )
++		kof_ondaPos = (kof_ondaPos + 1) & 4095; /* KOFstation: próxima amostra da sonda */
+ 	if ( m.every_other_sample )
+ 	{
+ 		m.kon    = m.new_kon;
+@@ -850,8 +861,14 @@ inline VOICE_CLOCK( V3c )
+ 
+ inline void SPC_DSP::voice_output( voice_t const* v, int ch )
+ {
++	/* KOFstation: a forma da voz (antes do volume), 1 por amostra a 32 kHz */
++	if ( kof_sonda && !ch )
++		kof_onda [v->voice_number * 4096 + kof_ondaPos] = (int16_t) m.t_output;
++
+ 	// Apply left/right volume
+ 	int amp = (m.t_output * (int8_t) VREG(v->regs,voll + ch)) >> 7;
++	if ( kof_mudas >> v->voice_number & 1 )
++		amp = 0; /* KOFstation: voz muda na jukebox */
+ 	amp *= ((stereo_switch & (1 << (v->voice_number + ch * voice_count))) ? 1 : 0);
+ 	
+ 	// Apply user-set volume (if set)

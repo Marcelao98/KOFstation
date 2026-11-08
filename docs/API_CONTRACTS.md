@@ -50,6 +50,9 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | `library.scan` | `{exts[]}` → `{root, files: RomFile[]}` (Games até 2 níveis; `.zip` traz o diretório; `.bin/.img/.iso` trazem `cd`) | `ROOT_MISSING` | ✅ M3.2 (sem eventos de progresso: a varredura não lê os arquivos inteiros) |
 | `library.crc` | `{items: {path, sistema}[]}` → `{crcs: {path: crc}}` (No-Intro; cache em `<dados>/cache/crc.json`) | `ROOT_MISSING`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
 | `file.read` | `{scope: "kof-games", path, offset?, length?}` → binário | `NOT_FOUND`, `INVALID_ARGS`, `PATH_OUTSIDE_SCOPE` | ✅ M3.2 |
+| `file.stat` | `{scope: "kof-games", path}` → `{size, dir}` (o tamanho dos .bin de um .cue sem ler) | `NOT_FOUND`, `PATH_OUTSIDE_SCOPE` | ✅ correção 07/11 |
+| `file.zip.list` | `{scope: "kof-games", path}` → `{size, itens: {nome, tamanho, crc}[]}` (o diretório do zip, sem descompactar) | `NOT_FOUND`, `PATH_OUTSIDE_SCOPE` | ✅ correção 07/11 |
+| `file.zip.read` | `{scope: "kof-games", path, entrada, length?}` → binário (os primeiros `length` bytes de uma entrada, descompactados; guardado ou deflate) | `NOT_FOUND`, `BAD_ZIP`, `PATH_OUTSIDE_SCOPE` | ✅ correção 07/11 |
 | `library.inventory` | — → `{files: (RomFile & {cue?: string[]})[], dirs[]}` (tudo de Games e Novos, até 6 níveis) | `ROOT_MISSING` | ✅ M3.3 |
 | `library.organize.plan` | **no TS** (`domain/organizar.ts` `planejarOrganizacao`, sobre o `library.inventory`): `{moves: Move[], limpar[]}` | — | ✅ M3.3 |
 | `library.organize.apply` | `{moves, limpar?}` → `{done, failed: {move, code, message}[], removed[]}` (nome repetido vira "nome (2).ext"; pasta inteira junta com a que já existe) | por movimento: `NOT_FOUND`, `PATH_OUTSIDE_SCOPE`, `IO_ERROR` | ✅ M3.3 |
@@ -67,8 +70,8 @@ Todo `path` nos comandos é **relativo** ao escopo; `..`, caminho absoluto e lin
 | `bios.list` / `bios.import` | `{token}` → `BiosInfo[]` | `UNKNOWN_BIOS` | M11 |
 | `native.ps2.start` / `.stop` | `{}` → `{session}` | `SIDECAR_MISSING`, `SIDECAR_CRASHED` | M12 |
 | `native.ps2.send` | um dos comandos tipados do protocolo kofnativo | `NOT_RUNNING` | M12 |
-| `net.*` | os pedidos da API local de `rede/PROTOCOLO.md` (`eu`, `lista`, `parear`, `conectar`, `enviar`...) | os do protocolo, enumerados | M13 |
-| `update.check` / `update.apply` | — → `UpdateInfo` | `SIGNATURE_INVALID`, `NETWORK` | M15 |
+| `rede.ligar` | — → `{porta, token, id, tcp}`: onde está a WebSocket da rede entre aparelhos (127.0.0.1, `?t=<token>`, só a origem da página). Por ela vai o **mesmo JSON da API local do antigo** (`third_party/kofrede/PROTOCOLO.md`: pedidos `eu`, `lista`, `nome`, `visivel`, `parear`, `parear-fim`, `achar`, `parear-com`, `conectar`, `remover`, `enviar`; eventos `lista`, `parear`, `parear-fim`, `achados`, `pareado`, `par-erro`, `msg`, `nao-enviou`). O serviço (`kof-net`) abre junto com o app, nas portas do antigo (TCP/UDP 8650; TCP pula até +9 se ocupada) | `NETWORK` (não abriu: porta ocupada, `KOF_SEM_REDE`) | ✅ M13.1/M13.2 |
+| `app.atualizacao` | `{procurar?: bool}` → `{versao, commit, ligado, motivo?, situacao: parado\|procurando\|emDia\|pronta\|erro, nova?, baixados, bytes, erro?}`. `procurar: true` começa a procurar numa linha separada (a página pergunta de novo até sair de `procurando`); a versão baixada entra na **próxima abertura** (`kof-atualiza::aplicar` no começo do `main`). Desligado rodando do código, sem a chave compilada ou com `nao-atualizar` na pasta. Num pacote, o `app.info.version` é a do `versao.txt` | no `erro`: `NETWORK` (inclui assinatura que não confere e arquivo diferente do manifesto), `PATH_OUTSIDE_SCOPE`, `IO_ERROR` | ✅ M15.1 (D34) |
 
 Eventos previstos: `library.scan.progress`, `native.ps2.state`, `native.ps2.frame` (binário), `native.ps2.read`
 (pedido de pedaço de disco), `net.*` (os do PROTOCOLO.md), `update.progress`, `backend.error` (erro sem pedido).
@@ -84,7 +87,26 @@ interface BiosInfo { system: SystemId; file: string; sha256: string; size: numbe
 interface ContractError { code: string; message: string; details?: Record<string, unknown> }
 ```
 
-## 5. Contratos que continuam iguais ao antigo (compatibilidade)
+## 5. Núcleo nativo (M11b, D32; `crates/kof-nativo`, `packages/contracts/src/nativo.ts`)
+
+O `kofstation` abre `kofstation --nativo` (um processo por jogo). **stdin:** uma linha JSON
+`{nucleo, jogo?, sistema, saves, token, origem?, variaveis?, sem_som?}`; fechar o stdin = fechar o jogo. **stdout:** uma
+linha, `{porta, nucleo: {nome, versao, extensoes, caminho_inteiro}, taxaSaida}` ou `{erro: {codigo, mensagem}}`
+(`CORE_FAILED`, `INVALID_ARGS`). **stderr:** log (o supervisor guarda as últimas 300 linhas).
+
+A página conecta em `ws://127.0.0.1:<porta>/?t=<token>` (sem token, token errado ou `Origin` diferente da do app = HTTP
+403). Uma página por vez: a nova derruba a anterior e recebe `pronto` de novo.
+
+| Direção | Mensagem |
+|---|---|
+| página → | texto `{cmd: pausar\|continuar\|reiniciar\|fechar}`, `{cmd: volume, valor 0–1}`, `{cmd: turbo, fator 1–8}`, `{cmd: variavel, chave, valor}`, `{cmd: salvarEstado\|lerBateria, pedido}` |
+| página → | binário `[2, jogador, botões u16, eixos 4×i16]` (máscara do libretro); `[4\|6, 0,0,0, pedido u32, tamanho u32] + bytes` (carregar estado / gravar bateria) |
+| → página | texto `{tipo: pronto, nucleo, versao, largura, altura, proporcao, fps, taxa, taxaSaida}`, `geometria`, `desempenho {quadros, amostras, atrasoMs, faltas}` (1/s), `ok {pedido}`, `erro {pedido, codigo, mensagem}`, `fim {motivo}` |
+| → página | binário `[1, 0,0,0, largura u16, altura u16, número u32] + RGBA` (só o mais novo); `[3\|5, 0,0,0, pedido u32, tamanho u32] + bytes` (estado / bateria) |
+
+Números em little-endian. Exemplos testados dos dois lados: `packages/contracts/fixtures/nativo.json`.
+
+## 6. Contratos que continuam iguais ao antigo (compatibilidade)
 
 - `rede/PROTOCOLO.md` v1 (entre aparelhos): **igual**, pra parear com o APK atual.
 - Protocolo do kofnativo (cabeçalho de `pc-nativo/kofnativo.c`): igual por dentro; muda só quem conversa com ele (o

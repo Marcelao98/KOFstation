@@ -10,7 +10,8 @@ camada de experiência em volta deles.
 > [Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old) e continua sendo o produto até a troca.
 > A migração anda em etapas com paridade total: nada do antigo pode se perder ([docs/PARIDADE.md](docs/PARIDADE.md)).
 
-**Onde estamos (02/11/2026):** M3 a M8 aprovados pelo Marcelo; **M9 a M11 feitos**, esperando ele testar — jukebox
+**Onde estamos:** o retrato pra ler em 5 minutos está em [docs/SITUACAO.md](docs/SITUACAO.md). Resumo (03/11/2026): M11b feito até o N.8 (PS1 nativo padrão, jukebox do SNES com Ondas/Notas, N64
+desenhando), esperando o Marcelo testar; o PS2 nativo (N.9) é o próximo. Antes: M3 a M8 aprovados pelo Marcelo; **M9 a M11 feitos**, esperando ele testar — jukebox
 (F7, ondas, notas, .spc, .wav, trilha do KOFstation, música do Início), abertura da 1ª vez, estatísticas, espaço usado,
 traduções (IPS/BPS/UPS), caçador de bugs (F9) e a tela de BIOS. Roda SNES, NES, Game Boy/Color, GBA, Mega Drive, Master
 System, Game Gear, **Neo Geo, PlayStation e Nintendo 64**. Detalhe de cada etapa: [docs/ROADMAP.md](docs/ROADMAP.md). O que aconteceu em cada sessão:
@@ -62,6 +63,9 @@ flowchart TB
     KA["kof-app — servidor local (uma linha por pedido) + api.rs (os comandos) + abre o navegador"]
     KF["kof-files — escopos, Kof Games, varredura, CRC, organizar, lojas, config, capas"]
     KC["kof-core — app.info, erros com código, log em arquivo (inclusive o da tela)"]
+    KN["kof-nativo — núcleo libretro nativo num processo filho (kofstation --nativo): som pela placa, OpenGL sem janela pro PS2, imagem e botões por WebSocket local com token"]
+    KU["kof-atualiza — atualizador: manifesto assinado (Ed25519), baixa só o que mudou, troca na próxima abertura"]
+    KR["kof-net — rede entre aparelhos: kofrede.c do antigo (FFI) + o serviço do kofservico em Rust (UDP/TCP 8650), mesmo protocolo do APK; WebSocket da página com token"]
   end
   NU[("núcleos libretro do kofstation-old<br/>third_party/cores/manifest.json (SHA-256)")]
 
@@ -78,6 +82,13 @@ flowchart TB
   KA --> KF
   KA --> KC
   KF --> KC
+  KA -->|"abre e vigia o processo filho"| KN
+  KN --> KC
+  KA --> KU
+  KA -->|"abre junto (linhas próprias)"| KR
+  PL -.->|"WebSocket 127.0.0.1 + token (M13)"| KR
+  KR <-.->|"TCP/UDP 8650, cifrado (rede de casa)"| CEL(["celular (APK) ou outro PC"])
+  PL -.->|"WebSocket 127.0.0.1 + token (N.3)"| KN
   EN --> NU
 ```
 
@@ -126,18 +137,24 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Jukebox e música (trilha FM, violino, .spc, .wav), abertura, música do Início | ⏸ M9 (falta o Marcelo testar) |
 | Estatísticas, espaço usado, traduções, caçador de bugs (F9) e replay | ⏸ M10 |
 | BIOS, GBA com BIOS, Neo Geo, PS1, N64 (núcleo do SNES: Snes9x; o Kof quando a Mel liberar) | ⏸ M11 |
-| PS2 | ⬜ M12 |
-| Rede e celular, pacotes e atualização, Android | ⬜ M13–M15 |
+| PS1 nativo (PCSX-ReARMed com recompilador, processo à parte, som pela placa, imagem pela página), jukebox do SNES com Ondas/Notas, N64 conferido | ⏸ M11b (N.1–N.8; falta o Marcelo testar) |
+| PS2 nativo (LRPS2 do antigo, OpenGL sem janela no processo do jogo, DVD lido do disco) | ⏸ M12/N.9 (falta o Marcelo jogar) |
+| Atualizador assinado (liga com a chave), pacote do Linux (`--instalar`), instalador do Windows, lado a lado com o antigo | ⏸ M15 (falta a chave e o Marcelo instalar) |
+| Rede entre aparelhos (📡 Aparelhos, QR e código, pareia com o APK atual), celular como controle (rede e servidor do APK), 🖥 Jogar no PC (WebRTC), Levar pro celular | ⏸ M13 (falta o Marcelo testar com o celular) |
+| Android (o APK servindo o app novo) | ⬜ M14 |
 
 ---
 
 ## Rodar
 
-Só testar (sem compilar nada), instalando em `~/Programas/Kof Games/KOFstation` (a pasta de cima vira a Kof Games):
+Só testar (sem compilar nada): a pasta `KOFstation` (o executável, `nucleos/`, `nativo/` e `versao.txt`, igual ao app
+antigo) vai pra `~/Programas/Kof Games/` (a pasta de cima vira a Kof Games):
 
 ```bash
-mkdir -p ~/Programas/"Kof Games"/KOFstation && curl -fL -o ~/Programas/"Kof Games"/KOFstation/kofstation https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/kofstation && chmod +x ~/Programas/"Kof Games"/KOFstation/kofstation && ~/Programas/"Kof Games"/KOFstation/kofstation
+mkdir -p ~/Programas/"Kof Games" && curl -fL https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/KOFstation-linux.tar.gz | tar -xz -C ~/Programas/"Kof Games" && ~/Programas/"Kof Games"/KOFstation/kofstation
 ```
+
+No Windows: `KOFstation-windows.zip` da mesma branch, descompactado dentro da pasta Kof Games.
 
 Pelo código (precisa de Node 22+, Rust pelo rustup e um navegador Chromium; detalhes em
 [docs/INSTALAR.md](docs/INSTALAR.md)):

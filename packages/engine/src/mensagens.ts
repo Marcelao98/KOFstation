@@ -61,6 +61,15 @@ export interface Medicao {
   faltasDeSom: number;
   /** som esperando no anel, em ms */
   somNaFilaMs: number;
+  /** núcleo nativo que desenha na placa (PS2): ms lendo a imagem da placa por quadro */
+  leituraMs?: number;
+  /** núcleo nativo: ms preparando o quadro pra página */
+  imagemMs?: number;
+  /** cada quadro do último segundo (M16): 6 números por quadro, em µs, [t, núcleo, leitura, envio, som na fila,
+   *  faltas] (lerPorQuadro do domain/desempenho.ts). `t` conta do começo do Worker/processo. */
+  porQuadro?: number[];
+  /** núcleo nativo: % de um núcleo do processador por linha (thread) do processo do jogo */
+  cpu?: { linha: string; pct: number }[];
 }
 
 export type DoWorker =
@@ -95,6 +104,8 @@ export interface FaixaNoWorker {
   spc?: Uint8Array | null;
   /** trilha do KOFstation (comandos FM/PSG): toca no núcleo só de som */
   fm?: Uint8Array | null;
+  /** o 8 bits (reserva quando faltam o violino e o núcleo FM): toca sem núcleo */
+  oito?: import('./oitobits').DadosOitoBits | null;
   /** BIOS e os arquivos do jogo (Neo Geo) */
   extras?: ExtrasDoJogo;
 }

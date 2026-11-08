@@ -1,6 +1,6 @@
 // M9: F7 guarda a música do jogo; a jukebox toca numa instância separada do núcleo, com as ondas de cada canal.
 import { expect, test } from '@playwright/test';
-import { romGbSom } from './roms';
+import { romGbSom, spcDeTeste } from './roms';
 
 const erros: string[] = [];
 test.beforeEach(async ({ page }) => {
@@ -46,4 +46,27 @@ test('F7 guarda, a jukebox toca com ondas, Mudo/Solo e a trilha do KOFstation na
   await page.locator('[data-acao="jk-vista-notas"]').click();
   await page.waitForTimeout(1500);
   if (process.env.KOF_PRINTS) await page.screenshot({ path: `${process.env.KOF_PRINTS}/jukebox-notas.png` });
+});
+
+test('SNES: .spc com as 8 vozes nas Ondas (Snes9x com sonda), Notas e Capa', async ({ page }) => {
+  await page.locator('#lateral [data-acao="jukebox"]').click();
+  await expect(page.locator('#jukebox')).toBeVisible();
+  await page.setInputFiles('#arquivo-spc', {
+    name: 'Quadrada.spc',
+    mimeType: 'application/octet-stream',
+    buffer: spcDeTeste(),
+  });
+  await page.locator('.jk-faixa', { hasText: 'Quadrada' }).click();
+  await expect(page.locator('#jk-titulo')).toHaveText('Quadrada');
+  await expect(page.locator('#jk-vozes .jk-voz')).toHaveCount(8);
+  if (process.env.KOF_PRINTS) await page.screenshot({ path: `${process.env.KOF_PRINTS}/jukebox-snes-capa.png` });
+  await page.locator('[data-acao="jk-vista-ondas"]').click();
+  await expect(page.locator('#jk-ondas .jk-canal')).toHaveCount(8);
+  // a voz 1 soa (quadrada): o canvas dela é pintado; o aviso "sem ondas" não aparece
+  await expect.poll(() => page.evaluate(pintado('#jk-ondas .jk-canal canvas')), { timeout: 5000 }).toBeGreaterThan(0);
+  await expect(page.locator('#jukebox')).not.toContainText('não entrega a onda');
+  if (process.env.KOF_PRINTS) await page.screenshot({ path: `${process.env.KOF_PRINTS}/jukebox-snes-ondas.png` });
+  await page.locator('[data-acao="jk-vista-notas"]').click();
+  await page.waitForTimeout(1500);
+  if (process.env.KOF_PRINTS) await page.screenshot({ path: `${process.env.KOF_PRINTS}/jukebox-snes-notas.png` });
 });

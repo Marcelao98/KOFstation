@@ -27,6 +27,8 @@ import {
   temMusica,
   Tocador,
   TocadorViolino,
+  dadosDaRua,
+  type DadosOitoBits,
   type FaixaNoWorker,
   type InfoDaFaixa,
   type OndasAoVivo,
@@ -204,26 +206,54 @@ async function faixaNoWorker(f: ItemJuke): Promise<FaixaNoWorker | 'violino'> {
   };
 }
 
+/** O 8 bits do antigo (KofMusica): só o Air e a Rua; as notas do Air vêm do manifesto (nucleos/air8.json). */
+async function faixaOitoBits(qual: string): Promise<FaixaNoWorker | null> {
+  if (qual === 'rua') return { sistema: 'md', oito: dadosDaRua() };
+  if (qual !== 'air') return null;
+  const r = await fetch(new URL('air8.json', base()));
+  if (!r.ok) throw new Error(`as notas do Air não vieram (${r.status})`);
+  return { sistema: 'md', oito: (await r.json()) as DadosOitoBits };
+}
+
 async function abrirTocador(f: ItemJuke, mudas: number, repetir: boolean): Promise<TocadorDeMusica> {
   const j = usarJogo.getState();
-  const fx = await faixaNoWorker(f);
   const { segundos, fadeMs } = f.trilha ? { segundos: f.segundos ?? 0, fadeMs: f.fadeMs ?? 4000 } : tempoDe(f);
-  if (fx === 'violino') {
-    const v = await TocadorViolino.abrir(base(), j.volume / 100, j.mudo);
-    v.configurar(segundos, fadeMs, repetir);
-    v.mudas(mudas);
-    return v;
+  const abrir = (faixa: FaixaNoWorker) =>
+    Tocador.abrir({
+      faixa,
+      baseNucleos: base(),
+      segundos,
+      fadeMs,
+      repetir,
+      mudas,
+      volume: j.volume / 100,
+      mudo: j.mudo,
+    });
+  // a trilha tem reserva, como no antigo: violino → som do Mega Drive (FM) → 8 bits
+  if (f.trilha) {
+    const m = (await carregarTrilha()).find((x) => x.id === f.trilha);
+    if (m?.violino)
+      try {
+        const v = await TocadorViolino.abrir(base(), j.volume / 100, j.mudo);
+        v.configurar(segundos, fadeMs, repetir);
+        v.mudas(mudas);
+        return v;
+      } catch (e) {
+        registrar('warn', 'jukebox', `sem o violino (${textoDoErro(e)}): tentando o som do Mega Drive`);
+      }
+    if (m?.cmd)
+      try {
+        return await abrir({ sistema: 'md', fm: deB64(m.cmd) });
+      } catch (e) {
+        registrar('warn', 'jukebox', `sem o núcleo FM (${textoDoErro(e)}): tentando o 8 bits`);
+      }
+    const oito = await faixaOitoBits(f.trilha);
+    if (!oito) throw new Error('essa versão não tem essa música');
+    return abrir(oito);
   }
-  return Tocador.abrir({
-    faixa: fx,
-    baseNucleos: base(),
-    segundos,
-    fadeMs,
-    repetir,
-    mudas,
-    volume: j.volume / 100,
-    mudo: j.mudo,
-  });
+  const fx = await faixaNoWorker(f);
+  if (fx === 'violino') throw new Error('violino fora da trilha'); // não acontece: o violino é só da trilha
+  return abrir(fx);
 }
 
 export const usarJukebox = create<Jukebox>()((set, get) => {

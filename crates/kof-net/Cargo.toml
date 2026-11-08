@@ -1,0 +1,22 @@
+[package]
+name = "kof-net"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Rede entre aparelhos (M13): o kofrede.c do antigo por FFI e o serviço do kofservico.c em Rust, com o mesmo protocolo e a mesma API JSON"
+
+[dependencies]
+serde_json = "1"
+tungstenite = { version = "0.30", default-features = false, features = ["handshake"] }
+getrandom = "0.3"
+tracing = "0.1"
+
+[build-dependencies]
+cc = "1"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true

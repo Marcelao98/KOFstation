@@ -34,7 +34,21 @@ export interface JogoAberto {
   arquivos?: { nome: string; bytes: Uint8Array }[];
   /** arquivos que o jogo cita e não vieram junto (os .bin de um .cue aberto sozinho): completarJogo procura */
   faltam?: string[];
+  /**
+   * Só a cabeça do arquivo foi lida (PS1 que vai pro núcleo nativo: o CD não passa pela página). `rom` tem o começo e
+   * `tamanho` o tamanho de verdade, que é o que entra na identidade e na chave do save.
+   */
+  parcial?: boolean;
+  tamanho?: number;
+  /**
+   * Bytes do CD no disco (o .cue com os .bin, o zip descompactado, a imagem), quando só a cabeça foi lida. Decide se o
+   * WebAssembly pode ser a reserva do nativo (CD grande não: teria que passar inteiro pela página).
+   */
+  pesoCd?: number;
 }
+
+/** O tamanho de verdade do jogo (a `rom` pode ser só a cabeça). */
+export const tamanhoDoJogo = (j: Pick<JogoAberto, 'rom' | 'tamanho'>): number => j.tamanho ?? j.rom.length;
 
 export class ErroDeArquivo extends Error {
   constructor(

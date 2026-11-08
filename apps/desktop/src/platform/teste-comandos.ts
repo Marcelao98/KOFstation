@@ -58,6 +58,15 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       return null;
     },
     'app.vivo': () => null,
+    'app.atualizacao': () => ({
+      versao: '',
+      commit: '',
+      ligado: false,
+      motivo: 'rodando do código (sem versao.txt do pacote)',
+      situacao: 'parado',
+      baixados: 0,
+      bytes: 0,
+    }),
     'library.root.get': () => infoRaiz(),
     'library.root.set': (a) => {
       const p = String(a.path ?? '');
@@ -136,6 +145,25 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       if (t.arquivos.get(p)?.length === dados.length) return { stored: null };
       t.arquivos.set(p, dados.slice());
       return { stored: p };
+    },
+    'library.import.parte': (a, dados) => {
+      precisaRaiz();
+      const p = `Games/${String(a.pasta)}/${String(a.nome)}`;
+      const offset = Number(a.offset);
+      const total = Number(a.total);
+      if (offset === 0 && t.arquivos.get(p)?.length === total) return { stored: p, ja: true };
+      const antes = offset === 0 ? new Uint8Array(0) : (t.arquivos.get(p + '.kofparcial') ?? new Uint8Array(0));
+      if (antes.length !== offset) throw erro('CONFLICT', `${String(a.nome)}: pedaço fora de ordem`);
+      const junto = new Uint8Array(offset + dados.length);
+      junto.set(antes);
+      junto.set(dados, offset);
+      if (junto.length < total) {
+        t.arquivos.set(p + '.kofparcial', junto);
+        return { stored: null, ja: false };
+      }
+      t.arquivos.delete(p + '.kofparcial');
+      t.arquivos.set(p, junto);
+      return { stored: p, ja: false };
     },
     // a configuração do backend de teste sobrevive ao recarregar a página (como o arquivo do Rust)
     'config.read': (a) => {

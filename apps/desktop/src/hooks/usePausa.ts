@@ -5,6 +5,7 @@ import { config } from '../stores/config';
 import { usarJogo } from '../stores/jogo';
 import { usarModo } from '../stores/modo';
 import { jogoPausadoPorTela, usarTelas } from '../stores/telas';
+import { usarTransmissao } from '../stores/transmissao';
 
 function useFoco(): boolean {
   const [focada, setFocada] = useState(() => document.hasFocus());
@@ -26,7 +27,9 @@ export function usePausado(): boolean {
   const telas = usarTelas();
   const focada = useFoco();
   const perguntando = usarModo((m) => m.perguntando);
-  const pausaAuto = config().ler('pausaAuto') !== '0';
+  // transmitindo pro celular (Jogar no PC), sair da janela do PC não pausa: quem joga está no celular
+  const transmitindo = usarTransmissao((t) => t.ligada);
+  const pausaAuto = config().ler('pausaAuto') !== '0' && !transmitindo;
   return pausaManual || rapidoAberto || perguntando || jogoPausadoPorTela(telas) || (!focada && pausaAuto);
 }
 

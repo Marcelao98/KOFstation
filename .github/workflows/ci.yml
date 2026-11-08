@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - name: Cabeçalhos do som (ALSA, pro cpal do kof-nativo) e genisoimage (CD grande no teste do PS1)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -q && sudo apt-get install -y -q libasound2-dev genisoimage libegl1 libegl-mesa0 libgl1-mesa-dri
       - name: Rust (versão do rust-toolchain.toml)
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@v2
@@ -28,8 +31,28 @@ jobs:
         run: pnpm check
       - name: Rust (formato, clippy, testes)
         run: pnpm check:rust
+        env:
+          # no Linux o OpenGL sem janela (Mesa) tem que existir: o teste do núcleo que desenha na placa não pode pular
+          KOF_EXIGIR_GL: ${{ runner.os == 'Linux' && '1' || '' }}
       - name: Testes de fluxo (Playwright, só no Linux)
         if: runner.os == 'Linux'
         run: |
           pnpm --filter @kof/desktop exec playwright install --with-deps chromium
           pnpm e2e
+      - name: PS1 nativo de ponta a ponta (app de verdade + PCSX nativo, só no Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cargo build -p kof-app
+          node tools/testar-conexoes.mjs target/debug/kofstation
+          node tools/testar-nativo.mjs target/debug/kofstation
+          node tools/testar-ps2.mjs target/debug/kofstation
+      - name: Atualizador de ponta a ponta (chave de teste, servidor local, núcleos de verdade; só no Linux)
+        if: runner.os == 'Linux'
+        run: node tools/testar-atualizacao.mjs
+      - name: Rede (M13; paridade com o kofservico e o Rede.java do APK do antigo; só no Linux)
+        if: runner.os == 'Linux'
+        run: |
+          git init -q /tmp/kofstation-old && cd /tmp/kofstation-old
+          git fetch -q --depth 1 https://github.com/Marcelao98/kofstation-old ceba493fc494165de6f561b77a699fb8c22b295f && git checkout -q FETCH_HEAD
+          cd - && node tools/testar-rede.mjs /tmp/kofstation-old
+          cargo build -p kof-app && node tools/testar-aparelhos.mjs --antigo /tmp/kofstation-old

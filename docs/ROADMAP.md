@@ -6,6 +6,25 @@
 > Onde está cada coisa no app antigo: [auditoria/PLANO_DETALHADO.md §4](auditoria/PLANO_DETALHADO.md) e
 > [auditoria/FEATURE_INVENTORY.md](auditoria/FEATURE_INVENTORY.md). Como o front é feito: [FRONTEND.md](FRONTEND.md).
 
+## Ordem combinada em 03/11 (do mais barato pro mais caro)
+
+> O Marcelo pediu pra deixar o PS2 (caro) pro fim e fazer antes o que sai rápido e com menos token. As seções abaixo
+> continuam com os mesmos números; **a ordem de execução é esta**:
+
+| # | O quê | Custo (tokens escritos, estimativa) | Por quê nessa posição |
+|---|---|---|---|
+| 1 | Teste do Marcelo no pacote da `teste-binarios` (M9, M10, M11, N.3, N.5, N.6) + correções | baixo (só o que aparecer) | aprova 19 passos de uma vez; bug achado cedo sai barato |
+| 2 | **M15 Distribuição** (atualizador com manifesto assinado, pacotes Linux e Windows, versão lado a lado com o antigo) | baixo–médio (~150–250 mil) | o executável já é um arquivo só; falta assinar, baixar, trocar e empacotar. Deixa você usar o novo no dia a dia sem compilar |
+| 3 | **M13 Rede e celular como controle** | médio (~250–400 mil) | o antigo já tem tudo pronto e pequeno: `rede/kofrede.c` (139 linhas + Monocypher) entra no Rust do jeito que ele é, o `kofservico.c` (773 linhas) vira Rust, `rede.js`/`jogarpc.js` (~370 linhas) viram telas. Protocolo igual: pareia com o APK atual |
+| 4 | **M14 Celular** (a casca Java atual servindo o app novo) | médio (~300–450 mil) | reaproveita a casca e as `.so` do antigo; o grosso é o layout de celular e o controle de toque |
+| 5 | **N.9 / M12 PS2 nativo** (+ N64 nativo junto) | alto (~400–700 mil) | OpenGL sem janela no processo do jogo, compilar o LRPS2 (Linux e Windows), sistema PS2 no app. O M12.1 e o M12.2 já saíram no N.1 |
+| 6 | **Troca** (PARIDADE 100% e o antigo levando pro novo) | baixo–médio | por último: precisa do PS2 pra paridade ser total |
+
+> **Atualização de 08/11 (Marcelo):** o PS2 (item 5) veio antes do M14 e já está no pacote (⏸ teste dele). Depois do
+> primeiro teste do PS2 entrou o **M16 Desempenho, diagnóstico e opções de emulação** ("não basta rodar, tem que rodar
+> bem"), **no meio da migração, antes do M14**: é a base pra otimizar todos os emuladores com número, não com chute.
+> Ordem agora: PS2 (⏸) → **M16** → M14 → Troca. Arquitetura em [DIAGNOSTICO.md](DIAGNOSTICO.md).
+
 ## Como é cada checkpoint
 
 1. **Resumo curto** do que foi feito e do que ficou de fora.
@@ -141,32 +160,32 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M9.1 | Tocador numa 2ª instância do núcleo, guardar música (F7) | você guarda e toca uma música | ⏸ |
-| M9.2 | Tela da jukebox com barras e capa, `.spc` (importar/exportar) | um `.spc` do antigo toca igual | ⏸ |
-| M9.3 | Ondas, Mudo/Solo, notas, sincronia, exportar `.wav` | `.wav` igual ao do antigo | ⏸ |
-| M9.4 | Trilha FM, 8 bits, Air em violino, música do Início | você ouve | ⏸ |
-| M9.5 | Abertura da primeira vez | print/vídeo antigo × novo | ⏸ |
+| M9.1 | Tocador numa 2ª instância do núcleo, guardar música (F7) | você guarda e toca uma música | ✅ |
+| M9.2 | Tela da jukebox com barras e capa, `.spc` (importar/exportar) | um `.spc` do antigo toca igual | ✅ |
+| M9.3 | Ondas, Mudo/Solo, notas, sincronia, exportar `.wav` | `.wav` igual ao do antigo | ✅ |
+| M9.4 | Trilha FM, 8 bits, Air em violino, música do Início | você ouve | ✅ |
+| M9.5 | Abertura da primeira vez | print/vídeo antigo × novo | ✅ |
 
 ## M10 — Estatísticas e extras
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M10.1 | Estatísticas (por dia/mês/hora/aparelho) e a tela | as tuas estatísticas importadas aparecem iguais | ⏸ |
-| M10.2 | Espaço usado | você vê | ⏸ |
-| M10.3 | Patches de tradução IPS/BPS/UPS | um jogo traduzido abre com o selo 🇧🇷 | ⏸ |
-| M10.4 | Caçador de bugs (F9) e replay | um pacote do antigo reproduz no novo | ⏸ |
-| M10.5 | Avisos de atualização e de mudo | você vê | ⏸ |
+| M10.1 | Estatísticas (por dia/mês/hora/aparelho) e a tela | as tuas estatísticas importadas aparecem iguais | ✅ |
+| M10.2 | Espaço usado | você vê | ✅ |
+| M10.3 | Patches de tradução IPS/BPS/UPS | um jogo traduzido abre com o selo 🇧🇷 | ✅ |
+| M10.4 | Caçador de bugs (F9) e replay | um pacote do antigo reproduz no novo | ✅ |
+| M10.5 | Avisos de atualização e de mudo | você vê | ✅ |
 
 ## M11 — Sistemas com BIOS
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M11.1 | Tela de BIOS e importação (por nome, tamanho e conteúdo) | tuas BIOS reconhecidas | ⏸ |
-| M11.2 | GBA | você joga | ⏸ |
+| M11.1 | Tela de BIOS e importação (por nome, tamanho e conteúdo) | tuas BIOS reconhecidas | ✅ |
+| M11.2 | GBA | você joga | ✅ |
 | M11.3 | Neo Geo (zip inteiro + pai, AES) | você joga KOF | ⏸ |
-| M11.4 | PS1 em wasm (CD sem cópia) | você joga | ⏸ |
+| M11.4 | PS1 em wasm (CD sem cópia) | você joga | ✅ |
 | M11.5 | N64 em wasm | você joga | ⏸ |
-| M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ⏸ |
+| M11.6 | Escolher o núcleo do SNES (Kof entra quando a Mel liberar) | você troca | ✅ |
 
 ## M11b — PS nativo e o que ficou incompleto no M9–M11 (aprovado em 02/11: "pode fazer tudo")
 
@@ -179,20 +198,73 @@ com teste junto → comparar com o antigo → registrar decisão/contrato novo �
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ⬜ |
-| N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ⬜ |
-| N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ⬜ |
-| N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ⬜ |
-| N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ⬜ |
-| N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⬜ |
-| N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ⬜ |
-| N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ⬜ |
-| N.9 | PS2 nativo (o M12) em cima do N.1 (LRPS2 como núcleo libretro nativo, sem o kofnativo.c) | você joga PS2 | ⬜ |
+| N.1 | Crate `kof-nativo`: frontend libretro em Rust (`libloading`) num processo filho supervisionado pelo `kof-app` (o `kof-process` do M12 adiantado): carrega o `.so`/`.dll`, roda o laço, som nativo (cpal) ditando o ritmo (D22), imagem pra página por WebSocket local com token (a página desenha com os mesmos filtros e molduras) e os botões vindo da página | teste com um núcleo libretro mínimo compilado no teste (sem ROM de verdade): quadro e som chegam, conexão sem token recusada | ✅ |
+| N.2 | PCSX-ReARMed nativo com dynarec, Linux e Windows (script `tools/nucleos-nativos.sh`, commit fixo, GPL), na Release e no manifesto | `cargo test` roda um PS-X EXE gerado que desenha na tela: pixels conferidos | ✅ |
+| N.3 | PS1 nativo no app: CD lido direto da Kof Games pelo Rust (sem passar pela página), BIOS do `/sistema`, bateria/cartão de memória, estados (mesmo formato do wasm), pausa, turbo, volume, caçador; **padrão no PS1**, wasm como opção (Opções de emulação) e reserva automática se o nativo faltar | **você joga PS1 liso** (Linux e Windows) | ✅ |
+| N.4 | Snes9x com sonda (`snes9x-sonda.patch`, como os outros núcleos do antigo): onda de cada uma das 8 vozes, mudo por voz; wasm na Release | o mesmo `.spc` no chip do antigo (rodado só na sessão) × no novo: som e ondas iguais | ✅ |
+| N.5 | Jukebox igual ao antigo: Ondas/Notas no SNES, capa oficial, o 8 bits, `.wav` da trilha byte a byte igual ao do antigo, prints antigo × novo das 3 vistas | prints lado a lado + `.wav` igual | ✅ |
+| N.6 | N64 rodando: ROM de teste válida que desenha na tela (gerada no teste), descobrir por que a ROM atual quebra o núcleo (que quebra igual no antigo), outro modo de CPU, recompilar se o publicado tiver defeito; avaliar o N64 nativo pelo mesmo caminho do N.1 | imagem conferida; **você joga N64** | ⏸ |
+| N.7 | Neo Geo e PS1 wasm conferidos pela imagem (PS-X EXE que desenha; zip do pai e BIOS) | pixels × antigo | ✅ |
+| N.8 | Pontas: cartão BIOS do Início diz quais estão guardadas; abertura com o ícone do app e a lista de BIOS no passo 2 | prints | ✅ |
+| N.9 | PS2 nativo (o M12) em cima do N.1 (LRPS2 como núcleo libretro nativo, sem o kofnativo.c) | você joga PS2 | ⏸ (P.1–P.6 feitos em 08/11; falta o teu teste com BIOS e jogo de verdade) |
+
+> **N.1 feito (02/11):** crate `kof-nativo` + `kofstation --nativo`; `cargo test -p kof-nativo` compila um núcleo libretro
+> mínimo em C e confere quadro, som (735 amostras/quadro, ~60 quadros/s), botões, estado, bateria, pausa, token/origem
+> recusados e núcleo que quebra derrubando só o filho. Página ainda não usa (entra no N.3).
+> **N.2 feito (02/11):** `tools/nucleos-nativos.sh` (PCSX-ReARMed c8816799 com lightrec, Linux + Windows por mingw-w64),
+> workflow "Núcleos nativos" → Release `nucleos-nativos-c881679`, manifesto (seção `nativos`) e `pnpm nucleos` baixando
+> a plataforma atual. `tests/pcsx.rs`: PS-X EXE montado no teste desenha vermelho + retângulo verde, pixels conferidos;
+> estado ida e volta 3x com o recompilador (o lightrec dava SIGILL ao carregar estado: reset antes contorna).
+> **N.3 feito, ⏸ você joga (02/11):** PS1 abre no nativo por padrão quando o jogo está na Kof Games (`nativo.abrir`; o
+> CD é lido pelo processo, sem passar pela página); Opções de emulação → "Núcleo do PlayStation" volta pro wasm; se o
+> nativo falhar, abre no wasm sozinho. Página: `JogoNativo` (engine) com a mesma cara do `Jogo`: imagem pelo mesmo
+> desenho (filtros, molduras), botões e analógico (DualShock), estados, cartão de memória (conferido 1x/s), pausa,
+> turbo, volume, painel F3. `tools/testar-nativo.mjs` (também no CI): app de verdade + Chromium + PS-X EXE gerado,
+> pixels da tela do app conferidos, 60 fps.
+> **Aprovados em 07/11:** M9 (jukebox), M10 (estatísticas e extras), M11 (menos Neo Geo e N64) e o N.5 (jukebox do SNES).
+> Ainda ⏸: **Neo Geo** (M11.3) e **N64** (M11.5, N.6), que o Marcelo testa quando estiver no Wi-Fi.
+> **N.3 aprovado no Linux (07/11):** o Marcelo jogou o FF9 pelo PS1 nativo: "liso liso liso", 60 fps, cartão de memória
+> salvando dentro do jogo e estado indo e voltando. Falta conferir no Windows (ele não tem Windows agora). Correções do
+> caminho: o CD (inclusive dentro de `.zip`) não passa mais pela página; estado não volta mais preto. Ver o JORNAL.
+> **Correção 07/11:** PS1 estourava a memória (a página lia o CD inteiro): agora só a cabeça do CD passa pela página,
+> arrastado vai pra Kof Games aos pedaços, e os núcleos ficam na pasta ao lado do executável (D33). Ver o JORNAL.
+> **N.4 feito (02/11):** `tools/remendos/snes9x-sonda.patch` (a saída de cada voz do DSP antes do volume, 32 kHz, e o
+> mudo por voz) + `tools/nucleos-wasm.sh` (o `construir.sh` e a `ponte.cpp` do antigo num commit fixo); Release
+> `nucleos-2`; o Snes9x do app passa a ser este. Conferido: o mesmo `.spc` toca **byte a byte igual** ao Snes9x publicado
+> do antigo (`sonda-snes.test`, com `KOF_ANTIGO`); a voz que soa aparece na onda; o mudo cala só ela. (O chip Kof do
+> antigo não roda aqui: é da Mel. O Snes9x é o som que o antigo já usava no jogo.)
+> **N.5 feito, ⏸ você confere (02/11):** jukebox do SNES com Ondas (8 vozes) e Notas; capa oficial do jogo pelo nome (o
+> print fica de reserva); o 8 bits do antigo portado (`oitobits.ts`: Rua e Air **byte a byte iguais** ao `KofMusica`)
+> como reserva da trilha (violino → FM → 8 bits); `.wav` da trilha **byte a byte igual** ao `exportarWav` do antigo
+> (`musica.test`, com `KOF_ANTIGO`). Prints do novo nas 3 vistas (e2e `jukebox.spec` com `KOF_PRINTS`); lado a lado
+> com o antigo não fiz (a jukebox do SNES do antigo usava o núcleo Kof).
+> **N.6 feito, ⏸ você joga N64 (02/11):** o "quebra" era a ROM de teste: o N64 começa executando `ROM[0x40..]` (o IPL3)
+> de dentro da memória do RSP, e a nossa tinha zeros ali (a CPU andava no vazio até cair; no antigo, igual). A ROM nova
+> (`romN64QueDesenha`) tem um programa MIPS no lugar do IPL3 que manda comandos pro RDP (fundo vermelho, retângulo verde)
+> e liga o VI: **o Mupen64Plus em wasm desenha certo** (e2e `bios.spec`, pixels conferidos). Jogo de verdade: você.
+> N64 nativo avaliado: o Mupen64Plus-Next nativo só desenha pela GPU (GLideN64, `SET_HW_RENDER`); o `kof-nativo` hoje
+> recusa isso. Dá pra fazer com um contexto OpenGL sem janela no processo do jogo (EGL) e ler a imagem de volta, o mesmo
+> caminho que o PS2 (N.9) precisa: fica junto com ele.
+> **N.7 feito (02/11):** PS1 em wasm com o mesmo PS-X EXE que desenha: pixels conferidos (e2e). Neo Geo com imagem só
+> com a BIOS (não entra em teste): o fluxo de pedir a BIOS e o zip + pai seguem no teste de antes.
+> **N.8 feito (02/11):** cartão BIOS do Início diz quais estão guardadas ("✅ GBA, Neo Geo · trocar ou guardar outra");
+> a abertura mostra o ícone do app (a xícara do `icone.py` do antigo, em SVG; também o ícone da janela) e, no passo 2, a
+> lista de BIOS (GBA roda sem; Neo Geo guardado ou faltando).
+> **N.9 ⬜ (adiado pro item 5 da "Ordem combinada em 03/11", depois do M15, M13 e M14):** o `kof-nativo` precisa dar ao núcleo um OpenGL sem janela (`SET_HW_RENDER`: contexto EGL
+> no processo do jogo, framebuffer, `get_proc_address`) e ler a imagem de volta pra página; depois o LRPS2 (commit do
+> antigo) no `tools/nucleos-nativos.sh`. O mesmo caminho dá o N64 nativo.
 
 Estimativa (tokens escritos): N.1–N.3 300–500 mil · N.4–N.5 230–330 mil · N.6 100–200 mil · N.7–N.8 90 mil. Com o N.9, o
 M12 encolhe (o canal e o processo já vêm do N.1).
 
 ## M12 — PS2 nativo
+
+> **08/11 (pedido do Marcelo: PS2 antes do M14, "liso igual ao PCSX2"):** plano P.1–P.8. Feitos: **P.1** o LRPS2 do
+> antigo pelo manifesto (sem compilar); **P.2** OpenGL sem janela no `kof-nativo` (EGL/WGL, `gl.rs`); **P.3** leitura
+> assíncrona com 3 buffers em rodízio; **P.4** o LRPS2 abre com BIOS e DVD, cache de shaders na pasta de dados;
+> **P.5** o sistema PS2 no app (biblioteca, BIOS obrigatória, DVD lido do disco, controles do PS1); **P.6** ritmo pelo
+> som e o F3 com núcleo/leitura/imagem. **P.7** (modo direto: janela nativa sem cópia) só se os números do Marcelo
+> pedirem; **P.8** pacote na `teste-binarios` ✅, falta ele jogar. M12.1 e M12.2 já tinham saído no N.1.
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
@@ -201,23 +273,35 @@ M12 encolhe (o canal e o processo já vêm do N.1).
 | M12.3 | Modo página com filtros, disco lido aos pedaços | DVD de teste roda | ⬜ |
 | M12.4 | Cartão de memória, savestate, pausa | você joga PS2 (quando quiser) | ⬜ |
 
+## M16 — Desempenho, diagnóstico e opções de emulação (essencial; antes do M14)
+
+Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
+
+| Passo | O que faço | Checkpoint | Estado |
+|---|---|---|---|
+| M16.1 | Medidor quadro a quadro (nativo e WebAssembly), CPU por linha, `domain/desempenho.ts` (p50/p95/p99, engasgos e culpado) | testes com tempos fabricados; números no CI | ⬜ |
+| M16.2 | F3 com gráfico dos últimos quadros, p99, engasgos/min, CPU por linha | print do F3 com PS2 e SNES | ⬜ |
+| M16.3 | Modo diagnóstico: grava a sessão (`resumo.txt`, `sessao.json`, `quadros.csv`, `segundos.csv`, `engasgos.csv`, `log.txt`), resumo ao fechar, exportar `.zip`, junto do F9 | **você grava o Shadow of the Colossus e me manda** | ⬜ |
+| M16.4 | Opções de emulação por console (PS1 em diante): catálogo em português, perfis Rápido/Equilibrado/Fiel, Avançado, por jogo, na hora quando dá | você troca uma opção e vê o efeito no F3 | ⬜ |
+| M16.5 | Otimizar pelos relatórios (PS2 primeiro: shaders, EE, som, ritmo, leitura) | antes × depois medido no teu PC | ⬜ |
+
 ## M13 — Rede e celular como controle
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M13.1 | `kof-net` (usa o `kofrede.c` do antigo) | testes do protocolo passando | ⬜ |
-| M13.2 | Tela Aparelhos, código e QR | **teu celular (APK atual) pareia com o PC novo** | ⬜ |
-| M13.3 | Celular como controle (antigo e pela rede), jogadores pela rede | você joga com o celular | ⬜ |
-| M13.4 | Jogar no PC, Controle total, Modo Switch, Levar pro celular | você joga no celular com o PC processando | ⬜ |
+| M13.1 | `kof-net` (usa o `kofrede.c` do antigo) | testes do protocolo passando (`tools/testar-rede.mjs`: o `servicos.cjs` e o `celular.cjs` do antigo contra o novo, novo × kofservico antigo) | ✅ |
+| M13.2 | Tela Aparelhos, código e QR | **teu celular (APK atual) pareia com o PC novo** | ⏸ |
+| M13.3 | Celular como controle (antigo e pela rede), jogadores pela rede | você joga com o celular | ⏸ |
+| M13.4 | Jogar no PC, Controle total, Modo Switch, Levar pro celular | você joga no celular com o PC processando | ⏸ |
 
 ## M15 — Distribuição
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| M15.1 | Manifesto assinado e atualizador | teste: arquivo alterado é recusado | ⬜ |
-| M15.2 | Pacote do Linux | **você instala no teu Linux** | ⬜ |
-| M15.3 | Pacote do Windows | você instala num Windows | ⬜ |
-| M15.4 | Versão de teste lado a lado com o app antigo | você usa as duas | ⬜ |
+| M15.1 | Manifesto assinado e atualizador | teste: arquivo alterado é recusado (`tools/testar-atualizacao.mjs`, no CI) | ✅ (ligado quando a chave existir: ⏸ Marcelo cria) |
+| M15.2 | Pacote do Linux (`.tar.gz` + `kofstation --instalar` no menu) | **você instala no teu Linux** | ⏸ |
+| M15.3 | Pacote do Windows (instalador NSIS sem administrador + `.zip`) | você instala num Windows | ⏸ |
+| M15.4 | Versão de teste lado a lado com o app antigo ("KOFstation novo", dados separados) | você usa as duas | ⏸ |
 
 ## M14 — Celular
 

@@ -143,6 +143,40 @@ export const aplicarPlano = (b: Backend, p: Plano) =>
 
 /** Jogo aberto de fora: guarda uma cópia em Kof Games/Games/<console> (o original fica). `novo` = copiou agora
  *  (false = já estava lá com o mesmo tamanho); null = não é jogo que tenha pasta. */
+/** Tamanho de cada pedaço quando o arquivo vai aos pedaços (`library.import.parte`). */
+export const PEDACO = 16 << 20;
+
+/**
+ * Guarda um arquivo grande na Kof Games aos pedaços, lendo do `Blob` (o arquivo arrastado) uma fatia por vez: o CD
+ * nunca fica inteiro na memória da página. `progresso` recebe 0..1.
+ */
+export async function guardarNaKofGamesAosPedacos(
+  b: Backend,
+  fato: FatoDeArquivo,
+  arquivo: Blob,
+  opcoes: { pasta?: string; progresso?: (p: number) => void } = {},
+): Promise<{ path: string; novo: boolean } | null> {
+  const { progresso } = opcoes;
+  const pasta = opcoes.pasta ?? pastaDoArquivo(fato);
+  if (!pasta) return null;
+  const total = arquivo.size;
+  let stored: string | null = null;
+  for (let offset = 0; offset < total || (total === 0 && offset === 0); offset += PEDACO) {
+    const pedaco = arquivo.slice(offset, Math.min(total, offset + PEDACO));
+    const args = { pasta, nome: fato.nome, offset, total };
+    type R = { stored: string | null; ja: boolean };
+    // direto do disco quando o backend sabe (o local); senão, lê a fatia
+    const r = b.enviarArquivo
+      ? await b.enviarArquivo<R>('library.import.parte', args, pedaco)
+      : await b.enviarBinario<R>('library.import.parte', args, new Uint8Array(await pedaco.arrayBuffer()));
+    progresso?.(Math.min(1, (offset + pedaco.size) / Math.max(1, total)));
+    if (r.ja) return { path: r.stored ?? `Games/${pasta}/${fato.nome}`, novo: false };
+    stored = r.stored;
+    if (total === 0) break;
+  }
+  return { path: stored ?? `Games/${pasta}/${fato.nome}`, novo: true };
+}
+
 export async function guardarNaKofGames(
   b: Backend,
   fato: FatoDeArquivo,

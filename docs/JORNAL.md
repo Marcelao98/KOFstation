@@ -21,6 +21,333 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · Planejamento · M16 (desempenho, diagnóstico, opções de emulação) · onde parou pra próxima sessão
+
+**Pedido:** o Marcelo testou o PS2 (Shadow of the Colossus "rodou relativamente bem, umas engasgadas aqui e ali") e
+pediu, antes de corrigir, medição de verdade: modo diagnóstico que grava logs e estatísticas, e opções de emulação do
+PS1 em diante. "Não basta rodar, tem que rodar bem." Etapa essencial, no meio da migração, antes do M14. Pediu pra
+pesquisar quem já faz, desenhar a arquitetura e parar (contexto grande): a implementação fica pra próxima sessão.
+**Feito:** só planejamento. `docs/DIAGNOSTICO.md` (pesquisa no PCSX2 `PerformanceMetrics.cpp` e no DuckStation
+`performance_counters.cpp` + a arquitetura), M16.1–M16.5 no ROADMAP (antes do M14), D37.
+**Decidido:** D37 (medir antes de otimizar; estatística pura no `domain`; gravação pelo Rust em `diag.*`).
+**Onde parou:** **próximo é o M16.1** (medidor quadro a quadro), na ordem do `DIAGNOSTICO.md`:
+1. `domain/desempenho.ts` primeiro (puro, com teste): percentis p50/p95/p99, fps suavizado, engasgo (> 1,5× o tempo de
+   um quadro ou falta de som) e o culpado (a etapa que mais passou do normal dela).
+2. `crates/kof-nativo/src/medidor.rs`: histórico de 600 quadros sem alocar; o `filho.rs` já mede núcleo, leitura
+   (`gl::LEITURA_US`) e imagem por segundo: passar a guardar por quadro e mandar o bloco do segundo no aviso
+   `desempenho` (campo novo, opcional, nos dois lados do contrato e nas fixtures de `packages/contracts/fixtures`).
+3. CPU por linha (Linux `/proc/self/task/*/stat`, Windows `GetThreadTimes`), agrupada pelo nome da linha.
+4. O mesmo formato no Worker do WebAssembly (`packages/engine`) e o tempo de desenho/chegada na página.
+Depois M16.2 (F3 com gráfico), M16.3 (modo diagnóstico; ⏸ o Marcelo grava o SotC e manda), M16.4 (opções de
+emulação), M16.5 (otimizar pelos relatórios). Pergunta em aberto pro Marcelo: os engasgos do SotC foram na primeira
+vez que aparece um lugar/efeito (shader sendo montado) ou espalhados?
+**Também esperando o Marcelo:** a chave do atualizador (SITUACAO, "Pra você fazer"), o teste da rede com o celular,
+os pacotes do Linux/Windows, e o PS2 nos outros dois jogos (Zone of the Enders 2, Gran Turismo 4) com print do F3.
+**Ambiente da próxima sessão:** `pnpm install`, `KOF_NATIVOS=todas pnpm nucleos` (traz o LRPS2), e pros testes
+nativos/PS2: `sudo apt-get install -y libasound2-dev genisoimage libegl1 libegl-mesa0 libgl1-mesa-dri`. O teste
+`kof-nativo --test pcsx` morre com SIGILL em container (CPU), no CI passa. Pros testes de paridade da rede:
+`git clone https://github.com/Marcelao98/kofstation-old` (só leitura) e `node tools/testar-rede.mjs <pasta>`.
+
+---
+
+## 2026-11-08 · Correção · a página que às vezes não abria (tiny_http)
+
+**Pedido:** o CI quebrou de novo com a página sem carregar (agora no teste dos Aparelhos); o Marcelo pediu pra tentar de
+novo.
+**Causa:** bug do `tiny_http` 0.12.0 (`TaskPool::spawn`): uma linha acordada que ainda não pegou a tarefa segue contada
+como "esperando"; com conexões chegando juntas, uma ia pra fila sem linha pra ela e ficava parada enquanto a outra
+conexão keep-alive do Chrome vivesse. Era o "arquivo `.js` sem resposta" do JORNAL de 07/11 e do M13 (não era o disco).
+**Feito:** cópia do crate em `third_party/tiny_http` com a correção de uma linha (só vai pra fila se tem mais linhas
+esperando do que tarefas na fila), via `[patch.crates-io]`; `tools/testar-conexoes.mjs` (no CI); o teste do PS1 não
+tenta mais de novo (a causa saiu). `pnpm nucleos` com 3 tentativas por download (o GitHub respondeu 504 no CI).
+Teste do OpenGL só obrigatório onde há placa (o Windows do CI não tem).
+**Medido / conferido:** 30 conexões keep-alive juntas × 5 rodadas: **5 de 150 sem resposta antes, 0 depois** (duas
+vezes, e no executável do pacote). CI verde no Linux e no Windows com todos os testes de ponta a ponta.
+**Onde parou:** o mesmo da entrada do PS2 (abaixo): ⏸ o Marcelo joga PS2 com o pacote novo da `teste-binarios`.
+
+---
+
+## 2026-11-08 · PS2 (N.9/M12) · LRPS2 com OpenGL sem janela, o sistema PS2 no app
+
+**Pedido:** o Marcelo trocou a ordem: PS2 antes do M14 ("quero jogar PS2, eu uso mais PC"), "liso igual ao PCSX2", no
+jeito mais eficiente, num núcleo separado como os outros. Aprovou o plano P.1–P.8 e mandou executar tudo.
+**Feito:** P.1 `pcsx2_libretro` do `publicado/nativo/` do antigo no manifesto (o `.so` vem gzipado: o `pnpm nucleos`
+descompacta e confere), `empacotar.sh` leva todos os nativos. P.2/P.3 `crates/kof-nativo/src/gl.rs`: OpenGL sem
+janela (Linux EGL: tela do usuário ou surfaceless; Windows: janela escondida + WGL, só compilado aqui), framebuffer com
+profundidade/estêncil, `SET_HW_RENDER`/`GET_PREFERRED_HW_RENDER`, `context_reset` depois do `load_game`,
+`context_destroy` ao fechar, leitura assíncrona (3 PBOs + cerca). P.4 o LRPS2 abre no frontend novo (teste com BIOS
+falsa: só a ROMDIR + um laço no vetor de reset, e DVD gerado). P.5 `NUCLEOS.ps2` (só nativo), cabeça do DVD (64 KB; o
+sistema pelo SYSTEM.CNF lido aos pedaços), DVD arrastado vai pra Kof Games aos pedaços, BIOS do PS2 obrigatória (vai
+pra `sistema/pcsx2/bios`), mensagens quando falta o núcleo ou o jogo está fora da Kof Games. P.6 o aviso de desempenho
+traz o tempo do núcleo, da leitura da placa e do quadro pra página; o F3 mostra. P.8 pacote na `teste-binarios`.
+**Decidido:** D36 (LRPS2 do antigo, OpenGL sem janela, imagem pela página; modo direto só se os números pedirem).
+**Medido / conferido:** `tests/opengl.rs` (núcleo de teste que desenha com OpenGL core 3.3: imagem virada certa, 120 de
+120 quadros entregues, no máximo 2 de atraso, 0,64 ms por quadro no Mesa sem placa); `tests/lrps2.rs` (o LRPS2 de
+verdade: abre, pede a placa, 60 quadros, ~958 amostras de som por quadro); `tools/testar-ps2.mjs` (no CI): app de
+verdade e o executável do pacote, DVD de 4,3 GB (esparso) pela biblioteca, processo vivo, página 339 → 339 MB,
+`kofstation` 17 MB. `check`, `check:rust`, 43 e2e verdes.
+**Deu errado / aprendido:** (1) com a BIOS falsa só de zeros o PCSX2 cai (o antigo anotava o mesmo no RetroArch): um
+`j 0xBFC00000` no vetor de reset deixa ele parado e o resto do caminho testável. (2) PS2 agora "roda": a BIOS
+obrigatória fazia a tela de BIOS abrir antes de avisar que falta o núcleo; o aviso do núcleo vem primeiro. (3) Imagem
+de verdade só com BIOS de verdade (a falsa não liga o vídeo do PS2): **não vi um quadro de PS2 aqui**.
+**Onde parou:** ⏸ Marcelo: BIOS + um jogo de verdade (Shadow of the Colossus) no pacote novo, print do F3 numa cena
+pesada, e se possível o mesmo jogo no PCSX2 sozinho pra comparar. Com os números: decidir o P.7 (modo direto) e
+ajustar opções. Também pendente: cartão de memória do PS2 no backup `.kofsave` (hoje fica em
+`<dados>/nativo/saves/ps2`, persistente), conferir no Windows (WGL nunca rodou), estados do PS2 com jogo de verdade.
+Depois: M14 (celular), plano na entrada do M13.
+
+---
+
+## 2026-11-08 · Etapa M13 · rede entre aparelhos, celular como controle e Jogar no PC
+
+**Pedido:** o mesmo lote ("segue até o M14"): M13 reaproveitando o `kofrede.c` e com o mesmo protocolo do APK atual.
+**Feito:** M13.1 `crates/kof-net`: `kofrede.c` + Monocypher do antigo sem mudança (`third_party/kofrede`) por FFI
+(`ffi.rs`), o `kofservico.c` em Rust (`servico.rs`: UDP achar, TCP parear/conectar, pareados em arquivo, ping 15 s,
+religar PC×PC), a WebSocket da página (`pagina.rs`, token ou o modo do antigo) e o `kof-rede` (o serviço sozinho com as
+opções do kofservico). M13.2: o `kofstation` abre a rede junto (`crates/kof-app/src/rede.rs`, `rede.ligar`), tela
+📡 Aparelhos (`screens/Aparelhos`, QR com o mesmo gerador do antigo, código, lista, nome, procurar), cartão do Início
+(`app-core/rede.ts`, `stores/rede.ts`, backend de teste com serviço de mentira). M13.3: `domain/celular.ts` (formatos do
+antigo) e `stores/celular.ts`: celular pela rede (canal `pad`, `pad-ok` com jogador e console) e pelo servidor do APK
+(Arquivo → 📱 Celular como controle, senha de 4 números, religa sozinho), os celulares entram nos Jogadores. M13.4:
+`stores/transmissao.ts` (o `jogarpc.js`): pedir/oferta/resposta/fim pelo canal `jogo`, imagem crua em pixels inteiros,
+H.264, 12 Mbps, som no celular (`Jogo.somPraTransmitir`, o PC fica mudo; no PS1 nativo vai sem som), canal de dados com
+os 6 bytes, ping, menu do PC no celular, 💾⟲🏠, 📱 Levar pro celular / 📺 Voltar pra TV no menu rápido, a navegação
+por controle aceita o celular, sair da janela não pausa enquanto transmite.
+**Decidido:** D35 (FFI + serviço em Rust, mesma API JSON, WebSocket da página com token).
+**Medido / conferido:** `tools/testar-rede.mjs` (CI): o `servicos.cjs` do antigo contra o novo; novo × `kofservico`
+antigo nos dois papéis; o `celular.cjs` do antigo (o `Rede.java` do APK + `libkofrede.so`) contra o novo — tudo verde.
+`tools/testar-aparelhos.mjs --antigo` (CI): app de verdade + Chromium, outro aparelho pareia digitando o código da
+tela e aparece 🟢; o `ControleServidor.java` do APK conecta com a senha e o A acende na tela Jogadores. e2e novos:
+`aparelhos.spec.ts`, `jogar-no-pc.spec.ts` (um "celular" WebRTC noutra página recebe a imagem vermelha, manda botão,
+ping e menu). 43 e2e, `check`, `check:rust` (menos o SIGILL do pcsx neste container) verdes.
+**Deu errado / aprendido:** (1) importar stores no topo do `main.tsx` cria elas antes da configuração carregar (o tema
+voltava pro padrão ao recarregar): as da rede entram depois do `carregarConfig`. (2) O MSVC não tem os `__builtin_` que
+o `kofrede.c` usa: o `build.rs` define pras funções do C no Windows (o arquivo continua igual). (3) **Aberto:** o
+`testar-nativo` às vezes estoura o `page.goto` (1 em ~4 aqui): um arquivo da página (`react-*.js`) fica sem resposta do
+servidor HTTP local logo depois dos 600 MB de CD gravados; sem a carga de disco não reproduz (0 em 12). O teste tenta de
+novo uma vez; investigar o `tiny_http` (ver se um pedido fica preso atrás de outro na mesma conexão).
+**Onde parou:** ⏸ Marcelo: testar a rede com o celular (abaixo e no SITUACAO), a chave do atualizador e os pacotes.
+**Próximo: M14** (não começado), plano: M14.1 adaptador `android` (`platform/android.ts`) implementando o `Backend`
+sobre a ponte `KOFnesApk` da casca Java atual (CASCA 14; a página nova vai nos assets e no `publicado/android` da
+casca, sem mexer no `kofstation-old`: o APK novo é montado aqui com a casca copiada, como os núcleos); as lojas e a
+config no celular ficam no IndexedDB/OPFS (sem Rust lá) com a mesma interface; a rede pela `KOFnesApk.redeCmd` +
+`window.__rede` (o mesmo `CanalRede`). M14.2: controle de toque (6 modelos do `android.css`/`android.js`) e layout do
+celular. M14.3: pasta de ROMs (`Pasta.java`). M14.4: PS1/N64 nativos pela ponte (`Ps1Jogo`/`N64Jogo`). M14.5:
+atualizador do APK (`Atualizador.java` lendo um manifesto nosso). Tudo precisa do Marcelo no celular de verdade.
+
+---
+
+## 2026-11-07 · Etapa M15 · atualizador assinado, pacotes do Linux e do Windows, lado a lado com o antigo
+
+**Pedido:** "segue até o M14", sem parar em cada checkpoint; parar só no que só o Marcelo faz (chave, celular, Windows).
+**Feito:** M15.1: o `kofstation` aplica a versão baixada no começo do `main` (executável trocado → abre o novo e sai),
+`app.atualizacao {procurar}` (procura numa linha separada; a página pergunta até terminar), versão do `versao.txt` no
+`app.info` (antes era sempre 0.1.0, então o "✨ atualizado!" nunca aparecia), `nao-atualizar` e `fonte.txt` como no
+antigo (`crates/kof-app/src/atualizacao.rs`); página: menu "🔄 Procurar atualização" e procura sozinha 10 s depois de
+abrir (`stores/atualizacao.ts`, `app-core/atualizacao.ts`); `tools/manifesto.mjs` (gera a chave; monta e assina; arquivo
+igual ao da versão anterior aponta pra Release antiga); workflow `versao.yml` (Linux + Windows, empacota, assina,
+Release `v<data>` como "latest"; sem o secret só compila). M15.2: `kofstation --instalar/--desinstalar`
+(`kofstation-novo.desktop`, `src/instalar.rs`), ícone da xícara do antigo (`tools/icone.py`), `tools/pacote-linux.sh`
+(`.tar.gz` com LEIA-ME). M15.3: `tools/pacote-windows.sh` + `tools/pacote/instalador.nsi` (NSIS sem administrador em
+`%LOCALAPPDATA%\Programs\KOFstation`, atalhos "KOFstation novo", desinstalador que não toca em saves) e o `.zip`.
+M15.4: nomes e pastas separados do antigo ("KOFstation novo"; dados em `KOFstation/`, o antigo em `KOFnes/`).
+**Decidido:** D34 (atualizador próprio, Ed25519 com o `ring`, troca na próxima abertura, publicação a cada envio na
+`main`).
+**Medido / conferido:** `crates/kof-atualiza/tests/ciclo.rs` (5 testes: troca, núcleo velho apagado, assinatura de outra
+chave, manifesto mexido, arquivo alterado, caminho `../`); `tools/testar-atualizacao.mjs` (no CI): o `kofstation` de
+verdade com chave de teste, versão 2 servida por HTTP local com os 13 núcleos reais (28 MB): baixa, troca o
+executável na abertura seguinte, apaga o núcleo que saiu, `app.info` diz "2", depois "em dia"; arquivo alterado e
+assinatura falsa recusados sem deixar nada pela metade. Pacotes: `.tar.gz` 13,9 MB, instalador 11,6 MB, `.zip` 15 MB;
+o `.tar.gz` baixado da `teste-binarios` extrai, `--instalar` grava o `.desktop` certo e o app serve os núcleos.
+`check`, `check:rust` e 40 e2e verdes.
+**Deu errado / aprendido:** neste container o teste `kof-nativo --test pcsx` morre com SIGILL (CPU do container; não
+mexi no kof-nativo, no CI do GitHub ele passa). O instalador do Windows só foi montado (makensis no Linux), não rodado.
+**Onde parou:** ⏸ Marcelo: (1) **criar a chave** (comando no SITUACAO, "Pra você fazer"); (2) instalar o pacote do
+Linux; (3) Windows quando der. Seguindo pro M13 (rede).
+
+---
+
+## 2026-11-07 · M15.1 começado · onde parou pra próxima sessão
+
+**Pedido:** o Marcelo autorizou seguir os próximos (M15 em diante) e pediu pra deixar tudo salvo: a sessão ficou grande e
+ele vai abrir outra.
+**Feito:** só o começo do M15.1: o crate `crates/kof-atualiza` (compila, clippy limpo, 2 testes de unidade; **ainda não
+ligado ao `kofstation`**): manifesto por plataforma (`caminho → {tamanho, sha256, url}`), assinatura Ed25519 conferida com
+o `ring` (já vinha pelo TLS), `procurar` (baixa manifesto + `.sig`, compara a pasta pelo SHA-256, baixa só o que mudou
+pra `.atualizacao/`, cada arquivo conferido, `pronto.json`), `aplicar` (na abertura: troca os arquivos, o executável
+rodando vira `.velho`, apaga os núcleos que saíram da lista, grava o `versao.txt`), `atualizacao.log` como o antigo.
+**Falta no M15.1 (plano):** (1) teste de integração com chave gerada no teste (assinatura falsa e arquivo alterado
+recusados; troca e núcleo velho apagado); (2) `kof-app`: `aplicar` no começo do `main` (antes do servidor; se trocou o
+executável, abre o novo e sai), comando `app.atualizacao {procurar}` no `api.rs` com o `ureq` das capas, a versão do
+`versao.txt` no `app.info`; (3) página: o menu "🔄 Procurar atualização" (hoje `ETAPA.atualizacao = 'M15'` em
+`app/acoes.ts`) e a procura sozinha uns 15 s depois de abrir, com os avisos ("baixando…", "pronta: vale na próxima vez",
+"já está na última"); (4) `tools/manifesto.mjs` (monta o manifesto das pastas do `tools/empacotar.sh`; núcleos com hash
+no nome sobem uma vez só, compartilhados) + workflow `versao.yml` (compila Linux e Windows, empacota, assina com o
+secret, Release "latest" com os arquivos soltos); (5) **chave**: a pública num arquivo do repositório
+(`crates/kof-app/chave-atualizacao.txt`, hex de 32 bytes); a privada é um secret do GitHub que **o Marcelo cria**
+(`openssl genpkey -algorithm ed25519`); sem chave, o atualizador fica desligado e anota no log.
+**Onde parou:** ⏸ Marcelo testa Neo Geo e N64 (no Wi-Fi). Próxima sessão: terminar o M15.1 pelos itens acima, depois
+M15.2–M15.4 (ordem combinada em 03/11, no ROADMAP).
+
+---
+
+## 2026-11-07 · Aprovações · M9, M10, M11 e a jukebox do SNES
+
+**Pedido:** o Marcelo testou o pacote: "falta testar N64 e Neo Geo, o resto passou". Pediu os próximos passos.
+**Feito:** ROADMAP: M9.1–M9.5, M10.1–M10.5, M11.1, M11.2, M11.4, M11.6 e N.5 ✅. SITUACAO: 68 ✅, 3 ⏸, 20 ⬜.
+**Onde parou:** ⏸ Neo Geo (M11.3) e N64 (M11.5, N.6): ele testa no Wi-Fi. PS1 no Windows quando ele tiver um.
+Próximo: **M15.1** (atualizador com manifesto assinado), na ordem combinada em 03/11.
+
+---
+
+## 2026-11-07 · Correção · PS1 sem memória de novo: o jogo zipado (e o estado que voltava preto)
+
+**Pedido:** o Marcelo pediu pra fazer o PS1 rodar no Linux dele, com os jogos dele, sem estourar a memória, sozinho
+até resolver (suspeitos em ordem: reserva no wasm, lightrec sem o endereço 0, processo caindo, formato não coberto,
+pacote velho).
+**Erro de verdade:** o único PS1 dele é um **`.zip`** (CD de 740 MB dentro: `.cue` + `.bin`). O `cabecaDoCd` só
+cobria `cue|bin|img|iso|chd|pbp`: o zip era lido inteiro pela página e o jogo ia pro **WebAssembly** (nem tentava o
+nativo; o log não tinha nenhuma linha "nativo"). Reproduzido no pacote `689755e` como usuário comum: página com pico de
+**3,6 GB** (1,2 GB presos depois), `kofstation` **971 MB** (servindo o zip), 47 fps com 26 engasgos/s.
+**Feito:**
+- Rust (`kof-files/src/zip.rs`): entradas do zip com método e posição; `ler_entrada` (o começo de uma entrada,
+  descompactado: guardado ou deflate, com o `flate2` que já vinha pelo `ureq`); `extrair_cd` (o CD sai em
+  `<dados>/nativo/cache/<sistema>/<nome>-<tamanho>-<data>/`, CRC conferido, um CD por vez no cache, reaproveita se o zip
+  é o mesmo). Erro novo `BAD_ZIP`. Comandos `file.stat`, `file.zip.list`, `file.zip.read` (API_CONTRACTS). O
+  `nativo.abrir` extrai quando o caminho é `.zip`.
+- Página (`app-core/jogos.ts`): `cabecaDoZip` monta o mesmo `JogoAberto` que o zip lido inteiro (mesmo nome, mesma rom
+  = o `.cue`/a cabeça/o `.cue` montado das faixas: **mesma identidade e chave do save**), lendo só o `.cue` ou 64 KB.
+  `pesoCd` = o tamanho do CD no disco (do zip, da imagem, ou do `.cue` + os `.bin` pelo `file.stat`).
+- Reserva (`stores/jogo.ts`): CD acima de **100 MB** não cai mais pro WebAssembly; mostra o erro do nativo e o log do
+  processo vai pro log do app. A reserva dos CDs pequenos agora lê o jogo inteiro antes (antes ia só a cabeça de 64 KB
+  pro wasm).
+- **Segundo bug, achado no caminho:** carregar estado num jogo de verdade deixava a **tela preta e o jogo recomeçava**.
+  O `reset` antes do `unserialize` (posto no N.2 contra o SIGILL do lightrec) faz a BIOS HLE deixar o boot do CD pro
+  próximo quadro, e esse boot passava por cima do estado. Agora: `reset` → **um quadro** (o boot acontece; som e imagem
+  dele descartados) → `unserialize` (`kof-nativo/src/nucleo.rs`).
+- `JogoNativo` (engine): a WebSocket que cai com o processo vivo reconecta sozinha (3 tentativas); depois de um "fim" do
+  processo não reconecta. Uma vez a conexão caiu sozinha nos primeiros 10 s (o servidor viu EOF do navegador); não
+  reproduziu em mais 8 rodadas.
+- Teste `crates/kof-nativo/tests/jogo_de_verdade.rs` (ignorado; `KOF_JOGO=<cue>`): roda, salva, anda, carrega 3 vezes e
+  confere que a imagem volta e o jogo anda. Não cita jogo nenhum.
+**Suspeitos descartados:** (2) o lightrec não consegue o 0x0 como usuário (`vm.mmap_min_addr = 65536`), cai pro mapa
+em 0x10000000 ("Memory map is sub-par") e funciona: 1500 quadros do FF9 em 0,7 s, muito acima do tempo real. Não
+precisou recompilar o PCSX (sem Release nova). Sem o reset, o `pcsx.rs` também passa como usuário (o SIGILL foi visto
+como root, no mapa em 0x0: por isso o reset ficou, com o quadro depois). (3) o processo não caiu. (5) o pacote
+instalado era o `81f859e`.
+**Medido / conferido (FF9 do Marcelo, só na máquina dele, BIOS HLE porque ele não tem a do PS1):** pela Biblioteca:
+abre em 0,2 s, **página com pico de 190–320 MB, `kofstation` com 14–21 MB, processo do jogo com 44 MB** (não crescem com o
+CD), 60 fps, 0 engasgos, 0 falta de som, controle responde, estado F5/F8 volta na mesma tela. Arrastado de fora: guardado
+inteiro na Kof Games (cópia byte a byte) e abre no nativo, página 191 MB, `kofstation` 28 MB. A extração do zip leva
+alguns segundos só na primeira vez. Cartão: o jogo lê o cartão ("No FF9 save data") e o app guarda e devolve ele entre
+duas aberturas. `pnpm check`, `pnpm check:rust`, testes novos (zip no Rust e no TS, reconexão), `testar-nativo.mjs` no
+pacote (sem `genisoimage`: só o PS-X EXE) e `pnpm e2e` 39/39 verdes (cada um precisou de uma segunda rodada uma vez: o
+`page.goto` de 60 s do `testar-nativo` e o `visual.spec` do F4, que não mudou; os dois passaram na segunda).
+**Deu errado / aprendido:** o teste do JORNAL anterior gerava `.cue`/`.iso` soltos; o jogo de verdade era zip. Testar
+com o formato que a pessoa tem. A máquina dele não tinha Rust nem pnpm: instalados no usuário (rustup, pnpm pelo npx) e
+o `alsa-lib-devel` extraído do RPM em `~/.local/kof-alsa` (`PKG_CONFIG_PATH`), sem sudo.
+**Teste do Marcelo (07/11, pacote `a88d370` na Kof Games dele):** FF9 "rodou liso liso liso, 60 fps, sem stuttering".
+Ele também testou **salvar no cartão dentro do jogo**: funciona. ✅ PS1 nativo aprovado no Linux.
+**Onde parou:** falta o **Windows**: o Marcelo não tem Windows; ele vê depois como conferir (não mexer sem ele pedir).
+Um `.chd` quando ele tiver. Depois: M15.1.
+
+---
+
+## 2026-11-07 · Correção · PS1 sem memória e a pasta de núcleos igual ao antigo
+
+**Pedido:** o Marcelo testou: o PS1 estoura a memória. Pediu pra achar a causa, corrigir e documentar, e deixar os
+núcleos numa pasta ao lado do executável como no antigo (`nativo/`, `nucleos/`, `versao.txt`).
+**Causa:** a página lia o CD inteiro antes de abrir o jogo. Reproduzido no pacote anterior com um CD gerado de 300 MB:
+arrastado de fora, a página foi a **1,2 GB** (com 700 MB, a aba morre) e o CD nem era guardado na Kof Games (limite de
+256 MB por pedido); imagem única (`.iso`/`.chd`/`.bin`) pela biblioteca também era lida inteira. (Eu tinha testado só
+com um programa de PS1 de poucos KB.)
+**Feito:** `cabecaDoCd` (app-core): com o nativo, só o `.cue` ou 64 KB da imagem passam pela página; o tamanho de
+verdade fica em `JogoAberto.tamanho` (a identidade e a chave do save não mudam). CD arrastado: vai pra Kof Games aos
+pedaços de 16 MB direto do disco (`library.import.parte` no Rust, `enviarArquivo` com `Blob` no `fetch`) e abre no
+nativo. WebAssembly (reserva): o CD vai pro Worker transferido, sem cópia. **D33:** núcleos fora do executável
+(38 → 8 MB): `KOFstation/{kofstation, nucleos/ (hash no nome + lista.json), nativo/, versao.txt}`,
+`crates/kof-app/src/pastas.rs`, `tools/empacotar.sh`; rodando do código, usa as pastas do repositório.
+**Medido / conferido:** `tools/testar-nativo.mjs` (também no CI, com `genisoimage`): CD de 300 MB de verdade (ISO com
+SYSTEM.CNF e o programa que desenha) pela biblioteca (`.cue` e `.iso`) e arrastado: imagem certa no nativo, 60 fps,
+página ~300 MB (igual a antes de abrir), `kofstation` < 60 MB, CD guardado inteiro na Kof Games. `check`, `check:rust`,
+39 e2e verdes. O pacote baixado da `teste-binarios` abre e serve os núcleos da pasta.
+**Deu errado / aprendido:** testar sempre com arquivo do tamanho de verdade. Ler os pedaços como `ArrayBuffer` ainda
+subia a página (~730 MB: o coletor de lixo demora); mandando o `Blob` direto no `fetch` não sobe. Uma vez o `page.goto`
+do teste estourou 60 s (já tinha acontecido no CI): não reproduziu depois; ficar de olho. O executável novo é maior que
+o lançador do antigo (que só abria o navegador): o perfil de compilação enxuto (~6 MB) ficou pra depois, a pedido.
+**Onde parou:** ⏸ o Marcelo testa a `teste-binarios` nova (`fc73f93`: `KOFstation-linux.tar.gz` /
+`KOFstation-windows.zip`): **PS1 de verdade** (pela biblioteca e arrastado), depois N64, jukebox do SNES e Neo Geo.
+Depois: M15.1 (o atualizador já tem a pasta pronta).
+
+---
+
+## 2026-11-03 · Planejamento · ordem nova (PS2 pro fim)
+
+**Pedido:** o Marcelo achou o PS2 caro em token e pediu pra fazer antes o que sai mais rápido, e deixar documentado.
+**Feito:** só o plano: ROADMAP → "Ordem combinada em 03/11" (custo de cada etapa e por quê).
+**Decidido:** ordem 1) teste dele + correções, 2) M15 distribuição, 3) M13 rede/celular como controle, 4) M14 celular,
+5) N.9/M12 PS2 (+ N64 nativo), 6) Troca.
+**Onde parou:** ⏸ o Marcelo testa a `teste-binarios` (PS1 nativo, jukebox do SNES, N64) e abre o PR da
+`claude/busy-ritchie-wrvk8h`. Depois: **M15.1** (manifesto assinado e atualizador).
+
+---
+
+## 2026-11-02 · Etapas M11b N.2–N.8 · PS1 nativo, jukebox do SNES igual, N64 desenhando
+
+**Pedido:** "segue até terminar" (depois do N.1).
+**Feito:** N.2 `tools/nucleos-nativos.sh` (PCSX-ReARMed c8816799 com lightrec, Linux + Windows por mingw-w64) e o
+workflow "Núcleos compilados" → Release `nucleos-2` (manifesto, seção `nativos`; o `pnpm nucleos` baixa a plataforma
+atual). N.3 o `kofstation` embute o núcleo nativo da plataforma (`crates/kof-app/src/nativo.rs`, comandos `nativo.*`) e o
+PS1 abre nele por padrão (jogo da Kof Games; o CD é lido pelo processo); `JogoNativo` na engine com a mesma cara do
+`Jogo`; Opções de emulação → "Núcleo do PlayStation"; se falhar, cai no wasm. N.4 `tools/remendos/snes9x-sonda.patch` +
+`tools/nucleos-wasm.sh` (o `construir.sh`/`ponte.cpp` do antigo num commit fixo); o Snes9x do app passa a ser o com
+sonda. N.5 jukebox do SNES com Ondas/Notas, capa oficial pelo nome, o 8 bits do antigo portado (`oitobits.ts`) como
+reserva da trilha. N.6 ROM de N64 que boota (programa no lugar do IPL3 → RDP → VI). N.7 PS1 wasm conferido pela imagem.
+N.8 cartão BIOS do Início, ícone do app (xícara do `icone.py`, em SVG) na abertura e na janela, lista de BIOS no passo 2.
+Executáveis novos na `teste-binarios` (`85befef`; Linux SHA-256 `a9633142…`, Windows `b86ff328…`).
+**Decidido:** núcleos que a gente compila: Release `nucleos-<VERSAO>` (sobe a VERSAO quando muda núcleo; recompilar dá
+outros bytes). PCSX nativo: `reset` antes de carregar estado (o lightrec dá SIGILL sem isso, também no upstream novo).
+**Medido / conferido:** `tests/pcsx.rs`: PS-X EXE gerado desenha (vermelho + retângulo verde), pixels conferidos; estado
+3x com o recompilador. `tools/testar-nativo.mjs` (também no CI): app de verdade + Chromium + PCSX nativo, pixels da
+tela do app, 60 fps. Snes9x com sonda: o mesmo `.spc` toca **byte a byte igual** ao Snes9x publicado do antigo.
+8 bits (Rua e Air) e `.wav` da trilha **byte a byte iguais** ao antigo (testes com `KOF_ANTIGO`). N64 em wasm desenha a
+ROM nova (e2e, pixels). `check`, `check:rust`, e2e verdes; CI do N.1 verde também no Windows.
+**Deu errado / aprendido:** o N64 "quebrado" era a ROM de teste (zeros no lugar do IPL3), não o núcleo. O PCSX com
+lightrec entrega RGB565 (verde 31 → 251, a mesma conta do wasm). No CI, `page.goto` esperando "load" estourou uma vez:
+o teste do nativo espera o DOM e a tela do Início.
+**Onde parou:** ⏸ o Marcelo testa a `teste-binarios`: **PS1 de verdade** (Linux e Windows; liso?), N64 de verdade,
+jukebox do SNES (F7 num jogo, Ondas/Notas), Neo Geo. Falta o **N.9 (PS2 nativo)**: precisa ensinar o `kof-nativo` a dar
+um OpenGL sem janela pro núcleo (`SET_HW_RENDER`) e ler a imagem de volta; o mesmo caminho serve pro N64 nativo. É do
+tamanho do M12: fazer numa sessão própria.
+
+---
+
+## 2026-11-02 · Etapa M11b N.1 · núcleo nativo num processo filho
+
+**Pedido:** começar o M11b pelo N.1 ("pode fazer tudo").
+**Feito:** crate `crates/kof-nativo`: frontend libretro em Rust (`nucleo.rs`, `libloading`; conversão de pixels igual ao
+`ponte.cpp` do antigo; padrão das opções do `SET_VARIABLES` guardado como no RetroArch; log do núcleo formatado por uma
+ponte em C, `ponte.c`, porque o printf do libretro é variádico), som pela placa (`som.rs`, cpal + reamostrador linear;
+sem placa, um relógio), WebSocket local com token e origem (`canal.rs`, tungstenite; só o quadro mais novo vai),
+protocolo (`protocolo.rs`), processo filho (`filho.rs`) e supervisor (`supervisor.rs`: token sorteado, config pelo stdin,
+log guardado, fecha junto). `kofstation --nativo` roda o filho (um executável só). Erro novo `CORE_FAILED` no `kof-core`.
+Lado da página: `packages/contracts/src/nativo.ts` (ler quadro/avisos, montar botões e blocos). CI e `rodar.sh` instalam
+/ conferem os cabeçalhos do ALSA; INSTALAR.md atualizado.
+**Decidido:** D32 (processo filho, som pela placa, imagem pela página). Protocolo em API_CONTRACTS §5.
+**Medido / conferido:** `cargo test -p kof-nativo` compila `tests/nucleo/minimo.c` e confere: quadro RGBA com a cor da
+opção e o 1º byte do jogo; som amostra por amostra; ~60 quadros/s e 735 amostras por quadro no relógio; botões; estado
+ida e volta; bateria; pausa (o quadro não anda); sem token, token errado e origem errada = 403; comando inválido vira
+erro; página nova derruba a antiga; núcleo que dá `abort()` derruba só o filho e o log fica; núcleo inexistente =
+`CORE_FAILED`. Fixtures `packages/contracts/fixtures/nativo.json` testadas no TS e no Rust. `pnpm check` e
+`pnpm check:rust` verdes. Sem placa de som no container: o caminho do cpal só foi conferido até "sem placa → relógio".
+**Deu errado / aprendido:** o "pronto" da página nova ia pra conexão antiga (fila compartilhada): agora a geração é
+conferida com a fila presa. cpal 0.18 mudou a API (config por valor, `cpal::Error`).
+**Onde parou:** N.1 ✅. Próximo: **N.2** (compilar o PCSX-ReARMed nativo com dynarec no commit do antigo:
+`nucleo-libretro/construir.sh` do `kofstation-old` diz qual; Release + manifesto; PS-X EXE gerado no teste) e **N.3**
+(o app usa: comandos `nativo.*` na API, a página conecta pelo `nativo.ts` e desenha com os filtros).
+
+---
+
 ## 2026-11-02 · Pós-entrega do M9–M11 · plano do PS nativo e do que ficou incompleto
 
 **Pedido:** o Marcelo não aceita o pacote M9–M11 assim: a jukebox tem que ser "igualzinha à outra" (no SNES faltam Ondas

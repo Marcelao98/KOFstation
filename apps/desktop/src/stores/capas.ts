@@ -1,5 +1,6 @@
 // Capas oficiais e modo sofá (grade de capas em tela cheia, feita pro controle).
 import { criarCapas, type Capas } from '@kof/app-core';
+import type { ItemBiblioteca, SistemaId } from '@kof/domain';
 import { create } from 'zustand';
 import { config } from './config';
 import { servicos } from './servicos';
@@ -46,4 +47,17 @@ export function capasDoApp(): Capas {
     () => usarCapas.getState().ligadas,
   );
   return capas;
+}
+
+/** Capa oficial de um jogo só pelo nome e console (a jukebox: `srcCapa({nome})` do antigo). Pede se ainda não tem. */
+export function capaPorNome(nome: string, sistema: SistemaId): string | null {
+  const item: ItemBiblioteca = {
+    nome,
+    chave: nome,
+    pasta: { path: '', nome, arquivo: nome, ext: '', sistema, chave: nome, variante: false, faixa: false, tamanho: 0 },
+  };
+  const c = capasDoApp();
+  const url = c.url(item);
+  if (!url) c.pedir(item);
+  return url;
 }

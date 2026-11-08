@@ -97,12 +97,26 @@ impl Servidor {
             .to_ip()
             .map(|a| a.port())
             .ok_or_else(|| std::io::Error::other("sem porta"))?;
+        let estado = Estado::novo(pasta_dados);
+        let _ = estado.origem.set(format!("http://127.0.0.1:{porta}")); // recém-criado: sempre vazio
         Ok(Self {
             srv,
             token,
             porta,
-            estado: Estado::novo(pasta_dados),
+            estado,
         })
+    }
+
+    /// Abre a rede entre aparelhos numa linha separada (porta ocupada só fica no log; a tela Aparelhos explica).
+    pub fn abrir_rede(&self) {
+        let (pasta, origem) = (
+            self.estado.pasta_dados.clone(),
+            format!("http://127.0.0.1:{}", self.porta),
+        );
+        let r = self.estado.rede.abrir(&pasta, &origem);
+        if let Err(e) = r {
+            tracing::warn!(target: "rede", "a rede entre aparelhos não abriu: {e}");
+        }
     }
 
     pub fn url(&self) -> String {
@@ -130,6 +144,20 @@ impl Servidor {
             return self.api(req, cmd);
         }
         let rel = caminho.trim_start_matches('/');
+        // núcleos: da pasta nucleos/ ao lado do executável (D33), não de dentro dele
+        if let Some(nome) = rel.strip_prefix("nucleos/") {
+            return match crate::pastas::nucleo_wasm(nome).map(std::fs::read) {
+                Some(Ok(d)) => isolado(Response::from_data(d)).with_header(cabecalho("Content-Type", tipo(nome))),
+                Some(Err(e)) => {
+                    tracing::error!(nome, "não consegui ler o núcleo: {e}");
+                    isolado(Response::from_string("erro ao ler o núcleo").with_status_code(500))
+                }
+                None => {
+                    tracing::warn!(nome, "núcleo não achado na pasta nucleos/");
+                    isolado(Response::from_string("núcleo não encontrado").with_status_code(404))
+                }
+            };
+        }
         let arq = APP.get_file(rel).or_else(|| APP.get_file("index.html")); // telas sem arquivo: o app
         match arq {
             Some(f) => isolado(Response::from_data(f.contents().to_vec())).with_header(cabecalho(

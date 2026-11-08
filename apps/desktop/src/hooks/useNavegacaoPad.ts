@@ -3,6 +3,7 @@
 import { observarControle } from '@kof/app-core';
 import { BOTAO } from '@kof/domain';
 import { bitsDeTodos, controlesDoNavegador } from '@kof/engine';
+import { aparelhosCelular } from '../stores/celular';
 import { useEffect } from 'react';
 import { acao } from '../app/acoes';
 import { teclaDoRapido } from '../components/MenuRapido';
@@ -63,7 +64,9 @@ export function useNavegacaoPad() {
   useEffect(() => {
     let dirAntes = 0;
     let proxima = 0;
-    const parar = observarControle({ ler: () => bitsDeTodos(controlesDoNavegador()) }, (b, novos) => {
+    // Controle total (M13.4): o controle físico ou o celular (como controle ou no Jogar no PC); o teclado não
+    const ler = () => bitsDeTodos(controlesDoNavegador()) | aparelhosCelular().reduce((x, a) => x | a.b, 0);
+    const parar = observarControle({ ler }, (b, novos) => {
       if (usarJogo.getState().rapidoAberto) {
         // menu rápido: o direcional anda e ajusta, A confirma, B fecha (com repetição segurando, como nas telas)
         const dirR = b & (BOTAO.Cima | BOTAO.Baixo | BOTAO.Esquerda | BOTAO.Direita);

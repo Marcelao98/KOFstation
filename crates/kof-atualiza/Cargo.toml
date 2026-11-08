@@ -1,0 +1,20 @@
+[package]
+name = "kof-atualiza"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Atualizador do KOFstation: manifesto assinado (Ed25519), baixa só o que mudou, troca na próxima abertura"
+
+[dependencies]
+kof-core = { path = "../kof-core" }
+ring = "0.17"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true

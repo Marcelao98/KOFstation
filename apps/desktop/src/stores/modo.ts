@@ -41,6 +41,7 @@ export const usarModo = create<EstadoModo>()((set, get) => {
     perguntar: () => {
       get().aplicar();
       if (config().ler('modoPerguntar') === '0') return;
+      if ((window as { __kofRemoto?: boolean }).__kofRemoto) return; // aberto pelo celular (Jogar no PC): sem pergunta no PC
       // testes automáticos: só o teste dos modos quer ver a escolha (window.__kofModo), como no antigo
       if (navigator.webdriver && !(window as { __kofModo?: boolean }).__kofModo) return;
       const id = usarJogo.getState().registro?.id ?? '';

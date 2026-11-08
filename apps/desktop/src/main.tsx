@@ -22,6 +22,10 @@ addEventListener('unhandledrejection', (e) => registrar('error', 'promessa', tex
 // (o App é importado depois: as stores leem a configuração quando são criadas)
 await carregarConfig(backend).catch((e: unknown) => registrar('error', 'config', textoDoErro(e)));
 const { App } = await import('./app/App');
+// rede entre aparelhos (M13): liga, religa o celular da última vez e ouve o Jogar no PC desde a abertura
+(await import('./stores/rede')).ligarARede();
+(await import('./stores/celular')).religarControleNaAbertura();
+await import('./stores/transmissao');
 (await import('./app/ganchosDeTeste')).ligarGanchosDeTeste();
 const { assentarSobras } = await import('./stores/bateria');
 setTimeout(assentarSobras, 1500);

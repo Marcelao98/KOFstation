@@ -4,6 +4,7 @@ import { criarAnel, escrever, ocupacao, type Anel } from './anel';
 import type { FabricaDeNucleo } from './libretro';
 import type { DoTocador, ParaTocador } from './mensagens';
 import { ganhoDoFade, Musica, MusicaFm, type FonteDeMusica, type ModuloSomFm } from './musica';
+import { MusicaOitoBits } from './oitobits';
 import { Reamostrador } from './reamostrador';
 import { montarWav } from './spc';
 
@@ -83,10 +84,14 @@ eu.onmessage = async ({ data: d }) => {
     switch (d.tipo) {
       case 'iniciar': {
         const nucleo = d.urlNucleo.split('/').pop()?.replace(/\.js$/, '') ?? '';
-        const fab = await carregarNucleo(d.urlNucleo, nucleo);
-        const m: FonteDeMusica = d.faixa.fm
-          ? await MusicaFm.abrir(d.faixa.fm, fab as unknown as () => Promise<ModuloSomFm>)
-          : await Musica.abrir(d.faixa, fab);
+        let m: FonteDeMusica;
+        if (d.faixa.oito) m = new MusicaOitoBits(d.faixa.oito);
+        else {
+          const fab = await carregarNucleo(d.urlNucleo, nucleo);
+          m = d.faixa.fm
+            ? await MusicaFm.abrir(d.faixa.fm, fab as unknown as () => Promise<ModuloSomFm>)
+            : await Musica.abrir(d.faixa, fab);
+        }
         m.mudar(d.mudas);
         Object.assign(cfg, { segundos: d.segundos, fadeMs: d.fadeMs, repetir: d.repetir });
         musica = m;

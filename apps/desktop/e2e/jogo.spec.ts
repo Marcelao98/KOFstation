@@ -47,6 +47,10 @@ test('roda: imagem vermelha, quadros andando e som saindo', async ({ page }) => 
   const painel = (await page.locator('#desempenho').textContent()) ?? '';
   expect(painel).not.toContain('sem som');
   expect(Number(/(\d+) fps/.exec(painel)?.[1])).toBeGreaterThan(30);
+  // M16: o quadro a quadro (percentis e engasgos) e o gráfico dos últimos quadros
+  await expect(page.locator('#desempenho-quadros')).toContainText('p99', { timeout: 5000 });
+  await expect(page.locator('#desempenho-grafico')).toBeVisible();
+  await page.locator('#desempenho').screenshot({ path: 'test-results/f3-desempenho.png' });
   await expect(page.locator('#st-fps')).toContainText('fps');
 });
 
@@ -81,7 +85,7 @@ test('menu rápido: F2 e botão direito, volume com ◀▶, Esc fecha', async ({
   await expect(page.locator('#rapido')).toBeHidden();
 });
 
-test('arquivo que não é jogo e sistema que ainda não chegou avisam', async ({ page }) => {
+test('arquivo que não é jogo, PS2 sem o núcleo nativo e .cue sem os .bin avisam', async ({ page }) => {
   await page.setInputFiles('#arquivo', { name: 'leia.txt', mimeType: 'text/plain', buffer: Buffer.from('oi') });
   await expect(page.locator('#aviso')).toContainText('não parece um jogo');
   await page.setInputFiles('#arquivo', {
@@ -89,7 +93,7 @@ test('arquivo que não é jogo e sistema que ainda não chegou avisam', async ({
     mimeType: 'application/octet-stream',
     buffer: Buffer.from('ELF'),
   });
-  await expect(page.locator('#aviso')).toContainText('PlayStation 2 ainda não roda');
+  await expect(page.locator('#aviso')).toContainText('PS2 precisa do núcleo nativo'); // o backend de teste não tem nativo
   // .cue sozinho, sem os .bin que ele cita: diz o que falta
   await page.setInputFiles('#arquivo', {
     name: 'disco.cue',

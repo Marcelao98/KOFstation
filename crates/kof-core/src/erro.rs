@@ -40,6 +40,10 @@ pub enum KofError {
     EsquemaNovo(String),
     #[error("erro de rede: {0}")]
     Rede(String),
+    #[error("o núcleo nativo falhou: {0}")]
+    Nucleo(String),
+    #[error("zip estragado ou que eu não sei abrir: {0}")]
+    ZipRuim(String),
     #[error("erro de arquivo em {caminho}: {fonte}")]
     Io {
         caminho: String,
@@ -66,6 +70,8 @@ impl KofError {
             KofError::DiscoCheio(_) => "DISK_FULL",
             KofError::EsquemaNovo(_) => "SCHEMA_TOO_NEW",
             KofError::Rede(_) => "NETWORK",
+            KofError::Nucleo(_) => "CORE_FAILED",
+            KofError::ZipRuim(_) => "BAD_ZIP",
             KofError::Io { .. } => "IO_ERROR",
         }
     }

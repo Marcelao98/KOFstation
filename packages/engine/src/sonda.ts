@@ -19,7 +19,12 @@ const PSG = {
 } as const;
 
 export const CANAIS: Partial<Record<SistemaId, CanaisDoSistema>> = {
-  snes: { nomes: ['Voz 1', 'Voz 2', 'Voz 3', 'Voz 4', 'Voz 5', 'Voz 6', 'Voz 7', 'Voz 8'], papeis: [] },
+  // a sonda do Snes9x (tools/remendos/snes9x-sonda.patch) guarda a saída de cada voz antes do volume, como o Dsp.kf
+  snes: {
+    nomes: ['Voz 1', 'Voz 2', 'Voz 3', 'Voz 4', 'Voz 5', 'Voz 6', 'Voz 7', 'Voz 8'],
+    papeis: [],
+    escalas: [1 / 16384, 1 / 16384, 1 / 16384, 1 / 16384, 1 / 16384, 1 / 16384, 1 / 16384, 1 / 16384],
+  },
   gb: {
     nomes: ['Pulso 1', 'Pulso 2', 'Onda', 'Ruído'],
     papeis: ['quadrada + sweep', 'quadrada', 'tabela 4 bits', 'LFSR'],
@@ -99,6 +104,7 @@ export function taxaDaOnda(nucleo: string): number {
   if (nucleo === 'genplus') return 26633;
   if (nucleo === 'fceumm') return 1789773 / 56;
   if (nucleo === 'fbneo') return 8000000 / 144;
+  if (nucleo === 'snes9x') return 32000; // o DSP do SNES gera exatamente 32 kHz
   return 32768;
 }
 

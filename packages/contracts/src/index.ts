@@ -43,3 +43,4 @@ export function ehAppInfo(v: unknown): v is AppInfo {
     typeof v.dataDir === 'string'
   );
 }
+export * from './nativo';

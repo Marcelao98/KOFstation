@@ -59,7 +59,8 @@ function picos(ondas: Int16Array, canais: number, escalas?: readonly number[]): 
 }
 
 /** Gera o .wav de qualquer fonte (o `exportarWav` do antigo: tempo + fade, mais rápido que o tempo real). */
-async function wavDe(
+/** O .wav de qualquer fonte (o `exportarWav` do antigo: segundos + fade, mais rápido que o tempo real). */
+export async function wavDeFonte(
   f: Pick<FonteDeMusica, 'taxa' | 'quadro'>,
   segundos: number,
   fadeMs: number,
@@ -128,7 +129,7 @@ export class Musica implements FonteDeMusica {
       m.papeis = c.papeis;
       m.escalas = c.nomes.map((_, i) => c.escalas?.[i] ?? 1 / 7680);
       m.indices = c.indices ? [...c.indices] : c.nomes.map((_, i) => i);
-      // SNES no Snes9x: sem sonda, mas as 8 vozes (barras pelo envelope e mudo pelas opções)
+      // SNES: sempre as 8 vozes (barras pelo envelope); ondas só com o Snes9x com sonda
       m.canais = f.sistema === 'snes' ? 8 : m.totalSonda ? Math.min(m.indices.length, c.nomes.length) : 0;
     }
     m.taxaOnda = taxaDaOnda(s.config.nucleo);
@@ -150,7 +151,8 @@ export class Musica implements FonteDeMusica {
         op[k] = m & (1 << l) ? '0' : '100';
       });
       this.s.mudarOpcoes(op);
-    } else if (n === 'snes9x') {
+    } else if (n === 'snes9x' && !this.totalSonda) {
+      // Snes9x sem a sonda (o publicado do antigo): mudo pelas opções de volume
       const op: Record<string, string> = {};
       for (let v = 0; v < 8; v++) op[`snes9x_sndchan_volume_${v + 1}`] = m & (1 << v) ? '0' : '100';
       this.s.mudarOpcoes(op);
@@ -197,7 +199,7 @@ export class Musica implements FonteDeMusica {
 
   /** O .wav da faixa: `segundos` + fade, mais rápido que o tempo real (o `exportarWav` do antigo). */
   gerarWav(segundos: number, fadeMs: number, pausa?: () => Promise<void>) {
-    return wavDe(this, segundos, fadeMs, pausa);
+    return wavDeFonte(this, segundos, fadeMs, pausa);
   }
 }
 
@@ -270,7 +272,7 @@ export class MusicaFm implements FonteDeMusica {
   }
 
   gerarWav(segundos: number, fadeMs: number, pausa?: () => Promise<void>) {
-    return wavDe(this, segundos, fadeMs, pausa);
+    return wavDeFonte(this, segundos, fadeMs, pausa);
   }
 }
 

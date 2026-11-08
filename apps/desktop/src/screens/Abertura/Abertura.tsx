@@ -1,8 +1,10 @@
 // Abertura (#abertura do antigo): tela de título → frases → os temas mais nostálgicos passando → apresentação → guia em
 // 4 passos (jogos, BIOS, tema, dicas). "Pular" vai pro guia; no guia, fecha.
-import { LOGOS, nomeDoTema } from '@kof/domain';
+import { nomeDoTema } from '@kof/domain';
 import { useEffect, useRef, useState } from 'react';
 import { acao } from '../../app/acoes';
+import { IconeApp } from '../../components/IconeApp';
+import { usarBios } from '../../stores/bios';
 import { usarAbertura } from '../../stores/abertura';
 import { usarPrefs } from '../../stores/prefs';
 
@@ -31,6 +33,7 @@ type Tela = 'titulo' | 'texto' | 'guia';
 export function Abertura() {
   const { aberta, fechar } = usarAbertura();
   const prefs = usarPrefs();
+  const biosGuardadas = usarBios((b) => b.lista);
   const [tela, setTela] = useState<Tela>('titulo');
   const [frase, setFrase] = useState('');
   const [vis, setVis] = useState(false);
@@ -111,9 +114,7 @@ export function Abertura() {
     <section id="abertura" aria-label="boas-vindas ao KOFstation">
       <div className="ab-grao"></div>
       <div className="ab-tela" id="ab-titulo" hidden={tela !== 'titulo'}>
-        <span className="ab-logo" style={{ fontSize: 96, lineHeight: 1 }}>
-          {LOGOS[prefs.temaNaTela] ?? '🎮'}
-        </span>
+        <IconeApp className="ab-logo" />
         <h1>KOFstation</h1>
         <p className="ab-piscar">pressione qualquer botão</p>
       </div>
@@ -150,6 +151,14 @@ export function Abertura() {
             Alguns consoles têm um programa interno, a BIOS. O GBA roda sem ela; o Neo Geo precisa do <b>neogeo.zip</b>.
             O KOFstation não traz BIOS: se tiver a sua, escolha uma vez e ela fica guardada.
           </p>
+          <ul className="ab-bios">
+            <li data-sis="gba">🟢 Game Boy Advance: roda sem BIOS</li>
+            <li data-sis="neogeo">
+              {biosGuardadas.some((b) => b.sistema === 'neogeo')
+                ? '✅ Neo Geo: neogeo.zip guardado'
+                : '⚪ Neo Geo: falta o neogeo.zip (só precisa pra jogar Neo Geo)'}
+            </li>
+          </ul>
           <div className="ab-botoes">
             <button
               className="grande sec"

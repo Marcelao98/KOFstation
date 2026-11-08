@@ -18,6 +18,14 @@ pub struct Estado {
     pub exe: Option<PathBuf>,
     /// pasta do usuário (sugestão da Kof Games)
     pub casa: Option<PathBuf>,
+    /// o jogo nativo aberto (M11b)
+    pub nativos: crate::nativo::Nativos,
+    /// endereço da página (`http://127.0.0.1:<porta>`): a WebSocket do nativo só aceita esta origem
+    pub origem: std::sync::OnceLock<String>,
+    /// o atualizador (M15.1)
+    pub atualizador: crate::atualizacao::Atualizador,
+    /// a rede entre aparelhos (M13)
+    pub rede: crate::rede::Rede,
 }
 
 #[derive(serde::Deserialize)]
@@ -51,6 +59,15 @@ struct ArgsAplicar {
 struct ArgsGuardar {
     pasta: String,
     nome: String,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsParte {
+    pasta: String,
+    nome: String,
+    offset: u64,
+    total: u64,
 }
 
 #[derive(serde::Deserialize)]
@@ -104,6 +121,33 @@ struct ArgsLer {
     length: Option<u64>,
 }
 
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsCaminho {
+    scope: String,
+    path: String,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsLerZip {
+    scope: String,
+    /// o .zip, relativo ao escopo
+    path: String,
+    /// o arquivo de dentro (só o nome)
+    entrada: String,
+    #[serde(default)]
+    length: Option<u64>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ArgsAtualizacao {
+    /// true: começa a procurar; false: só diz como está
+    #[serde(default)]
+    procurar: bool,
+}
+
 pub fn args<T: DeserializeOwned>(v: Value) -> Result<T, KofError> {
     serde_json::from_value(v).map_err(|e| KofError::argumento("args", e.to_string()))
 }
@@ -116,6 +160,10 @@ impl Estado {
             pasta_dados,
             exe: std::env::current_exe().ok(),
             casa,
+            nativos: Default::default(),
+            origem: std::sync::OnceLock::new(),
+            atualizador: crate::atualizacao::Atualizador::novo(crate::pastas::do_executavel().as_deref()),
+            rede: crate::rede::Rede::nova(),
         }
     }
 
@@ -149,7 +197,27 @@ impl Estado {
     pub fn chamar(&self, cmd: &str, a: Value, corpo: Vec<u8>) -> Result<Saida, KofError> {
         let json = |v: Value| Ok(Saida::Json(v));
         match cmd {
-            "app.info" => json(serde_json::to_value(kof_core::info::app_info(&self.pasta_dados)).expect("info")),
+            "app.info" => {
+                let mut info = kof_core::info::app_info(&self.pasta_dados);
+                // num pacote, a versão é a do versao.txt (a que o atualizador troca); rodando do código, a do Cargo
+                if let Some(v) = self.atualizador.versao() {
+                    info.version = v;
+                }
+                json(serde_json::to_value(info).expect("info"))
+            }
+            "rede.ligar" => {
+                let origem = self.origem.get().cloned().unwrap_or_default();
+                json(self.rede.ligar(&self.pasta_dados, &origem)?)
+            }
+            "app.atualizacao" => {
+                let a: ArgsAtualizacao = args(a)?;
+                let s = if a.procurar {
+                    self.atualizador.procurar()
+                } else {
+                    self.atualizador.situacao()
+                };
+                json(serde_json::to_value(s).expect("json"))
+            }
             // sinal de vida da janela (a cada 5 s): o servidor fica no ar enquanto ele chega
             "app.vivo" => json(Value::Null),
             "log.write" => {
@@ -183,6 +251,12 @@ impl Estado {
             "library.organize.apply" => {
                 let a: ArgsAplicar = args(a)?;
                 let r = kof_files::organizar::aplicar(&self.raiz()?, &a.moves, &a.limpar);
+                json(serde_json::to_value(r).expect("json"))
+            }
+            "library.import.parte" => {
+                let a: ArgsParte = args(a)?;
+                let r =
+                    kof_files::organizar::guardar_parte(&self.raiz()?, &a.pasta, &a.nome, a.offset, a.total, &corpo)?;
                 json(serde_json::to_value(r).expect("json"))
             }
             "library.import" => {
@@ -247,6 +321,36 @@ impl Estado {
                 let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
                 Ok(Saida::Bin(kof_files::escopo::ler(&p, a.offset, a.length)?))
             }
+            "file.stat" => {
+                let a: ArgsCaminho = args(a)?;
+                let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
+                let m = std::fs::metadata(&p).map_err(|e| KofError::de_io(&a.path, e))?;
+                json(serde_json::json!({ "size": m.len(), "dir": m.is_dir() }))
+            }
+            "file.zip.list" => {
+                let a: ArgsCaminho = args(a)?;
+                let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
+                let mut f = std::fs::File::open(&p).map_err(|e| KofError::de_io(&a.path, e))?;
+                let tamanho = f.metadata().map_err(|e| KofError::de_io(&a.path, e))?.len();
+                json(serde_json::json!({ "size": tamanho, "itens": kof_files::zip::itens(&mut f, tamanho) }))
+            }
+            "file.zip.read" => {
+                let a: ArgsLerZip = args(a)?;
+                let p = kof_files::escopo::resolver(&self.escopo(&a.scope)?, &a.path)?;
+                Ok(Saida::Bin(kof_files::zip::ler_entrada(&p, &a.entrada, a.length)?))
+            }
+            "nativo.disponivel" => json(serde_json::json!({ "sistemas": crate::nativo::sistemas() })),
+            "nativo.abrir" => {
+                let a: crate::nativo::ArgsAbrir = args(a)?;
+                let jogo = kof_files::escopo::resolver(&self.raiz()?, a.caminho())?;
+                let origem = self.origem.get().cloned().unwrap_or_default();
+                json(self.nativos.abrir(&self.pasta_dados, jogo, &self.lojas, origem, a)?)
+            }
+            "nativo.fechar" => {
+                self.nativos.fechar();
+                json(Value::Null)
+            }
+            "nativo.log" => json(self.nativos.log()),
             outro => Err(KofError::ComandoDesconhecido(outro.to_string())),
         }
     }

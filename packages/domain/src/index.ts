@@ -19,3 +19,5 @@ export * from './entrada';
 export * from './jogadores';
 export * from './patch';
 export * from './bios';
+export * from './celular';
+export * from './desempenho';

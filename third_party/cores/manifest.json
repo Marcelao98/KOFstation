@@ -22,9 +22,11 @@
       "sha256": "5ed1b9872a762e4cec94c04321e92ac996ed37a93e2080f324ce715505710751"
     },
     "snes9x": {
-      "arquivo": "snes9x-ab8ba810.js",
-      "tamanho": 4105029,
-      "sha256": "ab8ba810287b4e89e525ccfc584f0b865a9b9c85037c5da593aec797e7f7c800"
+      "arquivo": "snes9x-sonda.js",
+      "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-2/snes9x-sonda.js",
+      "tamanho": 4105233,
+      "sha256": "e10af61604b9a105e79510278fa2b5980ff4247ca35c82e4057711102fd4c703",
+      "nota": "Snes9x do mesmo commit do antigo com a sonda da jukebox (tools/remendos/snes9x-sonda.patch); toca igual ao publicado do antigo (teste sonda-snes)"
     },
     "jogos": {
       "arquivo": "jogos-371590f5.js",
@@ -66,6 +68,50 @@
       "arquivo": "mupen64-66e19597.js",
       "tamanho": 4564926,
       "sha256": "66e195978cf81275fa3c7d92ebe263cfb53b6d8cc51c56f78516d9df3e912220"
+    },
+    "air8": {
+      "url": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/ceba493fc494165de6f561b77a699fb8c22b295f/web/musicas/air.json",
+      "destino": "air8.json",
+      "tamanho": 12724,
+      "sha256": "97dd3284be34be5179b8e3dfb2f1d6e9b14756c8ca0e85a074b3a11c0b038caf",
+      "nota": "notas do Air (Bach, Mutopia, domínio público) pro 8 bits da jukebox: a reserva quando faltam o violino e o núcleo FM"
+    }
+  },
+  "nativos": {
+    "pcsx": {
+      "nota": "PCSX-ReARMed (GPL-2.0) com o recompilador lightrec, commit c8816799 (o mesmo do wasm do antigo); compilado por tools/nucleos-nativos.sh no workflow \"Núcleos compilados\" e publicado como anexo da Release",
+      "plataformas": {
+        "linux-x64": {
+          "arquivo": "pcsx_rearmed_libretro.so",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-2/pcsx_rearmed_libretro-linux-x64.so",
+          "tamanho": 2176552,
+          "sha256": "593ca91f48a2c031703b9b6c9aca5de2d92a0a6e1a3cb4c1ba7ff7ecf8058fa6"
+        },
+        "windows-x64": {
+          "arquivo": "pcsx_rearmed_libretro.dll",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-2/pcsx_rearmed_libretro-windows-x64.dll",
+          "tamanho": 7010816,
+          "sha256": "d71e1f665787a3aa8f27c73e02965563ef951e54e1389d1506ccb4df3853e991"
+        }
+      }
+    },
+    "pcsx2": {
+      "nota": "LRPS2 (o PCSX2 do libretro, github.com/libretro/ps2, GPL-3.0), commit 38d3a83f, o mesmo que o antigo publica e o Marcelo já jogou; compilado pelo pc-nativo/construir.sh e construir-windows.sh do kofstation-old (sem Vulkan: o desenho é OpenGL, dado pelo kof-nativo). O do Linux vem gzipado: o pnpm nucleos descompacta e confere o SHA-256 do .so",
+      "plataformas": {
+        "linux-x64": {
+          "arquivo": "pcsx2_libretro.so",
+          "url": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/ceba493fc494165de6f561b77a699fb8c22b295f/publicado/nativo/pcsx2_libretro-405610ed.so.gz",
+          "gzip": true,
+          "tamanho": 9590504,
+          "sha256": "c28993f7a6eacb837673f6560687a5e42cfc553a1a1fa8b47e7632faba801178"
+        },
+        "windows-x64": {
+          "arquivo": "pcsx2_libretro.dll",
+          "url": "https://raw.githubusercontent.com/Marcelao98/kofstation-old/ceba493fc494165de6f561b77a699fb8c22b295f/publicado/nativo/pcsx2_libretro-31718abe.dll",
+          "tamanho": 12388352,
+          "sha256": "31718abedfae144f11f9bea99a53ca15bd81fe4b8269c5df6c474e055f3152d0"
+        }
+      }
     }
   }
 }

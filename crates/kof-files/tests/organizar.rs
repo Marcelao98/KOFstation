@@ -62,3 +62,29 @@ fn guardar_copia_so_quando_precisa() {
         "PATH_OUTSIDE_SCOPE"
     );
 }
+
+#[test]
+fn guardar_aos_pedacos() {
+    use kof_files::organizar::guardar_parte;
+    let d = tempfile::tempdir().unwrap();
+    let raiz = d.path();
+    let a = guardar_parte(raiz, "psx", "Jogo.bin", 0, 10, b"0123").unwrap();
+    assert_eq!((a.stored, a.ja), (None, false));
+    assert!(raiz.join("Games/psx/Jogo.bin.kofparcial").is_file());
+    // pedaço fora de ordem é recusado
+    assert_eq!(
+        guardar_parte(raiz, "psx", "Jogo.bin", 8, 10, b"89")
+            .unwrap_err()
+            .codigo(),
+        "CONFLICT"
+    );
+    guardar_parte(raiz, "psx", "Jogo.bin", 4, 10, b"4567").unwrap();
+    let c = guardar_parte(raiz, "psx", "Jogo.bin", 8, 10, b"89").unwrap();
+    assert_eq!(c.stored.as_deref(), Some("Games/psx/Jogo.bin"));
+    assert_eq!(std::fs::read(raiz.join("Games/psx/Jogo.bin")).unwrap(), b"0123456789");
+    assert!(!raiz.join("Games/psx/Jogo.bin.kofparcial").exists());
+    // de novo, mesmo tamanho: já está lá
+    let j = guardar_parte(raiz, "psx", "Jogo.bin", 0, 10, b"0123").unwrap();
+    assert!(j.ja);
+    assert!(guardar_parte(raiz, "psx", "../x", 0, 1, b"x").is_err());
+}

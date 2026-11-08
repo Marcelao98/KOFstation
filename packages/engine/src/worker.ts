@@ -26,6 +26,10 @@ let somTocando = false;
 let ultimoPasso = 0;
 let parado = false;
 const med = { quadros: 0, nucleo: 0, atrasos: 0, desde: 0, faltasAntes: 0 };
+/** cada quadro do segundo (M16), no formato do domain/desempenho.ts: [t, núcleo, leitura, envio, som na fila, faltas]
+ *  em µs. Zera a cada segundo (no máximo uns 6 × 240 números com turbo). */
+let porQuadro: number[] = [];
+let faltasDoQuadro = 0;
 let sramAntes: Uint8Array | null = null;
 
 // ---------- caçador de bugs (novoMarco/rodarQuadro do antigo): marco a cada 600 quadros + os botões de cada um ----------
@@ -197,17 +201,31 @@ function doModulo(s: SessaoLibretro): Record<string, unknown> {
 }
 
 function mandarQuadro(s: SessaoLibretro) {
+  const t0 = performance.now();
   const copia = s.quadro.slice();
   enviar({ tipo: 'quadro', pixels: copia.buffer, largura: s.info.largura, altura: s.info.altura }, [copia.buffer]);
+  // o envio vai no último quadro anotado (pelo menos 1 µs: 0 quer dizer "não mandou")
+  if (porQuadro.length >= 6) porQuadro[porQuadro.length - 3] = Math.max(1, Math.round((performance.now() - t0) * 1000));
 }
 
 function umQuadro(s: SessaoLibretro, comSom: boolean) {
   const t0 = performance.now();
   const { audio } = s.rodar();
-  med.nucleo += performance.now() - t0;
+  const t1 = performance.now();
+  med.nucleo += t1 - t0;
   med.quadros++;
   anotarQuadro(s);
   if (comSom && anel && reamostrador) escrever(anel, reamostrador.converter(audio));
+  const faltas = anel ? Atomics.load(anel.ctl, 2) : 0;
+  porQuadro.push(
+    Math.round(t1 * 1000),
+    Math.round((t1 - t0) * 1000),
+    0, // sem placa de vídeo pra ler: o WebAssembly desenha na memória
+    0,
+    anel ? Math.round((ocupacao(anel) * 1e6) / taxaSaida) : 0,
+    faltas > faltasDoQuadro ? 1 : 0, // o anel conta amostras; aqui vale "o som acabou neste quadro" (como o nativo)
+  );
+  faltasDoQuadro = faltas;
 }
 
 function passo() {
@@ -269,8 +287,10 @@ function passoSemErro() {
         atrasos: med.atrasos,
         faltasDeSom: faltas - med.faltasAntes,
         somNaFilaMs: anel ? Math.round((ocupacao(anel) * 1000) / taxaSaida) : 0,
+        porQuadro,
       },
     });
+    porQuadro = [];
     Object.assign(med, { quadros: 0, nucleo: 0, atrasos: 0, desde: agora, faltasAntes: faltas });
   }
 }
@@ -295,6 +315,8 @@ eu.onmessage = async ({ data: m }) => {
         reamostrador = new Reamostrador(info.taxaAudio, taxaSaida);
         relogio = criarRelogio(info.fps);
         ultimoPasso = med.desde = performance.now();
+        porQuadro = [];
+        faltasDoQuadro = anel ? Atomics.load(anel.ctl, 2) : 0;
         enviar({ tipo: 'pronto', info });
         passo();
       } catch (e) {

@@ -27,4 +27,6 @@ playwright-report/
 third_party/cores/*.js
 third_party/cores/*.so
 third_party/cores/*.dll
+third_party/cores/nativos/
+third_party/cores/wasm/
 apps/desktop/public/nucleos/

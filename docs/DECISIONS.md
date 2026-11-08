@@ -166,3 +166,83 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - O `somfm` (YM2612 + PSG) vem embutido no `KOFstation.html` publicado do antigo: o `pnpm nucleos` baixa o html de um
   commit fixo e guarda só o trecho do núcleo (conferido por SHA-256), e a `trilha.js` (comandos das 6 músicas) vem do
   mesmo commit. O violino é arquivo do `publicado/nucleos`, como os núcleos. Nada disso entra no git.
+
+## D32. Núcleo nativo num processo filho, imagem pela página, som pela placa — **aceita** (M11b N.1, 02/11)
+- O PS1 em wasm não tem dynarec e pesa. Núcleo libretro nativo (`.so`/`.dll`) roda no **processo filho** `kofstation
+  --nativo` (crate `kof-nativo`; o mesmo executável, um processo por jogo): se o núcleo quebrar, só o filho morre e o
+  supervisor guarda as últimas 300 linhas do log dele (o caçador de bugs manda junto). O filho recebe a configuração por
+  uma linha JSON no stdin (o token nunca aparece na linha de comando) e fecha sozinho quando o stdin fecha (o app morreu).
+- **Som pela placa** (cpal: ALSA/PulseAudio/PipeWire, WASAPI) ditando o ritmo, como o AudioWorklet do wasm (D22): o laço
+  roda quadros enquanto houver menos de 60 ms guardados; sem placa, um relógio imita o consumo (testes, máquina sem som).
+- **Imagem pra página** por uma WebSocket em 127.0.0.1 (porta aleatória, token de 128 bits na URL, `Origin` conferida),
+  em RGBA igual ao `ponte.cpp` do antigo: a página desenha com os mesmos filtros, passadas e molduras. Só o quadro mais
+  novo vai (quem está lento pula quadros, nunca acumula atraso). Botões, estados, bateria e comandos voltam pelo mesmo
+  canal (protocolo em `docs/API_CONTRACTS.md` §5, fixtures dos dois lados em `packages/contracts/fixtures/nativo.json`).
+- Imagem pela GPU (`SET_HW_RENDER`, N64 com GLideN64) ainda não: o núcleo que pede recebe "não" e cai pro software.
+- Núcleos que a gente compila vão como anexo de Release no repositório KOFStation, pelo manifesto (SHA-256), no mesmo
+  commit do núcleo que o antigo usa (N.2).
+- Custo: o Linux precisa dos cabeçalhos do ALSA pra compilar (`libasound2-dev`/`alsa-lib-devel`); o executável pronto só
+  precisa da `libasound.so.2`, que todo Linux com som tem.
+
+## D33. Núcleos numa pasta ao lado do executável, como no antigo — **aceita** (Marcelo, 07/11)
+- Antes o `kofstation` embutia o app web **e** os núcleos (38–46 MB num arquivo só). Agora fica igual ao antigo:
+  `KOFstation/kofstation` (ou `KOFstation.exe`, ~8 MB, só o app web e o Rust), `nucleos/` (núcleos em WebAssembly e
+  dados, um arquivo por núcleo com o hash no nome, mais a `lista.json` que diz qual é qual), `nativo/` (PCSX-ReARMed
+  `.so`/`.dll`) e `versao.txt`. O `kofstation` serve `/nucleos/<nome>` lendo da pasta (`crates/kof-app/src/pastas.rs`,
+  só nome simples, nada de `..`); o núcleo nativo é aberto direto da `nativo/` (não extrai mais na pasta de dados).
+- Por quê: o executável fica pequeno, dá pra trocar um núcleo sem baixar o app inteiro (a base do atualizador, M15.1)
+  e o Marcelo enxerga o que tem, como no antigo.
+- Rodando do código (`cargo run`, `rodar.sh`) sem essas pastas do lado, usa as do repositório
+  (`apps/desktop/public/nucleos/`, `third_party/cores/nativos/<plataforma>/`). Quem monta a pasta: `tools/empacotar.sh`.
+
+## D34. Atualizador próprio com manifesto assinado (Ed25519), troca na próxima abertura — **aceita** (M15.1, 07/11)
+- O que o lançador do antigo fazia (comparar a versão, baixar o que mudou, trocar, apagar núcleo velho, `atualizacao.log`,
+  `nao-atualizar`, `fonte.txt`), agora no próprio `kofstation` (`crates/kof-atualiza` + `crates/kof-app/src/atualizacao.rs`)
+  e **com assinatura**: o manifesto (`plataforma → caminho → {tamanho, sha256, url}`) é assinado com Ed25519 e cada
+  arquivo é conferido pelo SHA-256 antes de entrar. Conferido com o `ring`, que já vinha pelo TLS (nada de crate novo).
+- A chave pública mora em `crates/kof-app/chave-atualizacao.txt` e entra no executável; a privada é o secret
+  `KOF_CHAVE_ATUALIZACAO` do GitHub (gerada pelo Marcelo com `node tools/manifesto.mjs chave`). Sem chave, compila e
+  roda com o atualizador desligado (a página diz o motivo).
+- Publicação: workflow `versao.yml` a cada envio na `main` (como o `publicado/` do antigo): Release `v<data>` marcada
+  como a mais nova; o app lê `releases/latest/download/manifesto.json`. Arquivo igual ao da versão anterior não sobe de
+  novo (o manifesto aponta pra Release antiga), então as Releases antigas não são apagadas.
+- Troca: baixa pra `.atualizacao/` (com `pronto.json`) e só troca na próxima abertura, antes do servidor subir; o
+  executável que roda muda de nome pra `.velho` (Windows deixa) e o novo é aberto na hora. Nada de Tauri updater: o
+  app não é Tauri (D2) e o formato da pasta é o do antigo (D33).
+- Por que não o "tem versão nova: feche e abra" do antigo só avisando: aqui ele já baixa por trás, e o aviso diz que
+  vale na próxima abertura.
+
+## D35. Rede: o `kofrede.c` do antigo por FFI e o serviço em Rust dentro do `kofstation` — **aceita** (M13, 08/11)
+- O núcleo do protocolo (`kofrede.c` + Monocypher) entra **sem mudar um byte** (`third_party/kofrede`, SHA-256 no
+  LEIA-ME de lá), compilado pelo `cc` no `crates/kof-net` e chamado por FFI (o `unsafe` fica todo em `ffi.rs`). É o
+  mesmo código da `libkofrede.so` do APK atual: o pareamento é igual byte a byte, sem reescrever cripto.
+- O serviço (`kofservico.c`, 773 linhas) virou Rust (`servico.rs`) com o mesmo comportamento e a **mesma API JSON**;
+  a prova é rodar os testes do próprio antigo contra ele (`rede/teste/servicos.cjs` e `celular.cjs`, com o `Rede.java`
+  do APK) e o novo contra o `kofservico` antigo nos dois sentidos (`tools/testar-rede.mjs`, no CI).
+- Abre junto com o `kofstation` (como o kofservico abria com o lançador), nas portas do antigo (TCP/UDP 8650, TCP pula
+  até +9 se ocupada). A página fala por uma WebSocket local em porta qualquer, com token e só a origem da página
+  (`rede.ligar`), em vez da 8644 fixa e sem senha do antigo.
+- Dados em `<pasta de dados>/rede` (`identidade.bin`, `pareados.txt`, `config.txt`, o formato do antigo), separados
+  do antigo (`KOFnes/rede`): o celular pareia de novo com o PC novo. Os dois abertos juntos disputam a 8650.
+
+## D36. PS2: o LRPS2 já compilado do antigo, OpenGL sem janela no processo do jogo, imagem pela página — **aceita** (08/11)
+- O núcleo é o `pcsx2_libretro` que o antigo publica (commit 38d3a83f, o mesmo que o Marcelo já jogou), baixado pelo
+  manifesto e conferido por SHA-256: nada de compilar o PCSX2 (20–30 min por plataforma). Fica na pasta `nativo/`.
+- O `kof-nativo` dá ao núcleo um contexto OpenGL sem janela (`gl.rs`: EGL no Linux, com a tela do usuário ou sem
+  nenhuma; WGL com uma janela escondida no Windows), um framebuffer no tamanho máximo e lê a imagem de volta com três
+  buffers em rodízio e cerca (a placa nunca espera a CPU; no máximo 2 quadros de atraso). Não usa o `kofnativo.c`
+  (SDL2) do antigo: um processo nativo só pra manter, e o DVD lido direto do disco (o antigo lia pela página).
+- A imagem vai pra página como a do PS1 nativo (filtros e molduras iguais). Na resolução nativa (640×448) são ~70 MB/s
+  dentro do PC. Se o Marcelo precisar de resolução aumentada ou os números mostrarem gargalo na cópia, entra o "modo
+  direto" (janela nativa sem cópia, P.7).
+- Opções iniciais como o antigo: renderer OpenGL e `pcsx2_ee_cycle_skip = Mild Underclock` (60 fps no Shadow of the
+  Colossus no Ryzen 5 4600H). Pra comparar com o PCSX2 sozinho, ele pode desligar pela opção do núcleo.
+
+## D37. Medir antes de otimizar: medidor por quadro, modo diagnóstico e opções de emulação no meio da migração — **aceita** (Marcelo, 08/11)
+- Depois do primeiro teste do PS2 ("relativamente bem, umas engasgadas"), o Marcelo pôs o M16 antes do M14: medição
+  quadro a quadro com o culpado de cada engasgo, um modo diagnóstico que grava a sessão pra ele mandar, e opções de
+  emulação por console com perfis. Vale pra todos os emuladores.
+- Desenho no [DIAGNOSTICO.md](DIAGNOSTICO.md), seguindo o que PCSX2 e DuckStation fazem (histórico circular, CPU por
+  linha, intervalo de 0,5–1 s) mais o que eles não têm (percentis, cada engasgo com momento e culpado, arquivo).
+- Estatística pura no `domain` (testável sem emulador); medição no processo/Worker; gravação pelo Rust com comandos
+  com nome (`diag.*`); nada de ROM nem caminho completo no relatório.

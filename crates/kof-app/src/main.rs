@@ -1,12 +1,27 @@
 //! KOFstation (casca B, D2): serve o app em 127.0.0.1 e abre num navegador Chromium em modo app. Fecha junto com a
 //! janela. Uso: `kofstation` (normal) ou `kofstation --sem-navegador` (só mostra o endereço; pra testes).
+//! `kofstation --instalar` / `--desinstalar` põe e tira do menu de aplicativos (Linux).
+//! `kofstation --nativo` é o processo filho de um núcleo nativo (M11b): o próprio app abre, ninguém roda à mão.
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
 mod api;
+mod atualizacao;
+mod instalar;
+mod nativo;
 mod navegador;
+mod pastas;
+mod rede;
 mod servidor;
 
 fn main() {
+    if std::env::args().nth(1).as_deref() == Some("--nativo") {
+        std::process::exit(kof_nativo::filho::rodar());
+    }
+    match std::env::args().nth(1).as_deref() {
+        Some("--instalar") => std::process::exit(instalar::rodar(false)),
+        Some("--desinstalar") => std::process::exit(instalar::rodar(true)),
+        _ => {}
+    }
     servidor::agora_ms(); // o relógio do sinal de vida começa agora
     let sem_navegador = std::env::args().any(|a| a == "--sem-navegador");
     let pasta = kof_core::info::pasta_de_dados(|k| std::env::var(k).ok())
@@ -18,6 +33,11 @@ fn main() {
             None
         }
     };
+    // a versão baixada da última vez entra agora, antes de abrir qualquer coisa (M15.1)
+    if atualizacao::aplicar_na_abertura() {
+        tracing::info!("executável trocado pela atualização: o novo já abriu");
+        return;
+    }
     let srv = match servidor::Servidor::novo(pasta.clone()) {
         Ok(s) => s,
         Err(e) => {
@@ -26,6 +46,7 @@ fn main() {
             std::process::exit(1);
         }
     };
+    srv.abrir_rede(); // o celular acha o PC mesmo antes de abrir a tela Aparelhos (como o kofservico do antigo)
     let url = srv.url();
     tracing::info!(
         porta = srv.porta,

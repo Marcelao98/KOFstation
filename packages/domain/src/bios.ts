@@ -23,7 +23,7 @@ export const BIOS: Partial<Record<SistemaId, readonly ArquivoDeBios[]>> = {
   gba: [{ arquivo: 'gba_bios.bin', tamanho: 16384, opcional: true }],
   neogeo: [{ arquivo: 'neogeo.zip' }],
   ps1: PS1,
-  ps2: [{ arquivo: 'bios-ps2.bin', tamanho: 4194304, opcional: true }],
+  ps2: [{ arquivo: 'bios-ps2.bin', tamanho: 4194304 }], // o PCSX2 não liga sem
 };
 
 /** A ordem e a dica da tela de BIOS. */

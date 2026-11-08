@@ -35,8 +35,15 @@ test('telas e Voltar: lateral, Alt+←, botão direito e Esc', async ({ page }) 
 test('menus completos; o que ainda não existe avisa a etapa', async ({ page }) => {
   await page.click('#menu .m:nth-child(1) > button');
   await expect(page.locator('#menu .m.aberto .sub button')).toHaveCount(13);
+  // o celular como controle (M13.3) pede o endereço e a senha que o celular mostra
+  const pediu = page.waitForEvent('dialog').then(async (d) => {
+    const m = d.message();
+    await d.accept('celular errado');
+    return m;
+  });
   await page.click('#menu .m.aberto [data-acao="controle-celular"]');
-  await expect(page.locator('#aviso')).toContainText('etapa M13');
+  expect(await pediu).toContain('Usar como controle do PC');
+  await expect(page.locator('#aviso')).toContainText('digite o endereço e a senha');
   await page.keyboard.press('F5');
   await expect(page.locator('#aviso')).toContainText('abra um jogo primeiro');
 });

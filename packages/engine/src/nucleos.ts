@@ -2,7 +2,7 @@
 // `SISTEMAS` do web/nucleo.js do kofstation-old (só o que a engine precisa; nome e extensões ficam no domain).
 import type { SistemaId } from '@kof/domain';
 
-export type NucleoId = 'snes9x' | 'gambatte' | 'fceumm' | 'genplus' | 'mgba' | 'fbneo' | 'pcsx' | 'mupen64';
+export type NucleoId = 'snes9x' | 'gambatte' | 'fceumm' | 'genplus' | 'mgba' | 'fbneo' | 'pcsx' | 'mupen64' | 'pcsx2';
 
 export interface ConfigNucleo {
   nucleo: NucleoId;
@@ -25,9 +25,11 @@ export interface ConfigNucleo {
   dispositivo?: number;
   /** desenha com OpenGL (N64): WebGL2 num OffscreenCanvas dentro do Worker */
   gl?: boolean;
+  /** só roda no núcleo nativo (PS2: não existe em WebAssembly que aguente) */
+  soNativo?: boolean;
 }
 
-/** Sistemas que rodam no app novo (M2 + M11). O PS2 chega no M12. */
+/** Sistemas que rodam no app novo (M2 + M11; o PS2 no núcleo nativo, M12/N.9). */
 export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
   snes: { nucleo: 'snes9x', largura: 256, altura: 224, ext: 'sfc' },
   gb: { nucleo: 'gambatte', largura: 160, altura: 144, ext: 'gb' },
@@ -80,6 +82,21 @@ export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
       'mupen64plus-pak1': 'memory',
     },
     ext: 'z64',
+  },
+  // PlayStation 2 (LRPS2, o PCSX2 do libretro): só nativo, desenhando pela placa (OpenGL sem janela no processo do
+  // jogo). O DVD é lido direto do disco pelo núcleo. Opções como o antigo: renderer OpenGL e o "EE cycle skip" leve,
+  // que deixou o Shadow of the Colossus em 60 no Ryzen 5 4600H (a CPU do PS2 é o gargalo em PC modesto)
+  ps2: {
+    nucleo: 'pcsx2',
+    largura: 640,
+    altura: 448,
+    dinamico: true,
+    tv43: true,
+    caminho: true,
+    semRebob: true,
+    soNativo: true,
+    opcoes: { pcsx2_renderer: 'OpenGL', pcsx2_ee_cycle_skip: 'Mild Underclock', pcsx2_bios: 'bios-ps2.bin' },
+    ext: 'iso',
   },
 };
 
