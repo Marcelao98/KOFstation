@@ -65,7 +65,7 @@ test('o celular joga com o PC processando: imagem, botões, ping, menu e voltar 
         () =>
           (window as unknown as { __kofTeste: { rede: Rede } }).__kofTeste.rede.enviados.find((x) =>
             x.dados.includes('"oferta"'),
-          )!.dados,
+          )?.dados ?? '',
       ),
     );
   const sdp = (JSON.parse(oferta) as { sdp: string }).sdp;
@@ -95,12 +95,12 @@ test('o celular joga com o PC processando: imagem, botões, ping, menu e voltar 
       pc.onicegatheringstatechange = () => pc.iceGatheringState === 'complete' && ok();
       setTimeout(ok, 3000);
     });
-    return pc.localDescription!.sdp;
+    return pc.localDescription?.sdp ?? '';
   }, sdp);
   await page.evaluate(
     ([c, r]) =>
       (window as unknown as { __kofTeste: { rede: Rede } }).__kofTeste.rede.mensagem(
-        c!,
+        c ?? '',
         'jogo',
         JSON.stringify({ t: 'resposta', sdp: r }),
       ),
@@ -117,7 +117,8 @@ test('o celular joga com o PC processando: imagem, botões, ping, menu e voltar 
           const c = document.createElement('canvas');
           c.width = v.videoWidth;
           c.height = v.videoHeight;
-          const g = c.getContext('2d')!;
+          const g = c.getContext('2d');
+          if (!g) return false;
           g.drawImage(v, 0, 0);
           const [r = 0, gr = 255, b = 255] = g.getImageData(c.width >> 1, c.height >> 1, 1, 1).data;
           return r > 150 && gr < 80 && b < 80;
