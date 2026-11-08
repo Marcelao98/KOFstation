@@ -206,13 +206,6 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     set({ abrindo: true });
     try {
       const { armazem } = servicos();
-      // Neo Geo sem o neogeo.zip: a tela da BIOS pede, e o jogo abre quando ela chegar
-      if (await faltaBiosDe(armazem, aberto.sistema)) {
-        set({ abrindo: false });
-        const { usarBios } = await import('./bios');
-        await usarBios.getState().pedir(aberto.sistema, () => get().abrirJogo(aberto, origem));
-        return false;
-      }
       const nativo = await querNativo(aberto.sistema, origem.path);
       if (aberto.sistema === 'ps2' && !nativo) {
         av.avisarErro(
@@ -221,6 +214,13 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
             : 'PS2 precisa do núcleo nativo (pasta nativo/ do KOFstation): esta versão veio sem ele',
         );
         set({ abrindo: false });
+        return false;
+      }
+      // Neo Geo sem o neogeo.zip: a tela da BIOS pede, e o jogo abre quando ela chegar
+      if (await faltaBiosDe(armazem, aberto.sistema)) {
+        set({ abrindo: false });
+        const { usarBios } = await import('./bios');
+        await usarBios.getState().pedir(aberto.sistema, () => get().abrirJogo(aberto, origem));
         return false;
       }
       // nativo: o processo lê o CD direto da Kof Games (o CD e os .bin do .cue não passam pela página)

@@ -81,7 +81,7 @@ test('menu rápido: F2 e botão direito, volume com ◀▶, Esc fecha', async ({
   await expect(page.locator('#rapido')).toBeHidden();
 });
 
-test('arquivo que não é jogo e sistema que ainda não chegou avisam', async ({ page }) => {
+test('arquivo que não é jogo, PS2 sem o núcleo nativo e .cue sem os .bin avisam', async ({ page }) => {
   await page.setInputFiles('#arquivo', { name: 'leia.txt', mimeType: 'text/plain', buffer: Buffer.from('oi') });
   await expect(page.locator('#aviso')).toContainText('não parece um jogo');
   await page.setInputFiles('#arquivo', {
@@ -89,7 +89,7 @@ test('arquivo que não é jogo e sistema que ainda não chegou avisam', async ({
     mimeType: 'application/octet-stream',
     buffer: Buffer.from('ELF'),
   });
-  await expect(page.locator('#aviso')).toContainText('PlayStation 2 ainda não roda');
+  await expect(page.locator('#aviso')).toContainText('PS2 precisa do núcleo nativo'); // o backend de teste não tem nativo
   // .cue sozinho, sem os .bin que ele cita: diz o que falta
   await page.setInputFiles('#arquivo', {
     name: 'disco.cue',
