@@ -68,5 +68,43 @@ contrato do nativo, docs fora desta pasta.
 
 ## Relatório
 
-_(preencha ao terminar: o que mudou e por quê, os números de antes e depois do novo e do antigo, o que ficou de fora,
-e os comandos pra conferir)_
+**e2e:** `pnpm e2e` 44 passou, 1 pulado (visual-paridade, já era assim). `pnpm check` verde.
+
+**Nota:** o pedido falava em `B-ritmo-wasm.md`, que não existe; a tarefa de ritmo é esta (`A-ritmo-wasm.md`). Branch usada:
+`claude/fervent-brahmagupta-zq12qz` (a partir da `claude/busy-ritchie-wrvk8h`), e não `agente-a/ritmo-wasm`.
+
+**Causa.** O Worker produz quadros por timer (`setTimeout(4)`) segurando ~60 ms de som no anel, então os quadros chegam
+na página em rajadas (0, 2, 1...). A tela mostrava "o último que chegou" a cada vsync: rajada de 2 = um some (pulado);
+passo sem quadro = o anterior repete. Não é o `postMessage` nem o alvo do anel: é a falta de uma fila entre a chegada e o vsync.
+
+**Correção** (só `packages/engine/src/jogo.ts`, lado da página): os quadros do Worker entram numa fila e saem **um por
+vsync** (`requestAnimationFrame`), com 1 quadro de folga (um quadro sozinho espera o próximo por até 34 ms; depois sai,
+pra pausa e estado carregado não ficarem presos). Fila acima de 3 descarta os mais velhos (`descartados`). Worker,
+som, turbo, rebobinar, caçador/replay e `porQuadro` ficaram intactos (nada mudou no Worker nem no anel).
+
+**Medição** (`tools/medir-ritmo.mjs`, ROM de Game Boy gerada que anda o fundo 1 px por quadro; por minuto):
+
+| | novos | repetidos | pulados | p50 / p95 / p99 (ms) |
+|---|---|---|---|---|
+| novo ANTES (20 s, CPU 1x) | 3141 | 476 | 440–461 | 16,67 / 33,34 / 33,34 |
+| novo DEPOIS (30 s, CPU 1x) | 3574 | 20 | 8 | 16,67 / 16,67 / 16,67 |
+| antigo (30 s, CPU 1x) | 3582 | 0 | 2 | 16,7 / 16,8 / 16,8 |
+| novo DEPOIS (20 s, CPU 4x) | 3327 | 9 | 255 | 16,67 / 33,33 / 33,34 |
+| antigo (20 s, CPU 4x) | 2982 | 0 | 603 | 16,7 / 33,4 / 33,4 |
+
+Leitura: pulados e p95/p99 empatam com o antigo; os repetidos (~10–20/min) são o que sobra de 60 Hz da tela contra
+59,73 do console (o antigo mostra 0 porque o medidor não separa esses quadros; os "novos" dele somam um pouco menos
+de 60/s também). Com CPU 4x o novo fica melhor (255 contra 603 pulados). Faltas de som: o Worker/anel não foram
+tocados. O custo é ~1 quadro (16 ms) de atraso de imagem. Rodei no Chromium com SwiftShader, vsync de 60 Hz; num monitor de
+144 Hz ou VRR os números mudam, e não medi o som de ouvido.
+
+**De fora:** não mexi em `stores/jogo.ts` (`med.chegou()` agora conta a chegada no vsync, não a do Worker; o
+`porQuadro` do Worker continua com a verdade do lado do núcleo), nem em turbo (a fila corta pra 3 e o turbo mostra
+menos quadros, como já era com "último que chegou"). Não escrevi spec e2e nova.
+
+**Conferir:**
+```bash
+pnpm build && node tools/medir-ritmo.mjs --segundos 30
+node tools/medir-ritmo.mjs --so novo --segundos 20 --cpu 4
+```
+(precisa do clone do antigo em `../kofstation-old`, ou `--antigo <pasta>`; `RITMO_DEBUG=1` mostra a sequência de imagens.)
