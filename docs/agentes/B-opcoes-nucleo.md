@@ -81,5 +81,49 @@ nativo.
 
 ## Relatório
 
-_(preencha ao terminar: o que entrou no catálogo, de onde saiu cada chave (arquivo e commit do núcleo), o que o
-núcleo de verdade declarou, o que ficou de fora e os comandos pra conferir)_
+**Feito.** Branch `agente-b/opcoes-nucleo`.
+
+**O que entrou**
+- `packages/domain/src/opcoes-nucleo.ts` (exportado no `index.ts`): tipos `Perfil`, `ValorDeOpcao`, `OpcaoDeNucleo`
+  (+ `PERFIS`, `GrupoDeOpcao`), `OPCOES_DE_NUCLEO`, `valoresDoPerfil`, `conferirOpcoes`. **PS2: 23 opções; PS1: 15.**
+  N64 ficou de fora (o Mupen64Plus é só WebAssembly e não há `.so` pra conferir).
+- PS2: resolução interna, EE cycle skip/rate, MTVU, VU1 instantâneo, DVD rápido, filtro de textura, trilinear,
+  anisotrópico, precisão das transparências, dithering, download da imagem, deinterlace, FPU/VU exatos, fast boot,
+  widescreen/no-interlacing hint, cache de shaders, preload frame data, LOD0 (sem mipmap). Fora: `pcsx2_bios`,
+  `pcsx2_renderer` (do app) e as `pcsx2_pgs_*` (do renderizador paraLLEl; o app usa OpenGL).
+- PS1: recompilador, frameskip (tipo, intervalo, limite), desenho e som em thread, interpolação e reverb do som,
+  Enhanced Resolution, dithering, icache, exceções, sem stalls, CD turbo, região.
+- **Equilibrado = o que o app usa hoje**: PS2 = padrões do núcleo + `pcsx2_ee_cycle_skip: 'Mild Underclock'`;
+  PS1 = `frameskip_type: auto`, `frameskip_interval: 3`, `drc: enabled` (teste garante).
+- `packages/domain/src/opcoes-nucleo.test.ts`: padrões/perfis existem nos valores, sem chave repetida, dicas
+  preenchidas, Equilibrado bate com o app, `conferirOpcoes` (chave/valor/sistema desconhecidos, mensagens em
+  português) e a **fixture** `packages/contracts/fixtures/opcoes-nucleo.json` (falha se desatualizada;
+  `KOF_ATUALIZAR_FIXTURES=1 pnpm --filter @kof/domain test` reescreve). Adicionei a fixture ao `.prettierignore`
+  (o JSON é gerado por `JSON.stringify`, não pelo prettier).
+- `crates/kof-nativo/src/nucleo.rs`: o `SET_VARIABLES` agora guarda o texto completo de cada opção;
+  `Nucleo::opcoes_declaradas() -> Vec<OpcaoDeclarada>` (`chave`, `descricao`, `valores`, o 1º é o padrão) e
+  `analisar_opcao()`.
+- `crates/kof-nativo/tests/opcoes.rs`: abre os dois `.so` de verdade (PS1 com PS-X EXE de um laço; PS2 com BIOS
+  falsa + ISO do genisoimage, como o `lrps2.rs`) e confere chave, valores, perfis, padrão = 1º valor do núcleo e
+  "vale na hora" ≠ "(Restart)" na descrição. Sem o `.so`, avisa e passa.
+
+**O que o núcleo de verdade declarou:** PS1 (PCSX-ReARMed) **53** opções, PS2 (o `.so` do manifesto, que se
+apresenta como *ParaLLEl PS2*) **82**. Os dois declaram tudo já na abertura do jogo (não aceitam abrir sem jogo, daí
+o jogo mínimo). Nenhuma divergência entre o catálogo e o `.so`.
+
+**Fonte das chaves:** o próprio `.so` do commit fixado (`pnpm nucleos`), lido pelo teste; não consultei o
+`libretro_core_options.h` do GitHub.
+
+**Ressalvas pro orquestrador**
+- `naHora`: eu só consigo confirmar o lado "(Restart)" (o núcleo marca na descrição). As outras estão como `true`
+  (ou `false` por palpite onde o núcleo não diz, ex.: `pcsx2_mtvu`, `pcsx2_instant_vu1`, `pcsx_rearmed_spu_thread`);
+  vale testar com `variavel` ao vivo antes de prometer "vale na hora" na tela.
+- Os valores dos perfis Rápido/Fiel são uma proposta (só o Equilibrado é medido); ajuste com o jogo na mão.
+- A fixture traz também `perfis` (o Rust confere que cada valor de perfil existe no núcleo).
+
+**Conferir**
+```bash
+pnpm --filter @kof/domain test
+cargo test -p kof-nativo --test opcoes -- --nocapture   # precisa do KOF_NATIVOS=todas pnpm nucleos e do genisoimage
+pnpm check && pnpm check:rust   # no container, o pcsx.rs morre com SIGILL (sabido); cargo test --workspace --no-fail-fast: o resto passa
+```
