@@ -37,6 +37,8 @@ sudo apt-get install -y libasound2-dev genisoimage libegl1 libegl-mesa0 libgl1-m
 (se o `apt-get install` não achar os pacotes, rode `sudo apt-get update` antes.) O app antigo, pra comparar (só
 leitura, nunca mexa nele): `git clone https://github.com/Marcelao98/kofstation-old`.
 
+O plano do resto do roadmap em tarefas (ondas, dependências, quem mexe em quê): [PLANO.md](PLANO.md).
+
 ## Tarefas abertas
 
 | Tarefa | Arquivo | Branch | Situação |
