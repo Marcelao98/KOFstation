@@ -21,6 +21,23 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-08 · Correção · a página que às vezes não abria (tiny_http)
+
+**Pedido:** o CI quebrou de novo com a página sem carregar (agora no teste dos Aparelhos); o Marcelo pediu pra tentar de
+novo.
+**Causa:** bug do `tiny_http` 0.12.0 (`TaskPool::spawn`): uma linha acordada que ainda não pegou a tarefa segue contada
+como "esperando"; com conexões chegando juntas, uma ia pra fila sem linha pra ela e ficava parada enquanto a outra
+conexão keep-alive do Chrome vivesse. Era o "arquivo `.js` sem resposta" do JORNAL de 07/11 e do M13 (não era o disco).
+**Feito:** cópia do crate em `third_party/tiny_http` com a correção de uma linha (só vai pra fila se tem mais linhas
+esperando do que tarefas na fila), via `[patch.crates-io]`; `tools/testar-conexoes.mjs` (no CI); o teste do PS1 não
+tenta mais de novo (a causa saiu). `pnpm nucleos` com 3 tentativas por download (o GitHub respondeu 504 no CI).
+Teste do OpenGL só obrigatório onde há placa (o Windows do CI não tem).
+**Medido / conferido:** 30 conexões keep-alive juntas × 5 rodadas: **5 de 150 sem resposta antes, 0 depois** (duas
+vezes, e no executável do pacote). CI verde no Linux e no Windows com todos os testes de ponta a ponta.
+**Onde parou:** o mesmo da entrada do PS2 (abaixo): ⏸ o Marcelo joga PS2 com o pacote novo da `teste-binarios`.
+
+---
+
 ## 2026-11-08 · PS2 (N.9/M12) · LRPS2 com OpenGL sem janela, o sistema PS2 no app
 
 **Pedido:** o Marcelo trocou a ordem: PS2 antes do M14 ("quero jogar PS2, eu uso mais PC"), "liso igual ao PCSX2", no
