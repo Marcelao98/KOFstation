@@ -102,7 +102,11 @@ pub fn rodar() -> i32 {
         Err(e) => return falhar(&e),
     };
     if nucleo.pediu_gpu() {
-        tracing::warn!("o núcleo pediu desenho pela GPU: aqui só por software");
+        if crate::gl::existe() {
+            tracing::info!("o núcleo desenha pela placa (OpenGL sem janela; a imagem volta pra página)");
+        } else {
+            tracing::warn!("o núcleo pediu a placa de vídeo e o OpenGL não abriu: desenha por software, se souber");
+        }
     }
     let mut saida: Box<dyn Saida> = if cfg.sem_som {
         Box::new(Relogio::default())
@@ -168,6 +172,8 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
     let (mut quadros, mut amostras, mut numero) = (0u64, 0u64, 0u32);
     let mut geo = n.av.geometry;
     let mut ultimo_relatorio = Instant::now();
+    // tempo do núcleo (s, quadros) e do preparo da imagem (s, quadros) no último segundo
+    let mut med = (0.0f64, 0u64, 0.0f64, 0u64);
     loop {
         loop {
             let p = match rx.try_recv() {
@@ -238,7 +244,10 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
         while saida.guardado_ms() < ALVO_MS && rodou < 8 {
             for _ in 0..turbo {
                 som.clear();
+                let t = Instant::now();
                 novo |= n.rodar(&mut som);
+                med.0 += t.elapsed().as_secs_f64();
+                med.1 += 1;
                 quadros += 1;
             }
             if som.is_empty() {
@@ -251,9 +260,12 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
         }
         if novo {
             numero = numero.wrapping_add(1);
+            let t = Instant::now();
             if let Some(()) = n.com_quadro(|q| protocolo::quadro(q, numero, &mut buf)) {
                 canal.publicar_quadro(std::mem::take(&mut buf));
             }
+            med.2 += t.elapsed().as_secs_f64();
+            med.3 += 1;
         }
         let g = n.av.geometry;
         if g.base_width != geo.base_width || g.base_height != geo.base_height || g.aspect_ratio != geo.aspect_ratio {
@@ -266,12 +278,18 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
         }
         if ultimo_relatorio.elapsed() >= Duration::from_secs(1) {
             ultimo_relatorio = Instant::now();
+            let ms = |s: f64, n: u64| (n > 0).then(|| (s * 1000.0 / n as f64 * 100.0).round() / 100.0);
+            let leitura = crate::gl::LEITURA_US.swap(0, std::sync::atomic::Ordering::Relaxed) as f64 / 1e6;
             canal.avisar(&Aviso::Desempenho {
                 quadros,
                 amostras,
                 atraso_ms: saida.guardado_ms(),
                 faltas: saida.faltas(),
+                nucleo_ms: ms(med.0, med.1),
+                leitura_ms: crate::gl::existe().then(|| ms(leitura, med.1)).flatten(),
+                imagem_ms: ms(med.2, med.3),
             });
+            med = (0.0, 0, 0.0, 0);
         }
         if rodou == 0 {
             let espera = (saida.guardado_ms() - ALVO_MS).clamp(0.5, 4.0);

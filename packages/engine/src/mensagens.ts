@@ -61,6 +61,10 @@ export interface Medicao {
   faltasDeSom: number;
   /** som esperando no anel, em ms */
   somNaFilaMs: number;
+  /** núcleo nativo que desenha na placa (PS2): ms lendo a imagem da placa por quadro */
+  leituraMs?: number;
+  /** núcleo nativo: ms preparando o quadro pra página */
+  imagemMs?: number;
 }
 
 export type DoWorker =

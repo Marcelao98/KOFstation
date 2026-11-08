@@ -74,6 +74,14 @@ pub enum Aviso {
         #[serde(rename = "atrasoMs")]
         atraso_ms: f64,
         faltas: u64,
+        /// média por quadro no último segundo: o núcleo inteiro (com a leitura da placa), só a leitura da placa e o
+        /// preparo do quadro pra página (ms)
+        #[serde(rename = "nucleoMs", default, skip_serializing_if = "Option::is_none")]
+        nucleo_ms: Option<f64>,
+        #[serde(rename = "leituraMs", default, skip_serializing_if = "Option::is_none")]
+        leitura_ms: Option<f64>,
+        #[serde(rename = "imagemMs", default, skip_serializing_if = "Option::is_none")]
+        imagem_ms: Option<f64>,
     },
     Ok {
         pedido: u32,

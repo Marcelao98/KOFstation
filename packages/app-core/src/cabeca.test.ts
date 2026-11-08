@@ -16,7 +16,8 @@ function backend(arquivos: Record<string, Uint8Array>) {
       const length = a?.length as number | undefined;
       pedidos.push({ path, ...(length !== undefined ? { length } : {}) });
       const d = arquivos[path] ?? new Uint8Array(0);
-      return Promise.resolve(d.subarray(Number(a?.offset ?? 0), length === undefined ? undefined : length));
+      const o = Number(a?.offset ?? 0);
+      return Promise.resolve(d.subarray(o, length === undefined ? undefined : o + length));
     },
   };
   return { b, pedidos };
@@ -37,7 +38,9 @@ describe('cabeça do CD de PS1', () => {
     expect(j?.sistema).toBe('ps1');
     expect(j?.parcial).toBe(true);
     expect(j?.tamanho).toBe(700 << 20);
-    expect(pedidos).toEqual([{ path: 'Games/psx/Jogo.iso', length: 64 << 10 }]);
+    // só pedaços pequenos (pra saber se é DVD de PS2) e a cabeça de 64 KB: nunca o CD inteiro
+    expect(pedidos).toContainEqual({ path: 'Games/psx/Jogo.iso', length: 64 << 10 });
+    expect(pedidos.every((p) => p.length !== undefined && p.length <= 64 << 10)).toBe(true);
     // mesma identidade que lendo inteiro: nome + tamanho
     expect(identidade('ps1', j?.rom ?? new Uint8Array(0), 'Jogo', j?.tamanho).id).toBe(
       identidade('ps1', new Uint8Array(700 << 20), 'Jogo').id,
@@ -51,6 +54,37 @@ describe('cabeça do CD de PS1', () => {
     expect(j?.sistema).toBe('ps1');
     expect(j?.parcial).toBeUndefined();
     expect(pedidos.map((p) => p.path)).toEqual(['Games/psx/Jogo.cue']);
+  });
+
+  it('DVD de PS2 (ISO com BOOT2): sistema ps2 pelo conteúdo, só pedaços pequenos, tamanho de verdade', async () => {
+    const u = new Uint8Array(40 * 2048);
+    const pvd = 16 * 2048;
+    u.set([1, ...[...'CD001'].map((c) => c.charCodeAt(0))], pvd);
+    const v = new DataView(u.buffer);
+    v.setUint32(pvd + 158, 20, true);
+    v.setUint32(pvd + 166, 2048, true);
+    const r = 20 * 2048,
+      nome = 'SYSTEM.CNF;1',
+      boot = 'BOOT2 = cdrom0:\\SLUS_200.00;1\r\n';
+    u[r] = 33 + nome.length;
+    v.setUint32(r + 2, 30, true);
+    v.setUint32(r + 10, boot.length, true);
+    u[r + 32] = nome.length;
+    u.set(
+      [...nome].map((c) => c.charCodeAt(0)),
+      r + 33,
+    );
+    u.set(
+      [...boot].map((c) => c.charCodeAt(0)),
+      30 * 2048,
+    );
+    const { b, pedidos } = backend({ 'Games/ps2/Jogo.iso': u });
+    const j = await cabecaDoCd(b, 'Games/ps2/Jogo.iso', 4 * 2 ** 30);
+    expect(j?.sistema).toBe('ps2');
+    expect(j?.parcial).toBe(true);
+    expect(j?.tamanho).toBe(4 * 2 ** 30);
+    expect(j?.nome).toBe('Jogo');
+    expect(pedidos.every((p) => p.length !== undefined && p.length <= 64 << 10)).toBe(true);
   });
 
   it('.bin de Mega Drive não é CD: volta null (lê do jeito normal)', async () => {

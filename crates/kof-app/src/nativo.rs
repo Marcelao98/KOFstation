@@ -11,7 +11,7 @@ use std::sync::Mutex;
 
 /// Sistemas com núcleo nativo na pasta `nativo/` (ou no repositório, rodando do código).
 pub fn sistemas() -> Vec<&'static str> {
-    ["ps1"]
+    ["ps1", "ps2"]
         .into_iter()
         .filter(|s| crate::pastas::nucleo_nativo(s).is_some())
         .collect()
@@ -71,10 +71,17 @@ impl Nativos {
         for d in [&sistema, &saves] {
             std::fs::create_dir_all(d).map_err(|e| KofError::de_io(d.display(), e))?;
         }
+        // o PCSX2 procura a BIOS em <sistema>/pcsx2/bios (o nome vai na opção pcsx2_bios)
+        let pasta_bios = if a.sistema == "ps2" {
+            sistema.join("pcsx2").join("bios")
+        } else {
+            sistema.clone()
+        };
+        std::fs::create_dir_all(&pasta_bios).map_err(|e| KofError::de_io(pasta_bios.display(), e))?;
         for b in &a.bios {
             let n = nome_simples(b)?;
             let dados = lojas.pegar("bios", n)?;
-            let alvo = sistema.join(n);
+            let alvo = pasta_bios.join(n);
             if std::fs::read(&alvo).ok().as_deref() != Some(&dados[..]) {
                 std::fs::write(&alvo, &dados).map_err(|e| KofError::de_io(alvo.display(), e))?;
             }

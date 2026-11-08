@@ -32,7 +32,17 @@ export type AvisoNativo =
       taxaSaida: number;
     }
   | { tipo: 'geometria'; largura: number; altura: number; proporcao: number }
-  | { tipo: 'desempenho'; quadros: number; amostras: number; atrasoMs: number; faltas: number }
+  | {
+      tipo: 'desempenho';
+      quadros: number;
+      amostras: number;
+      atrasoMs: number;
+      faltas: number;
+      /** ms por quadro no último segundo: o núcleo (com a leitura da placa), a leitura da placa, o quadro pra página */
+      nucleoMs?: number;
+      leituraMs?: number;
+      imagemMs?: number;
+    }
   | { tipo: 'ok'; pedido: number }
   | { tipo: 'erro'; pedido: number | null; codigo: string; mensagem: string }
   | { tipo: 'fim'; motivo: string };

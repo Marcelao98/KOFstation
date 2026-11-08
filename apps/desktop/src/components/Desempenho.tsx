@@ -9,6 +9,8 @@ export function Desempenho() {
     <div id="desempenho">
       {m.fps} fps · núcleo {m.nucleoMs} ms · engasgos {m.atrasos}/s · falta de som {m.faltasDeSom} · som na fila{' '}
       {m.somNaFilaMs} ms
+      {m.leituraMs !== undefined ? ` · leitura da placa ${m.leituraMs} ms` : ''}
+      {m.imagemMs !== undefined ? ` · imagem pra página ${m.imagemMs} ms` : ''}
       {jogo.comSom ? '' : ' · sem som'}
     </div>
   );

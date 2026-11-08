@@ -191,7 +191,9 @@ export class JogoNativo {
     const s = (t - antes.t) / 1000;
     this.eventos.medicao?.({
       fps: s > 0 ? Math.round((a.quadros - antes.quadros) / s) : 0,
-      nucleoMs: 0, // o núcleo roda no outro processo: o tempo dele não aparece aqui
+      nucleoMs: a.nucleoMs ?? 0, // medido no processo do jogo
+      ...(a.leituraMs !== undefined ? { leituraMs: a.leituraMs } : {}),
+      ...(a.imagemMs !== undefined ? { imagemMs: a.imagemMs } : {}),
       atrasos: 0,
       faltasDeSom: a.faltas - antes.faltas,
       somNaFilaMs: Math.round(a.atrasoMs),

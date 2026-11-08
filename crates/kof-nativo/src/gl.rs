@@ -78,6 +78,8 @@ unsafe impl Send for Estado {}
 
 static ESTADO: Mutex<Option<Estado>> = Mutex::new(None);
 static FBO: AtomicU32 = AtomicU32::new(0);
+/// microssegundos gastos lendo a imagem da placa (somados; o laço tira a média por segundo)
+pub static LEITURA_US: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
 fn estado() -> std::sync::MutexGuard<'static, Option<Estado>> {
     ESTADO.lock().unwrap_or_else(|e| e.into_inner())
@@ -218,6 +220,13 @@ pub fn preparar(largura: u32, altura: u32, profundidade: bool, estencil: bool) -
 /// `destino` (RGBA, a origem em cima), o quadro mais velho que já ficou pronto. `true` = `destino` tem quadro novo.
 /// `embaixo` = o núcleo desenha com a origem embaixo (o normal do OpenGL): a imagem é virada aqui.
 pub fn quadro(largura: u32, altura: u32, embaixo: bool, destino: &mut Vec<u8>, dim: &mut (u32, u32)) -> bool {
+    let inicio = std::time::Instant::now();
+    let r = quadro_de_fato(largura, altura, embaixo, destino, dim);
+    LEITURA_US.fetch_add(inicio.elapsed().as_micros() as u64, Ordering::Relaxed);
+    r
+}
+
+fn quadro_de_fato(largura: u32, altura: u32, embaixo: bool, destino: &mut Vec<u8>, dim: &mut (u32, u32)) -> bool {
     let mut g = estado();
     let Some(e) = g.as_mut() else { return false };
     let (w, h) = (

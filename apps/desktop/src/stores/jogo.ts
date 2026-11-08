@@ -105,6 +105,7 @@ function nativos(): Promise<string[]> {
 
 /** O núcleo nativo desse sistema está ligado (Opções de emulação) e existe neste executável? */
 export async function nativoLigado(sistema: string): Promise<boolean> {
+  if (sistema === 'ps2') return (await nativos()).includes('ps2'); // o PS2 só existe nativo
   if (sistema !== 'ps1' || config().ler('nucleoPs1') === 'wasm') return false;
   return (await nativos()).includes(sistema);
 }
@@ -213,6 +214,15 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         return false;
       }
       const nativo = await querNativo(aberto.sistema, origem.path);
+      if (aberto.sistema === 'ps2' && !nativo) {
+        av.avisarErro(
+          (await nativos()).includes('ps2')
+            ? 'PS2 roda do disco: guarde o jogo na pasta Kof Games (Biblioteca) e abra por lá'
+            : 'PS2 precisa do núcleo nativo (pasta nativo/ do KOFstation): esta versão veio sem ele',
+        );
+        set({ abrindo: false });
+        return false;
+      }
       // nativo: o processo lê o CD direto da Kof Games (o CD e os .bin do .cue não passam pela página)
       if (!nativo) {
         aberto = await jogoInteiro(aberto, origem.path);
@@ -264,16 +274,19 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
             .backend.chamar('nativo.fechar')
             .catch(() => undefined); // já fechado ou nem abriu: nada a fazer
           const peso = aberto.pesoCd ?? 0;
-          // CD grande: o WebAssembly teria que ler ele inteiro na página (estoura a memória); mostra o erro e para
-          if (peso > MAX_RESERVA_WASM) {
+          // PS2 (só nativo) ou CD grande: o WebAssembly teria que ler ele inteiro na página (estoura a memória)
+          const nomeSis = aberto.sistema === 'ps2' ? 'PS2' : 'PS1';
+          if (aberto.sistema === 'ps2' || peso > MAX_RESERVA_WASM) {
             registrar(
               'error',
               'nativo',
-              `o núcleo nativo não abriu (${textoDoErro(e)}); CD de ${mb(peso)} MB, sem reserva no WebAssembly · ${linhas.join(' | ')}`,
+              `o núcleo nativo não abriu (${textoDoErro(e)}); ${mb(peso)} MB, sem reserva no WebAssembly · ${linhas.join(' | ')}`,
             );
             av.avisarErro(
-              `PS1 nativo não abriu: ${textoDoErro(e)}. O CD tem ${mb(peso)} MB, grande demais pro WebAssembly; ` +
-                'o log do processo foi pro log do app (Ajuda → Reportar bug)',
+              aberto.sistema === 'ps2'
+                ? `PS2 não abriu: ${textoDoErro(e)}. O log do processo foi pro log do app (Ajuda → Reportar bug)`
+                : `${nomeSis} nativo não abriu: ${textoDoErro(e)}. O CD tem ${mb(peso)} MB, grande demais pro WebAssembly; ` +
+                    'o log do processo foi pro log do app (Ajuda → Reportar bug)',
             );
             return false;
           }
@@ -404,10 +417,11 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
  * abre de lá, no nativo. false = não é o caso (outro sistema, sem nativo, sem Kof Games): segue o caminho normal.
  */
 async function abrirCdDeFora(arquivo: File, soltos: File[]): Promise<boolean> {
-  if (!(await nativoLigado('ps1'))) return false;
   const ler = async (o: number, n: number) => new Uint8Array(await arquivo.slice(o, o + n).arrayBuffer());
   const fato = await fatosDe(arquivo.name, arquivo.size, ler);
-  if (sistemaDoArquivo(fato) !== 'ps1') return false;
+  const sis = sistemaDoArquivo(fato);
+  // CD de PS1 (com o nativo ligado) e DVD de PS2 (sempre): pra Kof Games aos pedaços, nunca inteiro na memória
+  if (!(sis === 'ps1' || sis === 'ps2') || !(await nativoLigado(sis))) return false;
   const { backend } = servicos();
   const av = usarAvisos.getState();
   let g;

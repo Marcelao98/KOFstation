@@ -6,7 +6,9 @@ import {
   baseCd,
   crcRom,
   cueDasFaixas,
+  fatosDe,
   jogoIdDe,
+  sistemaDoArquivo,
   tituloInterno,
   zipTemCd,
   type ArquivoDaPasta,
@@ -109,6 +111,8 @@ export interface ComoLer {
 /** Bytes do começo que bastam pra reconhecer um CD (o `cdPs1` olha até 0x9000) e o cabeçalho de um PS-X EXE. */
 const CABECA = 64 << 10;
 const CD_PS1 = /\.(cue|bin|img|iso|chd|pbp)$/i;
+/** O que pode ser DVD de PS2 (o .iso/.bin/.chd só pelo conteúdo: SYSTEM.CNF com BOOT2). */
+const DVD_PS2 = /\.(iso|bin|img|chd|cso|isz|elf)$/i;
 
 /** Tamanho de um arquivo da Kof Games sem ler (null = não achou). */
 async function tamanhoNaKofGames(b: Backend, path: string): Promise<number | null> {
@@ -127,6 +131,8 @@ async function tamanhoNaKofGames(b: Backend, path: string): Promise<number | nul
 export async function cabecaDoCd(b: Backend, path: string, tamanho: number): Promise<JogoAberto | null> {
   const nome = path.split('/').pop() ?? path;
   if (/\.zip$/i.test(nome)) return cabecaDoZip(b, path, nome);
+  const dvd = await cabecaDoDvd(b, path, nome, tamanho);
+  if (dvd) return dvd;
   if (!CD_PS1.test(nome)) return null;
   const cue = /\.cue$/i.test(nome);
   const bytes = await lerDaKofGames(b, path, 0, cue ? undefined : Math.min(tamanho || CABECA, CABECA));
@@ -144,6 +150,18 @@ export async function cabecaDoCd(b: Backend, path: string, tamanho: number): Pro
   // imagem única (.chd, .iso, .pbp): a rom era a imagem inteira; .bin sem .cue: a rom é o .cue montado (já certo)
   if (/\.(chd|pbp|iso|img)$/i.test(nome) || !j.arquivos) r.tamanho = tamanho;
   return r;
+}
+
+/**
+ * DVD de PS2 da Kof Games: só os primeiros 64 KB passam pela página (o DVD tem GB; o núcleo lê do disco). O sistema
+ * vem do conteúdo (SYSTEM.CNF com BOOT2, lido aos pedaços pelo Rust). null = não é PS2.
+ */
+async function cabecaDoDvd(b: Backend, path: string, nome: string, tamanho: number): Promise<JogoAberto | null> {
+  if (!DVD_PS2.test(nome)) return null;
+  const fato = await fatosDe(nome, tamanho, (o, n) => lerDaKofGames(b, path, o, n));
+  if (sistemaDoArquivo(fato) !== 'ps2') return null;
+  const rom = await lerDaKofGames(b, path, 0, Math.min(tamanho || CABECA, CABECA));
+  return { nome: baseCd(nome), arquivo: nome, sistema: 'ps2', rom, parcial: true, pesoCd: tamanho, tamanho };
 }
 
 /**
@@ -181,7 +199,7 @@ async function cabecaDoZip(b: Backend, path: string, nomeZip: string): Promise<J
 export async function bytesDoJogo(b: Backend, arm: Armazem, j: RegistroJogo, como: ComoLer = {}): Promise<JogoAberto> {
   if (j.path) {
     try {
-      if (como.soCabeca && j.sistema === 'ps1') {
+      if (como.soCabeca && (j.sistema === 'ps1' || j.sistema === 'ps2')) {
         const c = await cabecaDoCd(b, j.path, j.tamanho);
         if (c) return c;
       }
