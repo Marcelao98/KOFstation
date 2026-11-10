@@ -120,6 +120,10 @@ relatório (.zip)** e me mande. Faça o mesmo com o **Zone of the Enders 2** at�
 do aviso e quanto de RAM o PC tem). O **F3** agora mostra p50/p99, engasgos por minuto e quem causou, a CPU de cada
 linha e o gráfico dos últimos 10 s.
 
+**Ritmo nativo (09/11):** integrado envio de cada quadro do PS2/PS1 e apresentação por vsync. A medição de teste caiu
+de 183/303 para 0/302 quadros sem envio. O pacote precisa ser reconstruído para o Marcelo confirmar no SotC; segue
+faltando o `.zip` do ZoE2 para investigar a memória.
+
 **Novo (PS2):** no pacote da `teste-binarios`: guarde a BIOS do PS2 (🔑 BIOS → PS2), ponha o jogo em
 `Kof Games/Games/ps2`, abra pela Biblioteca e aperte **F3** numa cena pesada: me mande o print (fps, núcleo, leitura da
 placa, imagem pra página). Se der, rode o mesmo jogo no PCSX2 sozinho pra comparar.

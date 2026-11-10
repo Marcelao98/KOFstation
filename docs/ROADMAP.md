@@ -289,6 +289,8 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 | M16.4 | Opções de emulação por console (PS1 em diante): catálogo em português, perfis Rápido/Equilibrado/Fiel, Avançado, por jogo, na hora quando dá | você troca uma opção e vê o efeito no F3 | ⬜ |
 | M16.5 | Otimizar pelos relatórios (PS2 primeiro: shaders, EE, som, ritmo, leitura) | antes × depois medido no teu PC | ⬜ |
 
+> **Tarefa C integrada (09/11, `d7e57d3`):** envio quadro a quadro no nativo + fila por vsync compartilhada com o wasm. A medição do núcleo mínimo caiu de 183/303 (60%) para 0/302 quadros sem envio. Falta reconstruir o pacote da `teste-binarios` para o teste real do Marcelo; o teste Rust local exige ALSA (`alsa.pc`).
+
 ## M13 — Rede e celular como controle
 
 | Passo | O que faço | Checkpoint | Estado |
