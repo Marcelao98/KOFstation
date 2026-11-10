@@ -21,6 +21,20 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-10 · Conferência · o C entrou, o SotC continua não liso
+
+**Pedido:** o Marcelo jogou o pacote com a tarefa C: o Shadow of the Colossus **continua não liso** (no antigo roda
+liso). Limites do Codex e do Claude acabando: retomar no sábado.
+**Conferido:** a junção do C pelo Codex está certa (`filho.rs` manda todo quadro; `canal.rs` fila de até 6; fila por
+vsync comum em `engine/fila-de-quadros.ts`); CI verde no Linux e no Windows (`1f91825`, run 104). B (`agente-b/opcoes-nucleo`)
+ainda **não** junto.
+**Conclusão:** o quadro perdido na origem era real (60% → 0 no teste) mas não era o que o olho do Marcelo vê, ou não
+era o único. Sem o `.zip` do 🩺 não dá pra saber o culpado.
+**Onde parou (sábado):** 1) o Marcelo manda o `.zip` do 🩺 do SotC (Ajuda → 🩺, jogar 5 min, Exportar) e diz **se no
+antigo o PS2 abre numa janela própria ou dentro da página do app**; 2) se o culpado for núcleo/CPU: opções (B, M16.4);
+se for ritmo/página: o **modo janela própria** como o antigo (D36), que é o caminho mais provável pra "liso igual ao
+antigo"; 3) a memória do ZoE2 com a saída do `journalctl` (comando no `CONTINUAR.md`).
+
 ## 2026-11-09 · M16 · ritmo do PS2/PS1 nativo (tarefa C)
 
 **Pedido:** continuar de `docs/agentes/CONTINUAR.md`, integrar o que chegou na branch `claude/busy-ritchie-wrvk8h` e enviar, sem PR.
