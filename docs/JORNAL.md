@@ -25,8 +25,8 @@ commits citados pelo hash curto quando ajudarem.
 
 **Pedido:** continuar de `docs/agentes/CONTINUAR.md`, integrar o que chegou na branch `claude/busy-ritchie-wrvk8h` e enviar, sem PR.
 **Feito:** revisada e integrada `agente-c/ritmo-nativo` (merge `d7e57d3`). `filho.rs` publica cada quadro; `canal.rs` mantém fila limitada; `JogoNativo` e o wasm usam `FilaDeQuadros` por vsync.
-**Medido / conferido:** relatório da tarefa C registra 183/303 quadros sem envio antes e 0/302 depois com núcleo mínimo. `git diff --check` limpo. Não consegui executar o teste local: falta ALSA (`alsa.pc`). `pnpm check` e `pnpm e2e` não produziram saída após 30 s neste ambiente; interrompidos. O pacote PS2 não foi reconstruído.
-**Onde parou:** commit enviado à branch `claude/busy-ritchie-wrvk8h`. Falta gerar o pacote atualizado em `teste-binarios`; depois o Marcelo joga SotC e fornece o `.zip`/erro do ZoE2. Em seguida integrar B e iniciar M16.4.
+**Medido / conferido:** teste `ritmo`: 284 quadros rodados, 0 sem envio. `pnpm check` passou; e2e passou com 44 testes (1 ignorado) usando dois workers. Formatação e clippy passaram. Na suíte Rust completa, todos os alvos passaram exceto `opengl`, que entregou 64 quadros de 120 sob este backend gráfico e falhou no limite do teste; os testes `pcsx`, `lrps2`, `processo` e `ritmo` passaram. Build Linux e `tools/testar-ps2.mjs`: DVD sintético de 4,3 GB abriu, núcleo ficou vivo e a memória da página ficou em 753 MB. Pacote Linux SHA-256 `da4cf8bb…`, publicado em `teste-binarios` (`65bdcf0`). Os artefatos Windows foram preservados da versão anterior e estão marcados como sem C.
+**Onde parou:** ⏸ o Marcelo testa SotC com diagnóstico e envia o `.zip`; repete com ZoE2 até o erro de memória. Depois integrar B e iniciar M16.4.
 
 ## 2026-11-08 · Passagem · onde parou pro próximo orquestrador (Codex local)
 

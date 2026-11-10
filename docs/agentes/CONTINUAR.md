@@ -15,7 +15,7 @@
 
 - **Branch do orquestrador:** `claude/busy-ritchie-wrvk8h` (tudo junto e enviado; último commit `eb4980a` + este
   arquivo).
-- **Pacote de teste:** branch `teste-binarios` (`4058e25`): M16.1–M16.3. **Ainda não tem** a correção do A nem a do C.
+- **Pacote de teste:** branch `teste-binarios` (`65bdcf0`): Linux inclui M16.1–M16.3 e as correções A e C. Os artefatos Windows foram preservados de `4058e25` e não incluem a correção C.
 - **Feito nesta sessão:** M16.1 (medidor quadro a quadro, CPU por linha), M16.2 (F3 com gráfico), M16.3 (🩺 modo
   diagnóstico: Ajuda → 🩺, exporta `.zip`). Tarefa **A** (ritmo do WebAssembly) conferida e junta: 0 quadros
   pulados/min, igual ao antigo (`tools/medir-ritmo.mjs`). Detalhes no topo do [JORNAL](../JORNAL.md).
@@ -68,14 +68,10 @@ journalctl -k --since "-6 hours" | grep -iE "out of memory|oom|killed process" |
 
 ## Próximos passos, em ordem
 
-1. Juntar o C quando chegar: revisar o diff, `pnpm check`, `pnpm check:rust` (`--no-fail-fast`: o teste `pcsx` morre
-   com SIGILL em container), `pnpm e2e`, `pnpm build && cargo build -p kof-app && node tools/testar-ps2.mjs`.
-2. Pacote novo na `teste-binarios` (como no JORNAL de 08/11 "M16.1–M16.3": `tools/empacotar.sh`,
-   `tools/pacote-linux.sh`, `tools/pacote-windows.sh`, um commit órfão só, `git push -f origin teste-binarios`).
-   Atualizar o `LEIA-ME.md` de lá.
+1. **Feito:** C revisada e integrada; `pnpm check`, e2e (44 passaram, 1 ignorado), teste `ritmo` (284 quadros, 0 sem envio), build Linux e `tools/testar-ps2.mjs` passaram.
+2. **Feito:** pacote Linux atualizado e enviado em `teste-binarios` (`65bdcf0`), commit órfão único. Os binários Windows continuam na versão anterior.
 3. O Marcelo joga o SotC com o 🩺 ligado e manda o `.zip`. Com o log do ZoE2, atacar a memória.
 4. Juntar o B; depois o M16.4 (tela das opções, tarefa E do PLANO).
-5. JORNAL (entrada nova no topo), ROADMAP, SITUACAO, README ao fechar.
 
 Regras de sempre: nunca ROM/BIOS/jogo em lugar nenhum; commits em português, sem nome de modelo de IA; `git status`
 antes de `git add -A`; não abrir PR sem o Marcelo pedir.

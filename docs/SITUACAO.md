@@ -114,15 +114,15 @@ A partir daí, cada envio na `main` publica uma versão (workflow "Versão") e o
 
 ## Esperando você testar ⏸
 
-**Novo (M16.3, 08/11): gravar o Shadow of the Colossus.** Pacote novo na `teste-binarios`. Em **Ajuda → 🩺 Modo
+**Novo (M16.3, 08/11): gravar o Shadow of the Colossus.** Pacote Linux atualizado na `teste-binarios` (`65bdcf0`). Em **Ajuda → 🩺 Modo
 diagnóstico**, marque "gravar cada jogo que eu abrir", jogue uns 5–10 minutos e depois clique em **Exportar
 relatório (.zip)** e me mande. Faça o mesmo com o **Zone of the Enders 2** até o erro de memória (manda também o texto
 do aviso e quanto de RAM o PC tem). O **F3** agora mostra p50/p99, engasgos por minuto e quem causou, a CPU de cada
 linha e o gráfico dos últimos 10 s.
 
-**Ritmo nativo (09/11):** integrado envio de cada quadro do PS2/PS1 e apresentação por vsync. A medição de teste caiu
-de 183/303 para 0/302 quadros sem envio. O pacote precisa ser reconstruído para o Marcelo confirmar no SotC; segue
-faltando o `.zip` do ZoE2 para investigar a memória.
+**Ritmo nativo (09/11):** integrado envio de cada quadro do PS2/PS1 e apresentação por vsync. A medição foi 0/284
+quadros sem envio; o PS2 sintético também passou no pacote. O Marcelo confirma no SotC real e envia o `.zip` do ZoE2
+para investigar a memória. Os pacotes Windows permanecem na versão anterior (`4058e25`), sem a correção C.
 
 **Novo (PS2):** no pacote da `teste-binarios`: guarde a BIOS do PS2 (🔑 BIOS → PS2), ponha o jogo em
 `Kof Games/Games/ps2`, abra pela Biblioteca e aperte **F3** numa cena pesada: me mande o print (fps, núcleo, leitura da
@@ -143,8 +143,8 @@ mkdir -p ~/Programas/"Kof Games" && curl -fL https://raw.githubusercontent.com/M
 ```
 
 Confira: aparece **KOFstation novo** no menu de aplicativos (com a xícara), abre por ali, e o antigo continua lá, do
-jeito que estava, com os saves dele. No Windows: o `KOFstation-instalar.exe` da mesma branch (instala sem pedir
-administrador, atalho na área de trabalho) ou o `.zip`.
+jeito que estava, com os saves dele. Os arquivos Windows (`KOFstation-instalar.exe` e `.zip`) ainda são da versão
+anterior (`4058e25`) e não contêm a correção do ritmo nativo.
 
 **De antes:**
 
