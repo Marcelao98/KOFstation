@@ -23,10 +23,17 @@ pub enum Pedido {
     GravarBateria(u32, Vec<u8>),
 }
 
+/// Quadros publicados que a conexão ainda não mandou. Passou disso, a página está lenta: os mais velhos saem
+/// (mostrar atrasado é pior que pular).
+const MAX_NA_FILA: usize = 6;
+
 #[derive(Default)]
 struct Ultimo {
-    numero: u64,
+    /// o mais novo (volta quando uma página nova conecta)
     bytes: Arc<Vec<u8>>,
+    fila: VecDeque<Arc<Vec<u8>>>,
+    /// quadros tirados da fila sem mandar porque a página não acompanhou
+    descartados: u64,
 }
 
 /// Parte compartilhada entre o laço do núcleo e a linha da conexão.
@@ -91,16 +98,32 @@ impl Canal {
         Ok(canal)
     }
 
-    /// Guarda o quadro mais novo (quem está lento perde os do meio, nunca atrasa).
+    /// Põe o quadro na fila de envio, na ordem em que o núcleo fez (a conexão manda todos). Se a página não acompanha
+    /// e a fila passa de `MAX_NA_FILA`, os mais velhos saem.
     pub fn publicar_quadro(&self, bytes: Vec<u8>) {
         let mut u = self.quadro.lock().unwrap_or_else(|e| e.into_inner());
-        u.numero += 1;
-        u.bytes = Arc::new(bytes);
+        let b = Arc::new(bytes);
+        u.bytes = b.clone();
+        u.fila.push_back(b);
+        while u.fila.len() > MAX_NA_FILA {
+            u.fila.pop_front();
+            u.descartados += 1;
+        }
+    }
+
+    /// Quadros que a fila jogou fora por a página estar lenta (pro diagnóstico).
+    pub fn descartados(&self) -> u64 {
+        self.quadro.lock().unwrap_or_else(|e| e.into_inner()).descartados
     }
 
     /// Faz a próxima conexão (ou a atual) receber o último quadro de novo.
     pub fn reenviar_quadro(&self) {
-        self.quadro.lock().unwrap_or_else(|e| e.into_inner()).numero += 1;
+        let mut u = self.quadro.lock().unwrap_or_else(|e| e.into_inner());
+        u.fila.clear();
+        if !u.bytes.is_empty() {
+            let b = u.bytes.clone();
+            u.fila.push_back(b);
+        }
     }
 
     pub fn avisar(&self, a: &Aviso) {
@@ -154,7 +177,6 @@ impl Canal {
     }
 
     fn laco(&self, ws: &mut WebSocket<TcpStream>, minha: u64, tx: &Sender<Pedido>) -> String {
-        let mut visto = 0u64;
         loop {
             if self.geracao.load(Ordering::SeqCst) != minha {
                 return "outra página conectou".into();
@@ -215,14 +237,11 @@ impl Canal {
                     return e.to_string();
                 }
             }
-            let novo = {
-                let u = self.quadro.lock().unwrap_or_else(|e| e.into_inner());
-                (u.numero != visto && !u.bytes.is_empty()).then(|| {
-                    visto = u.numero;
-                    u.bytes.clone()
-                })
+            let novos: Vec<Arc<Vec<u8>>> = {
+                let mut u = self.quadro.lock().unwrap_or_else(|e| e.into_inner());
+                u.fila.drain(..).collect()
             };
-            if let Some(b) = novo {
+            for b in novos {
                 if let Err(e) = ws.send(Message::binary(b.as_ref().clone())) {
                     return e.to_string();
                 }

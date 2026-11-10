@@ -38,6 +38,42 @@ pub struct Config {
 /// Som guardado que o laço mantém (o mesmo alvo do Worker do wasm).
 const ALVO_MS: f64 = 60.0;
 
+/// Só pros testes (`sem_som` + `KOF_NATIVO_SOM_BLOCO_MS`): um relógio que só "enxerga" o consumo a cada bloco de tempo,
+/// como a placa de som de verdade (ela consome em blocos). Aí o laço roda 2–3 quadros de uma vez, igual no uso real.
+struct EmBlocos {
+    por_dentro: Relogio,
+    bloco: Duration,
+    visto: std::cell::Cell<(Instant, f64)>,
+}
+
+impl Saida for EmBlocos {
+    fn taxa(&self) -> u32 {
+        self.por_dentro.taxa()
+    }
+    fn tocar(&mut self, amostras: &[i16], taxa_nucleo: f64) {
+        self.por_dentro.tocar(amostras, taxa_nucleo);
+        let (t, g) = self.visto.get();
+        self.visto
+            .set((t, g + (amostras.len() / 2) as f64 * 1000.0 / taxa_nucleo.max(1.0)));
+    }
+    fn guardado_ms(&self) -> f64 {
+        let (t, _) = self.visto.get();
+        if t.elapsed() >= self.bloco {
+            self.visto.set((Instant::now(), self.por_dentro.guardado_ms()));
+        }
+        self.visto.get().1
+    }
+    fn faltas(&self) -> u64 {
+        self.por_dentro.faltas()
+    }
+    fn volume(&mut self, v: f32) {
+        self.por_dentro.volume(v);
+    }
+    fn pausar(&mut self, pausado: bool) {
+        self.por_dentro.pausar(pausado);
+    }
+}
+
 fn responder(v: serde_json::Value) {
     let mut o = std::io::stdout().lock();
     // sem stdout o pai já foi embora; o laço termina sozinho quando o stdin fechar
@@ -109,7 +145,17 @@ pub fn rodar() -> i32 {
         }
     }
     let mut saida: Box<dyn Saida> = if cfg.sem_som {
-        Box::new(Relogio::default())
+        match std::env::var("KOF_NATIVO_SOM_BLOCO_MS")
+            .ok()
+            .and_then(|v| v.parse::<f64>().ok())
+        {
+            Some(b) if b > 0.0 => Box::new(EmBlocos {
+                por_dentro: Relogio::default(),
+                bloco: Duration::from_secs_f64(b / 1000.0),
+                visto: std::cell::Cell::new((Instant::now(), 0.0)),
+            }),
+            _ => Box::new(Relogio::default()),
+        }
     } else {
         match Placa::abrir() {
             Ok(p) => Box::new(p),
@@ -242,16 +288,26 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
         }
         let taxa = n.av.timing.sample_rate;
         let fps = if n.av.timing.fps > 0.0 { n.av.timing.fps } else { 60.0 };
-        let mut novo = false;
         let mut rodou = 0;
         while saida.guardado_ms() < ALVO_MS && rodou < 8 {
-            for _ in 0..turbo {
+            for i in 0..turbo {
                 som.clear();
                 let t = Instant::now();
                 leitura_agora(); // o que sobrou fora de um quadro não conta
-                novo |= n.rodar(&mut som);
+                let novo = n.rodar(&mut som);
                 med.quadro(t.elapsed(), leitura_agora(), saida.guardado_ms(), saida.faltas());
                 quadros += 1;
+                // Todo quadro que o núcleo fez vai pra página na hora (não só o último do lote): a placa de som
+                // consome em blocos e o laço roda 2–3 quadros seguidos; mandar só o último fazia a tela pular.
+                // No turbo só o último de cada rodada vai (os outros não dá pra ver mesmo).
+                if novo && i + 1 == turbo {
+                    numero = numero.wrapping_add(1);
+                    let t = Instant::now();
+                    if let Some(()) = n.com_quadro(|q| protocolo::quadro(q, numero, &mut buf)) {
+                        canal.publicar_quadro(std::mem::take(&mut buf));
+                        med.envio(t.elapsed());
+                    }
+                }
             }
             if som.is_empty() {
                 // núcleo mudo: um quadro de silêncio, pra o ritmo continuar certo
@@ -260,14 +316,6 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
             amostras += (som.len() / 2) as u64;
             saida.tocar(&som, taxa);
             rodou += 1;
-        }
-        if novo {
-            numero = numero.wrapping_add(1);
-            let t = Instant::now();
-            if let Some(()) = n.com_quadro(|q| protocolo::quadro(q, numero, &mut buf)) {
-                canal.publicar_quadro(std::mem::take(&mut buf));
-                med.envio(t.elapsed());
-            }
         }
         let g = n.av.geometry;
         if g.base_width != geo.base_width || g.base_height != geo.base_height || g.aspect_ratio != geo.aspect_ratio {

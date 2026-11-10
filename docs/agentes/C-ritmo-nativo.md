@@ -58,5 +58,28 @@ mandado** pra página. Use isso pra contar.
 
 ## Relatório
 
-_(preencha ao terminar: o que mudou e por quê, os números de antes e depois, o que ficou de fora e os comandos pra
-conferir)_
+**Causa confirmada com número.** A suspeita 1 era a certa. Com o som consumido em blocos (como a placa de verdade), o
+laço roda 2–3 quadros por lote e só o último ia pra página; o canal ainda guardava só o mais novo.
+
+**Medição** (`crates/kof-nativo/tests/ritmo.rs`, núcleo mínimo, relógio de som em blocos de 40 ms via
+`KOF_NATIVO_SOM_BLOCO_MS`, 5 s depois do 1º segundo, pelo `porQuadro`):
+
+| | quadros rodados | rodados e **não** mandados |
+|---|---|---|
+| antes | 303 | **183 (60%)** |
+| depois | 302 | **0** |
+
+**O que mudou**
+- `filho.rs`: a imagem é publicada logo depois de cada `n.rodar` (no turbo, só o último de cada rodada). Novo
+  `EmBlocos` (só com `sem_som` + a variável de ambiente acima, só pra teste).
+- `canal.rs`: `publicar_quadro` põe numa fila (máx. 6, descarta os mais velhos se a página não acompanha;
+  `descartados()` conta) e a conexão manda todos, na ordem. `reenviar_quadro` (página nova) manda só o último.
+- `packages/engine/src/fila-de-quadros.ts` (+ teste): a fila por vsync da tarefa A virou módulo comum; `Jogo` (wasm) e
+  `JogoNativo` usam. No nativo, sem `requestAnimationFrame` (testes no Node) o quadro vai direto.
+
+**Não feito:** adaptar o `tools/medir-ritmo.mjs` pra jogo nativo (o PCSX morre com SIGILL aqui e não deu tempo de
+fazer o caminho com o núcleo de teste). Não medi com PS2/GPU de verdade (sem placa no container): o Marcelo precisa
+jogar o Shadow of the Colossus pra confirmar a sensação.
+
+**Conferir:** `cargo test -p kof-nativo --test ritmo -- --nocapture` (linha `RITMO:`), `pnpm check`, `pnpm e2e`
+(44 ok), `cargo test --workspace --no-fail-fast` (só o `pcsx` com SIGILL), `node tools/testar-ps2.mjs` (ok).

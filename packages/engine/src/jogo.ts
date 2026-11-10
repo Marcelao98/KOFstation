@@ -2,6 +2,7 @@
 // Sem React: a tela do jogo só recebe callbacks (o laço não passa pelo render).
 import type { SistemaId } from '@kof/domain';
 import { CODIGO_WORKLET } from './anel';
+import { FilaDeQuadros } from './fila-de-quadros';
 import type { ExtrasDoJogo, InfoDoJogo } from './libretro';
 import type { DoWorker, Medicao, ParaWorker, Pedido, ReplayDoBug, SituacaoRebob } from './mensagens';
 import { NUCLEOS } from './nucleos';
@@ -35,11 +36,6 @@ export interface OpcoesDoJogo {
   transferir?: boolean;
 }
 
-/** Quadros na fila acima disso: os mais velhos saem (a página não acompanhou; mostrar atrasado é pior que pular). */
-const MAX_NA_FILA = 3;
-/** Um quadro sozinho na fila espera o próximo por até isso (2 vsyncs); depois sai (pausa, estado carregado, 30 fps). */
-const ESPERA_DA_FOLGA_MS = 34;
-
 export class Jogo {
   info!: InfoDoJogo;
   /** o som saiu pelo AudioWorklet (false = sem isolamento ou sem placa de som: o jogo roda mudo, no relógio) */
@@ -55,15 +51,13 @@ export class Jogo {
   private mudo: boolean;
   private acordar = () => void this.ctx?.resume();
   private proximoId = 1;
-  /**
-   * Quadros que o Worker mandou e ainda não foram pra tela. O Worker acorda por timer e o som dita o ritmo dele, então
-   * os quadros chegam em rajadas (0, 2, 1...); mostrar "o último que chegou" a cada vsync repete e pula quadro. Aqui
-   * eles esperam na fila e saem um por vsync (o `laco`), com 1 quadro de folga pra aguentar o atraso do timer.
-   */
-  private fila: { pixels: Uint32Array; largura: number; altura: number; chegou: number }[] = [];
+  /** Quadros que o Worker mandou e ainda não foram pra tela: saem um por vsync (ver `FilaDeQuadros`). */
+  private fila = new FilaDeQuadros();
   private pedidoDoLaco = 0;
   /** quadros que ficaram pra trás na fila (a página engasgou ou o turbo está ligado) e foram jogados fora */
-  descartados = 0;
+  get descartados(): number {
+    return this.fila.descartados;
+  }
   private esperando = new Map<number, { ok: (b: Uint8Array | null) => void; falhou: (e: Error) => void }>();
 
   private constructor(
@@ -153,24 +147,16 @@ export class Jogo {
     }
   }
 
-  /** A cada vsync: solta um quadro da fila. Só segura o último se ele acabou de chegar e não tem folga (ver `fila`). */
+  /** A cada vsync: solta um quadro da fila. */
   private laco = (agora: number) => {
     this.pedidoDoLaco = requestAnimationFrame(this.laco);
-    const f = this.fila;
-    while (f.length > MAX_NA_FILA) {
-      f.shift();
-      this.descartados++;
-    }
-    const primeiro = f[0];
-    if (!primeiro) return;
-    if (f.length < 2 && agora - primeiro.chegou < ESPERA_DA_FOLGA_MS) return; // espera o próximo: absorve o timer
-    f.shift();
-    this.eventos.quadro?.(primeiro.pixels, primeiro.largura, primeiro.altura);
+    const q = this.fila.tirar(agora);
+    if (q) this.eventos.quadro?.(q.pixels, q.largura, q.altura);
   };
 
   private receber(m: DoWorker) {
     if (m.tipo === 'quadro')
-      this.fila.push({
+      this.fila.empurrar({
         pixels: new Uint32Array(m.pixels),
         largura: m.largura,
         altura: m.altura,
@@ -317,7 +303,7 @@ export class Jogo {
     this.mandar({ tipo: 'parar' });
     this.worker.terminate();
     cancelAnimationFrame(this.pedidoDoLaco);
-    this.fila.length = 0;
+    this.fila.limpar();
     removeEventListener('pointerdown', this.acordar, true);
     removeEventListener('keydown', this.acordar, true);
     void this.ctx?.close().catch(() => undefined);
