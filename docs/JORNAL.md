@@ -21,6 +21,15 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · M16.5 · otimização do PS2 pausada por decisão do Marcelo
+
+**Pedido:** terminar o roadmap até o fim (M16.4, T.1, M14), um passo depois do outro, sem parar nos checkpoints; o que
+depender do Marcelo vira ⏸ e entra na lista "Pra você testar" do `docs/SITUACAO.md`. T.2 fica pra ele decidir.
+**Decidido:** a **otimização do PS2 (M16.5) está pausada por decisão do Marcelo.** As tentativas ficam na branch
+`rascunho/ps2-liso` (ritmo pelo relógio como o PCSX2, medição de CPU fora do laço, MTVU ligado) e **não devem ser
+juntadas**. Ninguém mexe em otimização de PS2 até ele reabrir o assunto.
+**Onde parou:** começando pelo M16.4 (juntar `agente-b/opcoes-nucleo` e fazer a tela), depois T.1 e M14.
+
 ## 2026-11-10 · Conferência · o C entrou, o SotC continua não liso
 
 **Pedido:** o Marcelo jogou o pacote com a tarefa C: o Shadow of the Colossus **continua não liso** (no antigo roda
