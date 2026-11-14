@@ -42,6 +42,8 @@ struct Contexto {
     saves: CString,
     variaveis: BTreeMap<String, CString>,
     variaveis_mudaram: bool,
+    /// tudo o que o núcleo declarou no `SET_VARIABLES` (chave → "Descrição; padrão|outro|…"), na ordem da chave
+    declaradas: BTreeMap<String, String>,
     av_mudou: Option<retro_system_av_info>,
     geometria_mudou: Option<retro_game_geometry>,
     pediu_fim: bool,
@@ -103,6 +105,30 @@ pub fn padrao_da_opcao(texto: &str) -> Option<&str> {
     lista.trim_start().split('|').next().filter(|s| !s.is_empty())
 }
 
+/// Uma opção como o núcleo a declarou no `SET_VARIABLES` ("Descrição; padrão|valor2|valor3").
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct OpcaoDeclarada {
+    pub chave: String,
+    pub descricao: String,
+    /// valores aceitos; o primeiro é o padrão do núcleo
+    pub valores: Vec<String>,
+}
+
+/// Separa o texto do `SET_VARIABLES` em descrição e valores.
+pub fn analisar_opcao(chave: &str, texto: &str) -> OpcaoDeclarada {
+    let (descricao, lista) = texto.split_once(';').unwrap_or((texto, ""));
+    OpcaoDeclarada {
+        chave: chave.to_string(),
+        descricao: descricao.trim().to_string(),
+        valores: lista
+            .trim_start()
+            .split('|')
+            .filter(|s| !s.is_empty())
+            .map(str::to_string)
+            .collect(),
+    }
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // o que o núcleo chama de volta
 
@@ -161,6 +187,10 @@ unsafe extern "C" fn cb_environment(cmd: c_uint, data: *mut c_void) -> bool {
             let mut v = data as *const retro_variable;
             while !v.is_null() && !(*v).key.is_null() {
                 let k = CStr::from_ptr((*v).key).to_string_lossy().into_owned();
+                if !(*v).value.is_null() {
+                    c.declaradas
+                        .insert(k.clone(), CStr::from_ptr((*v).value).to_string_lossy().into_owned());
+                }
                 if !c.variaveis.contains_key(&k) && !(*v).value.is_null() {
                     let texto = CStr::from_ptr((*v).value).to_string_lossy();
                     if let Some(p) = padrao_da_opcao(&texto).and_then(|p| CString::new(p).ok()) {
@@ -614,6 +644,11 @@ impl Nucleo {
                 *x = e;
             }
         });
+    }
+
+    /// Todas as opções que o núcleo declarou (por chave). Vazio se ele só declara depois de abrir um jogo.
+    pub fn opcoes_declaradas(&self) -> Vec<OpcaoDeclarada> {
+        com(|c| c.declaradas.iter().map(|(k, t)| analisar_opcao(k, t)).collect()).unwrap_or_default()
     }
 
     pub fn variavel(&self, chave: &str, valor: &str) -> Result<(), KofError> {
