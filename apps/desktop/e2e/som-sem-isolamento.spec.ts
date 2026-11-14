@@ -21,12 +21,13 @@ test('sem crossOriginIsolated o jogo toca som pelo AudioWorklet por mensagens', 
   const tocadas = () =>
     page.evaluate(() => (globalThis as unknown as { __kofTeste: { somTocado: () => number } }).__kofTeste.somTocado());
   await expect.poll(tocadas, { timeout: 15_000 }).toBeGreaterThan(24_000); // mais de ~0,5 s de som saiu
-  // e o ritmo é o do jogo (≈ 1 s de som por segundo, com folga pra tolerância da máquina)
+  // e o som continua saindo no ritmo do jogo (≈ 48 mil amostras por segundo). O piso é folgado porque a máquina do CI,
+  // com 2 testes ao mesmo tempo, roda o jogo mais devagar (já deu 27 mil/s lá); o defeito que este teste pega é o mudo (0).
   const a = await tocadas();
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(4000);
   const b = await tocadas();
-  const porSegundo = (b - a) / 2;
-  expect(porSegundo).toBeGreaterThan(30_000);
+  const porSegundo = (b - a) / 4;
+  expect(porSegundo).toBeGreaterThan(20_000);
   expect(porSegundo).toBeLessThan(60_000);
   await page.keyboard.press('F3');
   expect(await page.locator('#desempenho').textContent()).not.toContain('sem som');

@@ -28,7 +28,8 @@ passo novo "Paridade da abertura e do controle de toque": `tools/paridade-*.mjs`
 existe na minha máquina; o projeto tem o `@playwright/test`, que exporta o mesmo `chromium`. Troquei nas três
 ferramentas e rodei o passo igual ao CI (página do antigo no commit fixado `ceba493`): abertura TUDO IGUAL, controle
 TUDO IGUAL. No CI faltava também esperar o `vite preview` subir (era `sleep 4` fixo; agora espera a porta, em
-127.0.0.1). Código do app não mudou; o pacote da `teste-binarios` continua valendo.
+127.0.0.1) e o teste do som sem isolamento media 2 s e exigia 30 mil amostras/s: o CI com 2 testes juntos deu 27 mil
+(som saindo, só mais devagar). Agora mede 4 s e o piso é 20 mil; o defeito que ele pega é o mudo. Código do app não mudou; o pacote da `teste-binarios` continua valendo.
 **Onde parou:** só falta o teste de pareamento (T-REDE), que o Marcelo faz em casa. T.2 e o PS2 seguem com ele.
 
 ## 2026-11-14 · O controle de toque por console no celular (vinha o do Super Nintendo no PS1)
