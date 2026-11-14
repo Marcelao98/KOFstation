@@ -39,8 +39,8 @@ aapt package -f -M "$W/AndroidManifest.xml" -S "$W/res" -A "$W/assets" -I "$ANDR
 (cd "$W" && aapt add base.apk classes.dex >/dev/null)
 # PS1 e N64 nativos: as .so ARM64 do APK do antigo (sem elas o app usa o WebAssembly, que é bem mais lento)
 if [ -f "$APK_ANTIGO" ]; then
-  mkdir -p "$W/lib/arm64-v8a" && (cd "$W" && unzip -qo "$APK_ANTIGO" 'lib/arm64-v8a/libkofps1.so' 'lib/arm64-v8a/libkofn64.so' 'lib/arm64-v8a/libretro.so' 'lib/arm64-v8a/libn64.so')
-  (cd "$W" && aapt add base.apk lib/arm64-v8a/libkofps1.so lib/arm64-v8a/libkofn64.so lib/arm64-v8a/libretro.so lib/arm64-v8a/libn64.so >/dev/null)
+  mkdir -p "$W/lib/arm64-v8a" && (cd "$W" && unzip -qo "$APK_ANTIGO" 'lib/arm64-v8a/libkofps1.so' 'lib/arm64-v8a/libkofn64.so' 'lib/arm64-v8a/libretro.so' 'lib/arm64-v8a/libn64.so' 'lib/arm64-v8a/libkofrede.so')
+  (cd "$W" && aapt add base.apk lib/arm64-v8a/libkofps1.so lib/arm64-v8a/libkofn64.so lib/arm64-v8a/libretro.so lib/arm64-v8a/libn64.so lib/arm64-v8a/libkofrede.so >/dev/null)
 else
   echo "AVISO: sem $APK_ANTIGO: o APK sai SEM o PS1/N64 nativos (diga KOF_APK_ANTIGO=...)"
 fi

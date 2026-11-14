@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { Aviso } from '../components/Aviso';
 import { Desempenho } from '../components/Desempenho';
 import { ControleDeToque } from '../components/ControleDeToque';
+import { ModoControle } from '../components/ModoControle';
 import { Lateral } from '../components/Lateral';
 import { Menu } from '../components/Menu';
 import { MenuRapido, teclaDoRapido } from '../components/MenuRapido';
@@ -247,6 +248,7 @@ export function App({ backend }: { backend: Backend }) {
     <>
       <Menu />
       <ControleDeToque />
+      <ModoControle />
       <Lateral />
       <main id="palco">
         {atual === 'home' && <Inicio />}

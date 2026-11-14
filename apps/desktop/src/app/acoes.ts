@@ -19,6 +19,8 @@ import { usarBug } from '../stores/bug';
 import { usarDiagnostico } from '../stores/diagnostico';
 import { usarBios } from '../stores/bios';
 import { menuControleCelular } from '../stores/celular';
+import { emModoCelular } from './celular';
+import { entrarModoControle } from '../stores/modoControle';
 import { procurar as procurarAtualizacao } from '../stores/atualizacao';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
@@ -65,7 +67,9 @@ export function acao(nome: string, valor?: string): boolean {
   const j = usarJogo.getState();
   switch (nome) {
     case 'controle-celular':
-      menuControleCelular();
+      if (emModoCelular())
+        entrarModoControle(); // no celular: ESTE aparelho vira o controle do PC
+      else menuControleCelular(); // no PC: conectar a um celular pelo endereço e a senha
       return true;
     case 'atualizacao':
       void procurarAtualizacao(true);

@@ -8,6 +8,7 @@ import { emModoCelular } from '../app/celular';
 import { usarJogo } from '../stores/jogo';
 import { usarModo } from '../stores/modo';
 import { usarRebob } from '../stores/rebob';
+import { menuDoPc, usarMC } from '../stores/modoControle';
 import { usarTelas } from '../stores/telas';
 import { soltarToque, toque, usarToque } from '../stores/toque';
 
@@ -81,10 +82,13 @@ interface Dedo {
 export function ControleDeToque() {
   const raiz = useRef<HTMLDivElement>(null);
   const { modelo, tam, opa, canhoto, vibrar } = usarToque();
+  const sisPc = usarMC((c) => c.sis);
+  const emControle = usarMC((c) => c.ativo);
   const sistema = usarJogo((j) => j.info?.sistema ?? 'snes');
+  const sisDosRotulos = emControle ? sisPc || 'ps1' : sistema;
   const temJogo = usarJogo((j) => !!j.jogo);
   const naTelaDoJogo = usarTelas((t) => t.atual) === 'jogo';
-  const jogando = temJogo && naTelaDoJogo;
+  const jogando = (temJogo && naTelaDoJogo) || emControle;
 
   useEffect(() => {
     document.body.classList.toggle('cel-jogo', jogando);
@@ -149,6 +153,7 @@ export function ControleDeToque() {
       if (b === 'menu') {
         dedos.delete(id);
         c.classList.remove('on');
+        if (usarMC.getState().ativo) return menuDoPc(); // jogando no PC: o menu é o do PC
         if (j.jogo && !j.rapidoAberto) j.abrirRapido();
         else if (j.rapidoAberto) j.fecharRapido();
         return;
@@ -230,16 +235,16 @@ export function ControleDeToque() {
           <i key={c} className={c} />
         ))}
       </div>
-      {botao('shoulder', 'L', rotuloDe(sistema, 'L'))}
-      {botao('shoulder', 'R', rotuloDe(sistema, 'R'))}
-      {botao('shoulder', 'L2', rotuloDe(sistema, 'L2'))}
-      {botao('shoulder', 'R2', rotuloDe(sistema, 'R2'))}
-      {botao('pill', 'Select', rotuloDe(sistema, 'Select'))}
-      {botao('pill', 'Start', rotuloDe(sistema, 'Start'))}
-      {botao('face', 'Y', rotuloDe(sistema, 'Y'))}
-      {botao('face', 'X', rotuloDe(sistema, 'X'))}
-      {botao('face', 'B', rotuloDe(sistema, 'B'))}
-      {botao('face', 'A', rotuloDe(sistema, 'A'))}
+      {botao('shoulder', 'L', rotuloDe(sisDosRotulos, 'L'))}
+      {botao('shoulder', 'R', rotuloDe(sisDosRotulos, 'R'))}
+      {botao('shoulder', 'L2', rotuloDe(sisDosRotulos, 'L2'))}
+      {botao('shoulder', 'R2', rotuloDe(sisDosRotulos, 'R2'))}
+      {botao('pill', 'Select', rotuloDe(sisDosRotulos, 'Select'))}
+      {botao('pill', 'Start', rotuloDe(sisDosRotulos, 'Start'))}
+      {botao('face', 'Y', rotuloDe(sisDosRotulos, 'Y'))}
+      {botao('face', 'X', rotuloDe(sisDosRotulos, 'X'))}
+      {botao('face', 'B', rotuloDe(sisDosRotulos, 'B'))}
+      {botao('face', 'A', rotuloDe(sisDosRotulos, 'A'))}
       {botao('menu', 'menu', '☰')}
       {botao('rew', 'rew', '⏪')}
       {botao('turbo', 'turbo', '⏩')}

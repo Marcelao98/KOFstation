@@ -3,7 +3,7 @@
 // um texto JSON: `{"ok":true,"data":…,"bin":"<base64>"}` ou `{"ok":false,"error":{code,message,details?}}`: o mesmo
 // contrato do Rust (docs/API_CONTRACTS.md), só que os bytes viajam em base64. Comando que a casca ainda não tem devolve
 // `UNSUPPORTED` com a explicação em português, e o app trata como qualquer outro erro do backend.
-import type { Backend } from '@kof/app-core';
+import type { Backend, CanalRede, EventoRede } from '@kof/app-core';
 
 /** O que a casca Java expõe (ver android/src/dev/kofstation/android/Ponte.java). */
 export interface PonteAndroid {
@@ -59,6 +59,24 @@ export function criarBackendAndroid(ponte: PonteAndroid): Backend {
     },
     enviarBinario: async <T>(cmd: string, args: Record<string, unknown>, dados: Uint8Array) =>
       rodar(cmd, args, dados).data as T,
+    // rede entre aparelhos (M13/M14): a `Rede.java` do antigo (libkofrede.so) pela ponte KOFnesApk.redeCmd; os eventos voltam
+    // em window.__rede (os mesmos pedidos e eventos JSON do kofservico do PC, rede/PROTOCOLO.md)
+    rede(): Promise<CanalRede> {
+      const apk = (globalThis as { KOFnesApk?: { redeCmd?: (json: string) => void } }).KOFnesApk;
+      if (!apk?.redeCmd)
+        return Promise.reject({ code: 'UNSUPPORTED', message: 'a rede do celular precisa do APK com a libkofrede.so' });
+      let evento: (m: EventoRede) => void = () => undefined;
+      (globalThis as { __rede?: (m: EventoRede) => void }).__rede = (m) => evento(m);
+      return Promise.resolve({
+        mandar: (p) => {
+          apk.redeCmd?.(JSON.stringify(p));
+          return true;
+        },
+        ouvir: (e) => {
+          evento = e; // o celular não "cai": a casca é do próprio aparelho
+        },
+      });
+    },
     // sem `enviarArquivo`: o Blob vira bytes na memória (o app já cai no enviarBinario). CD grande no celular é o
     // M14.4 (núcleo nativo lendo da pasta), não passa pela página.
   };

@@ -296,7 +296,7 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
 | M13.1 | `kof-net` (usa o `kofrede.c` do antigo) | testes do protocolo passando (`tools/testar-rede.mjs`: o `servicos.cjs` e o `celular.cjs` do antigo contra o novo, novo × kofservico antigo) | ✅ |
-| M13.2 | Tela Aparelhos, código e QR | **teu celular (APK atual) pareia com o PC novo** | ⏸ |
+| M13.2 | Tela Aparelhos, código e QR | **teu celular (APK atual) pareia com o PC novo** | ⏸ (o APK novo também: `Rede.java` do antigo ligada ao `Backend.rede()`, 📷 Ler o QR e 🎮 Jogar no PC na tela Aparelhos do celular; e2e com duas páginas) |
 | M13.3 | Celular como controle (antigo e pela rede), jogadores pela rede | você joga com o celular | ⏸ |
 | M13.4 | Jogar no PC, Controle total, Modo Switch, Levar pro celular | você joga no celular com o PC processando | ⏸ |
 

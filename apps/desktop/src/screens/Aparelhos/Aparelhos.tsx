@@ -4,7 +4,10 @@ import { quandoFoi } from '@kof/app-core';
 import qrcode from 'qrcode-generator';
 import { useEffect, useMemo, useState } from 'react';
 import { acao } from '../../app/acoes';
+import { emModoCelular } from '../../app/celular';
+import { entrarModoControle } from '../../stores/modoControle';
 import { usarRede } from '../../stores/rede';
+import { LerQr } from './LerQr';
 
 function Qr({ texto }: { texto: string }) {
   const svg = useMemo(() => {
@@ -100,6 +103,17 @@ export function Aparelhos() {
                     : '⚪ fora da rede · visto ' + quandoFoi(a.visto)}
                 </small>
               </span>
+              {emModoCelular() && a.online && a.tipo === 'pc' && (
+                <button
+                  className="grande"
+                  onClick={() => {
+                    acao('fechar-tela');
+                    entrarModoControle({ pc: a.id }); // 🖥 Jogar no PC: o jogo que estiver aberto lá
+                  }}
+                >
+                  🎮 Jogar no PC
+                </button>
+              )}
               <button
                 className="grande sec"
                 onClick={() =>
@@ -116,8 +130,9 @@ export function Aparelhos() {
           Nenhum ainda.
         </p>
         <div>
+          <LerQr />
           <button
-            className="grande"
+            className="grande so-pc"
             data-acao="ap-parear"
             onClick={() => {
               r.setMsg('');

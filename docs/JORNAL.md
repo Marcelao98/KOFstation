@@ -21,6 +21,19 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · M13/M14 · rede e controle no APK novo (lado do celular)
+
+**Pedido:** "testa a rede entre aparelhos no APK novo e as opções do controle; faz a paridade total".
+**Como:** em cima do que já existia (casca, `Rede.java`, `ControleServidor.java`, `libkofrede.so` do APK antigo). O que faltava era a
+**tela do celular no app novo** (o `android.js` do antigo): `platform/android.ts` ganhou `rede()` (KOFnesApk.redeCmd + `window.__rede`) e o APK
+passou a levar a `libkofrede.so`; `stores/modoControle.ts` + `components/ModoControle.tsx` = o `entrarModoControle` do antigo (Jogar no PC por
+WebRTC com vídeo, ping, menu do PC, filtro do celular; controle pela rede pareada com jogador e console; servidor de endereço e senha do APK);
+`screens/Aparelhos/LerQr.tsx` (📷 Ler o QR do PC, BarcodeDetector ou `jsqr`) e 🎮 Jogar no PC por aparelho; botões `.so-pc`/`.so-cel`.
+**Conferido:** e2e `celular-pc.spec.ts` com **duas páginas de verdade** (PC e `?celular=1`) ligadas por um cabo de teste: o celular pede,
+chega o vídeo por WebRTC (videoWidth > 0), o ping, o botão apertado no celular chega no PC, o menu do PC aparece e "Voltar pra TV"; e o
+controle pela rede ("PC de teste · Jogador 1", console Mega Drive). Estável 3×. `pnpm check` com o antigo e `pnpm e2e` (64 ok).
+**Falta provar no aparelho:** o `libkofrede.so` de verdade (UDP 8650 na Wi-Fi) e a câmera do QR no Android (T-REDE no SITUACAO).
+
 ## 2026-11-14 · Auditoria, som do APK e fecho de qualidade
 
 **Pedido:** olhar o repositório e o roadmap, rodar todos os testes, deixar o app "igualzinho" ao antigo e descobrir por que o APK
