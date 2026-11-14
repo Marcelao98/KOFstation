@@ -35,8 +35,13 @@ pub struct Config {
     pub dispositivo: Option<u32>,
 }
 
-/// Som guardado que o laço mantém (o mesmo alvo do Worker do wasm).
+/// Som guardado que o laço mantém. O ritmo é o do relógio (um quadro a cada 1/fps, como o `kofnativo.c` do antigo):
+/// o som só ajusta o relógio de leve pra a fila ficar perto disto, e enche até aqui no começo e depois de faltar.
 const ALVO_MS: f64 = 60.0;
+/// Acima disto o laço espera a placa tocar (o antigo esperava em 120 ms).
+const SOM_MAXIMO_MS: f64 = 120.0;
+/// Quanto o relógio dos quadros pode correr/atrasar pra segurar a fila de som (0,5%: ninguém percebe).
+const AJUSTE_DO_RELOGIO: f64 = 0.005;
 
 /// Só pros testes (`sem_som` + `KOF_NATIVO_SOM_BLOCO_MS`): um relógio que só "enxerga" o consumo a cada bloco de tempo,
 /// como a placa de som de verdade (ela consome em blocos). Aí o laço roda 2–3 quadros de uma vez, igual no uso real.
@@ -87,8 +92,22 @@ fn falhar(e: &KofError) -> i32 {
     2
 }
 
+/// No Windows o `sleep` anda de ~15 em ~15 ms por padrão (o laço dorme até o próximo quadro): pede 1 ms, como o SDL
+/// do antigo faz. Vale só pra este processo e acaba com ele.
+#[cfg(windows)]
+#[allow(unsafe_code)]
+fn relogio_fino() {
+    // SAFETY: chamada sem ponteiros; o par timeEndPeriod não é preciso (o processo termina junto)
+    unsafe {
+        windows_sys::Win32::Media::timeBeginPeriod(1);
+    }
+}
+#[cfg(not(windows))]
+fn relogio_fino() {}
+
 /// Ponto de entrada do processo filho (o `kof-nativo` e o `kofstation --nativo`). Devolve o código de saída.
 pub fn rodar() -> i32 {
+    relogio_fino();
     let _ = tracing_subscriber::fmt() // já tem um (testes no mesmo processo): usa aquele
         .with_writer(std::io::stderr)
         .with_ansi(false)
@@ -221,8 +240,29 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
     let mut ultimo_relatorio = Instant::now();
     // cada quadro (núcleo, leitura da placa, envio, som) e o processador de cada linha (M16)
     let mut med = crate::medidor::Medidor::new();
-    let mut cpu = crate::cpu::Cpu::new();
+    // a CPU por linha é lida numa linha à parte, 1x por segundo: ler o /proc (ou tirar a foto das linhas no Windows)
+    // no laço do jogo dava uma travadinha a cada segundo
+    let cpu_lida = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    {
+        let destino = std::sync::Arc::downgrade(&cpu_lida);
+        let r = std::thread::Builder::new().name("kof-cpu".into()).spawn(move || {
+            let mut cpu = crate::cpu::Cpu::new();
+            loop {
+                std::thread::sleep(Duration::from_secs(1));
+                let Some(d) = destino.upgrade() else { break }; // o laço acabou: a linha também
+                let v = cpu.ler();
+                *d.lock().unwrap_or_else(|e| e.into_inner()) = v;
+            }
+        });
+        if let Err(e) = r {
+            tracing::warn!("sem a linha que mede a CPU ({e}): o F3 fica sem a CPU por linha");
+        }
+    }
     let leitura_agora = || crate::gl::LEITURA_US.swap(0, std::sync::atomic::Ordering::Relaxed);
+    // ritmo: a hora do próximo quadro; `enchendo` = sem som guardado ainda (começo, depois de pausar ou de faltar)
+    let mut proximo = Instant::now();
+    let mut enchendo = true;
+    let mut faltas_antes = saida.faltas();
     loop {
         loop {
             let p = match rx.try_recv() {
@@ -288,8 +328,31 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
         }
         let taxa = n.av.timing.sample_rate;
         let fps = if n.av.timing.fps > 0.0 { n.av.timing.fps } else { 60.0 };
+        // Um quadro por vez, no relógio do jogo (como o antigo): rodar "enquanto o som pede" fazia rajadas de 2–3
+        // quadros seguidos (a placa consome em blocos) e a tela sentia, mesmo com todos mandados.
+        let guardado = saida.guardado_ms();
+        if saida.faltas() != faltas_antes {
+            faltas_antes = saida.faltas();
+            enchendo = true; // o som acabou: enche de novo antes de voltar pro relógio
+        }
+        if guardado >= ALVO_MS {
+            enchendo = false;
+        }
+        let agora = Instant::now();
+        if agora > proximo + Duration::from_millis(250) {
+            proximo = agora; // pausou ou travou: não tenta recuperar o atraso (o antigo fazia igual)
+        }
+        let ajuste = if guardado < ALVO_MS * 0.66 {
+            1.0 - AJUSTE_DO_RELOGIO
+        } else if guardado > ALVO_MS * 1.33 {
+            1.0 + AJUSTE_DO_RELOGIO
+        } else {
+            1.0
+        };
+        let periodo = Duration::from_secs_f64(ajuste / fps);
         let mut rodou = 0;
-        while saida.guardado_ms() < ALVO_MS && rodou < 8 {
+        if guardado < SOM_MAXIMO_MS && (enchendo || agora >= proximo) {
+            proximo = (if enchendo { agora } else { proximo }) + periodo;
             for i in 0..turbo {
                 som.clear();
                 let t = Instant::now();
@@ -349,12 +412,15 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
                 leitura_ms: crate::gl::existe().then(|| ms(lei, q)).flatten(),
                 imagem_ms: ms(env, e),
                 por_quadro: Some(med.bloco()),
-                cpu: Some(cpu.ler()),
+                cpu: Some(cpu_lida.lock().unwrap_or_else(|e| e.into_inner()).clone()),
             });
         }
         if rodou == 0 {
-            let espera = (saida.guardado_ms() - ALVO_MS).clamp(0.5, 4.0);
-            std::thread::sleep(Duration::from_secs_f64(espera / 1000.0));
+            // dorme até o próximo quadro (no máximo 2 ms por vez: os comandos da página não esperam)
+            let espera = proximo
+                .saturating_duration_since(Instant::now())
+                .clamp(Duration::from_micros(200), Duration::from_millis(2));
+            std::thread::sleep(espera);
         }
     }
 }
