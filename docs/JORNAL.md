@@ -21,6 +21,20 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · A abertura do zip com a ISO no celular (o motivo do "nem abre" e do "trava")
+
+**Pedido:** "o antigo abre a ROM e o novo nem abre; faz o teste de paridade da parte que abre a ISO do zip; traz igual ao antigo".
+**Causa (achada comparando o código):** o antigo decide se o jogo vai pro núcleo nativo ANTES de ler o arquivo (`consoleNativo` do
+`android.js`): `.zip` pelo diretório (`itensDoZip`/`cdDoZip`), `.bin` pelo começo. O novo olhava só a extensão: o `.zip` com a ISO caía
+no WebAssembly, que lê o CD inteiro na página (travava; com CD maior, nem abria). Pela Biblioteca o novo também não sabia que tinha
+PS1/N64 nativos (lia o arquivo inteiro).
+**Feito (portado como está no antigo):** `consoleNativoDoApk`/`nomesDoZip` em `platform/android-nativo.ts`; `nativo.disponivel` no Android
+= os nativos da casca; `nativoLigado('n64')` (só o APK tem). **Teste de paridade de verdade:** `tools/paridade-abrir.mjs` (página antiga ×
+nova, 9 arquivos gerados): a versão anterior dava **4 DIFERENÇAS (todas com zip)**; agora **TUDO IGUAL**, lendo só o diretório do zip
+(~250 B). Entrou no CI e num e2e (`android-simulado`: zip com ISO, zip com .cue+.bin e zip de N64 vão pro nativo; zip de GB não).
+**Aprendido:** eu tinha testado a lógica nova com arquivos soltos (`.cue`, `.z64`), nunca o caminho real (zip) contra o antigo. A paridade
+tem que ser medida com os mesmos arquivos nas duas páginas, não suposta.
+
 ## 2026-11-14 · PS1/N64 no APK: as duas últimas diferenças do antigo, e a otimização documentada
 
 **Pedido:** ainda travando no APK novo (com a correção do salvar automático): trazer as diferenças que achei e deixar idêntico ao

@@ -38,9 +38,15 @@ flowchart LR
 | 5 | O som do PCSX no mesmo fio da emulação | **SPU em thread própria** (`pcsx_rearmed_spu_thread`) | `libkofps1.so` | a mesma `.so` (vem do APK do antigo) |
 | 6 | O estado passava duas vezes por base64 dentro de JSON pela ponte síncrona | **Estado grande em pedaços (384 KB) e leitura por URL sem base64** | (o antigo usava IndexedDB) | `platform/android.ts` (`store.put.parte`, `/kofdados/...`) |
 | 7 | Cabeçalhos de isolamento (COOP/COEP) que o WebView nem usa | **Servir a página sem eles, como o antigo** | `MainActivity.servir` sem cabeçalhos | `MainActivity.servir` sem cabeçalhos (14/11) |
+| 0 | **O zip com a ISO nem abria** no APK novo (e travava antes disso): o novo decidia "nativo ou não" só pela extensão, então um `.zip` com o CD caía no WebAssembly, que tenta carregar o CD inteiro dentro da página | **Decidir ANTES de ler o arquivo, como o antigo: `.z64/.n64/.v64` = N64; `.cue/.chd/.pbp/.iso/.img/.exe` = PS1; `.bin` pelo começo (`cdPs1`); `.zip` pelo diretório do fim do arquivo (`.cue/.chd/.pbp/.iso`, ou `.bin/.img` > 16 MB = PS1; `.z64` dentro = N64)**. O CD nunca passa pela página: o Java extrai o zip e copia (`Ps1Jogo.trazer`) | `android.js` `consoleNativo` (515) + `app.js` `itensDoZip`/`cdDoZip` (1875/1904) | `platform/android-nativo.ts` `consoleNativoDoApk`/`nomesDoZip`; a Biblioteca lê só a cabeça (`nativo.disponivel` = os da casca) |
 | 8 | Depois de abrir, o antigo reinicia o núcleo | **`Reiniciar` uma vez depois do "pronto"** | `app.js` 2475 `s.reset()` | `JogoNativoAndroid.abrir` |
 
 ## Como medir (antes × depois, antigo × novo)
+
+`tools/paridade-abrir.mjs` manda os **mesmos arquivos** (gerados por `tools/paridade/arquivos.py`) pra página do APK antigo e pra do
+novo, com a mesma casca falsa, e compara a decisão (qual núcleo nativo abriu, com que nome) e quantos bytes a página leu. Roda no CI.
+Em 14/11 ele achou as 4 diferenças do item 0 (todas com zip) e depois da correção deu "TUDO IGUAL".
+
 
 `tools/paridade-casca.mjs` roda a página do APK antigo e a do novo com a **mesma casca falsa** (`KOFnesApk`) e mede: chamadas à
 casca por nome (Pad/Area/Volume...), o maior buraco entre dois sinais (acima de 250 ms o Java pausaria), tarefas longas, tempo de

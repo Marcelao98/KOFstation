@@ -34,7 +34,7 @@ import {
   type SituacaoRebob,
 } from '@kof/engine';
 import { create } from 'zustand';
-import { ambienteDoApk, consoleNativoDoApk, marcaNativa } from '../platform/android-nativo';
+import { ambienteDoApk, consoleNativoDoApk, marcaNativa, nativosDoApk } from '../platform/android-nativo';
 import { usarAvisos } from './avisos';
 import { aoTrazerSaves } from './backup';
 import { guardarBateria, saveDoJogo } from './bateria';
@@ -121,6 +121,7 @@ function nativos(): Promise<string[]> {
 /** O núcleo nativo desse sistema está ligado (Opções de emulação) e existe neste executável? */
 export async function nativoLigado(sistema: string): Promise<boolean> {
   if (sistema === 'ps2') return (await nativos()).includes('ps2'); // o PS2 só existe nativo
+  if (sistema === 'n64') return (await nativos()).includes('n64'); // só o APK tem N64 nativo
   if (sistema !== 'ps1' || config().ler('nucleoPs1') === 'wasm') return false;
   return (await nativos()).includes(sistema);
 }
@@ -223,7 +224,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     const av = usarAvisos.getState();
     try {
       // APK: PS1 e N64 vão pro núcleo nativo da casca (as `.so` do antigo); o CD nunca passa pela página
-      const nat = consoleNativoDoApk(arquivo.name, config().ler('nucleoPs1') === 'wasm');
+      const nat = await consoleNativoDoApk(arquivo, config().ler('nucleoPs1') === 'wasm');
       if (nat) {
         const nomeLimpo = arquivo.name.replace(/\.[^.]+$/, '');
         await get().abrirJogo(
@@ -259,7 +260,13 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       const { armazem } = servicos();
       // APK, jogo da pasta de ROMs (SAF): PS1/N64 vão pro núcleo nativo; a casca copia o CD direto da pasta
       if (!origem.nativoAndroid && origem.path) {
-        const nat = consoleNativoDoApk(origem.path, config().ler('nucleoPs1') === 'wasm');
+        const doApk = nativosDoApk();
+        const nat =
+          aberto.sistema === 'n64' && doApk.includes('n64')
+            ? 'n64'
+            : aberto.sistema === 'ps1' && doApk.includes('ps1') && config().ler('nucleoPs1') !== 'wasm'
+              ? 'ps1'
+              : null;
         if (nat) {
           await servicos().backend.chamar('pasta.preparar', { path: origem.path });
           origem = { ...origem, nativoAndroid: nat };

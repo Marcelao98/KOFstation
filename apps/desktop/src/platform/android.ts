@@ -4,6 +4,7 @@
 // contrato do Rust (docs/API_CONTRACTS.md), só que os bytes viajam em base64. Comando que a casca ainda não tem devolve
 // `UNSUPPORTED` com a explicação em português, e o app trata como qualquer outro erro do backend.
 import type { Backend, CanalRede, EventoRede } from '@kof/app-core';
+import { nativosDoApk } from './android-nativo';
 
 /** O que a casca Java expõe (ver android/src/dev/kofstation/android/Ponte.java). */
 export interface PonteAndroid {
@@ -56,7 +57,11 @@ export function criarBackendAndroid(ponte: PonteAndroid): Backend {
     return r;
   };
   return {
-    chamar: async <T>(cmd: string, args: Record<string, unknown> = {}) => rodar(cmd, args).data as T,
+    chamar: async <T>(cmd: string, args: Record<string, unknown> = {}) => {
+      // os nativos do celular são os da casca do antigo (KOFnesApk): a Biblioteca lê só a cabeça do CD, como o antigo
+      if (cmd === 'nativo.disponivel') return { sistemas: nativosDoApk() } as T;
+      return rodar(cmd, args).data as T;
+    },
     lerBinario: async (cmd, args = {}) => {
       if (cmd === 'store.get' && ponte.dadosPorUrl?.()) {
         const r = await fetch(`/kofdados/${String(args.store)}/${encodeURIComponent(String(args.key))}`);

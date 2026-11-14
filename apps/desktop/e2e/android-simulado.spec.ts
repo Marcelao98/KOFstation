@@ -3,7 +3,7 @@
 // Prova o adaptador `platform/android.ts`, o modo celular automático e o que acontece com comando que o celular ainda não
 // tem (pasta de ROMs, núcleo nativo). A casca Java em si só se prova instalando o APK (SITUACAO: T-CELULAR).
 import { expect, test } from '@playwright/test';
-import { romGbComSave } from './roms';
+import { romGbComSave, zipGuardado } from './roms';
 
 test.use({ viewport: { width: 390, height: 780 }, hasTouch: true, isMobile: true });
 
@@ -174,4 +174,50 @@ test('PS1 e N64 vão pro núcleo nativo da casca (KOFnesApk, as .so do antigo): 
   });
   await expect.poll(nomes).toContain('n64Abrir');
   await expect.poll(nomes).toContain('ps1Fechar'); // trocou de jogo: o PS1 fechou
+});
+
+test('zip com a ISO (ou com .cue+.bin) e zip com ROM de N64 vão pro nativo sem a página ler o CD: igual ao consoleNativo do antigo', async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    const g = globalThis as unknown as Record<string, unknown>;
+    const chamadas: string[] = [];
+    g.__abriu = chamadas;
+    const apk: Record<string, unknown> = { ps1Nativo: () => true, n64Nativo: () => true };
+    for (const c of ['ps1', 'n64']) {
+      for (const m of ['Pad', 'Area', 'Fechar', 'Reiniciar', 'Volume']) apk[c + m] = () => undefined;
+      apk[c + 'Abrir'] = (nome: string) => {
+        chamadas.push(c + 'Abrir:' + nome);
+        setTimeout(
+          () =>
+            (g['__' + c + 'Pronto'] as (r: unknown) => void)({
+              principal: nome,
+              largura: 320,
+              altura: 240,
+              fps: 59.94,
+            }),
+          20,
+        );
+      };
+    }
+    g.KOFnesApk = apk;
+  });
+  const abriu = () => page.evaluate(() => (globalThis as unknown as { __abriu: string[] }).__abriu);
+  const iso = zipGuardado({ 'Jogo/Jogo.iso': Buffer.alloc(0x9000) });
+  await page.setInputFiles('#arquivo', { name: 'Jogo com iso.zip', mimeType: 'application/zip', buffer: iso });
+  await expect.poll(abriu, { timeout: 10_000 }).toContain('ps1Abrir:Jogo com iso.zip');
+  await expect(page.locator('#st-jogo')).toHaveText('Jogo com iso', { timeout: 10_000 }); // um jogo de cada vez, como no uso
+  const cue = zipGuardado({ 'Jogo.cue': Buffer.from('FILE "Jogo.bin" BINARY\n'), 'Jogo.bin': Buffer.alloc(4096) });
+  await page.setInputFiles('#arquivo', { name: 'Jogo com cue.zip', mimeType: 'application/zip', buffer: cue });
+  await expect.poll(abriu, { timeout: 10_000 }).toContain('ps1Abrir:Jogo com cue.zip');
+  await expect(page.locator('#st-jogo')).toHaveText('Jogo com cue', { timeout: 10_000 });
+  const n64 = zipGuardado({ 'Mario.z64': Buffer.concat([Buffer.from([0x80, 0x37, 0x12, 0x40]), Buffer.alloc(4092)]) });
+  await page.setInputFiles('#arquivo', { name: 'Mario.zip', mimeType: 'application/zip', buffer: n64 });
+  await expect.poll(abriu, { timeout: 10_000 }).toContain('n64Abrir:Mario.zip');
+  await expect(page.locator('#st-jogo')).toHaveText('Mario', { timeout: 10_000 });
+  // um zip de Game Boy NÃO vai pro nativo (como no antigo): abre no WebAssembly
+  const gb = zipGuardado({ 'Save.gb': romGbComSave() });
+  await page.setInputFiles('#arquivo', { name: 'Save.zip', mimeType: 'application/zip', buffer: gb });
+  await expect(page.locator('#st-jogo')).toHaveText('Save', { timeout: 10_000 });
+  expect((await abriu()).filter((c) => c.includes('Save'))).toEqual([]);
 });
