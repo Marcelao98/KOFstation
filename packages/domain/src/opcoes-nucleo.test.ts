@@ -7,7 +7,7 @@ const sistemas = Object.keys(OPCOES_DE_NUCLEO) as SistemaId[];
 
 describe('catálogo de opções de emulação', () => {
   it('cobre pelo menos PS1 e PS2', () => {
-    expect(sistemas).toEqual(expect.arrayContaining(['ps1', 'ps2']));
+    expect(sistemas).toEqual(expect.arrayContaining(['ps1', 'ps2', 'n64', 'snes', 'gb', 'nes', 'md', 'gba']));
   });
 
   for (const s of sistemas) {
@@ -91,7 +91,7 @@ describe('catálogo de opções de emulação', () => {
     });
 
     it('recusa sistema sem catálogo', () => {
-      const r = conferirOpcoes('snes', { a: 'b' });
+      const r = conferirOpcoes('neogeo', { a: 'b' });
       expect(r.ok).toBe(false);
       expect(r.erros[0]).toMatch(/ainda não tem opções/);
     });

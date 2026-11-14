@@ -1,0 +1,510 @@
+// Catálogo das opções de emulação dos núcleos em WebAssembly (M16.4): Nintendo 64, Super Nintendo, Game Boy, NES,
+// Mega Drive/Master System/Game Gear e Game Boy Advance. Chaves, valores e padrões conferidos contra o que cada núcleo
+// declara de verdade: `tools/opcoes-wasm.mjs` lê as tabelas da memória do módulo e gera
+// `packages/contracts/fixtures/opcoes-wasm.json`; o teste `opcoes-nucleo-wasm.test.ts` compara com este catálogo.
+//
+// O Equilibrado é o que o app usa hoje: o padrão do núcleo mais as opções fixas de `engine/nucleos.ts` (N64: tela
+// 320x240 e fator de resolução 1; NES: som "High"). Nenhuma delas vale na hora (`naHora: false`): a ponte do
+// WebAssembly entrega a mudança pelo `GET_VARIABLE_UPDATE`, mas ninguém mediu quais núcleos releem; até medir, o app
+// avisa "vale ao reabrir o jogo". Ficam fora as opções que outras telas já controlam (paleta do Game Boy e do NES) e
+// as de controle (gatilhos, zapper, mouse).
+import type { OpcaoDeNucleo, Perfil, ValorDeOpcao } from './opcoes-nucleo';
+
+const v = (valor: string, nome = valor): ValorDeOpcao => ({ valor, nome });
+const perfis = (rapido: string, equilibrado: string, fiel: string): Record<Perfil, string> => ({
+  rapido,
+  equilibrado,
+  fiel,
+});
+const igual = (x: string): Record<Perfil, string> => perfis(x, x, x);
+const simNao = (sim: string, nao: string): ValorDeOpcao[] => [v(sim, 'Ligado'), v(nao, 'Desligado')];
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Nintendo 64 · Mupen64Plus-Next (GLideN64 em WebGL2; só o interpretador, sem recompilador no WebAssembly)
+
+export const N64: OpcaoDeNucleo[] = [
+  {
+    chave: 'mupen64plus-43screensize',
+    nome: 'Tamanho da tela (4:3)',
+    dica: 'Resolução em que o jogo é desenhado quando a proporção é 4:3; maior fica mais nítido e pesa mais.',
+    grupo: 'imagem',
+    valores: [v('320x240', '320x240 (original)'), v('640x480'), v('960x720'), v('1280x960')],
+    padrao: '640x480',
+    naHora: false,
+    perfis: perfis('320x240', '320x240', '640x480'),
+  },
+  {
+    chave: 'mupen64plus-EnableNativeResFactor',
+    nome: 'Fator de resolução',
+    dica: 'Multiplica a resolução original do N64; 0 usa o tamanho da tela acima. Valores altos pesam muito na placa de vídeo.',
+    grupo: 'imagem',
+    valores: [v('0', 'Pelo tamanho da tela'), v('1', '1x'), v('2', '2x'), v('3', '3x'), v('4', '4x')],
+    padrao: '0',
+    naHora: false,
+    perfis: perfis('1', '1', '2'),
+  },
+  {
+    chave: 'mupen64plus-BilinearMode',
+    nome: 'Filtro bilinear',
+    dica: '"3 pontos" é o filtro do N64 de verdade (borrão característico); "padrão" é mais liso e mais leve.',
+    grupo: 'imagem',
+    valores: [v('standard', 'Padrão'), v('3point', '3 pontos (como o N64)')],
+    padrao: 'standard',
+    naHora: false,
+    perfis: perfis('standard', 'standard', '3point'),
+  },
+  {
+    chave: 'mupen64plus-FXAA',
+    nome: 'Suavizar serrilhado (FXAA)',
+    dica: 'Alisa as bordas pós-desenho, a um custo pequeno na placa de vídeo.',
+    grupo: 'imagem',
+    valores: [v('0', 'Desligado'), v('1', 'Ligado')],
+    padrao: '0',
+    naHora: false,
+    perfis: perfis('0', '0', '1'),
+  },
+  {
+    chave: 'mupen64plus-MultiSampling',
+    nome: 'Antisserrilhado (MSAA)',
+    dica: 'Suaviza as bordas dos polígonos; 2x a 16x, cada passo pesa mais. Pode não funcionar em todas as placas.',
+    grupo: 'imagem',
+    valores: [v('0', 'Desligado'), v('2', '2x'), v('4', '4x'), v('8', '8x'), v('16', '16x')],
+    padrao: '0',
+    naHora: false,
+    perfis: igual('0'),
+  },
+  {
+    chave: 'mupen64plus-HybridFilter',
+    nome: 'Filtro híbrido',
+    dica: 'Mistura dois filtros de textura pra imitar o visual do N64; desligar deixa mais leve e mais áspero.',
+    grupo: 'imagem',
+    valores: simNao('True', 'False'),
+    padrao: 'True',
+    naHora: false,
+    perfis: perfis('False', 'True', 'True'),
+  },
+  {
+    chave: 'mupen64plus-EnableLODEmulation',
+    nome: 'Níveis de detalhe das texturas (LOD)',
+    dica: 'Imita como o N64 troca a textura conforme a distância; desligar alivia a placa, mas pode estragar alguns jogos.',
+    grupo: 'precisao',
+    valores: simNao('True', 'False'),
+    padrao: 'True',
+    naHora: false,
+    perfis: perfis('False', 'True', 'True'),
+  },
+  {
+    chave: 'mupen64plus-EnableHWLighting',
+    nome: 'Iluminação pela placa de vídeo',
+    dica: 'Calcula a luz de cada ponto na placa de vídeo em vez de por vértice, como o N64; mais fiel e mais pesado.',
+    grupo: 'precisao',
+    valores: simNao('True', 'False'),
+    padrao: 'False',
+    naHora: false,
+    perfis: perfis('False', 'False', 'True'),
+  },
+  {
+    chave: 'mupen64plus-EnableCopyColorToRDRAM',
+    nome: 'Cópia da imagem para a memória do N64',
+    dica: 'Alguns jogos leem a própria imagem de volta (efeitos de tela); "Desligado" é o mais rápido, "Sincronizado" é o mais certo.',
+    grupo: 'precisao',
+    valores: [
+      v('Off', 'Desligado'),
+      v('Async', 'Em paralelo'),
+      v('Sync', 'Sincronizado'),
+      v('TripleBuffer', 'Triplo buffer'),
+    ],
+    padrao: 'Async',
+    naHora: false,
+    perfis: perfis('Off', 'Async', 'Sync'),
+    avancada: true,
+  },
+  {
+    chave: 'mupen64plus-FrameDuping',
+    nome: 'Repetir quadro quando o jogo não desenha',
+    dica: 'Mostra de novo o quadro anterior quando o jogo atrasa, em vez de deixar o ritmo falhar.',
+    grupo: 'velocidade',
+    valores: simNao('True', 'False'),
+    padrao: 'False',
+    naHora: false,
+    perfis: perfis('True', 'False', 'False'),
+    avancada: true,
+  },
+  {
+    chave: 'mupen64plus-cpucore',
+    nome: 'Processador (CPU)',
+    dica: 'O "cacheado" é bem mais rápido; o interpretador puro é o mais certinho. No WebAssembly não há recompilador.',
+    grupo: 'velocidade',
+    valores: [v('cached_interpreter', 'Interpretador com cache'), v('pure_interpreter', 'Interpretador puro')],
+    padrao: 'cached_interpreter',
+    naHora: false,
+    perfis: igual('cached_interpreter'),
+    avancada: true,
+  },
+  {
+    chave: 'mupen64plus-pak1',
+    nome: 'Acessório do controle 1',
+    dica: 'O que fica plugado no controle: cartão de memória (saves de alguns jogos), vibração ou Transfer Pak.',
+    grupo: 'outros',
+    valores: [
+      v('none', 'Nenhum'),
+      v('memory', 'Cartão de memória'),
+      v('rumble', 'Vibração'),
+      v('transfer', 'Transfer Pak'),
+    ],
+    padrao: 'memory',
+    naHora: false,
+    perfis: igual('memory'),
+    avancada: true,
+  },
+];
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Super Nintendo · Snes9x
+
+export const SNES: OpcaoDeNucleo[] = [
+  {
+    chave: 'snes9x_audio_interpolation',
+    nome: 'Suavização do som',
+    dica: 'Como as amostras do chip de som são interpoladas; "gaussiano" é o do SNES de verdade, "linear" é mais leve.',
+    grupo: 'som',
+    valores: [
+      v('gaussian', 'Gaussiano (como o SNES)'),
+      v('linear', 'Linear'),
+      v('cubic', 'Cúbico'),
+      v('sinc', 'Sinc'),
+      v('none', 'Nenhuma'),
+    ],
+    padrao: 'gaussian',
+    naHora: false,
+    perfis: perfis('linear', 'gaussian', 'gaussian'),
+  },
+  {
+    chave: 'snes9x_overclock_cycles',
+    nome: 'Acelerar o processador (overclock)',
+    dica: 'Tira lentidão de jogos que travavam no console, mas pode causar defeitos; "compatível" é o mais seguro.',
+    grupo: 'velocidade',
+    valores: [v('disabled', 'Desligado'), v('light', 'Leve'), v('compatible', 'Compatível'), v('max', 'Máximo')],
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('compatible', 'disabled', 'disabled'),
+  },
+  {
+    chave: 'snes9x_superfx_timing',
+    nome: 'Tempo do chip Super FX',
+    dica: 'Jogos com Super FX (Star Fox, Yoshi\'s Island): "hardware" imita o ritmo do chip de verdade; "compatível" é mais seguro.',
+    grupo: 'precisao',
+    valores: [v('compat', 'Compatível'), v('hardware', 'Como o hardware')],
+    padrao: 'compat',
+    naHora: false,
+    perfis: perfis('compat', 'compat', 'hardware'),
+  },
+  {
+    chave: 'snes9x_mode7_hires',
+    nome: 'Mode 7 em alta resolução',
+    dica: 'Redesenha os fundos giratórios (F-Zero, Mario Kart) com mais pixels; nítido, mas foge do visual original.',
+    grupo: 'imagem',
+    valores: [
+      v('disabled', 'Desligado'),
+      v('2x'),
+      v('4x'),
+      v('2x_hv', '2x (horizontal e vertical)'),
+      v('4x_hv', '4x (horizontal e vertical)'),
+    ],
+    padrao: 'disabled',
+    naHora: false,
+    perfis: igual('disabled'),
+    avancada: true,
+  },
+  {
+    chave: 'snes9x_region',
+    nome: 'Região',
+    dica: 'Força NTSC (60 Hz) ou PAL (50 Hz); "automático" lê da imagem do jogo.',
+    grupo: 'outros',
+    valores: [v('auto', 'Automática'), v('ntsc', 'NTSC (60 Hz)'), v('pal', 'PAL (50 Hz)')],
+    padrao: 'auto',
+    naHora: false,
+    perfis: igual('auto'),
+    avancada: true,
+  },
+];
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Game Boy / Game Boy Color · Gambatte (a paleta do Game Boy fica na tela Visual, não aqui)
+
+export const GB: OpcaoDeNucleo[] = [
+  {
+    chave: 'gambatte_audio_resampler',
+    nome: 'Qualidade do som',
+    dica: '"Sinc" é o mais limpo; "ciclo contado" gasta menos processador.',
+    grupo: 'som',
+    valores: [v('sinc', 'Sinc (limpo)'), v('cc', 'Ciclo contado (leve)')],
+    padrao: 'sinc',
+    naHora: false,
+    perfis: perfis('cc', 'sinc', 'sinc'),
+  },
+  {
+    chave: 'gambatte_gbc_color_correction',
+    nome: 'Correção das cores do Game Boy Color',
+    dica: 'A tela do GBC era lavada; a correção aproxima o que se via nela. "Só GBC" deixa o Game Boy comum como está.',
+    grupo: 'imagem',
+    valores: [v('GBC only', 'Só nos jogos de GBC'), v('always', 'Sempre'), v('disabled', 'Desligada')],
+    padrao: 'GBC only',
+    naHora: false,
+    perfis: perfis('disabled', 'GBC only', 'GBC only'),
+  },
+  {
+    chave: 'gambatte_gbc_color_correction_mode',
+    nome: 'Método da correção de cor',
+    dica: '"Preciso" imita a tela do GBC com mais cuidado; "rápido" gasta menos processador.',
+    grupo: 'imagem',
+    valores: [v('accurate', 'Preciso'), v('fast', 'Rápido')],
+    padrao: 'accurate',
+    naHora: false,
+    perfis: perfis('fast', 'accurate', 'accurate'),
+  },
+  {
+    chave: 'gambatte_mix_frames',
+    nome: 'Mistura de quadros (fantasma da tela)',
+    dica: 'A tela de cristal líquido do Game Boy deixava um rastro; ligar imita isso e evita o piscar de alguns jogos.',
+    grupo: 'imagem',
+    valores: [
+      v('disabled', 'Desligada'),
+      v('mix', 'Mistura simples'),
+      v('lcd_ghosting', 'Rastro de LCD'),
+      v('lcd_ghosting_fast', 'Rastro de LCD (rápido)'),
+    ],
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('disabled', 'disabled', 'lcd_ghosting'),
+  },
+  {
+    chave: 'gambatte_gb_bootloader',
+    nome: 'Logo de abertura do Game Boy',
+    dica: 'Mostra a animação de entrada do console antes do jogo; desligar pula direto pro jogo.',
+    grupo: 'outros',
+    valores: simNao('enabled', 'disabled'),
+    padrao: 'enabled',
+    naHora: false,
+    perfis: perfis('disabled', 'enabled', 'enabled'),
+  },
+  {
+    chave: 'gambatte_gb_hwmode',
+    nome: 'Aparelho emulado',
+    dica: 'Qual Game Boy o jogo pensa que é; "automático" escolhe pelo cartucho.',
+    grupo: 'outros',
+    valores: [v('Auto', 'Automático'), v('GB', 'Game Boy'), v('GBC', 'Game Boy Color'), v('GBA', 'Game Boy Advance')],
+    padrao: 'Auto',
+    naHora: false,
+    perfis: igual('Auto'),
+    avancada: true,
+  },
+];
+
+// ---------------------------------------------------------------------------------------------------------------------
+// NES · FCEUmm (a paleta fica na tela Visual). O Equilibrado usa "High" no som, como o app sempre usou.
+
+export const NES: OpcaoDeNucleo[] = [
+  {
+    chave: 'fceumm_sndquality',
+    nome: 'Qualidade do som',
+    dica: 'Mais alta soa mais limpa e gasta um pouco mais de processador.',
+    grupo: 'som',
+    valores: [v('Low', 'Baixa'), v('High', 'Alta'), v('Very High', 'Muito alta')],
+    padrao: 'Low',
+    naHora: false,
+    perfis: perfis('Low', 'High', 'Very High'),
+  },
+  {
+    chave: 'fceumm_sndlowpass',
+    nome: 'Filtro de graves do som',
+    dica: 'O NES de verdade tinha um filtro que abafava os agudos; ligar deixa o som mais parecido com o do console.',
+    grupo: 'som',
+    valores: simNao('enabled', 'disabled'),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('disabled', 'disabled', 'enabled'),
+  },
+  {
+    chave: 'fceumm_nospritelimit',
+    nome: 'Sem limite de sprites',
+    dica: 'O NES só mostrava 8 sprites por linha (daí o piscar); tirar o limite acaba com o piscar, mas foge do original.',
+    grupo: 'precisao',
+    valores: simNao('enabled', 'disabled'),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: igual('disabled'),
+  },
+  {
+    chave: 'fceumm_overclocking',
+    nome: 'Acelerar o processador (overclock)',
+    dica: 'Tira lentidão de alguns jogos adicionando tempo extra por quadro; pode quebrar jogos que contam ciclos.',
+    grupo: 'velocidade',
+    valores: [v('disabled', 'Desligado'), v('2x-Postrender', '2x depois da imagem'), v('2x-VBlank', '2x no VBlank')],
+    padrao: 'disabled',
+    naHora: false,
+    perfis: igual('disabled'),
+    avancada: true,
+  },
+  {
+    chave: 'fceumm_region',
+    nome: 'Região',
+    dica: '"Automática" lê do cartucho; PAL roda a 50 Hz e Dendy é o clone russo.',
+    grupo: 'outros',
+    valores: [v('Auto', 'Automática'), v('NTSC'), v('PAL'), v('Dendy')],
+    padrao: 'Auto',
+    naHora: false,
+    perfis: igual('Auto'),
+    avancada: true,
+  },
+];
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Mega Drive, Master System e Game Gear · Genesis Plus GX (um núcleo só, a mesma lista)
+
+export const GENPLUS: OpcaoDeNucleo[] = [
+  {
+    chave: 'genesis_plus_gx_ym2612',
+    nome: 'Chip de som FM do Mega Drive',
+    dica: '"Nuked" imita o chip de verdade com mais exatidão e gasta mais processador; o MAME é bem próximo e mais leve.',
+    grupo: 'som',
+    valores: [
+      v('mame (ym2612)', 'MAME (YM2612)'),
+      v('mame (asic ym3438)', 'MAME (ASIC YM3438)'),
+      v('mame (enhanced ym3438)', 'MAME (YM3438 melhorado)'),
+      v('nuked (ym2612)', 'Nuked (YM2612)'),
+      v('nuked (ym3438)', 'Nuked (YM3438)'),
+    ],
+    padrao: 'mame (ym2612)',
+    naHora: false,
+    perfis: perfis('mame (ym2612)', 'mame (ym2612)', 'nuked (ym2612)'),
+  },
+  {
+    chave: 'genesis_plus_gx_audio_filter',
+    nome: 'Filtro de agudos do som',
+    dica: 'O Mega Drive de verdade abafava os agudos; "passa-baixa" imita isso.',
+    grupo: 'som',
+    valores: [v('disabled', 'Desligado'), v('low-pass', 'Passa-baixa')],
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('disabled', 'disabled', 'low-pass'),
+  },
+  {
+    chave: 'genesis_plus_gx_frameskip',
+    nome: 'Pular quadros quando atrasa',
+    dica: 'Em PC lento, descarta alguns quadros pra manter o jogo na velocidade certa.',
+    grupo: 'velocidade',
+    valores: [v('disabled', 'Desligado'), v('auto', 'Automático'), v('manual', 'Manual')],
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('auto', 'disabled', 'disabled'),
+  },
+  {
+    chave: 'genesis_plus_gx_no_sprite_limit',
+    nome: 'Sem limite de sprites',
+    dica: 'Tira o limite de sprites por linha do Mega Drive, acabando com o piscar; foge do original.',
+    grupo: 'precisao',
+    valores: simNao('enabled', 'disabled'),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: igual('disabled'),
+  },
+  {
+    chave: 'genesis_plus_gx_region_detect',
+    nome: 'Região',
+    dica: '"Automática" lê da imagem do jogo; force quando um jogo japonês ou europeu não abre direito.',
+    grupo: 'outros',
+    valores: [
+      v('auto', 'Automática'),
+      v('ntsc-u', 'EUA (NTSC-U)'),
+      v('pal', 'Europa (PAL)'),
+      v('ntsc-j', 'Japão (NTSC-J)'),
+    ],
+    padrao: 'auto',
+    naHora: false,
+    perfis: igual('auto'),
+    avancada: true,
+  },
+];
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Game Boy Advance · mGBA
+
+export const GBA: OpcaoDeNucleo[] = [
+  {
+    chave: 'mgba_frameskip',
+    nome: 'Pular quadros quando atrasa',
+    dica: 'Em PC lento, descarta alguns quadros pra manter o jogo na velocidade certa.',
+    grupo: 'velocidade',
+    valores: [
+      v('disabled', 'Desligado'),
+      v('auto', 'Automático'),
+      v('auto_threshold', 'Automático (com limite)'),
+      v('fixed_interval', 'Intervalo fixo'),
+    ],
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('auto', 'disabled', 'disabled'),
+  },
+  {
+    chave: 'mgba_idle_optimization',
+    nome: 'Otimização de laços de espera',
+    dica: 'Pula as esperas do jogo que não fazem nada, ganhando velocidade; "não remover" é o mais exato.',
+    grupo: 'velocidade',
+    valores: [
+      v('Remove Known', 'Tirar as conhecidas'),
+      v('Detect and Remove', 'Detectar e tirar'),
+      v("Don't Remove", 'Não tirar'),
+    ],
+    padrao: 'Remove Known',
+    naHora: false,
+    perfis: perfis('Detect and Remove', 'Remove Known', "Don't Remove"),
+  },
+  {
+    chave: 'mgba_skip_bios',
+    nome: 'Pular a abertura do GBA',
+    dica: 'Vai direto ao jogo, sem a tela de entrada do aparelho.',
+    grupo: 'outros',
+    valores: simNao('ON', 'OFF'),
+    padrao: 'OFF',
+    naHora: false,
+    perfis: perfis('ON', 'OFF', 'OFF'),
+  },
+  {
+    chave: 'mgba_color_correction',
+    nome: 'Correção de cor da tela',
+    dica: 'A tela do GBA era escura e dessaturada; a correção aproxima o que se via nela.',
+    grupo: 'imagem',
+    valores: [v('OFF', 'Desligada'), v('GBA', 'Como o GBA'), v('GBC', 'Como o GBC'), v('Auto', 'Automática')],
+    padrao: 'OFF',
+    naHora: false,
+    perfis: perfis('OFF', 'OFF', 'GBA'),
+  },
+  {
+    chave: 'mgba_interframe_blending',
+    nome: 'Mistura de quadros (fantasma da tela)',
+    dica: 'A tela de cristal líquido deixava um rastro; ligar imita isso e evita o piscar de alguns jogos.',
+    grupo: 'imagem',
+    valores: [
+      v('OFF', 'Desligada'),
+      v('mix', 'Mistura simples'),
+      v('mix_smart', 'Mistura inteligente'),
+      v('lcd_ghosting', 'Rastro de LCD'),
+      v('lcd_ghosting_fast', 'Rastro de LCD (rápido)'),
+    ],
+    padrao: 'OFF',
+    naHora: false,
+    perfis: perfis('OFF', 'OFF', 'lcd_ghosting'),
+  },
+  {
+    chave: 'mgba_audio_low_pass_filter',
+    nome: 'Filtro de agudos do som',
+    dica: 'Abafa um pouco os agudos, como as caixinhas do aparelho.',
+    grupo: 'som',
+    valores: simNao('enabled', 'disabled'),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: igual('disabled'),
+    avancada: true,
+  },
+];

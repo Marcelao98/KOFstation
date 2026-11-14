@@ -129,7 +129,7 @@ async function comecarGravacao() {
       nativo: nucleo.nativo,
       tamanho: j.registro?.tamanho ?? aberto?.rom.length ?? 0,
       fps: j.info.fps,
-      opcoes: opcoesEmUso(sis),
+      opcoes: opcoesEmUso(sis, usarJogo.getState().registro?.id),
       pagina: { navegador: navigator.userAgent, placa: placaDaPagina() },
       kofstation: usarApp.getState().info?.version ?? '?',
       ...(nucleo.placa ? { placaDoNucleo: nucleo.placa } : {}),

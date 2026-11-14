@@ -602,5 +602,763 @@
         "fiel": "auto"
       }
     }
+  ],
+  "n64": [
+    {
+      "chave": "mupen64plus-43screensize",
+      "padrao": "640x480",
+      "naHora": false,
+      "valores": [
+        "320x240",
+        "640x480",
+        "960x720",
+        "1280x960"
+      ],
+      "perfis": {
+        "rapido": "320x240",
+        "equilibrado": "320x240",
+        "fiel": "640x480"
+      }
+    },
+    {
+      "chave": "mupen64plus-EnableNativeResFactor",
+      "padrao": "0",
+      "naHora": false,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "2"
+      }
+    },
+    {
+      "chave": "mupen64plus-BilinearMode",
+      "padrao": "standard",
+      "naHora": false,
+      "valores": [
+        "standard",
+        "3point"
+      ],
+      "perfis": {
+        "rapido": "standard",
+        "equilibrado": "standard",
+        "fiel": "3point"
+      }
+    },
+    {
+      "chave": "mupen64plus-FXAA",
+      "padrao": "0",
+      "naHora": false,
+      "valores": [
+        "0",
+        "1"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "1"
+      }
+    },
+    {
+      "chave": "mupen64plus-MultiSampling",
+      "padrao": "0",
+      "naHora": false,
+      "valores": [
+        "0",
+        "2",
+        "4",
+        "8",
+        "16"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0"
+      }
+    },
+    {
+      "chave": "mupen64plus-HybridFilter",
+      "padrao": "True",
+      "naHora": false,
+      "valores": [
+        "True",
+        "False"
+      ],
+      "perfis": {
+        "rapido": "False",
+        "equilibrado": "True",
+        "fiel": "True"
+      }
+    },
+    {
+      "chave": "mupen64plus-EnableLODEmulation",
+      "padrao": "True",
+      "naHora": false,
+      "valores": [
+        "True",
+        "False"
+      ],
+      "perfis": {
+        "rapido": "False",
+        "equilibrado": "True",
+        "fiel": "True"
+      }
+    },
+    {
+      "chave": "mupen64plus-EnableHWLighting",
+      "padrao": "False",
+      "naHora": false,
+      "valores": [
+        "True",
+        "False"
+      ],
+      "perfis": {
+        "rapido": "False",
+        "equilibrado": "False",
+        "fiel": "True"
+      }
+    },
+    {
+      "chave": "mupen64plus-EnableCopyColorToRDRAM",
+      "padrao": "Async",
+      "naHora": false,
+      "valores": [
+        "Off",
+        "Async",
+        "Sync",
+        "TripleBuffer"
+      ],
+      "perfis": {
+        "rapido": "Off",
+        "equilibrado": "Async",
+        "fiel": "Sync"
+      }
+    },
+    {
+      "chave": "mupen64plus-FrameDuping",
+      "padrao": "False",
+      "naHora": false,
+      "valores": [
+        "True",
+        "False"
+      ],
+      "perfis": {
+        "rapido": "True",
+        "equilibrado": "False",
+        "fiel": "False"
+      }
+    },
+    {
+      "chave": "mupen64plus-cpucore",
+      "padrao": "cached_interpreter",
+      "naHora": false,
+      "valores": [
+        "cached_interpreter",
+        "pure_interpreter"
+      ],
+      "perfis": {
+        "rapido": "cached_interpreter",
+        "equilibrado": "cached_interpreter",
+        "fiel": "cached_interpreter"
+      }
+    },
+    {
+      "chave": "mupen64plus-pak1",
+      "padrao": "memory",
+      "naHora": false,
+      "valores": [
+        "none",
+        "memory",
+        "rumble",
+        "transfer"
+      ],
+      "perfis": {
+        "rapido": "memory",
+        "equilibrado": "memory",
+        "fiel": "memory"
+      }
+    }
+  ],
+  "snes": [
+    {
+      "chave": "snes9x_audio_interpolation",
+      "padrao": "gaussian",
+      "naHora": false,
+      "valores": [
+        "gaussian",
+        "linear",
+        "cubic",
+        "sinc",
+        "none"
+      ],
+      "perfis": {
+        "rapido": "linear",
+        "equilibrado": "gaussian",
+        "fiel": "gaussian"
+      }
+    },
+    {
+      "chave": "snes9x_overclock_cycles",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "light",
+        "compatible",
+        "max"
+      ],
+      "perfis": {
+        "rapido": "compatible",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "snes9x_superfx_timing",
+      "padrao": "compat",
+      "naHora": false,
+      "valores": [
+        "compat",
+        "hardware"
+      ],
+      "perfis": {
+        "rapido": "compat",
+        "equilibrado": "compat",
+        "fiel": "hardware"
+      }
+    },
+    {
+      "chave": "snes9x_mode7_hires",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "2x",
+        "4x",
+        "2x_hv",
+        "4x_hv"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "snes9x_region",
+      "padrao": "auto",
+      "naHora": false,
+      "valores": [
+        "auto",
+        "ntsc",
+        "pal"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "auto",
+        "fiel": "auto"
+      }
+    }
+  ],
+  "gb": [
+    {
+      "chave": "gambatte_audio_resampler",
+      "padrao": "sinc",
+      "naHora": false,
+      "valores": [
+        "sinc",
+        "cc"
+      ],
+      "perfis": {
+        "rapido": "cc",
+        "equilibrado": "sinc",
+        "fiel": "sinc"
+      }
+    },
+    {
+      "chave": "gambatte_gbc_color_correction",
+      "padrao": "GBC only",
+      "naHora": false,
+      "valores": [
+        "GBC only",
+        "always",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "GBC only",
+        "fiel": "GBC only"
+      }
+    },
+    {
+      "chave": "gambatte_gbc_color_correction_mode",
+      "padrao": "accurate",
+      "naHora": false,
+      "valores": [
+        "accurate",
+        "fast"
+      ],
+      "perfis": {
+        "rapido": "fast",
+        "equilibrado": "accurate",
+        "fiel": "accurate"
+      }
+    },
+    {
+      "chave": "gambatte_mix_frames",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "mix",
+        "lcd_ghosting",
+        "lcd_ghosting_fast"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "lcd_ghosting"
+      }
+    },
+    {
+      "chave": "gambatte_gb_bootloader",
+      "padrao": "enabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled"
+      }
+    },
+    {
+      "chave": "gambatte_gb_hwmode",
+      "padrao": "Auto",
+      "naHora": false,
+      "valores": [
+        "Auto",
+        "GB",
+        "GBC",
+        "GBA"
+      ],
+      "perfis": {
+        "rapido": "Auto",
+        "equilibrado": "Auto",
+        "fiel": "Auto"
+      }
+    }
+  ],
+  "nes": [
+    {
+      "chave": "fceumm_sndquality",
+      "padrao": "Low",
+      "naHora": false,
+      "valores": [
+        "Low",
+        "High",
+        "Very High"
+      ],
+      "perfis": {
+        "rapido": "Low",
+        "equilibrado": "High",
+        "fiel": "Very High"
+      }
+    },
+    {
+      "chave": "fceumm_sndlowpass",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "enabled"
+      }
+    },
+    {
+      "chave": "fceumm_nospritelimit",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "fceumm_overclocking",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "2x-Postrender",
+        "2x-VBlank"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "fceumm_region",
+      "padrao": "Auto",
+      "naHora": false,
+      "valores": [
+        "Auto",
+        "NTSC",
+        "PAL",
+        "Dendy"
+      ],
+      "perfis": {
+        "rapido": "Auto",
+        "equilibrado": "Auto",
+        "fiel": "Auto"
+      }
+    }
+  ],
+  "md": [
+    {
+      "chave": "genesis_plus_gx_ym2612",
+      "padrao": "mame (ym2612)",
+      "naHora": false,
+      "valores": [
+        "mame (ym2612)",
+        "mame (asic ym3438)",
+        "mame (enhanced ym3438)",
+        "nuked (ym2612)",
+        "nuked (ym3438)"
+      ],
+      "perfis": {
+        "rapido": "mame (ym2612)",
+        "equilibrado": "mame (ym2612)",
+        "fiel": "nuked (ym2612)"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_audio_filter",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "low-pass"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "low-pass"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_frameskip",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "auto",
+        "manual"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_no_sprite_limit",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_region_detect",
+      "padrao": "auto",
+      "naHora": false,
+      "valores": [
+        "auto",
+        "ntsc-u",
+        "pal",
+        "ntsc-j"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "auto",
+        "fiel": "auto"
+      }
+    }
+  ],
+  "sms": [
+    {
+      "chave": "genesis_plus_gx_ym2612",
+      "padrao": "mame (ym2612)",
+      "naHora": false,
+      "valores": [
+        "mame (ym2612)",
+        "mame (asic ym3438)",
+        "mame (enhanced ym3438)",
+        "nuked (ym2612)",
+        "nuked (ym3438)"
+      ],
+      "perfis": {
+        "rapido": "mame (ym2612)",
+        "equilibrado": "mame (ym2612)",
+        "fiel": "nuked (ym2612)"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_audio_filter",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "low-pass"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "low-pass"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_frameskip",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "auto",
+        "manual"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_no_sprite_limit",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_region_detect",
+      "padrao": "auto",
+      "naHora": false,
+      "valores": [
+        "auto",
+        "ntsc-u",
+        "pal",
+        "ntsc-j"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "auto",
+        "fiel": "auto"
+      }
+    }
+  ],
+  "gg": [
+    {
+      "chave": "genesis_plus_gx_ym2612",
+      "padrao": "mame (ym2612)",
+      "naHora": false,
+      "valores": [
+        "mame (ym2612)",
+        "mame (asic ym3438)",
+        "mame (enhanced ym3438)",
+        "nuked (ym2612)",
+        "nuked (ym3438)"
+      ],
+      "perfis": {
+        "rapido": "mame (ym2612)",
+        "equilibrado": "mame (ym2612)",
+        "fiel": "nuked (ym2612)"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_audio_filter",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "low-pass"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "low-pass"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_frameskip",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "auto",
+        "manual"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_no_sprite_limit",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "genesis_plus_gx_region_detect",
+      "padrao": "auto",
+      "naHora": false,
+      "valores": [
+        "auto",
+        "ntsc-u",
+        "pal",
+        "ntsc-j"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "auto",
+        "fiel": "auto"
+      }
+    }
+  ],
+  "gba": [
+    {
+      "chave": "mgba_frameskip",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "auto",
+        "auto_threshold",
+        "fixed_interval"
+      ],
+      "perfis": {
+        "rapido": "auto",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    },
+    {
+      "chave": "mgba_idle_optimization",
+      "padrao": "Remove Known",
+      "naHora": false,
+      "valores": [
+        "Remove Known",
+        "Detect and Remove",
+        "Don't Remove"
+      ],
+      "perfis": {
+        "rapido": "Detect and Remove",
+        "equilibrado": "Remove Known",
+        "fiel": "Don't Remove"
+      }
+    },
+    {
+      "chave": "mgba_skip_bios",
+      "padrao": "OFF",
+      "naHora": false,
+      "valores": [
+        "ON",
+        "OFF"
+      ],
+      "perfis": {
+        "rapido": "ON",
+        "equilibrado": "OFF",
+        "fiel": "OFF"
+      }
+    },
+    {
+      "chave": "mgba_color_correction",
+      "padrao": "OFF",
+      "naHora": false,
+      "valores": [
+        "OFF",
+        "GBA",
+        "GBC",
+        "Auto"
+      ],
+      "perfis": {
+        "rapido": "OFF",
+        "equilibrado": "OFF",
+        "fiel": "GBA"
+      }
+    },
+    {
+      "chave": "mgba_interframe_blending",
+      "padrao": "OFF",
+      "naHora": false,
+      "valores": [
+        "OFF",
+        "mix",
+        "mix_smart",
+        "lcd_ghosting",
+        "lcd_ghosting_fast"
+      ],
+      "perfis": {
+        "rapido": "OFF",
+        "equilibrado": "OFF",
+        "fiel": "lcd_ghosting"
+      }
+    },
+    {
+      "chave": "mgba_audio_low_pass_filter",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled"
+      }
+    }
   ]
 }

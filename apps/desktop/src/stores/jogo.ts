@@ -78,6 +78,12 @@ export function trocarOpcoesDoNucleo(f: typeof opcoesDoNucleo) {
   opcoesDoNucleo = f;
 }
 
+/** Opções de emulação do jogador (perfis, console, jogo: M16.4), por sistema e por jogo (id do registro). */
+let opcoesDeEmulacao: (sistema: string, jogoId?: string) => Record<string, string> = () => ({});
+export function trocarOpcoesDeEmulacao(f: typeof opcoesDeEmulacao) {
+  opcoesDeEmulacao = f;
+}
+
 /** Erro no núcleo (o caçador de bugs oferece reportar). */
 export const aoErroDoEmulador = new Set<(m: string) => void>();
 
@@ -132,9 +138,10 @@ const MAX_RESERVA_WASM = 100 << 20;
 const mb = (n: number) => Math.round(n / (1 << 20));
 
 /** As opções de emulação que o núcleo do sistema recebe (as fixas do núcleo + as do jogador). */
-export const opcoesEmUso = (sistema: string): Record<string, string> => ({
+export const opcoesEmUso = (sistema: string, jogoId?: string): Record<string, string> => ({
   ...NUCLEOS[sistema as keyof typeof NUCLEOS]?.opcoes,
   ...opcoesDoNucleo(sistema),
+  ...opcoesDeEmulacao(sistema, jogoId),
 });
 
 /** O núcleo do jogo aberto (nome, versão, se é nativo e a placa de vídeo dele), pro diagnóstico. */
@@ -259,7 +266,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       const ident = identidade(aberto.sistema, aberto.rom, aberto.nome, tamanho);
       const chaveSram = chaveSramDe(ident.titulo || aberto.nome, tamanho);
       const sram = await saveDoJogo(chaveSram);
-      const opcoes = opcoesDoNucleo(aberto.sistema);
+      const opcoes = { ...opcoesDoNucleo(aberto.sistema), ...opcoesDeEmulacao(aberto.sistema, ident.id) };
       const med = new MedidorDaSessao();
       const eventos: EventosDoJogo = {
         quadro: (pixels, largura, altura) => {
@@ -285,7 +292,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
             sistema: aberto.sistema,
             path: origem.path,
             bios: bios.map((b) => b.nome),
-            opcoes: { ...NUCLEOS[aberto.sistema]?.opcoes, ...opcoes, pcsx_rearmed_drc: 'enabled' },
+            opcoes: { pcsx_rearmed_drc: 'enabled', ...NUCLEOS[aberto.sistema]?.opcoes, ...opcoes },
             ...(NUCLEOS[aberto.sistema]?.dispositivo ? { dispositivo: NUCLEOS[aberto.sistema]?.dispositivo } : {}),
           });
           jogo = await JogoNativo.abrir(

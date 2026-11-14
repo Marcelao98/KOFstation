@@ -5,6 +5,7 @@
 //
 // Fora do catálogo de propósito (são do app, fixas): `pcsx2_bios`, `pcsx2_renderer`. As opções do renderizador
 // paraLLEl (`pcsx2_pgs_*`) também ficam de fora: o app usa o renderizador OpenGL, que não lê essas.
+import { GB, GBA, GENPLUS, N64, NES, SNES } from './opcoes-nucleo-wasm';
 import type { SistemaId } from './sistemas';
 
 export type Perfil = 'rapido' | 'equilibrado' | 'fiel';
@@ -553,6 +554,15 @@ const PS1: OpcaoDeNucleo[] = [
 export const OPCOES_DE_NUCLEO: Partial<Record<SistemaId, OpcaoDeNucleo[]>> = {
   ps2: PS2,
   ps1: PS1,
+  // núcleos em WebAssembly (opcoes-nucleo-wasm.ts)
+  n64: N64,
+  snes: SNES,
+  gb: GB,
+  nes: NES,
+  md: GENPLUS,
+  sms: GENPLUS,
+  gg: GENPLUS,
+  gba: GBA,
 };
 
 /** As chaves e os valores de um sistema num perfil, prontos pra mandar ao núcleo. Sistema sem catálogo: vazio. */

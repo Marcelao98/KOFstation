@@ -21,6 +21,32 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · M16.4 · opções de emulação de todos os consoles
+
+**Pedido:** juntar a tarefa B (`agente-b/opcoes-nucleo`), fazer a tela (DIAGNOSTICO.md §4) e catalogar o N64 e os
+consoles em WebAssembly.
+**Feito:** (1) merge da branch do B (catálogo PS1/PS2, teste Rust contra os `.so`). (2) `domain/opcoes-camadas.ts`: as
+camadas geral → console → jogo (puro, com teste): `resolverOpcoes`, `opcoesParaNucleo`, `compararOpcoes` ("na hora"
+× "ao reabrir"), ajustes que não mexem no objeto antigo. (3) `stores/emulacao.ts`: guarda tudo na chave `emuOpcoes` da
+configuração; ao abrir o jogo as opções entram no núcleo (nativo e WebAssembly); mudar com o jogo aberto manda o que
+vale na hora (`Comando::Variavel` / `opcoes` do Worker) e avisa o resto. (4) `screens/Estados/OpcoesDoConsole.tsx`:
+perfil geral, console, "valer para o console todo ou só este jogo", perfil do console/jogo, opções por grupo com o
+selo ⚡/↻, **Avançado**, "voltar ao perfil" e "apagar os ajustes". (5) Catálogo dos WebAssembly em
+`domain/opcoes-nucleo-wasm.ts`: N64 (12), SNES (5), GB (6), NES (5), Mega Drive/SMS/GG (5), GBA (6).
+**Medido / conferido:** os núcleos WebAssembly do antigo não expõem as opções que declaram (a ponte ignora o
+`SET_VARIABLES`). `tools/opcoes-wasm.mjs` varre a memória estática de cada módulo (tabelas `retro_core_option_v2`) e
+gera `packages/contracts/fixtures/opcoes-wasm.json` (chave, valores e padrão **de verdade**); o teste
+`opcoes-nucleo-wasm.test.ts` falha se o catálogo disser outra coisa. Isso mostrou, por exemplo, que o Mupen64 do
+WebAssembly só tem GLideN64 e interpretador (sem recompilador, sem Angrylion). Novo e2e `opcoes-emulacao.spec.ts`
+(perfis, ajuste fino, Avançado, persistência depois de recarregar). `pnpm check`, `pnpm e2e` (46 ok),
+`cargo clippy`/`fmt` ok, `cargo test --workspace --no-fail-fast` ok (só o `pcsx` com SIGILL, sabido).
+**Decidido:** o Equilibrado é sempre o que o app já usava (testado), então quem não mexer em nada não percebe
+diferença. As opções dos WebAssembly dizem sempre "vale ao reabrir" até alguém medir quem relê. O "Avançado" mostra o
+que o catálogo marcou como avançado; **a lista completa do que o núcleo declara (`SET_VARIABLES`) fica pendente**:
+precisaria abrir o núcleo só pra listar (o PS1/PS2 têm `Nucleo::opcoes_declaradas`, falta um comando no `kof-app`).
+**Deu errado / aprendido:** o container não tinha `libasound2-dev` (instalei com apt pra compilar o `kof-app`).
+**Onde parou:** pacote novo na `teste-binarios` a fazer (fim da etapa), depois T.1 (paridade).
+
 ## 2026-11-14 · M16.5 · otimização do PS2 pausada por decisão do Marcelo
 
 **Pedido:** terminar o roadmap até o fim (M16.4, T.1, M14), um passo depois do outro, sem parar nos checkpoints; o que

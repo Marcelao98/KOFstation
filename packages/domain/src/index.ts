@@ -23,3 +23,4 @@ export * from './celular';
 export * from './desempenho';
 export * from './diagnostico';
 export * from './opcoes-nucleo';
+export * from './opcoes-camadas';

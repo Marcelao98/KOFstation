@@ -112,6 +112,31 @@ Isso cria a chave **privada** em `~/kofstation-chave.pem` (guarde; não mande pr
 
 A partir daí, cada envio na `main` publica uma versão (workflow "Versão") e o app instalado se atualiza sozinho.
 
+## Pra você testar 🧪 (a lista única, 14/11)
+
+> Tudo que depende de você, num lugar só, cada teste com o passo a passo. Eu vou marcando ⏸ no ROADMAP e botando aqui.
+> A seção "Esperando você testar" mais abaixo é o histórico das etapas antigas (M9–M13, M15, PS2); os passos delas
+> também estão resumidos aqui.
+
+### T-M16.4 · Opções de emulação por console (perfis, Avançado, por jogo)
+
+Precisa: o pacote novo da `teste-binarios` (ver o JORNAL de 14/11 pro hash) ou `pnpm dev`.
+
+1. Abra qualquer jogo (PS1 ou PS2 pra ver o efeito de verdade). F6 (Estados salvos) → aba **⚙ Opções de emulação**.
+2. Role até **Opções do console**. Em **Console**, escolha PlayStation 2. Em **Perfil do PlayStation 2**, troque
+   entre ⚡ Rápido, ⚖ Equilibrado e 🎯 Fiel: as opções abaixo mudam sozinhas.
+3. Com o jogo do PS2 aberto, troque "Pular ciclos do processador" (diz **⚡ vale na hora**): aperte **F3** e veja se
+   o núcleo ficou mais rápido/lento sem reabrir o jogo.
+4. Troque "Resolução interna" (diz **↻ vale ao reabrir o jogo**): aparece o aviso; feche e abra o jogo de novo.
+5. Em **Valer para**, escolha **só este jogo**, mude uma opção e abra outro jogo do mesmo console: o outro não muda.
+6. Abra o **Avançado** e confira que as opções de especialista estão lá. **Apagar os ajustes** volta ao perfil.
+7. O 🩺 Modo diagnóstico passa a gravar as opções usadas (veja o `sessao.json`), então antes × depois vira número.
+
+O que eu não consegui conferir sem você: se as opções do PS2 que marquei "vale na hora" realmente mudam o jogo ao
+vivo (só dá pra ver com o jogo rodando na tua placa), e se os valores dos perfis ⚡ Rápido e 🎯 Fiel agradam
+(só o ⚖ Equilibrado é o que o app sempre usou). Os consoles em WebAssembly (N64, SNES, GB, NES, Mega Drive, GBA)
+dizem sempre "vale ao reabrir": ninguém mediu quais núcleos releem na hora.
+
 ## Esperando você testar ⏸
 
 **Novo (M16.3, 08/11): gravar o Shadow of the Colossus.** Pacote Linux atualizado na `teste-binarios` (`65bdcf0`). Em **Ajuda → 🩺 Modo

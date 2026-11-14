@@ -286,8 +286,8 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 | M16.1 | Medidor quadro a quadro (nativo e WebAssembly), CPU por linha, `domain/desempenho.ts` (p50/p95/p99, engasgos e culpado) | testes com tempos fabricados; números no CI | ✅ feito (08/11) |
 | M16.2 | F3 com gráfico dos últimos quadros, p99, engasgos/min, CPU por linha | print do F3 com PS2 e SNES | ⏸ feito; print do SNES no e2e, falta o PS2 no teu PC |
 | M16.3 | Modo diagnóstico: grava a sessão (`resumo.txt`, `sessao.json`, `quadros.csv`, `segundos.csv`, `engasgos.csv`, `log.txt`), resumo ao fechar, exportar `.zip`, junto do F9 | **você grava o Shadow of the Colossus e me manda** | ⏸ pacote Linux na `teste-binarios` (`65bdcf0`); falta você gravar o SotC e o ZoE2 |
-| M16.4 | Opções de emulação por console (PS1 em diante): catálogo em português, perfis Rápido/Equilibrado/Fiel, Avançado, por jogo, na hora quando dá | você troca uma opção e vê o efeito no F3 | ⬜ |
-| M16.5 | Otimizar pelos relatórios (PS2 primeiro: shaders, EE, som, ritmo, leitura) | antes × depois medido no teu PC | ⬜ |
+| M16.4 | Opções de emulação por console: catálogo em português (PS1, PS2, N64 e os WebAssembly conferidos contra os núcleos), perfis Rápido/Equilibrado/Fiel, Avançado, por jogo, na hora quando dá | você troca uma opção e vê o efeito no F3 | ⏸ feito (14/11); teste na lista "Pra você testar" do SITUACAO |
+| M16.5 | Otimizar pelos relatórios (PS2 primeiro: shaders, EE, som, ritmo, leitura) | antes × depois medido no teu PC | ⏸ **pausado por decisão do Marcelo (14/11)**; tentativas na branch `rascunho/ps2-liso`, que não deve ser juntada |
 
 > **Tarefa C integrada (09/11, `d7e57d3`):** envio quadro a quadro no nativo + fila por vsync compartilhada com o wasm. O teste local mediu 0 quadros sem envio em 284 rodados. Pacote Linux atualizado na `teste-binarios` (`65bdcf0`); Windows segue na versão anterior sem C. O Marcelo confirma no SotC real.
 

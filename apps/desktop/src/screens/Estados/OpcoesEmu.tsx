@@ -8,6 +8,7 @@ import { config } from '../../stores/config';
 import { maxEstados } from '../../stores/estados';
 import { usarJogo } from '../../stores/jogo';
 import { usarModo } from '../../stores/modo';
+import { OpcoesDoConsole } from './OpcoesDoConsole';
 
 type Op = [string, string, [string, string][], () => string, (v: string) => void, () => string];
 
@@ -118,6 +119,7 @@ export function OpcoesEmu() {
           <small className="dica">{dica()}</small>
         </label>
       ))}
+      <OpcoesDoConsole />
       {sis === 'ps1' && (
         <p className="dica">⚠ PlayStation não tem rebobinar em nenhum modo: o estado dele é grande demais.</p>
       )}
