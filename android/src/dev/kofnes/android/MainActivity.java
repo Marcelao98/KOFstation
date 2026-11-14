@@ -200,7 +200,7 @@ public class MainActivity extends Activity {
         TIPOS.put("woff2", "font/woff2"); TIPOS.put("wasm", "application/wasm"); TIPOS.put("txt", "text/plain");
     }
 
-    /** O app novo (apps/desktop/dist, em assets/web/) com os cabeçalhos de isolamento que ele exige (SharedArrayBuffer). */
+    /** O app novo (apps/desktop/dist, em assets/web/), servido como o antigo servia a página dele. */
     /** `/kofdados/<loja>/<chave>`: os bytes de um registro das lojas, direto do arquivo (estado de PS1/N64 tem MB: sem base64). */
     private WebResourceResponse servirDados(String caminho) {
         try {
@@ -230,14 +230,10 @@ public class MainActivity extends Activity {
             status = 404;
             in = new ByteArrayInputStream(new byte[0]);
         }
+        // como o antigo: sem cabeçalhos de isolamento (COOP/COEP). O WebView do Android não liga o isolamento de origem
+        // mesmo com eles (o som sem SharedArrayBuffer vai por mensagem), então só pesavam; ver docs/NATIVO-LISO.md
         WebResourceResponse r = new WebResourceResponse(tipo, "utf-8", in);
         r.setStatusCodeAndReasonPhrase(status, status == 200 ? "OK" : "Not Found");
-        java.util.Map<String, String> h = new java.util.HashMap<String, String>();
-        h.put("Cross-Origin-Opener-Policy", "same-origin");
-        h.put("Cross-Origin-Embedder-Policy", "require-corp");
-        h.put("Cross-Origin-Resource-Policy", "same-origin");
-        h.put("Cache-Control", "no-cache");
-        r.setResponseHeaders(h);
         return r;
     }
 

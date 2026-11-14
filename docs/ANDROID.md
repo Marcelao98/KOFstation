@@ -7,7 +7,7 @@ ferramentas do Ubuntu (aapt, dalvik-exchange, apksigner, zipalign, android-23.ja
 ```mermaid
 flowchart LR
   subgraph APK["APK (dev.kofstation.android)"]
-    MA["MainActivity<br/>WebView em https://kofstation.local/<br/>serve assets/web com COOP/COEP<br/>seletor de arquivos · botão Voltar"]
+    MA["MainActivity<br/>WebView em https://appassets.androidplatform.net/<br/>serve assets/web (sem COOP/COEP, como o antigo)<br/>seletor de arquivos · botão Voltar"]
     PO["Ponte (@JavascriptInterface KofAndroid.chamar)"]
     CO["Comandos (Java puro)<br/>app.* log.write config.* store.*"]
   end
@@ -25,7 +25,7 @@ flowchart LR
 | Adaptador `Backend` do Android | `apps/desktop/src/platform/android.ts` (+ teste) | ✅ escolhido sozinho quando existe `window.KofAndroid` |
 | Modo celular, controle de toque, 6 modelos, Voltar | `app/celular.ts`, `components/ControleDeToque.tsx`, `styles/celular.css` | ✅ testado no navegador (`e2e/celular.spec.ts`) |
 | Comandos da casca | `android/src/dev/kofstation/android/Comandos.java` | ✅ app.*, log.write, config.*, store.* (mesmos nomes de arquivo do Rust), nativo.disponivel (vazio), library.root.get (sem pasta). Teste de JVM: `android/testar.sh` |
-| Casca | **a do antigo** (`android/src/dev/kofnes/android/`: `MainActivity`, `Ps1Jogo`, `N64Jogo`, `Pasta`, `Rede`, `ControleServidor`, `SavesNativos`), só com o mínimo mudado: serve `assets/web` (o app novo) com COOP/COEP, liga a ponte nova `KofAndroid` ao lado da `KOFnesApk` do antigo, o Voltar pergunta à página, e o `Atualizador` do antigo saiu (baixaria a página velha por cima) | compila; só se prova instalando (T-CELULAR) |
+| Casca | **a do antigo** (`android/src/dev/kofnes/android/`: `MainActivity`, `Ps1Jogo`, `N64Jogo`, `Pasta`, `Rede`, `ControleServidor`, `SavesNativos`), só com o mínimo mudado: serve `assets/web` (o app novo) sem COOP/COEP (como o antigo), liga a ponte nova `KofAndroid` ao lado da `KOFnesApk` do antigo, o Voltar pergunta à página, e o `Atualizador` do antigo saiu (baixaria a página velha por cima) | compila; só se prova instalando (T-CELULAR) |
 | APK | `android/construir-apk.sh` → `target/KOFstation-novo.apk` (13 MB), chave de teste `android/kofstation-teste.keystore` | ✅ monta e assina; as `.so` ARM64 vêm do APK do antigo (`KOF_APK_ANTIGO`), **sem NDK e sem binário no repositório** |
 | PS1 e N64 nativos (M14.4) | `packages/engine/src/nativo-android.ts` (`JogoNativoAndroid`: a `fachada()` do `android.js` do antigo com a cara de sessão do app novo) + `platform/android-nativo.ts` + o ramo `nativoAndroid` em `stores/jogo.ts` | ✅ testado com uma `KOFnesApk` falsa (unit e e2e); os nomes JNI das `.so` batem com `dev.kofnes.android.Ps1/N64`; ⏸ falta jogar no celular. O CD nunca passa pela página: o Java copia direto do que o seletor escolheu |
 | Pasta de ROMs (SAF) e biblioteca (M14.3) | `Pasta.java` do antigo + `PastaComandos.java`: `library.root.get/scan`, `file.read/stat`, `file.zip.list/read` (diretório central lido por posição, sem ler o zip todo), `pasta.preparar` (o PS1/N64 nativo copia o CD direto da pasta). Caminhos "Games/<caminho na pasta escolhida>". Organizar/importar = só no PC. No app: Biblioteca → escolher a pasta abre o seletor do Android | ✅ compila; e2e com ponte simulada; ⏸ provar no aparelho |

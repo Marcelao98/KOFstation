@@ -21,6 +21,16 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · PS1/N64 no APK: as duas últimas diferenças do antigo, e a otimização documentada
+
+**Pedido:** ainda travando no APK novo (com a correção do salvar automático): trazer as diferenças que achei e deixar idêntico ao
+antigo; documentar como a otimização foi feita, pra repetir no PS2.
+**Feito:** (1) a página não desenha nada por baixo do PS1/N64 nativo rodando, nem o chiado/fita dos filtros animados
+(`useTelaDoJogo`: `j.android && !j.parado` = sai; `JogoNativoAndroid.parado`), como o `app.js` 1145/1178 do antigo; (2) a casca serve
+a página **sem COOP/COEP**, como o antigo. `docs/NATIVO-LISO.md`: arquitetura, as 8 regras (antigo × novo, com arquivo e linha), como
+medir e a lista de conferência pro PS2.
+**Não provado aqui:** o efeito no aparelho.
+
 ## 2026-11-14 · Paridade do PS1/N64 no APK (travando) · salvar automático e estado grande
 
 **Pedido:** o PS1/N64 trava no APK novo (no antigo tinha sido resolvido): "faz o teste de paridade; tá tudo igual?".

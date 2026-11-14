@@ -28,6 +28,10 @@ export function useTelaDoJogo(canvas: React.RefObject<HTMLCanvasElement | null>)
       pedido = requestAnimationFrame(laco);
       const t = tela.current;
       if (!t) return;
+      // como o antigo (app.js 1145/1178): com o PS1/N64 nativo do celular rodando, a imagem vem pela tela do Android por cima
+      // e a página NÃO desenha nada por baixo (nem o chiado/fita dos filtros animados): a placa de vídeo fica pro jogo
+      const j = usarJogo.getState().jogo as { android?: boolean; parado?: boolean } | null;
+      if (j?.android && !j.parado) return;
       if (ultimoQuadro.novo && ultimoQuadro.pixels) {
         ultimoQuadro.novo = false;
         const t0 = performance.now();

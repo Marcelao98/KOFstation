@@ -120,6 +120,10 @@ export class JogoNativoAndroid {
   eixosDo(jogador: number, e: readonly number[] | null) {
     if (jogador === 0) this.eixos = e ? [...e.slice(0, 4)] : [0, 0, 0, 0];
   }
+  /** pausado (menu, tela por cima): só aí a página pode desenhar por baixo, como o antigo */
+  get parado(): boolean {
+    return this.pausado;
+  }
   pausar(sim: boolean) {
     this.pausado = sim;
     if (!sim) this.bater();
