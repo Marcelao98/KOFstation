@@ -7,7 +7,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 const require = createRequire(new URL('../apps/desktop/', import.meta.url).pathname);
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
 const [urlAntigo, urlNovo, pasta] = process.argv.slice(2);
 const b = await chromium.launch();
 

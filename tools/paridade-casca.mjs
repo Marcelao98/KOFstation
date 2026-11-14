@@ -7,7 +7,7 @@
 // Mede, com a MESMA casca falsa de PS1/N64, o que a página do APK antigo e a do novo fazem na hora de abrir um jogo nativo e depois jogando.
 import { createRequire } from 'node:module';
 const require = createRequire(new URL('../apps/desktop/', import.meta.url).pathname);
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
 const alvo = process.argv[2],
   url = process.argv[3],
   console_ = process.argv[4] || 'ps1';

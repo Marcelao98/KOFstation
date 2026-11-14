@@ -21,6 +21,15 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · O CI da paridade do celular estava vermelho
+
+**O que aconteceu:** os dois últimos envios (o do zip com a ISO e o do controle por console) falharam no CI do Linux no
+passo novo "Paridade da abertura e do controle de toque": `tools/paridade-*.mjs` pediam o pacote `playwright`, que só
+existe na minha máquina; o projeto tem o `@playwright/test`, que exporta o mesmo `chromium`. Troquei nas três
+ferramentas e rodei o passo igual ao CI (página do antigo no commit fixado `ceba493`): abertura TUDO IGUAL, controle
+TUDO IGUAL. Código do app não mudou; o pacote da `teste-binarios` continua valendo.
+**Onde parou:** só falta o teste de pareamento (T-REDE), que o Marcelo faz em casa. T.2 e o PS2 seguem com ele.
+
 ## 2026-11-14 · O controle de toque por console no celular (vinha o do Super Nintendo no PS1)
 
 **Pedido:** "abri o PS1 e veio o controle do Super Nintendo; no antigo o sistema detecta o console e muda o controle. Por que não veio?".

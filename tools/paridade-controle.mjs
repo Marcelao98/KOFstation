@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 const require = createRequire(new URL('../apps/desktop/', import.meta.url).pathname);
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
 const [urlAntigo, urlNovo, pasta] = process.argv.slice(2);
 const JOGOS = ['CD com iso.zip', 'Mario.z64', 'Jogo GB.gb', 'Vermelho.md'];
 const BOTOES = ['A', 'B', 'X', 'Y', 'L', 'R', 'L2', 'R2', 'Start', 'Select'];
