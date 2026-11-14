@@ -12,6 +12,8 @@ export interface SituacaoAtualizacao {
   baixados: number;
   bytes: number;
   erro?: { code: string; message: string };
+  /** o texto que a casca (APK) quer mostrar no lugar do padrão */
+  textoAndroid?: string;
 }
 
 const SITUACOES = ['parado', 'procurando', 'emDia', 'pronta', 'erro'];
@@ -48,6 +50,7 @@ export function avisoDaAtualizacao(
 ): { texto: string; ms: number; erro?: boolean } | null {
   switch (s.situacao) {
     case 'pronta':
+      if (s.textoAndroid) return { texto: s.textoAndroid, ms: 8000 };
       return {
         texto: `🆕 versão nova do KOFstation baixada${s.nova ? ` (${s.nova})` : ''}: feche e abra o KOFstation pra usar`,
         ms: 8000,

@@ -216,7 +216,30 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
     get().montarLista();
   },
 
-  abrirPedirPasta: () => set({ pedirPasta: true }),
+  abrirPedirPasta: () => {
+    // APK: a pasta de ROMs vem do seletor de pastas do Android (SAF, a Pasta.java do antigo), não de um caminho digitado
+    const apk = (globalThis as { KOFnesApk?: { pastaEscolher?: () => void } }).KOFnesApk;
+    if (apk?.pastaEscolher) {
+      (globalThis as { __pastaEscolhida?: (ok: boolean) => void }).__pastaEscolhida = (ok) => {
+        if (!ok) return void usarAvisos.getState().avisarErro('não consegui guardar a pasta de ROMs');
+        void (async () => {
+          try {
+            const raiz = await obterRaiz(servicos().backend);
+            set({ raiz, pedirPasta: false, pasta: null });
+            organizado = false;
+            usarAvisos.getState().avisar(`📁 pasta de ROMs: ${raiz.path ?? ''}`, 3500);
+            usarTelas.getState().abrir('biblioteca');
+            await get().mostrar(true);
+          } catch (e) {
+            usarAvisos.getState().avisarErro(`não deu pra ler a pasta de ROMs: ${paraBackendError(e).message}`);
+          }
+        })();
+      };
+      apk.pastaEscolher();
+      return;
+    }
+    set({ pedirPasta: true });
+  },
   fecharPedirPasta: () => set({ pedirPasta: false }),
   usarPasta: async (caminho) => {
     try {

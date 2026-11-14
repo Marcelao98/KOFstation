@@ -21,6 +21,18 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · M14.3 e M14.5 · pasta de ROMs e atualizador do APK (reaproveitando o antigo)
+
+**Como:** sobre o que já estava na casca do antigo. **M14.3:** a `Pasta.java` (SAF) ganhou o caminho relativo de cada arquivo; a nova
+`PastaComandos.java` atende `library.root.get/scan/crc/inventory`, `file.read/stat`, `file.zip.list/read` (diretório central do zip lido por
+posição; inflate raw) e `pasta.preparar` (o PS1/N64 nativo copia o CD da pasta); `Comandos.java` ganhou um `Delegado` pros comandos da casca.
+TS: `abrirPedirPasta` abre o seletor do Android (`KOFnesApk.pastaEscolher` + `__pastaEscolhida`) e jogo da pasta que é PS1/N64 vai pro
+nativo (`pasta.preparar` + `JogoNativoAndroid`). **M14.5:** `AtualizacaoApk.java` (`app.atualizacao`: compara o `codigo` do
+`android-versao.txt` da última Release com o `versionCode` e pergunta "Baixar"); `versao.yml` monta o APK e sobe `KOFstation-novo.apk` + `android-versao.txt`;
+`ci.yml` roda `android/testar.sh` e monta o APK. **Conferido:** e2e `android-pasta` (escolhe a pasta, lista, abre GB por `file.read`, abre PS1 por
+`pasta.preparar` + `ps1Abrir`); `android/testar.sh` (JVM) ok; APK de 13 MB assina. **Não provado aqui:** o SAF e o `HttpURLConnection` de verdade
+(só no aparelho / numa Release).
+
 ## 2026-11-14 · M13/M14 · rede e controle no APK novo (lado do celular)
 
 **Pedido:** "testa a rede entre aparelhos no APK novo e as opções do controle; faz a paridade total".

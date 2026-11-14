@@ -39,6 +39,9 @@ import java.io.OutputStream;
  * a página e os núcleos novos vêm do GitHub e valem na abertura seguinte, sem reinstalar o APK.
  */
 public class MainActivity extends Activity {
+    /** Quem prepara o jogo nativo (PS1/N64) pra copiar do arquivo escolhido na pasta. */
+    interface Preparar { void preparar(String uri); }
+
     private static final String HOST = "appassets.androidplatform.net";
     private static final int PEDIDO_ARQUIVO = 1, PEDIDO_SALVAR = 2, PEDIDO_PASTA = 3;
     // sobe a cada mudança neste Java: página publicada com casca maior pede APK novo (ela pode usar algo que esta não tem)
@@ -82,7 +85,33 @@ public class MainActivity extends Activity {
         try { WebView.setWebContentsDebuggingEnabled(true); } catch (Throwable t) { /* sem depuração */ }
         web.addJavascriptInterface(new Ponte(), "KOFnesApk");   // a ponte do antigo (PS1/N64 nativos, pasta de ROMs, rede)
         // a ponte do app novo (contrato docs/API_CONTRACTS.md): config, lojas, app.info...
-        web.addJavascriptInterface(new dev.kofstation.android.Ponte(new dev.kofstation.android.Comandos(getFilesDir(), "@VERSAO_NOME@")), "KofAndroid");
+        dev.kofstation.android.Comandos comandos = new dev.kofstation.android.Comandos(getFilesDir(), "@VERSAO_NOME@");
+        // a pasta de ROMs (Pasta.java, SAF) vista pelo contrato do app novo: library.*, file.*, pasta.preparar
+        final PastaComandos daPasta = new PastaComandos(pasta, new Preparar() {
+            @Override public void preparar(String uri) {
+                Uri[] us = pasta.doJogo(uri);
+                if (us == null) return;
+                if (ps1 != null) ps1.ultimaEscolha = us;   // o PS1/N64 nativo copia o CD direto dos arquivos da pasta
+                if (n64 != null) n64.ultimaEscolha = us;
+            }
+        });
+        // o atualizador do APK (M14.5): procura sozinho uma vez na abertura e quando a pessoa pede (🔄 Procurar atualização)
+        int codigo = 0;
+        String nomeVersao = "@VERSAO_NOME@";
+        try { codigo = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode; } catch (Exception e) { /* sem versão: nunca acha "nova" */ }
+        final AtualizacaoApk atualiza = new AtualizacaoApk(codigo, nomeVersao, new AtualizacaoApk.AoAchar() {
+            @Override public void nova(final String nome) { runOnUiThread(new Runnable() { public void run() { perguntarAtualizacao(nome); } }); }
+        });
+        comandos.delegarPara(new dev.kofstation.android.Comandos.Delegado() {
+            @Override public dev.kofstation.android.Comandos.Saida chamar(String cmd, org.json.JSONObject a, byte[] corpo) throws dev.kofstation.android.Comandos.Erro, java.io.IOException, org.json.JSONException {
+                dev.kofstation.android.Comandos.Saida r = atualiza.chamar(cmd, a, corpo);
+                return r != null ? r : daPasta.chamar(cmd, a, corpo);
+            }
+        });
+        web.addJavascriptInterface(new dev.kofstation.android.Ponte(comandos), "KofAndroid");
+        new Thread(new Runnable() { public void run() {
+            try { Thread.sleep(6000); atualiza.chamar("app.atualizacao", new org.json.JSONObject().put("procurar", true), new byte[0]); } catch (Exception e) { /* sem rede agora: tenta na próxima abertura */ }
+        } }, "KOFatualiza").start();
         web.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
@@ -193,6 +222,13 @@ public class MainActivity extends Activity {
         h.put("Cache-Control", "no-cache");
         r.setResponseHeaders(h);
         return r;
+    }
+
+    private void perguntarAtualizacao(String nome) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this).setTitle("KOFstation novo").setMessage("Tem uma versão nova (" + nome + "). Baixar e instalar por cima? Seus jogos e saves continuam.")
+                .setPositiveButton("Baixar", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) { abrirFora(AtualizacaoApk.APK); } })
+                .setNegativeButton("Depois", null).show();
     }
 
     private void abrirFora(String url) {

@@ -34,15 +34,17 @@ import java.util.regex.Pattern;
  */
 final class Pasta {
     static final class Item {
-        final String nome, pai;
+        final String nome, pai, rel;
         final Uri uri;
         final long tamanho;
-        Item(String nome, Uri uri, long tamanho, String pai) { this.nome = nome; this.uri = uri; this.tamanho = tamanho; this.pai = pai; }
+        Item(String nome, Uri uri, long tamanho, String pai, String rel) { this.nome = nome; this.uri = uri; this.tamanho = tamanho; this.pai = pai; this.rel = rel; }
     }
 
     private final Activity a;
     private final SharedPreferences prefs;
     private volatile Map<String, Item> porUri = new HashMap<String, Item>();
+    /** caminho relativo à pasta escolhida ("Sega/Sonic.md") -> arquivo da última listagem */
+    private volatile Map<String, Item> porCaminho = new HashMap<String, Item>();
 
     Pasta(Activity a) {
         this.a = a;
@@ -85,20 +87,23 @@ final class Pasta {
         Pattern p = Pattern.compile(ext, Pattern.CASE_INSENSITIVE);
         List<Item> l = new ArrayList<Item>();
         ContentResolver cr = a.getContentResolver();
-        varrer(cr, t, DocumentsContract.getTreeDocumentId(t), 0, p, l);
+        varrer(cr, t, DocumentsContract.getTreeDocumentId(t), 0, p, l, "");
         Map<String, Item> m = new HashMap<String, Item>();
+        Map<String, Item> c2 = new HashMap<String, Item>();
         JSONArray j = new JSONArray();
         try {
             for (Item it : l) {
                 m.put(it.uri.toString(), it);
-                j.put(new JSONObject().put("n", it.nome).put("u", it.uri.toString()).put("t", it.tamanho));
+                c2.put(it.rel, it);
+                j.put(new JSONObject().put("n", it.nome).put("u", it.uri.toString()).put("t", it.tamanho).put("r", it.rel));
             }
         } catch (Exception e) { /* JSONObject só reclama de número inválido */ }
         porUri = m;
+        porCaminho = c2;
         return j.toString();
     }
 
-    private static void varrer(ContentResolver cr, Uri t, String doc, int prof, Pattern p, List<Item> l) {
+    private static void varrer(ContentResolver cr, Uri t, String doc, int prof, Pattern p, List<Item> l, String rel) {
         Uri filhos = DocumentsContract.buildChildDocumentsUriUsingTree(t, doc);
         Cursor c = null;
         try {
@@ -108,9 +113,9 @@ final class Pasta {
                 String id = c.getString(0), nome = c.getString(1), mime = c.getString(2);
                 if (nome == null) continue;
                 if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mime)) {
-                    if (prof < 2) varrer(cr, t, id, prof + 1, p, l);
+                    if (prof < 2) varrer(cr, t, id, prof + 1, p, l, rel + nome + "/");
                 } else if (p.matcher(nome).find()) {
-                    l.add(new Item(nome, DocumentsContract.buildDocumentUriUsingTree(t, id), c.isNull(3) ? -1 : c.getLong(3), doc));
+                    l.add(new Item(nome, DocumentsContract.buildDocumentUriUsingTree(t, id), c.isNull(3) ? -1 : c.getLong(3), doc, rel + nome));
                 }
             }
         } catch (Exception e) {
@@ -130,6 +135,16 @@ final class Pasta {
         for (Item x : porUri.values())
             if (x != it && x.pai.equals(it.pai) && base(x.nome).equalsIgnoreCase(base)) r.add(x.uri);
         return r.toArray(new Uri[0]);
+    }
+
+    /** O arquivo pelo caminho relativo da última listagem (null = não está lá). */
+    Item porCaminho(String rel) { return porCaminho.get(rel); }
+
+    /** Abre o arquivo pra leitura (quem chama fecha). */
+    ParcelFileDescriptor abrir(Item it) throws IOException {
+        ParcelFileDescriptor f = a.getContentResolver().openFileDescriptor(it.uri, "r");
+        if (f == null) throw new IOException("o Android não deixou abrir " + it.nome);
+        return f;
     }
 
     private static String base(String n) {

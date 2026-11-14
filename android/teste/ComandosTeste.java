@@ -56,7 +56,7 @@ public class ComandosTeste {
 
         // o que ainda não existe diz o porquê, em português
         String e = erro(c, "library.scan", new JSONObject());
-        conferir(e.startsWith("UNSUPPORTED") && e.contains("M14.3"), "library.scan: UNSUPPORTED apontando o M14.3");
+        conferir(e.startsWith("UNSUPPORTED") && e.contains("só existe no PC"), "library.scan sem a casca da pasta: UNSUPPORTED explicando");
         conferir(erro(c, "nativo.abrir", new JSONObject()).contains("M14.4"), "nativo.abrir: UNSUPPORTED apontando o M14.4");
         conferir(((JSONArray) ((JSONObject) c.chamar("nativo.disponivel", new JSONObject(), new byte[0]).data).get("sistemas")).length() == 0, "nenhum núcleo nativo por enquanto");
         JSONObject raiz = (JSONObject) c.chamar("library.root.get", new JSONObject(), new byte[0]).data;

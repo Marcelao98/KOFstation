@@ -49,4 +49,5 @@ KS="$AQUI/kofstation-teste.keystore"
 [ -f "$KS" ] || keytool -genkeypair -keystore "$KS" -storepass kofstation-teste -keypass kofstation-teste -alias kofstation -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=KOFstation teste, O=KOFstation, C=BR" 2>&1 | grep -v "^Picked up"
 apksigner sign --ks "$KS" --ks-pass pass:kofstation-teste --key-pass pass:kofstation-teste --ks-key-alias kofstation --out "$OUT" "$W/alinhado.apk" 2>&1 | grep -v "^Picked up" || true
 apksigner verify -v "$OUT" 2>&1 | grep -v "^Picked up" | head -4 || true
+printf 'codigo=%s\nnome=%s\n' "$CODIGO" "$NOME" > "$(dirname "$OUT")/android-versao.txt"   # o que o atualizador do APK compara
 ls -l "$OUT"

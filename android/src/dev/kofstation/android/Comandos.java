@@ -25,7 +25,7 @@ public final class Comandos {
     public static final class Saida {
         public final Object data;
         public final byte[] bin;
-        Saida(Object data, byte[] bin) { this.data = data; this.bin = bin; }
+        public Saida(Object data, byte[] bin) { this.data = data; this.bin = bin; }
     }
 
     /** Erro do contrato: código em MAIÚSCULAS e mensagem em português. */
@@ -37,8 +37,16 @@ public final class Comandos {
     static final String[] LOJAS = { "jogos", "saves", "estados", "autos", "stats", "musicas", "capas", "visual", "roms", "bios" };
     static final int VERSAO_DA_CONFIG = 1;
 
+    /** Comandos que só a casca sabe atender (a pasta de ROMs por SAF, que precisa da Activity). `null` = não é comigo. */
+    public interface Delegado {
+        Saida chamar(String cmd, JSONObject a, byte[] corpo) throws Erro, IOException, JSONException;
+    }
+
     private final File dados;
     private final String versao;
+    private volatile Delegado delegado;
+
+    public void delegarPara(Delegado d) { this.delegado = d; }
 
     public Comandos(File dados, String versao) {
         this.dados = dados;
@@ -52,8 +60,6 @@ public final class Comandos {
                         .put("version", versao).put("contractVersion", 1).put("os", "android")
                         .put("arch", "arm64").put("dataDir", dados.getPath()));
                 case "app.vivo": return json(JSONObject.NULL);
-                case "app.atualizacao": return json(new JSONObject().put("estado", "desligado")
-                        .put("texto", "a atualização do APK ainda não existe (M14.5)"));
                 case "log.write": return logar(a);
                 case "config.read": return json(lerConfig(a.optString("doc")));
                 case "config.write": gravarConfig(a.optString("doc"), a.optJSONObject("data")); return json(JSONObject.NULL);
@@ -64,12 +70,15 @@ public final class Comandos {
                 case "store.delete": apagar(a.optString("store"), a.optString("key", null)); return json(JSONObject.NULL);
                 case "store.space": return json(espaco());
                 case "nativo.disponivel": return json(new JSONObject().put("sistemas", new JSONArray()));
-                // sem pasta Kof Games no celular ainda (M14.3): o app abre jogos pelo seletor de arquivos e guarda a cópia na loja roms
-                case "library.root.get": return json(new JSONObject().put("path", JSONObject.NULL).put("ok", false)
-                        .put("missing", new JSONArray()).put("sugestao", ""));
                 default:
+                    if (delegado != null) {
+                        Saida d = delegado.chamar(cmd, a, corpo);
+                        if (d != null) return d;
+                    }
+                    if ("library.root.get".equals(cmd)) // sem a casca da pasta (teste de JVM): nenhuma pasta escolhida
+                        return json(new JSONObject().put("path", JSONObject.NULL).put("ok", false).put("missing", new JSONArray()).put("sugestao", ""));
                     throw new Erro("UNSUPPORTED", "o comando " + cmd + " ainda não existe no celular ("
-                            + (cmd.startsWith("library.") || cmd.startsWith("file.") ? "pasta de ROMs: M14.3"
+                            + (cmd.startsWith("library.") || cmd.startsWith("file.") ? "essa parte da pasta de ROMs só existe no PC"
                             : cmd.startsWith("nativo.") ? "PS1 e N64 nativos: M14.4" : "casca do Android: M14.1") + ")");
             }
         } catch (JSONException e) {

@@ -315,9 +315,9 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 |---|---|---|---|
 | M14.1 | A casca Java atual serve o app novo (adaptador `android`) | APK abre o app novo | ⏸ casca **do antigo** com o app novo dentro (`docs/ANDROID.md`); falta instalar num celular (T-CELULAR) |
 | M14.2 | Controle de toque (6 modelos), layout do celular | você joga no celular | ⏸ feito e testado no navegador com tela de celular (retrato e deitado, multitoque); falta jogar num celular de verdade |
-| M14.3 | Pasta de ROMs e biblioteca do celular | tua pasta no celular | ⬜ não feito: `library.*`/`file.*` em Java (SAF) é grande e precisa de aparelho; hoje o jogo abre pelo seletor de arquivos. Plano em `docs/ANDROID.md` |
+| M14.3 | Pasta de ROMs e biblioteca do celular | tua pasta no celular | ⏸ feito: a `Pasta.java` do antigo (SAF) atendendo `library.*`/`file.*`/`pasta.preparar` do app novo (`PastaComandos.java`); e2e com ponte simulada; falta provar no aparelho (T-CELULAR) |
 | M14.4 | PS1 e N64 nativos | você joga | ⏸ feito reaproveitando a casca e as `.so` do APK antigo (sem NDK): `JogoNativoAndroid` + `KOFnesApk`; falta jogar no celular (T-CELULAR) |
-| M14.5 | Atualizador do APK | atualiza sozinho | ⬜ não feito: depende de publicar o APK junto das versões e de decidir a verificação (`docs/ANDROID.md`) |
+| M14.5 | Atualizador do APK | atualiza sozinho | ⏸ feito: `AtualizacaoApk.java` compara o `versionCode` com o `android-versao.txt` da Release e pergunta "Baixar"; o workflow `Versão` agora monta e publica o APK junto; a primeira prova é a próxima Release (a chave de teste do APK é a mesma, então instala por cima) |
 
 ## Troca
 

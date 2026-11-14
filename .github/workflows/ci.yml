@@ -56,3 +56,12 @@ jobs:
           git fetch -q --depth 1 https://github.com/Marcelao98/kofstation-old ceba493fc494165de6f561b77a699fb8c22b295f && git checkout -q FETCH_HEAD
           cd - && node tools/testar-rede.mjs /tmp/kofstation-old
           cargo build -p kof-app && node tools/testar-aparelhos.mjs --antigo /tmp/kofstation-old
+      - name: Casca do Android (M14; comandos em Java na JVM e o APK montando e assinando; só no Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y -q aapt apksigner zipalign libandroid-23-java dalvik-exchange android-sdk-platform-23 libandroid-json-org-java python3-pil
+          sh android/testar.sh
+          pnpm build
+          KOF_APK_ANTIGO=/tmp/kofstation-old/android/apk/KOFstation.apk android/construir-apk.sh target/KOFstation-novo.apk
+          aapt dump badging target/KOFstation-novo.apk | grep -E "package: name='dev.kofstation.android'"
+          unzip -l target/KOFstation-novo.apk | grep -E "lib/arm64-v8a/libkofps1.so|lib/arm64-v8a/libkofrede.so|assets/web/index.html"

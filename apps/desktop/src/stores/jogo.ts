@@ -257,6 +257,23 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     set({ abrindo: true });
     try {
       const { armazem } = servicos();
+      // APK, jogo da pasta de ROMs (SAF): PS1/N64 vão pro núcleo nativo; a casca copia o CD direto da pasta
+      if (!origem.nativoAndroid && origem.path) {
+        const nat = consoleNativoDoApk(origem.path, config().ler('nucleoPs1') === 'wasm');
+        if (nat) {
+          await servicos().backend.chamar('pasta.preparar', { path: origem.path });
+          origem = { ...origem, nativoAndroid: nat };
+          aberto = {
+            nome: aberto.nome,
+            arquivo: aberto.arquivo,
+            sistema: nat,
+            rom: marcaNativa(nat, aberto.arquivo),
+            parcial: true,
+            tamanho: tamanhoDoJogo(aberto),
+            pesoCd: aberto.pesoCd ?? tamanhoDoJogo(aberto),
+          };
+        }
+      }
       const nativo = await querNativo(aberto.sistema, origem.path);
       if (aberto.sistema === 'ps2' && !nativo) {
         av.avisarErro(
