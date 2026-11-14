@@ -142,7 +142,8 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Atualizador assinado (liga com a chave), pacote do Linux (`--instalar`), instalador do Windows, lado a lado com o antigo | ⏸ M15 (falta a chave e o Marcelo instalar) |
 | Rede entre aparelhos (📡 Aparelhos, QR e código, pareia com o APK atual), celular como controle (rede e servidor do APK), 🖥 Jogar no PC (WebRTC), Levar pro celular | ⏸ M13 (falta o Marcelo testar com o celular) |
 | Desempenho quadro a quadro (p50/p95/p99, engasgos e o culpado, CPU por linha), F3 com gráfico, 🩺 modo diagnóstico (grava a sessão e exporta `.zip`, junto do F9) | 🟨 M16.1–M16.3 feitos; pacote Linux com ritmo nativo corrigido em `teste-binarios` (`65bdcf0`), falta o Marcelo testar; M16.4–M16.5 a fazer |
-| Android (o APK servindo o app novo) | ⬜ M14 |
+| Opções de emulação por console (perfis ⚡/⚖/🎯, Avançado, por jogo; PS1, PS2, N64 e os WebAssembly conferidos contra os núcleos) | ⏸ M16.4 feito, falta o teu teste |
+| Android: APK com o app novo dentro (ponte `KofAndroid`, controle de toque com 6 modelos); ver [docs/ANDROID.md](docs/ANDROID.md) | 🟨 M14.1–M14.2 feitos (⏸ instalar); M14.3 pasta de ROMs, M14.4 PS1/N64 nativos, M14.5 atualizador ⬜ |
 
 ---
 

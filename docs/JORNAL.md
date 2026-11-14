@@ -21,6 +21,20 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · Fecho da sessão · onde parou
+
+**Feito nesta sessão (um commit por passo):** M16.4 (`047e047`), T.1 (`ad355eb`), M14.2 (`802bb61`), M14.1 (`d45ab03`),
+e2e do F4 mais firme, `tools/publicar-teste.sh`. Pacote novo na `teste-binarios` (um commit órfão com Linux, Windows e o
+`KOFstation-novo.apk`; os executáveis e o APK foram conferidos com `grep` pelo código novo antes de publicar). Essa branch
+tinha o pacote com as tentativas do PS2 (`rascunho/ps2-liso`): foi substituída pelo pacote sem elas.
+**Pausado por decisão do Marcelo:** M16.5 (otimização do PS2). **Não mexi** nos ⏸ de M9–M13, M15 e PS2 (só preparei os testes na
+lista "Pra você testar" do SITUACAO). **T.2 não foi feito** (fica pra ele decidir).
+**Não feito, com motivo:** M14.3, M14.4 e M14.5 (SAF/biblioteca em Java sem aparelho, NDK ausente, atualizador sem canal
+de publicação do APK): `docs/ANDROID.md` tem a ordem sugerida. A lista completa do Avançado ("tudo que o núcleo
+declara") também ficou pra depois (precisa de um comando que abra o núcleo só pra listar).
+**Próximo passo:** o Marcelo faz os testes da lista "Pra você testar" (T-M16.4 e T-CELULAR primeiro) e diz o que quebrou.
+Depois: M14.3 (Java com teste de JVM) e, com o NDK, M14.4.
+
 ## 2026-11-14 · M14.1 · casca do Android e o app novo dentro (APK)
 
 **Pedido:** M14.1 a M14.5; sem o Android SDK, fazer o que der e dizer o que faltou.

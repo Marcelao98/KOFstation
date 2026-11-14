@@ -12,6 +12,11 @@ O KOFstation novo já roda **todos os consoles do antigo menos o PS2**, com bibl
 controles, jukebox e estatísticas, e agora o **PlayStation roda nativo** (bem mais leve). Falta você testar o pacote
 atual; depois vêm distribuição, celular e, por último, o PS2.
 
+> **Atualização de 14/11:** feitos **M16.4** (opções de emulação por console), **T.1** (paridade com testes contra o antigo)
+> e **M14.1–M14.2** (APK com o app novo e controle de toque). O que depende de você está na lista **"Pra você testar"** logo
+> abaixo. Otimização do PS2 (M16.5) **pausada** por decisão sua. T.2 fica pra você decidir. M14.3–M14.5 (pasta de ROMs no
+> celular, PS1/N64 nativos, atualizador do APK) não foram feitos: precisam de aparelho e do Android NDK (ver `docs/ANDROID.md`).
+
 ## Os números
 
 | | Passos | O que quer dizer |
@@ -151,6 +156,13 @@ dizem sempre "vale ao reabrir": ninguém mediu quais núcleos releem na hora.
 2. Abra um jogo de SNES e outro de Mega Drive, aperte **F7** em cada um, abra a Jukebox (F7 no jogo ou pelo menu): vistas
    Capa, Ondas e Notas, Mudo/Solo, exportar `.wav`, importar um `.spc` seu. Compare com o antigo se puder.
 
+### T-EXTRAS · Estatísticas, tradução e o caçador de bugs (M10)
+
+1. Jogue uns minutos e abra 📊 Estatísticas: o tempo, as sessões e o jogo aparecem? "Espaço usado" lista as lojas?
+2. Com uma tradução `.ips`/`.bps`/`.ups` sua: Arquivo → aplicar tradução → escolha o patch e depois a ROM: abre o jogo traduzido,
+   com o selo 🇧🇷 na Biblioteca e o save separado do original?
+3. **F9** com um jogo aberto: o Reportar bug abre com o pacote marcado; Esc fecha e o jogo volta.
+
 ### T-NEOGEO · Neo Geo de verdade (M11)
 
 Com o seu `neogeo.zip` guardado em 🔑 BIOS e um jogo (ex.: `mslug.zip`) na Biblioteca: abra, jogue, salve estado. Se o jogo
@@ -288,7 +300,8 @@ O PS2 ficou pro fim porque é o mais caro em token. Os custos são estimativa (t
 | 5 | **PS2 nativo** (N.9 / M12) | ~400–700 mil | Dar OpenGL ao processo do jogo, compilar o LRPS2, criar o sistema PS2. O N64 nativo sai junto |
 | 6 | **Troca** | baixo–médio | Conferir a paridade 100% e o app antigo publicar a última versão, que leva pro novo |
 
-**Agora:** M15, M13 e o **PS2** feitos (faltam a chave e os teus testes). Entrou o **M16** (desempenho, antes do M14):
+**Agora (14/11):** M16.4, T.1, M14.1 e M14.2 feitos; faltam M14.3–M14.5 e os teus testes (lista "Pra você testar").
+**Antes:** M15, M13 e o **PS2** feitos (faltam a chave e os teus testes). Entrou o **M16** (desempenho, antes do M14):
 M16.1–M16.3 feitos, ⏸ você grava o SotC e o ZoE2; depois M16.4 (opções de emulação) e M16.5 (otimizar), ~300–550
 mil tokens, 2–3 sessões. Em paralelo, dois agentes com tarefa (`docs/agentes/`): **A** ritmo dos quadros no
 WebAssembly (o "antigo mais liso") e **B** o catálogo das opções de emulação.
