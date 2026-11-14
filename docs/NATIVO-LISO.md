@@ -43,6 +43,9 @@ flowchart LR
 
 ## Como medir (antes × depois, antigo × novo)
 
+`tools/paridade-controle.mjs`: o mesmo jogo nas duas páginas, aperta cada botão do controle de toque e compara as marcas do
+`<body>` (`data-sis`, `analogico`, `so-ab`, `nativo`), os rótulos e o código que chega no núcleo. Roda no CI.
+
 `tools/paridade-abrir.mjs` manda os **mesmos arquivos** (gerados por `tools/paridade/arquivos.py`) pra página do APK antigo e pra do
 novo, com a mesma casca falsa, e compara a decisão (qual núcleo nativo abriu, com que nome) e quantos bytes a página leu. Roda no CI.
 Em 14/11 ele achou as 4 diferenças do item 0 (todas com zip) e depois da correção deu "TUDO IGUAL".

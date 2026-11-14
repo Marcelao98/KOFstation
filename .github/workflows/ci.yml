@@ -65,7 +65,7 @@ jobs:
           KOF_APK_ANTIGO=/tmp/kofstation-old/android/apk/KOFstation.apk android/construir-apk.sh target/KOFstation-novo.apk
           aapt dump badging target/KOFstation-novo.apk | grep -E "package: name='dev.kofstation.android'"
           unzip -l target/KOFstation-novo.apk | grep -E "lib/arm64-v8a/libkofps1.so|lib/arm64-v8a/libkofrede.so|assets/web/index.html"
-      - name: Paridade da abertura no celular (a página do APK antigo × a do novo, mesmos arquivos; só no Linux)
+      - name: Paridade da abertura e do controle de toque no celular (a página do APK antigo × a do novo, mesmos arquivos; só no Linux)
         if: runner.os == 'Linux'
         run: |
           mkdir -p /tmp/antigo-pagina && cp /tmp/kofstation-old/publicado/android/KOFnes-android.html /tmp/antigo-pagina/index.html
@@ -75,3 +75,4 @@ jobs:
           python3 tools/paridade/arquivos.py /tmp/paridade-arquivos
           sleep 4
           node tools/paridade-abrir.mjs http://127.0.0.1:4190/index.html "http://127.0.0.1:4191/?celular=1" /tmp/paridade-arquivos
+          node tools/paridade-controle.mjs http://127.0.0.1:4190/index.html "http://127.0.0.1:4191/?celular=1" /tmp/paridade-arquivos

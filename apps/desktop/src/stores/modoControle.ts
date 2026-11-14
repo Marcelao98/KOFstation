@@ -5,11 +5,12 @@
 //  - servidor do APK (`ControleServidor.java`, KOFnesApk.controle*): o PC conecta por endereço e senha (Arquivo → Celular como controle).
 // Os botões vêm do controle de toque (stores/toque), como no antigo.
 import { empacotarEixos } from '@kof/engine';
-import { trocarLocal } from '@kof/domain';
+import { acoesDe, ANALOGICO, trocarLocal } from '@kof/domain';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { config } from './config';
-import { aoQuadroNovo, ultimoQuadro } from './jogo';
+import { marcarConsole } from './entrada';
+import { aoQuadroNovo, ultimoQuadro, usarJogo } from './jogo';
 import { ouvirRede, usarRede } from './rede';
 import { soltarToque, toque } from './toque';
 
@@ -129,6 +130,9 @@ function esperarIce(pc: RTCPeerConnection): Promise<void> {
 function consoleDoControle(sis: string, nome: string) {
   const base = CONSOLE_PARECIDO[sis] ?? sis;
   document.body.dataset.sis = NOME_CONSOLE[base] ? base : 'ps1';
+  // como o consoleDoControle do antigo (android.js 356–360): sem jogo no PC = controle completo, com analógico
+  document.body.classList.toggle('analogico', !NOME_CONSOLE[base] || !!ANALOGICO[base]);
+  document.body.classList.toggle('so-ab', !!NOME_CONSOLE[base] && !acoesDe(base).includes('X'));
   if (m) m.an = sis === 'n64' || sis === 'ps2' ? 'puro' : 'misto';
   usarMC.setState({
     sis: sis ? base : '',
@@ -303,7 +307,13 @@ export function sairModoControle(): void {
       // sem ponte: nada a parar
     }
   document.body.classList.remove('modo-controle', 'cel-jogo', 'remoto-filtro');
-  delete document.body.dataset.sis;
+  // o controle volta a ser o do jogo deste celular (android.js 411–415)
+  const j = usarJogo.getState();
+  if (j.jogo && j.info) marcarConsole(j.info.sistema, !!(j.jogo as { nativo?: boolean }).nativo);
+  else {
+    delete document.body.dataset.sis;
+    document.body.classList.remove('analogico', 'so-ab');
+  }
   usarMC.setState({ ...vazio });
 }
 

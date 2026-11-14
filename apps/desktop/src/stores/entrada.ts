@@ -1,6 +1,6 @@
 // Os controles que valem agora (aplicarControles do antigo): o mapa do console e do jogo aberto, refeito ao abrir um jogo
 // e quando a tela Controles muda alguma coisa. Sem jogo, vale o do SNES.
-import { montarEntrada, type Entrada } from '@kof/domain';
+import { acoesDe, ANALOGICO, montarEntrada, type Entrada } from '@kof/domain';
 import { create } from 'zustand';
 import { config } from './config';
 import { depoisDeAbrirJogo, usarJogo } from './jogo';
@@ -23,7 +23,20 @@ export const usarEntrada = create<EstadoEntrada>()((set) => ({
   aplicar: () => set({ entrada: calcular() }),
 }));
 
+/**
+ * As marcas do console no <body>, como o abrirBytes do antigo (app.js 2479–2483), que o CSS do celular usa:
+ * `data-sis` (L2/R2 só no PlayStation/N64, sem ⏪ no PS1/N64), `analogico` (o direcional de toque vira joystick: PS1/PS2/N64),
+ * `so-ab` (console sem X/Y: GB, NES, SMS, GG, GBA) e `nativo` (núcleo nativo: sem ⏩).
+ */
+export function marcarConsole(sis: string, nativo: boolean): void {
+  const b = document.body;
+  b.dataset.sis = sis;
+  b.classList.toggle('analogico', !!ANALOGICO[sis]);
+  b.classList.toggle('so-ab', !acoesDe(sis).includes('X'));
+  b.classList.toggle('nativo', nativo);
+}
+
 depoisDeAbrirJogo.add(() => {
   usarEntrada.getState().aplicar();
-  document.body.dataset.sis = sisAtual(); // o CSS do celular mostra L2/R2 só no PlayStation e no N64
+  marcarConsole(sisAtual(), !!(usarJogo.getState().jogo as { nativo?: boolean } | null)?.nativo);
 });

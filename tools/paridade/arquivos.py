@@ -25,3 +25,8 @@ with zipfile.ZipFile('Mario.zip', 'w', zipfile.ZIP_DEFLATED) as z:
     z.writestr('Mario.z64', b'\x80\x37\x12\x40' + b'\0' * 4092)
 with zipfile.ZipFile('Jogo GB.zip', 'w', zipfile.ZIP_DEFLATED) as z:
     z.writestr('Jogo GB.gb', bytes(gb))
+
+# Mega Drive que pinta o fundo (o mesmo do e2e): só o cabeçalho "SEGA" basta pra ser reconhecido
+md = bytearray(0x400)
+md[0x100:0x110] = b'SEGA MEGA DRIVE '
+open('Vermelho.md', 'wb').write(bytes(md))

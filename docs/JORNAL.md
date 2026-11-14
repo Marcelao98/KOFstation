@@ -21,6 +21,18 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · O controle de toque por console no celular (vinha o do Super Nintendo no PS1)
+
+**Pedido:** "abri o PS1 e veio o controle do Super Nintendo; no antigo o sistema detecta o console e muda o controle. Por que não veio?".
+**Por quê:** eu tinha testado o controle de toque só com Mega Drive no navegador e o nativo com uma casca falsa sem apertar botão;
+nunca comparei console por console com o antigo. Faltavam as marcas que o antigo põe no `<body>` ao abrir o jogo (`app.js` 2479–2483):
+`analogico` (o direcional vira joystick: PS1/PS2/N64 — sem ela aparecia a cruz do SNES), `so-ab` (GB/NES/SMS/GG/GBA sem X/Y/L/R) e
+`nativo` (sem ⏩ no PS1/N64). **Feito (portado como está):** `marcarConsole(sis, nativo)` em `stores/entrada.ts` (ao abrir o jogo) e o
+mesmo no controle do PC (`consoleDoControle`, android.js 356–360 e 411–415).
+**Teste de paridade:** `tools/paridade-controle.mjs` abre o mesmo jogo (PS1 por zip, N64, GB, MD) nas duas páginas, aperta cada botão
+do controle de toque e compara marcas, rótulos (inclusive os escondidos) e o código que chega no núcleo: antes **9 diferenças**, agora
+**TUDO IGUAL**. Entrou no CI junto do da abertura.
+
 ## 2026-11-14 · A abertura do zip com a ISO no celular (o motivo do "nem abre" e do "trava")
 
 **Pedido:** "o antigo abre a ROM e o novo nem abre; faz o teste de paridade da parte que abre a ISO do zip; traz igual ao antigo".
