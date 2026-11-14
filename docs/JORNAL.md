@@ -21,6 +21,28 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · M14.1 · casca do Android e o app novo dentro (APK)
+
+**Pedido:** M14.1 a M14.5; sem o Android SDK, fazer o que der e dizer o que faltou.
+**Ambiente:** `dl.google.com` é bloqueado (sem SDK/NDK), mas o `apt` tem as ferramentas que o antigo já usava (aapt,
+dalvik-exchange, apksigner, zipalign, `android-23.jar`, `org.json`): instalei e o APK monta e assina aqui. **NDK não existe**.
+**Feito:** `platform/android.ts` (adaptador `Backend` sobre `window.KofAndroid`, base64, erro do contrato, com teste);
+`escolher.ts` usa ele dentro do APK; `ligarModoCelular` liga o modo celular sozinho; `window.__kofVoltar` pro botão Voltar.
+`android/`: `Comandos.java` (Java puro: app.*, log.write, config.*, store.* com os mesmos nomes de arquivo do Rust,
+nativo.disponivel vazio, library.root.get sem pasta; o resto devolve `UNSUPPORTED` dizendo qual passo falta), `Ponte.java`,
+`MainActivity.java` (WebView em `https://kofstation.local/` servindo `assets/web` com COOP/COEP, seletor de arquivos, Voltar,
+tela cheia), `AndroidManifest.xml`, `construir-apk.sh` (sem lambda: o dx do minSdk 24 não aceita invokedynamic), chave de
+teste `kofstation-teste.keystore` (como a do antigo; `applicationId` próprio `dev.kofstation.android`). `docs/ANDROID.md`.
+**Medido / conferido:** `android/testar.sh`: 22 verificações de JVM dos comandos (config, lojas, erros, nomes de arquivo
+iguais aos do Rust). `unit` do adaptador (6). e2e `android-simulado.spec.ts` com uma ponte KofAndroid falsa em JS: o app liga no
+modo celular sozinho, abre um jogo, o save vai pra loja da "casca" (`sram.KOFSAVE.32768`), a biblioteca sem pasta não
+quebra. APK de 8,5 MB compila contra o `android.jar`, o `apksigner verify` passa (v2/v3) e o `aapt dump badging` mostra
+`dev.kofstation.android`, minSdk 24, ícone da xícara.
+**Não feito (e por quê):** M14.3 (pasta de ROMs por SAF: `library.*`/`file.*` em Java é grande e não dá pra provar sem
+aparelho), M14.4 (precisa do NDK), M14.5 (depende de publicar o APK junto das versões e de decidir a verificação). Tudo
+anotado no ROADMAP e em `docs/ANDROID.md`, com a ordem sugerida.
+**Onde parou:** ⏸ o Marcelo instala o APK (T-CELULAR). Próximo código: M14.3 em Java com teste de JVM.
+
 ## 2026-11-14 · M14.2 · controle de toque e layout do celular
 
 **Pedido:** M14.2 (controle de toque dos 6 modelos e o layout), feito e testado no navegador com tela de celular.

@@ -103,7 +103,7 @@
 - ✅ Modos alegria/normal/raiz/hardcore com as mesmas regras; pergunta ao abrir (desligável); Opções de emulação.
 - ✅ Rebobinar estilo Príncipe da Pérsia (preto e branco, ampulheta de 30 s; alegria sem recarga); o Rebobinador restaura os mesmos estados do antigo, passo a passo. PS1/PS2: `semRebob` (M11).
 - ✅ `.kofsave` exportado no antigo abre no novo e vice-versa (saves, estatísticas, configs opcionais, estados opcionais). [guarda.test com o guarda.js do antigo; e2e backup]
-- ⬜ Saves nativos do celular (PS1 `.mcd`, N64) entram no backup.
+- ⬜ Saves nativos do celular (PS1 `.mcd`, N64) entram no backup (M14.4).
 
 ## Jukebox e música — [juke, jukebox, trilha, capas-wav]
 - ✅ Guardar música por estado (todos os sistemas com sonda), lista com a Trilha do KOFstation, renomear/apagar, mini-player (a diferença D29 é decisão aceita)
@@ -142,8 +142,12 @@
   Levar pro celular, Voltar pra TV, filtro do celular.
 
 ## Celular (M14) — [celular, apk-simulado, pasta-apk, ps1-fachada]
-- ⬜ Controle de toque (6 modelos), biblioteca e ficha do celular, pasta de ROMs (SAF), PS1/N64 nativos, atualizador
-  do APK, voltar do Android = menu rápido.
+- ✅ Controle de toque (6 modelos: Clássico, Moderno, Minimalista, Arcade, Portátil, Segue o tema), tamanho, transparência,
+  vibrar, canhoto, rótulos por console, multitoque, analógico: mesmo CSS e mesmas coordenadas do antigo, e2e com viewport de
+  celular (retrato e deitado) [e2e celular]. ⏸ falta jogar num celular de verdade (T-CELULAR).
+- ⏸ Voltar do Android = menu rápido (`__kofVoltar`, feito; só prova instalando).
+- ⬜ Biblioteca e ficha do celular, pasta de ROMs (SAF), PS1/N64 nativos, atualizador do APK, rede no celular: ver
+  `docs/ANDROID.md` (M14.3–M14.5).
 
 ## Distribuição (M15) — [atualiza; lançadores no Wine]
 - ⏸ Abre em janela de app no Linux e no Windows; atualiza sozinho (agora assinado); dados do usuário nunca na pasta do T-INSTALAR.

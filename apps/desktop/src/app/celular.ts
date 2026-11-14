@@ -27,3 +27,28 @@ export function ligarModoCelular(): boolean {
 }
 
 export const emModoCelular = (): boolean => document.documentElement.classList.contains('celular');
+
+/**
+ * Botão Voltar do Android (a casca chama `window.__kofVoltar()` antes de sair): fecha o menu rápido; no jogo, abre o
+ * menu rápido; numa tela, volta uma; no Início devolve `false` e a casca fecha o app. Devolve se tratou o botão.
+ */
+export async function ligarVoltarDoAndroid(): Promise<void> {
+  const [{ usarJogo }, { usarTelas }] = await Promise.all([import('../stores/jogo'), import('../stores/telas')]);
+  (globalThis as { __kofVoltar?: () => boolean }).__kofVoltar = () => {
+    const j = usarJogo.getState();
+    const t = usarTelas.getState();
+    if (j.rapidoAberto) {
+      j.fecharRapido();
+      return true;
+    }
+    if (t.atual === 'jogo' && j.jogo) {
+      j.abrirRapido();
+      return true;
+    }
+    if (t.atual !== 'home') {
+      t.voltar();
+      return true;
+    }
+    return false;
+  };
+}

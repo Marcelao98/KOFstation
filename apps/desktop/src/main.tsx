@@ -22,7 +22,8 @@ addEventListener('unhandledrejection', (e) => registrar('error', 'promessa', tex
 // as configurações vêm antes da primeira tela (tema, volume...); se o serviço não responder, abre com o padrão
 // (o App é importado depois: as stores leem a configuração quando são criadas)
 await carregarConfig(backend).catch((e: unknown) => registrar('error', 'config', textoDoErro(e)));
-(await import('./app/celular')).ligarModoCelular();
+const celular = await import('./app/celular');
+if (celular.ligarModoCelular()) await celular.ligarVoltarDoAndroid();
 const { App } = await import('./app/App');
 // rede entre aparelhos (M13): liga, religa o celular da última vez e ouve o Jogar no PC desde a abertura
 (await import('./stores/rede')).ligarARede();

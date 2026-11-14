@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- applicationId próprio (dev.kofstation.novo): o APK novo convive com o antigo (dev.kofnes.android), cada um com os seus dados -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="dev.kofstation.android"
+    android:versionCode="@VERSAO_CODE@"
+    android:versionName="@VERSAO_NOME@">
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <application
+        android:label="KOFstation novo"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:theme="@style/TemaKofstation">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|uiMode"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
