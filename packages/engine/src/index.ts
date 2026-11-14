@@ -8,6 +8,7 @@ export * from './anel';
 export * from './fila-de-quadros';
 export * from './jogo';
 export * from './nativo';
+export * from './nativo-android';
 export * from './mensagens';
 export * from './reamostrador';
 export * from './rebobinador';

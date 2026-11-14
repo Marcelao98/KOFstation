@@ -207,13 +207,15 @@ O APK está em `KOFstation-novo.apk` na `teste-binarios` (mesma branch dos outro
 2. Abra **KOFstation novo**: o Início do app novo aparece (xícara, atalhos, cores do tema Café)?
 3. Toque em ☰ → Controles (ou 🎮 na barra de baixo): os 6 modelos do controle aparecem, mudam na hora e mudar o tamanho e a
    transparência funciona?
-4. Abra um jogo pelo **Biblioteca → Adicionar arquivo** (o seletor do Android abre; escolha uma ROM de GB, NES, SNES, Mega
-   Drive ou GBA): joga? o som sai? o controle de toque responde (dois dedos ao mesmo tempo, deslizar entre botões)? Vire o
+4. **PS1 e N64 (o mais importante):** Biblioteca → Adicionar arquivo e escolha um CD de PS1 (`.cue` com os `.bin`: marque o
+   `.cue` **e** os `.bin` juntos no seletor; ou `.chd`/`.iso`) ou uma ROM de N64 (`.z64`). Deve aparecer "preparando o CD…",
+   a tela nativa do jogo no lugar do canvas, som e botões respondendo; abrir o ☰ some a tela nativa e volta ao fechar.
+   Se não abrir, me mande o texto do aviso. Depois um jogo de GB, NES, SNES, Mega Drive ou GBA: joga? o som sai? o controle de toque responde (dois dedos ao mesmo tempo, deslizar entre botões)? Vire o
    celular deitado: o controle flutua nos cantos?
 5. Salve um estado (💾 no ☰), feche o app e abra de novo: o jogo e o estado continuam lá?
 6. O botão **Voltar** do Android: no jogo abre o ☰; numa tela volta; no Início sai do app.
-7. **O que ainda não existe** (não precisa testar, só saber): pasta Kof Games do celular, PS1 e N64 nativos (rodam no
-   WebAssembly, mais lentos), atualização do APK e rede entre aparelhos no celular. Detalhes em `docs/ANDROID.md`.
+7. **O que ainda não existe** (não precisa testar, só saber): pasta Kof Games do celular (CD nativo não reabre pela
+   Biblioteca: escolha o arquivo de novo), atualização do APK e rede entre aparelhos no celular. Detalhes em `docs/ANDROID.md`.
 Se algo quebrar, me mande o texto do erro (a tela mostra com código) e o modelo do celular; o log fica em `files/logs/` do app.
 
 ### T-DIAG · Gravar o diagnóstico (M16.3)

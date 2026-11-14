@@ -119,3 +119,59 @@ test('sem pasta Kof Games no celular: a biblioteca avisa em português em vez de
   await expect(page.locator('#biblioteca')).toBeVisible();
   await expect(page.locator('#lista-vazia')).toBeVisible();
 });
+
+test('PS1 e N64 vão pro núcleo nativo da casca (KOFnesApk, as .so do antigo): abre, manda os botões e a área, e para ao pausar', async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    const g = globalThis as unknown as Record<string, unknown>;
+    const chamadas: [string, unknown[]][] = [];
+    g.__nativoAndroid = chamadas;
+    const apk: Record<string, unknown> = {};
+    for (const c of ['ps1', 'n64']) {
+      apk[c + 'Nativo'] = () => true;
+      for (const m of ['Pad', 'Area', 'Fechar', 'Reiniciar', 'Volume'])
+        apk[c + m] = (...a: unknown[]) => void chamadas.push([c + m, a]);
+      apk[c + 'Abrir'] = (...a: unknown[]) => {
+        chamadas.push([c + 'Abrir', a]);
+        setTimeout(
+          () =>
+            (g['__' + c + 'Pronto'] as (r: unknown) => void)({
+              principal: String(a[0]),
+              largura: 320,
+              altura: 240,
+              fps: 59.94,
+            }),
+          20,
+        );
+      };
+    }
+    g.KOFnesApk = apk;
+  });
+  // um CD (.cue pequeno de teste): o app NÃO lê o CD, só passa o nome pro Java
+  await page.setInputFiles('#arquivo', {
+    name: 'Meu Jogo.cue',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.from('FILE "a.bin" BINARY\n'),
+  });
+  await expect(page.locator('#st-jogo')).toHaveText('Meu Jogo', { timeout: 10_000 });
+  const nomes = () =>
+    page.evaluate(() =>
+      (globalThis as unknown as { __nativoAndroid: [string, unknown[]][] }).__nativoAndroid.map((c) => c[0]),
+    );
+  await expect.poll(nomes).toContain('ps1Abrir');
+  await expect.poll(nomes).toContain('ps1Pad');
+  await expect.poll(nomes).toContain('ps1Area');
+  // nenhum núcleo WebAssembly do PS1 foi baixado
+  expect(
+    await page.evaluate(() => performance.getEntriesByType('resource').some((r) => /nucleos\/pcsx/.test(r.name))),
+  ).toBe(false);
+  // um .z64 vai pro N64 nativo
+  await page.setInputFiles('#arquivo', {
+    name: 'Mario.z64',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.alloc(2048, 7),
+  });
+  await expect.poll(nomes).toContain('n64Abrir');
+  await expect.poll(nomes).toContain('ps1Fechar'); // trocou de jogo: o PS1 fechou
+});

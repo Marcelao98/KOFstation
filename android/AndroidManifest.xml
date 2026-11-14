@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <application
         android:label="KOFstation novo"
         android:icon="@mipmap/ic_launcher"
@@ -15,7 +17,7 @@
         android:hardwareAccelerated="true"
         android:theme="@style/TemaKofstation">
         <activity
-            android:name=".MainActivity"
+            android:name="dev.kofnes.android.MainActivity"
             android:exported="true"
             android:screenOrientation="fullSensor"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|uiMode"

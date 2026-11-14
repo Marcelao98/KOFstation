@@ -21,6 +21,24 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · M14.4 · PS1 e N64 nativos no APK (reaproveitando a casca do antigo)
+
+**Pedido:** o APK novo tem que rodar PS1 e N64 como o antigo ("não recria do zero, rearquiteta").
+**Erro meu:** escrevi uma casca nova do zero, apaguei o `pcsx.js`/`mupen64.js` do APK e disse que PS1/N64 rodavam no
+WebAssembly: **não rodavam** (o APK anterior não abria nenhum dos dois). O antigo roda nativo (`.so` ARM64 + `Ps1Jogo`/`N64Jogo`).
+**Achado:** o APK pronto do antigo (`android/apk/KOFstation.apk`) traz as `.so`; **não precisa de NDK**.
+**Feito:** `android/` agora é a casca do antigo com o mínimo mudado (assets do app novo com COOP/COEP, ponte nova `KofAndroid` ao
+lado da `KOFnesApk`, Voltar, sem o Atualizador do antigo); `construir-apk.sh` extrai as `.so` do APK antigo na hora de montar
+(nada de binário no histórico) e mantém o WebAssembly do PS1/N64 de reserva. TS: `engine/nativo-android.ts`
+(`JogoNativoAndroid`, a `fachada()` do `android.js` com a cara de sessão do app novo: botões a cada 16 ms, área do jogo, volume,
+savestate em base64), `platform/android-nativo.ts` (decide por extensão se vai pro nativo), `stores/jogo.ts` (ramo
+`nativoAndroid`: o CD não passa pela página, o "arquivo" guardado é uma marca de 16 bytes, sem cópia na loja `roms`).
+**Medido / conferido:** unit (5) e e2e com `KOFnesApk` falsa: `.cue` → `ps1Abrir`, depois `ps1Pad`/`ps1Area`/`ps1Volume`, sem baixar o
+WebAssembly do PS1; `.z64` → `n64Abrir` e o PS1 fecha; pausar para de mandar botões (é o sinal que esconde a tela nativa). Nomes
+JNI das `.so` (`Java_dev_kofnes_android_Ps1_*`, `..._N64_*`) batem com as classes copiadas. APK 13 MB assina e verifica.
+**Falta:** jogar no celular (T-CELULAR passo 4); reabrir CD nativo pela Biblioteca (depende do M14.3, a `Pasta.java` já está lá).
+**Onde parou:** ⏸ o Marcelo testa PS1/N64 no APK; depois M14.3.
+
 ## 2026-11-14 · Fecho da sessão · onde parou
 
 **Feito nesta sessão (um commit por passo):** M16.4 (`047e047`), T.1 (`ad355eb`), M14.2 (`802bb61`), M14.1 (`d45ab03`),

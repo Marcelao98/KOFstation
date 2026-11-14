@@ -1,0 +1,451 @@
+package dev.kofnes.android;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Message;
+import android.util.Base64;
+import android.view.View;
+import android.view.WindowManager;
+import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+import android.widget.Toast;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * KOFnes no Android: uma WebView em tela cheia que abre o KOFnes-android.html guardado dentro do app
+ * (assets/index.html), servido em https://appassets.androidplatform.net/ pra a página ter um endereço seguro
+ * (IndexedDB, crypto, WebAssembly). Faz só o que a página não consegue sozinha: escolher arquivo (ROM, .spc),
+ * salvar arquivo (pacote de bug, .spc exportado), abrir links no navegador e ler a pasta de ROMs (Pasta). (O Atualizador do antigo saiu: no app novo é o M14.5.)
+ * a página e os núcleos novos vêm do GitHub e valem na abertura seguinte, sem reinstalar o APK.
+ */
+public class MainActivity extends Activity {
+    private static final String HOST = "appassets.androidplatform.net";
+    private static final int PEDIDO_ARQUIVO = 1, PEDIDO_SALVAR = 2, PEDIDO_PASTA = 3;
+    // sobe a cada mudança neste Java: página publicada com casca maior pede APK novo (ela pode usar algo que esta não tem)
+    static final int CASCA = 14;   // (do antigo; sem uso aqui: o atualizador do APK novo é o M14.5)
+    private File raizWeb;   // pasta da versão baixada (null = a que veio dentro do APK)
+
+    private WebView web;
+    private ValueCallback<Uri[]> escolha;
+    private byte[] paraSalvar;
+    private Ps1Jogo ps1;   // PlayStation nativo (null = a ponte não carregou: o app usa o WebAssembly)
+    private ControleServidor controle;   // o celular como controle do PC (null = desligado)
+    private N64Jogo n64;   // Nintendo 64 nativo (null = sem N64 nesse aparelho)
+    private Pasta pasta;
+    private Rede rede;   // aparelhos pareados (PC): criada no 1º redeCmd
+    private android.webkit.PermissionRequest pedidoCamera;
+    private static final int PEDIDO_CAMERA = 4;
+
+    @Override
+    protected void onCreate(Bundle b) {
+        super.onCreate(b);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        web = new WebView(this);
+        FrameLayout raiz = new FrameLayout(this);
+        raiz.addView(web);
+        setContentView(raiz);
+        if (Ps1.carregar(null)) ps1 = new Ps1Jogo(this, raiz);
+        if (N64.carregar(null)) n64 = new N64Jogo(this, raiz);
+        pasta = new Pasta(this);
+        web.setBackgroundColor(0xFF000000);
+        WebSettings s = web.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);
+        s.setDatabaseEnabled(true);
+        s.setAllowFileAccess(false);
+        s.setMediaPlaybackRequiresUserGesture(false);
+        s.setSupportMultipleWindows(true);
+        s.setJavaScriptCanOpenWindowsAutomatically(true);
+        s.setBuiltInZoomControls(false);
+        s.setSupportZoom(false);
+        s.setCacheMode(WebSettings.LOAD_DEFAULT);
+        try { WebView.setWebContentsDebuggingEnabled(true); } catch (Throwable t) { /* sem depuração */ }
+        web.addJavascriptInterface(new Ponte(), "KOFnesApk");   // a ponte do antigo (PS1/N64 nativos, pasta de ROMs, rede)
+        // a ponte do app novo (contrato docs/API_CONTRACTS.md): config, lojas, app.info...
+        web.addJavascriptInterface(new dev.kofstation.android.Ponte(new dev.kofstation.android.Comandos(getFilesDir(), "@VERSAO_NOME@")), "KofAndroid");
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
+                Uri u = r.getUrl();
+                if (HOST.equals(u.getHost()) && "/pasta".equals(u.getPath())) return pasta.servir(u, r.getRequestHeaders());
+                if (HOST.equals(u.getHost())) return servir(u.getPath());
+                return null;                       // o resto (capas na internet...) segue normal
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView v, String url) {
+                if (url.startsWith("https://" + HOST)) return false;
+                abrirFora(url);
+                return true;
+            }
+        });
+        web.setWebChromeClient(new WebChromeClient() {
+            // câmera pra ler o QR do pareamento (getUserMedia na página): pede a permissão do Android na hora
+            @Override
+            public void onPermissionRequest(final android.webkit.PermissionRequest r) {
+                runOnUiThread(new Runnable() { public void run() {
+                    boolean soCamera = true;
+                    for (String x : r.getResources()) if (!x.equals(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE)) soCamera = false;
+                    if (!soCamera) { r.deny(); return; }
+                    if (checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) { r.grant(r.getResources()); return; }
+                    pedidoCamera = r;
+                    requestPermissions(new String[] { android.Manifest.permission.CAMERA }, PEDIDO_CAMERA);
+                } });
+            }
+            @Override
+            public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams p) {
+                if (escolha != null) escolha.onReceiveValue(null);
+                escolha = cb;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("*/*");                  // o seletor do Android não conhece .sfc/.smc: deixa escolher qualquer arquivo
+                i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, p.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE);
+                try {
+                    startActivityForResult(Intent.createChooser(i, "Escolha o arquivo"), PEDIDO_ARQUIVO);
+                } catch (ActivityNotFoundException e) {
+                    escolha = null;
+                    cb.onReceiveValue(null);
+                    return false;
+                }
+                return true;
+            }
+
+            // window.open(): a janela nova só serve pra abrir um link (a issue do GitHub), que vai pro navegador
+            @Override
+            public boolean onCreateWindow(WebView v, boolean dialog, boolean gesto, Message msg) {
+                WebView aba = new WebView(MainActivity.this);
+                aba.getSettings().setJavaScriptEnabled(true);
+                aba.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView w, String url) {
+                        abrirFora(url);
+                        return true;
+                    }
+                });
+                WebView.WebViewTransport t = (WebView.WebViewTransport) msg.obj;
+                t.setWebView(aba);
+                msg.sendToTarget();
+                return true;
+            }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage m) {
+                android.util.Log.d("KOFnes", m.message() + " (" + m.sourceId() + ":" + m.lineNumber() + ")");
+                return true;
+            }
+        });
+        // O Atualizador do antigo baixava a página do repositório antigo por cima: no app novo a página vem só do APK
+        // (o atualizador do APK novo é o M14.5). raizWeb = null: tudo sai dos assets em web/.
+        raizWeb = null;
+        if (b == null) web.loadUrl("https://" + HOST + "/index.html?celular=1");
+        else web.restoreState(b);
+    }
+
+    private static final java.util.Map<String, String> TIPOS = new java.util.HashMap<String, String>();
+    static {
+        TIPOS.put("html", "text/html"); TIPOS.put("js", "text/javascript"); TIPOS.put("mjs", "text/javascript");
+        TIPOS.put("css", "text/css"); TIPOS.put("json", "application/json"); TIPOS.put("svg", "image/svg+xml");
+        TIPOS.put("png", "image/png"); TIPOS.put("jpg", "image/jpeg"); TIPOS.put("ico", "image/x-icon");
+        TIPOS.put("woff2", "font/woff2"); TIPOS.put("wasm", "application/wasm"); TIPOS.put("txt", "text/plain");
+    }
+
+    /** O app novo (apps/desktop/dist, em assets/web/) com os cabeçalhos de isolamento que ele exige (SharedArrayBuffer). */
+    private WebResourceResponse servir(String caminho) {
+        String nome = (caminho == null || caminho.equals("/") || caminho.isEmpty()) ? "index.html" : caminho.substring(1);
+        int status = 200;
+        InputStream in = null;
+        String tipo = "text/plain";
+        try {
+            if (nome.contains("..")) throw new IOException("caminho inválido");
+            in = getAssets().open("web/" + nome);
+            String ext = nome.substring(nome.lastIndexOf('.') + 1).toLowerCase();
+            tipo = TIPOS.containsKey(ext) ? TIPOS.get(ext) : "application/octet-stream";
+        } catch (IOException e) {
+            status = 404;
+            in = new ByteArrayInputStream(new byte[0]);
+        }
+        WebResourceResponse r = new WebResourceResponse(tipo, "utf-8", in);
+        r.setStatusCodeAndReasonPhrase(status, status == 200 ? "OK" : "Not Found");
+        java.util.Map<String, String> h = new java.util.HashMap<String, String>();
+        h.put("Cross-Origin-Opener-Policy", "same-origin");
+        h.put("Cross-Origin-Embedder-Policy", "require-corp");
+        h.put("Cross-Origin-Resource-Policy", "same-origin");
+        h.put("Cache-Control", "no-cache");
+        r.setResponseHeaders(h);
+        return r;
+    }
+
+    private void abrirFora(String url) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (Exception e) {
+            Toast.makeText(this, "não consegui abrir o link", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int pedido, String[] perms, int[] res) {
+        if (pedido != PEDIDO_CAMERA || pedidoCamera == null) return;
+        android.webkit.PermissionRequest r = pedidoCamera; pedidoCamera = null;
+        if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) r.grant(r.getResources()); else r.deny();
+    }
+
+    /** O que a página enxerga como window.KOFnesApk. */
+    public class Ponte {
+        // ---- rede entre aparelhos (Rede.java): os mesmos pedidos/eventos JSON do kofservico do PC (rede/PROTOCOLO.md) ----
+        @JavascriptInterface
+        public void redeCmd(String json) {
+            synchronized (MainActivity.this) {
+                if (rede == null) {
+                    final android.content.SharedPreferences p = getSharedPreferences("rede", MODE_PRIVATE);
+                    Rede.Guarda g = new Rede.Guarda() {
+                        public String ler(String k) { return p.getString(k, null); }
+                        public void gravar(String k, String v) { p.edit().putString(k, v).apply(); }
+                    };
+                    Rede.Eventos ev = new Rede.Eventos() { public void evento(final String j) {
+                        runOnUiThread(new Runnable() { public void run() { web.evaluateJavascript("window.__rede && window.__rede(" + j + ")", null); } });
+                    } };
+                    try { rede = new Rede(g, ev, "celular", android.os.Build.MODEL); }
+                    catch (Throwable e) { return; }   // sem a libkofrede.so
+                    String ip = ControleServidor.ipLocal();   // broadcast da rede de casa (/24) além do 255.255.255.255
+                    if (ip != null && ip.indexOf('.') > 0) rede.alvosAchar.add(ip.substring(0, ip.lastIndexOf('.')) + ".255");
+                }
+            }
+            rede.cmd(json);
+        }
+        @JavascriptInterface
+        public void salvar(String nome, String mime, String base64) {
+            paraSalvar = Base64.decode(base64, Base64.DEFAULT);
+            final Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            i.addCategory(Intent.CATEGORY_OPENABLE);
+            i.setType(mime == null || mime.isEmpty() ? "application/octet-stream" : mime);
+            i.putExtra(Intent.EXTRA_TITLE, nome);
+            runOnUiThread(new Runnable() {
+                public void run() { startActivityForResult(i, PEDIDO_SALVAR); }
+            });
+        }
+
+        @JavascriptInterface
+        public String versao() { return "@VERSAO_NOME@"; }
+
+        // pasta de ROMs (Pasta.java): escolher, listar em segundo plano e preparar o jogo nativo (PS1/N64) que vem dela
+        @JavascriptInterface
+        public void pastaEscolher() {
+            runOnUiThread(new Runnable() { public void run() {
+                try { startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), PEDIDO_PASTA); }
+                catch (ActivityNotFoundException e) { Toast.makeText(MainActivity.this, "esse Android não deixa escolher pasta", Toast.LENGTH_LONG).show(); }
+            } });
+        }
+
+        @JavascriptInterface
+        public String pastaNome() { return pasta.nome(); }
+
+        @JavascriptInterface
+        public void pastaListar(final String ext) {
+            new Thread(new Runnable() { public void run() {
+                final String j = pasta.listar(ext);
+                runOnUiThread(new Runnable() { public void run() { web.evaluateJavascript("window.__pastaLida && window.__pastaLida(" + j + ")", null); } });
+            } }, "KOFpasta").start();
+        }
+
+        @JavascriptInterface
+        public void pastaPreparar(String u) {
+            Uri[] us = pasta.doJogo(u);
+            if (us == null) return;
+            if (ps1 != null) ps1.ultimaEscolha = us;
+            if (n64 != null) n64.ultimaEscolha = us;
+        }
+
+        // ---- o celular como controle do PC (ControleServidor): servidor na rede de casa, a página manda os botões ----
+        @JavascriptInterface
+        public String controleIniciar() {
+            try {
+                if (controle == null) {
+                    // senha fixa por celular: o PC guarda e na próxima vez conecta sozinho, sem digitar nada
+                    android.content.SharedPreferences p = getSharedPreferences("controle", MODE_PRIVATE);
+                    String senha = p.getString("senha", "");
+                    if (senha.length() != 4) { senha = ControleServidor.novaSenha(); p.edit().putString("senha", senha).apply(); }
+                    controle = new ControleServidor(senha, ControleServidor.PORTA);
+                }
+                runOnUiThread(new Runnable() { public void run() { getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); } });
+                String ip = ControleServidor.ipLocal();
+                return "{\"ip\":\"" + ip + "\",\"casa\":" + ControleServidor.redeDeCasa(ip) + ",\"porta\":" + controle.porta + ",\"senha\":\"" + controle.senha + "\"}";
+            } catch (Exception e) { return "{\"erro\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}"; }
+        }
+        @JavascriptInterface
+        public void controleEnviar(int botoes, int eixos) { ControleServidor c = controle; if (c != null) c.enviar(botoes, eixos); }
+        @JavascriptInterface
+        public String controleEstado() { ControleServidor c = controle; return c == null ? "0\t\t" : c.conectados() + "\t" + c.nomePc + "\t" + c.jogo; }   // conectados, nome do PC, console e jogo
+        @JavascriptInterface
+        public void controleParar() {
+            ControleServidor c = controle; controle = null; if (c != null) c.parar();
+            runOnUiThread(new Runnable() { public void run() { getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); } });
+        }
+
+        // ---- saves dos consoles nativos (SavesNativos): entram no backup .kofsave ----
+        @JavascriptInterface
+        public String savesNativos() { return SavesNativos.listar(getFilesDir()); }
+        @JavascriptInterface
+        public String saveNativoLer(String nome) {
+            try { byte[] b = SavesNativos.ler(getFilesDir(), nome); return b == null ? "" : Base64.encodeToString(b, Base64.NO_WRAP); }
+            catch (Exception e) { return ""; }
+        }
+        @JavascriptInterface
+        public boolean saveNativoGravar(String nome, String b64, double quando) {
+            try { return SavesNativos.gravar(getFilesDir(), nome, Base64.decode(b64, Base64.DEFAULT), (long) quando); }
+            catch (Exception e) { return false; }
+        }
+
+        // ---- PlayStation nativo (Ps1Jogo): a página chama no lugar do núcleo em WebAssembly ----
+        @JavascriptInterface
+        public boolean ps1Nativo() { return ps1 != null; }
+
+        /** Prepara o CD e abre; a resposta (JSON) chega em window.__ps1Pronto, porque copiar 500 MB demora. */
+        @JavascriptInterface
+        public void ps1Abrir(final String nome) {
+            new Thread(new Runnable() { public void run() {
+                final String r = ps1.abrir(nome);
+                runOnUiThread(new Runnable() { public void run() { web.evaluateJavascript("window.__ps1Pronto && window.__ps1Pronto(" + r + ")", null); } });
+            } }).start();
+        }
+
+        @JavascriptInterface
+        public void ps1Pad(int botoes, int eixos) { ps1.sinal(botoes, eixos); }
+
+        @JavascriptInterface
+        public void ps1Area(float x, float y, float w, float h) { ps1.area(x, y, w, h); }
+
+        @JavascriptInterface
+        public void ps1Fechar() { ps1.fechar(); }
+
+        @JavascriptInterface
+        public void ps1Reiniciar() { ps1.reiniciar(); }
+
+        @JavascriptInterface
+        public void ps1Volume(float v) { ps1.volume(v); }
+
+        @JavascriptInterface
+        public String ps1Estado() { return ps1.estado(); }
+
+        @JavascriptInterface
+        public boolean ps1CarregarEstado(String b64) { return ps1.carregarEstado(b64); }
+
+        // ---- Nintendo 64 nativo (N64Jogo): a mesma conversa do PS1 ----
+        @JavascriptInterface
+        public boolean n64Nativo() { return n64 != null; }
+
+        @JavascriptInterface
+        public void n64Abrir(final String nome) {
+            new Thread(new Runnable() { public void run() {
+                final String r = n64.abrir(nome);
+                runOnUiThread(new Runnable() { public void run() { web.evaluateJavascript("window.__n64Pronto && window.__n64Pronto(" + r + ")", null); } });
+            } }).start();
+        }
+
+        @JavascriptInterface
+        public void n64Pad(int botoes, int eixos) { n64.sinal(botoes, eixos); }
+
+        @JavascriptInterface
+        public void n64Area(float x, float y, float w, float h) { n64.area(x, y, w, h); }
+
+        @JavascriptInterface
+        public void n64Fechar() { n64.fechar(); }
+
+        @JavascriptInterface
+        public void n64Reiniciar() { n64.reiniciar(); }
+
+        @JavascriptInterface
+        public void n64Volume(float v) { n64.volume(v); }
+
+        @JavascriptInterface
+        public String n64Estado() { return n64.estado(); }
+
+        @JavascriptInterface
+        public boolean n64CarregarEstado(String b64) { return n64.carregarEstado(b64); }
+    }
+
+    @Override
+    protected void onActivityResult(int pedido, int resultado, Intent dados) {
+        super.onActivityResult(pedido, resultado, dados);
+        if (pedido == PEDIDO_ARQUIVO && escolha != null) {
+            Uri[] r = WebChromeClient.FileChooserParams.parseResult(resultado, dados);
+            // vários arquivos (o .cue com os .bin do CD de PlayStation) vêm no ClipData, que o parseResult ignora
+            if (resultado == RESULT_OK && dados != null && dados.getClipData() != null && dados.getClipData().getItemCount() > 0) {
+                ClipData c = dados.getClipData();
+                r = new Uri[c.getItemCount()];
+                for (int k = 0; k < r.length; k++) r[k] = c.getItemAt(k).getUri();
+            }
+            if (ps1 != null && r != null) ps1.ultimaEscolha = r;   // o PS1 nativo copia o CD direto dos arquivos escolhidos
+            if (n64 != null && r != null) n64.ultimaEscolha = r;
+            escolha.onReceiveValue(r);
+            escolha = null;
+        } else if (pedido == PEDIDO_PASTA) {
+            boolean ok = false;
+            if (resultado == RESULT_OK && dados != null && dados.getData() != null) {
+                try { pasta.guardar(dados.getData()); ok = true; } catch (Exception e) { Toast.makeText(this, "não consegui guardar a pasta", Toast.LENGTH_LONG).show(); }
+            }
+            web.evaluateJavascript("window.__pastaEscolhida && window.__pastaEscolhida(" + ok + ")", null);
+        } else if (pedido == PEDIDO_SALVAR) {
+            if (resultado == RESULT_OK && dados != null && dados.getData() != null && paraSalvar != null) {
+                try {
+                    OutputStream o = getContentResolver().openOutputStream(dados.getData());
+                    o.write(paraSalvar);
+                    o.close();
+                    Toast.makeText(this, "arquivo salvo", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(this, "não consegui salvar o arquivo", Toast.LENGTH_LONG).show();
+                }
+            }
+            paraSalvar = null;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // a página decide (fecha o menu rápido, volta uma tela, abre o menu no jogo); no Início, sai do app
+        web.evaluateJavascript("(window.__kofVoltar ? window.__kofVoltar() : false)", new ValueCallback<String>() {
+            @Override public void onReceiveValue(String r) { if (!"true".equals(r)) finish(); }
+        });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle b) {
+        super.onSaveInstanceState(b);
+        web.saveState(b);
+    }
+
+    @Override
+    protected void onPause() { super.onPause(); web.onPause(); if (ps1 != null) ps1.pausar(); if (n64 != null) n64.pausar(); }
+
+    @Override
+    protected void onResume() { super.onResume(); web.onResume(); imersivo(); }
+
+    @Override
+    public void onWindowFocusChanged(boolean foco) { super.onWindowFocusChanged(foco); if (foco) imersivo(); }
+
+    private void imersivo() {
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+}

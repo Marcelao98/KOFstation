@@ -24,6 +24,7 @@ import { chaveSramDe, fatosDe, sistemaDoArquivo, SISTEMAS, type RegistroJogo } f
 import {
   Jogo,
   JogoNativo,
+  JogoNativoAndroid,
   NUCLEOS,
   type EventosDoJogo,
   type InfoDoJogo,
@@ -33,6 +34,7 @@ import {
   type SituacaoRebob,
 } from '@kof/engine';
 import { create } from 'zustand';
+import { ambienteDoApk, consoleNativoDoApk, marcaNativa } from '../platform/android-nativo';
 import { usarAvisos } from './avisos';
 import { aoTrazerSaves } from './backup';
 import { guardarBateria, saveDoJogo } from './bateria';
@@ -102,6 +104,8 @@ export interface Origem {
   arquivoDeFora?: File;
   /** os outros arquivos escolhidos junto (os .bin do .cue): vão pra mesma pasta da Kof Games */
   soltos?: File[];
+  /** APK: o jogo roda no PS1/N64 nativo da casca (o CD nunca passa pela página; `aberto.rom` é só uma marca) */
+  nativoAndroid?: 'ps1' | 'n64';
 }
 
 /** Sistemas com núcleo nativo neste executável (perguntado uma vez). */
@@ -218,6 +222,24 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   abrirArquivo: async (arquivo, soltos = []) => {
     const av = usarAvisos.getState();
     try {
+      // APK: PS1 e N64 vão pro núcleo nativo da casca (as `.so` do antigo); o CD nunca passa pela página
+      const nat = consoleNativoDoApk(arquivo.name, config().ler('nucleoPs1') === 'wasm');
+      if (nat) {
+        const nomeLimpo = arquivo.name.replace(/\.[^.]+$/, '');
+        await get().abrirJogo(
+          {
+            nome: nomeLimpo,
+            arquivo: arquivo.name,
+            sistema: nat,
+            rom: marcaNativa(nat, arquivo.name),
+            parcial: true,
+            tamanho: arquivo.size,
+            pesoCd: arquivo.size,
+          },
+          { nativoAndroid: nat, arquivoDeFora: arquivo, soltos },
+        );
+        return;
+      }
       if (await abrirCdDeFora(arquivo, soltos)) return;
       const outros = await Promise.all(
         soltos.map(async (s) => ({ nome: s.name, bytes: new Uint8Array(await s.arrayBuffer()) })),
@@ -253,7 +275,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         return false;
       }
       // nativo: o processo lê o CD direto da Kof Games (o CD e os .bin do .cue não passam pela página)
-      if (!nativo) {
+      if (!nativo && !origem.nativoAndroid) {
         aberto = await jogoInteiro(aberto, origem.path);
         aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
       }
@@ -286,7 +308,17 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         },
       };
       let jogo: SessaoDeJogo | null = null;
-      if (nativo && origem.path)
+      if (origem.nativoAndroid) {
+        const amb = ambienteDoApk();
+        if (!amb) throw new Error('a casca do Android não está presente (PS1/N64 nativos só existem no APK)');
+        jogo = await JogoNativoAndroid.abrir(amb, {
+          sistema: origem.nativoAndroid,
+          nome: origem.arquivoDeFora?.name ?? aberto.arquivo,
+          volume: volume / 100,
+          mudo,
+        });
+      }
+      if (!jogo && nativo && origem.path)
         try {
           const r = await servicos().backend.chamar<{ porta: number; token: string }>('nativo.abrir', {
             sistema: aberto.sistema,
@@ -520,7 +552,7 @@ async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<
   const { backend, armazem } = servicos();
   let path = origem.path;
   const f = origem.arquivoDeFora;
-  if (!path && f) {
+  if (!path && f && !origem.nativoAndroid) {
     try {
       const fato = await fatosDe(f.name, f.size, async (o, n) => new Uint8Array(await f.slice(o, o + n).arrayBuffer()));
       // arquivo grande (CD): aos pedaços, sem ler inteiro de novo
@@ -544,7 +576,7 @@ async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<
     }
   }
   try {
-    return await registrarJogo(armazem, aberto, path ? { path } : {});
+    return await registrarJogo(armazem, aberto, path ? { path } : { semCopia: !!origem.nativoAndroid }); // nativo do APK: a `rom` é uma marca, não vira cópia
   } catch (e) {
     registrar('error', 'biblioteca', `não registrei ${aberto.nome}: ${textoDoErro(e)}`);
     return null;
