@@ -95,7 +95,14 @@ export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
     caminho: true,
     semRebob: true,
     soNativo: true,
-    opcoes: { pcsx2_renderer: 'OpenGL', pcsx2_ee_cycle_skip: 'Mild Underclock', pcsx2_bios: 'bios-ps2.bin' },
+    // MTVU: a VU1 do PS2 numa linha própria do processador (o núcleo vem com ele desligado; o PCSX2 recomenda com 3+
+    // núcleos físicos, e é o que mais pesa em jogo de VU como o Shadow of the Colossus)
+    opcoes: {
+      pcsx2_renderer: 'OpenGL',
+      pcsx2_ee_cycle_skip: 'Mild Underclock',
+      pcsx2_mtvu: 'enabled',
+      pcsx2_bios: 'bios-ps2.bin',
+    },
     ext: 'iso',
   },
 };
