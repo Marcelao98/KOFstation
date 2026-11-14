@@ -1,7 +1,7 @@
 // Worker do núcleo: carrega o núcleo do kofstation-old, roda os quadros e manda imagem e som. O ritmo é o do SOM quando
 // ele está tocando (mantém ~60 ms no anel; o AudioWorklet consome no relógio da placa de som); sem som, um relógio
 // pelo fps do núcleo. No máximo 4 quadros de uma vez (igual ao antigo); turbo = 4 por passo.
-import { criarAnel, escrever, ocupacao, type Anel } from './anel';
+import { criarAnel, criarAnelLocal, drenar, escrever, ocupacao, type Anel } from './anel';
 import { SessaoLibretro, type FabricaDeNucleo } from './libretro';
 import { assinaturaDoQuadro } from './bug';
 import type { DoWorker, ParaWorker, ReplayDoBug } from './mensagens';
@@ -17,6 +17,8 @@ const eu = self as unknown as {
 
 let sessao: SessaoLibretro | null = null;
 let anel: Anel | null = null;
+/** sem SharedArrayBuffer: o anel é só do Worker e o som vai pra página por mensagem (anel.ts `drenar`) */
+let pcmPorMensagem = false;
 let reamostrador: Reamostrador | null = null;
 let relogio: Relogio | null = null;
 let taxaSaida = 48000;
@@ -216,6 +218,10 @@ function umQuadro(s: SessaoLibretro, comSom: boolean) {
   med.quadros++;
   anotarQuadro(s);
   if (comSom && anel && reamostrador) escrever(anel, reamostrador.converter(audio));
+  if (pcmPorMensagem && anel) {
+    const d = drenar(anel);
+    if (d) enviar({ tipo: 'pcm', dados: d }, [d.buffer]);
+  }
   const faltas = anel ? Atomics.load(anel.ctl, 2) : 0;
   porQuadro.push(
     Math.round(t1 * 1000),
@@ -263,7 +269,7 @@ function passoSemErro() {
   let vezes = 0;
   if (turbo) {
     for (; vezes < MAX_QUADROS_POR_PASSO; vezes++) umQuadro(s, false);
-  } else if (somTocando && anel) {
+  } else if (somTocando && anel && !pcmPorMensagem) {
     const alvo = taxaSaida * 0.06;
     while (ocupacao(anel) < alvo && vezes < MAX_QUADROS_POR_PASSO) {
       umQuadro(s, true);
@@ -311,7 +317,12 @@ eu.onmessage = async ({ data: m }) => {
         marcoNoProximo = true;
         sessao = s;
         taxaSaida = m.taxaSaida;
-        anel = m.sab ? criarAnel((m.sab.byteLength - 16) / 8, m.sab) : null;
+        pcmPorMensagem = !m.sab && !!m.pcm;
+        anel = m.sab
+          ? criarAnel((m.sab.byteLength - 16) / 8, m.sab)
+          : pcmPorMensagem
+            ? criarAnelLocal(Math.round(taxaSaida * 0.5))
+            : null;
         reamostrador = new Reamostrador(info.taxaAudio, taxaSaida);
         relogio = criarRelogio(info.fps);
         ultimoPasso = med.desde = performance.now();

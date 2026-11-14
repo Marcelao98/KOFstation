@@ -47,7 +47,7 @@
 ## Início, abertura, guia — [home, hometemas, abertura]
 - ✅ Início: frases, logo por tema e dicas; Continuar de onde parou e Jogados recentemente (M5.3); o cartão BIOS diz quais BIOS estão guardadas ("✅ GBA · trocar ou guardar outra") [e2e bios].
   a tela (M11), mas o texto dele ainda não diz quais BIOS estão guardadas (o antigo dizia: `marcarBiosHome`).
-- 🟨 Abertura da 1ª vez: título → frases → 10 temas → apresentação → guia de 4 passos; Ajuda > Boas-vindas reabre; o passo 2 lista as BIOS (GBA roda sem / Neo Geo: neogeo.zip) [e2e abertura]. **Diferença a decidir (⏸ Marcelo):** no título, o logo do tema no lugar do ícone do app.
+- ✅ Abertura da 1ª vez: título (com o ícone da xícara, como o `<img class="ab-logo">` do antigo) → frases → 10 temas → apresentação → guia de 4 passos; Ajuda > Boas-vindas reabre; o passo 2 lista as BIOS (GBA roda sem / Neo Geo: neogeo.zip) [e2e abertura].
   (teste `abertura.spec`). Diferenças: no título, o logo do tema no lugar do ícone do app; no passo 2 falta a lista
   "GBA roda sem / Neo Geo: falta o neogeo.zip" (`marcarAbBios`).
 - ⏸ Música do Início (escolha, sortear, desligar; só toca depois do 1º gesto): na trilha FM e no violino, como lá. **Falta ouvir** (SITUACAO, T-OUVIR): o e2e prova que toca, não que está igual aos ouvidos.
@@ -146,8 +146,9 @@
   vibrar, canhoto, rótulos por console, multitoque, analógico: mesmo CSS e mesmas coordenadas do antigo, e2e com viewport de
   celular (retrato e deitado) [e2e celular]. ⏸ falta jogar num celular de verdade (T-CELULAR).
 - ⏸ Voltar do Android = menu rápido (`__kofVoltar`, feito; só prova instalando).
-- ⬜ Biblioteca e ficha do celular, pasta de ROMs (SAF), PS1/N64 nativos, atualizador do APK, rede no celular: ver
-  `docs/ANDROID.md` (M14.3–M14.5).
+- ⏸ PS1/N64 nativos no APK (as `.so` e as classes do antigo; `JogoNativoAndroid`): só prova jogando (T-CELULAR).
+- ✅ Som no celular: o WebView não tem isolamento (sem SharedArrayBuffer), então o som vai por mensagem Worker → página → AudioWorklet [e2e som-sem-isolamento].
+- ⬜ Biblioteca e ficha do celular, pasta de ROMs (SAF), atualizador do APK, rede no celular: ver `docs/ANDROID.md` (M14.3, M14.5).
 
 ## Distribuição (M15) — [atualiza; lançadores no Wine]
 - ⏸ Abre em janela de app no Linux e no Windows; atualiza sozinho (agora assinado); dados do usuário nunca na pasta do T-INSTALAR.

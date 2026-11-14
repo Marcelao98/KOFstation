@@ -225,7 +225,7 @@ mostra p50/p99, engasgos por minuto e quem causou, a CPU de cada linha e o gráf
 
 ### Pra você decidir
 
-- **Abertura da 1ª vez:** o título mostra o logo do tema; o antigo mostrava o ícone do app. Deixo assim ou volto ao ícone?
+- *(resolvido)* A abertura da 1ª vez já mostra o ícone da xícara, como o antigo.
 - **T.2** (a última versão do antigo que leva pro novo): fica pra você decidir; não mexi.
 
 ## Esperando você testar ⏸

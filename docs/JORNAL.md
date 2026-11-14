@@ -21,6 +21,24 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · Auditoria, som do APK e fecho de qualidade
+
+**Pedido:** olhar o repositório e o roadmap, rodar todos os testes, deixar o app "igualzinho" ao antigo e descobrir por que o APK
+saiu sem áudio.
+**Causa do mudo:** `Jogo.ligarSom` e `Tocador.ligarSom` só ligavam o som com `SharedArrayBuffer` + `crossOriginIsolated`. O WebView do
+Android **não tem isolamento de origem** (os cabeçalhos COOP/COEP que a casca manda não o ativam), então os dois devolviam "sem som" e os
+jogos de WebAssembly (SNES, GB, NES, Mega Drive, GBA...) e a música do Início rodavam mudos. O PS1/N64 nativos tocam pelo Java e não
+tinham esse problema. O teste daquela versão só cobria o PC (isolado), por isso passou.
+**Feito:** som sem memória compartilhada: o Worker escreve num anel só dele, `drenar` tira os quadros e manda `{tipo:'pcm'}`; a página
+repassa ao AudioWorklet `kof-som-pcm` (fila com teto de ~250 ms, silêncio quando seca). A jukebox e a trilha usam um relógio virtual
+pra saber quanto já tocou. Com isolamento (PC) nada muda: o caminho antigo continua igual. e2e novo `som-sem-isolamento` (força
+`crossOriginIsolated=false`, mede ≈ 48.000 amostras por segundo tocadas e sem "sem som" no F3).
+**Auditoria de paridade:** o teste com o antigo achou uma regressão minha (🏠 Início e 🎮 Controle virtual no menu rápido; no antigo
+também só existem no celular: teste ajustado). A "diferença" da abertura (logo do tema × ícone) era uma nota velha do PARIDADE: o
+novo já mostra a xícara.
+**Medido:** `KOF_ANTIGO=… pnpm check` (domain 145, engine 61+1, app-core 34, desktop 20), `pnpm e2e` 62 ok, `cargo fmt/clippy`, `cargo test
+--workspace --no-fail-fast` (só o `pcsx` com SIGILL, sabido), `android/testar.sh`.
+
 ## 2026-11-14 · M14.4 · PS1 e N64 nativos no APK (reaproveitando a casca do antigo)
 
 **Pedido:** o APK novo tem que rodar PS1 e N64 como o antigo ("não recria do zero, rearquiteta").

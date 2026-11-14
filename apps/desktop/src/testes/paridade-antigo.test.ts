@@ -45,7 +45,10 @@ describe.skipIf(!antigo)('paridade com o código do antigo', () => {
     const itens = tsx.slice(tsx.indexOf('function itens()'), tsx.indexOf('export function itensRemotos'));
     const doNovo = [...itens.matchAll(/\bt: '([^']+)'/g)]
       .map((m) => m[1])
-      .filter((t) => t !== '📱 Levar pro celular' && t !== '📺 Voltar pra TV'); // só no novo: Jogar no PC (M13)
+      // só no novo: Jogar no PC (M13). 🏠 Início e 🎮 Controle virtual só entram no celular, como o ITENS_RAPIDO.splice do android.js do antigo
+      .filter(
+        (t) => !['📱 Levar pro celular', '📺 Voltar pra TV', '🏠 Início', '🎮 Controle virtual'].includes(t ?? ''),
+      );
     expect(doNovo).toEqual(doAntigo);
   });
 
