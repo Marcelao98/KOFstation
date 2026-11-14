@@ -23,4 +23,7 @@ export const usarEntrada = create<EstadoEntrada>()((set) => ({
   aplicar: () => set({ entrada: calcular() }),
 }));
 
-depoisDeAbrirJogo.add(() => usarEntrada.getState().aplicar());
+depoisDeAbrirJogo.add(() => {
+  usarEntrada.getState().aplicar();
+  document.body.dataset.sis = sisAtual(); // o CSS do celular mostra L2/R2 só no PlayStation e no N64
+});

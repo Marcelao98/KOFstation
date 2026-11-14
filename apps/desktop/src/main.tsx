@@ -6,6 +6,7 @@ import { carregarConfig } from './stores/config';
 import { ligarServicos } from './stores/servicos';
 import './styles/antigo/estilo.css';
 import './styles/base.css';
+import './styles/celular.css';
 
 const raiz = document.getElementById('raiz');
 if (!raiz) throw new Error('index.html sem o #raiz');
@@ -21,6 +22,7 @@ addEventListener('unhandledrejection', (e) => registrar('error', 'promessa', tex
 // as configurações vêm antes da primeira tela (tema, volume...); se o serviço não responder, abre com o padrão
 // (o App é importado depois: as stores leem a configuração quando são criadas)
 await carregarConfig(backend).catch((e: unknown) => registrar('error', 'config', textoDoErro(e)));
+(await import('./app/celular')).ligarModoCelular();
 const { App } = await import('./app/App');
 // rede entre aparelhos (M13): liga, religa o celular da última vez e ouve o Jogar no PC desde a abertura
 (await import('./stores/rede')).ligarARede();

@@ -21,6 +21,28 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · M14.2 · controle de toque e layout do celular
+
+**Pedido:** M14.2 (controle de toque dos 6 modelos e o layout), feito e testado no navegador com tela de celular.
+**Feito:** `?celular=1` (ou aparelho de toque Android, ou o APK) liga a classe `celular` no `<html>` (`app/celular.ts`).
+`styles/celular.css` é o `android.css` do antigo (a marcação do novo usa os mesmos ids e classes). `components/ControleDeToque.tsx`
+é o `#ctl` do antigo em React: multitoque por `pointerId`, deslizar troca de botão, direcional com zona morta que vira
+analógico nos consoles que têm (misto no PS1, puro no N64/PS2), ☰ = menu rápido, ⏪ = rebobinar, ⏩ = turbo, rótulos por
+console (Mega Drive A/B/C, PS1 ✕○□△, N64...). `stores/toque.ts` guarda os dedos e as preferências (chaves do antigo ctlModelo,
+ctlTam, ctlOpa, ctlVibrar, ctlCanhoto); `hooks/useEntradaDoJogo` soma o toque ao teclado do J1. Tela Controles no
+celular = galeria dos 6 modelos com miniatura, tamanho, transparência, vibrar, canhoto e "restaurar o padrão"
+(`screens/Teclas/ControlesDeToque.tsx`); menu rápido ganha 🏠 Início e 🎮 Controle virtual.
+**Medido / conferido:** e2e `celular.spec.ts` com viewport de celular (390×780 e 844×390, toque): o controle aparece só
+jogando; A+Start juntos (multitoque), soltar um mantém o outro, deslizar de B pra Y; diagonal do direcional e zona morta;
+☰ abre o menu rápido; os 6 modelos mudam e ficam guardados depois de recarregar; deitado o direcional fica à esquerda
+da imagem e os botões à direita, sem cobrir. Prints: `apps/desktop/test-results/celular-*.png`. `pnpm check` e `pnpm e2e` (57 ok).
+CI do T.1 verde no Linux e no Windows; o do M16.4 (run 110) falhou só no e2e do F4 (carregamento do painel de imagem
+sob carga), que passou de novo no run seguinte: instabilidade já vista, sem relação com o commit.
+**Deu errado / aprendido:** um `usarJogo(...) && usarTelas(...)` chamou o hook condicionalmente e derrubou o App
+("reading 'length'" do React): hooks nunca em curto-circuito. E `prettier --write` rodado dentro de `apps/desktop` ignora o
+`.prettierignore` da raiz e reformatou o `estilo.css` do antigo: rodar sempre da raiz.
+**Onde parou:** M14.1 (casca Java servindo o app novo).
+
 ## 2026-11-14 · T.1 · paridade fechada com testes contra o antigo
 
 **Pedido:** fechar os itens não verificados do `PARIDADE.md`, com teste automático contra o `kofstation-old` (só leitura)

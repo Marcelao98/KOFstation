@@ -4,11 +4,13 @@
 import { ehDeTv, KofVisual, tamanhoNaTela, type Valores } from '@kof/engine';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas } from '../stores/telas';
+import { toque } from '../stores/toque';
 import { renderAtual, usarVisual } from '../stores/visual';
 
 export function ligarGanchosDeTeste() {
   const t = (globalThis as { __kofTeste?: Record<string, unknown> }).__kofTeste;
   if (!t) return;
+  t.toque = toque; // o que os dedos seguram no controle de toque (e2e do celular)
   t.visual = {
     /** a imagem (RGBA, l × a) no lugar do jogo, no tamanho que a janela der (múltiplo inteiro, 4:3) */
     imagemTeste: (rgba: number[], l: number, a: number) => {

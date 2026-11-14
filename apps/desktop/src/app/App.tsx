@@ -4,6 +4,7 @@ import { EXTENSOES, ehPacote, principal as principalDoCd } from '@kof/domain';
 import { useEffect, useRef } from 'react';
 import { Aviso } from '../components/Aviso';
 import { Desempenho } from '../components/Desempenho';
+import { ControleDeToque } from '../components/ControleDeToque';
 import { Lateral } from '../components/Lateral';
 import { Menu } from '../components/Menu';
 import { MenuRapido, teclaDoRapido } from '../components/MenuRapido';
@@ -245,6 +246,7 @@ export function App({ backend }: { backend: Backend }) {
   return (
     <>
       <Menu />
+      <ControleDeToque />
       <Lateral />
       <main id="palco">
         {atual === 'home' && <Inicio />}

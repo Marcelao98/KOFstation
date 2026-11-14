@@ -13,3 +13,4 @@ third_party/cores/nativos/
 third_party/cores/wasm/
 packages/contracts/fixtures/opcoes-nucleo.json
 packages/contracts/fixtures/opcoes-wasm.json
+apps/desktop/src/styles/celular.css

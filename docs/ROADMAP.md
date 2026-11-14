@@ -314,7 +314,7 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
 | M14.1 | A casca Java atual serve o app novo (adaptador `android`) | APK abre o app novo | ⬜ |
-| M14.2 | Controle de toque (6 modelos), layout do celular | você joga no celular | ⬜ |
+| M14.2 | Controle de toque (6 modelos), layout do celular | você joga no celular | ⏸ feito e testado no navegador com tela de celular (retrato e deitado, multitoque); falta jogar num celular de verdade |
 | M14.3 | Pasta de ROMs e biblioteca do celular | tua pasta no celular | ⬜ |
 | M14.4 | PS1 e N64 nativos | você joga | ⬜ |
 | M14.5 | Atualizador do APK | atualiza sozinho | ⬜ |

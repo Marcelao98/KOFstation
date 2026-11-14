@@ -3,6 +3,7 @@
 import { nomeDoTema, TODOS_TEMAS, MODOS, nomeModo } from '@kof/domain';
 import { useEffect, useState } from 'react';
 import { acao } from '../app/acoes';
+import { emModoCelular } from '../app/celular';
 import { PROPORCOES, usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarModo } from '../stores/modo';
@@ -49,6 +50,12 @@ function itens(): Item[] {
       so: () => usarTransmissao.getState().ligada,
       f: depois(() => pararTransmissao('o jogo voltou pra TV')),
     },
+    ...(emModoCelular()
+      ? [
+          { t: '🏠 Início', f: depois(() => acao('home')) },
+          { t: '🎮 Controle virtual', f: depois(() => acao('teclas')) },
+        ]
+      : []),
     { t: '💾 Salvar estado', f: depois(() => acao('salvar-estado')) },
     { t: '⟲ Carregar último estado', f: depois(() => acao('carregar-ultimo')) },
     { t: '🎵 Guardar esta música', f: depois(() => acao('guardar-musica')) },
