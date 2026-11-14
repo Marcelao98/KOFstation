@@ -27,7 +27,8 @@ commits citados pelo hash curto quando ajudarem.
 passo novo "Paridade da abertura e do controle de toque": `tools/paridade-*.mjs` pediam o pacote `playwright`, que só
 existe na minha máquina; o projeto tem o `@playwright/test`, que exporta o mesmo `chromium`. Troquei nas três
 ferramentas e rodei o passo igual ao CI (página do antigo no commit fixado `ceba493`): abertura TUDO IGUAL, controle
-TUDO IGUAL. Código do app não mudou; o pacote da `teste-binarios` continua valendo.
+TUDO IGUAL. No CI faltava também esperar o `vite preview` subir (era `sleep 4` fixo; agora espera a porta, em
+127.0.0.1). Código do app não mudou; o pacote da `teste-binarios` continua valendo.
 **Onde parou:** só falta o teste de pareamento (T-REDE), que o Marcelo faz em casa. T.2 e o PS2 seguem com ele.
 
 ## 2026-11-14 · O controle de toque por console no celular (vinha o do Super Nintendo no PS1)

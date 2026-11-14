@@ -71,8 +71,11 @@ jobs:
           mkdir -p /tmp/antigo-pagina && cp /tmp/kofstation-old/publicado/android/KOFnes-android.html /tmp/antigo-pagina/index.html
           ln -s /tmp/kofstation-old/publicado/nucleos /tmp/antigo-pagina/nucleos
           (cd /tmp/antigo-pagina && python3 -m http.server 4190 >/dev/null 2>&1 &)
-          (cd apps/desktop && pnpm exec vite preview --port 4191 --strictPort >/dev/null 2>&1 &)
+          (cd apps/desktop && pnpm exec vite preview --host 127.0.0.1 --port 4191 --strictPort >/tmp/preview-4191.log 2>&1 &)
           python3 tools/paridade/arquivos.py /tmp/paridade-arquivos
-          sleep 4
+          for porta in 4190 4191; do
+            for i in $(seq 60); do curl -sf -o /dev/null http://127.0.0.1:$porta/ && break; sleep 1; done
+            curl -sf -o /dev/null http://127.0.0.1:$porta/ || { echo "servidor da porta $porta não subiu"; cat /tmp/preview-4191.log; exit 1; }
+          done
           node tools/paridade-abrir.mjs http://127.0.0.1:4190/index.html "http://127.0.0.1:4191/?celular=1" /tmp/paridade-arquivos
           node tools/paridade-controle.mjs http://127.0.0.1:4190/index.html "http://127.0.0.1:4191/?celular=1" /tmp/paridade-arquivos
