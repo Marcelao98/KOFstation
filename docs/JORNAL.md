@@ -21,6 +21,27 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · T.1 · paridade fechada com testes contra o antigo
+
+**Pedido:** fechar os itens não verificados do `PARIDADE.md`, com teste automático contra o `kofstation-old` (só leitura)
+onde der.
+**Feito:** (1) `apps/desktop/src/testes/paridade-antigo.test.ts` (KOF_ANTIGO): o menu rápido tem os mesmos itens na mesma
+ordem do `ITENS_RAPIDO`; cada aviso literal do antigo (53) existe no novo ou está numa lista de diferenças com o motivo.
+O teste achou 2 mensagens que faltavam e elas foram copiadas ("o menu rápido é só durante o jogo"/"abra um jogo
+primeiro", "este jogo vai abrir sempre com esse jeito"). (2) `packages/engine/test/paridade-sistemas.test.ts`: lê o
+`nucleo.js` do antigo e compara sistemas, extensões, núcleo, tamanho de imagem, proporção, opções fixas, analógico e
+BIOS. (3) `contraste.test.ts`: as cores dos 126 temas são idênticas às do antigo; contraste WCAG medido (10 pares já
+eram baixos no antigo: lista fixa, que só pode encolher). (4) e2e novos: `paridade-teclas` (Tab = turbo ×1,8 ou mais,
+F11, proporções 4:3/8:7/esticar), `biblioteca-grande` (3.000 jogos, CPU 4× mais lenta: 433 ms até a primeira linha,
+150 linhas no DOM), `nucleo-sob-demanda` (nenhum núcleo no Início; só o do console do jogo).
+**Decidido:** os itens que só o Marcelo verifica ganharam o estado ⏸ no PARIDADE e um teste com passo a passo na lista
+"Pra você testar" do SITUACAO (T-JOGO, T-OUVIR, T-NEOGEO, T-PS2, T-REDE, T-INSTALAR, T-DIAG). "Estado salvo com outro
+núcleo de SNES" ficou ➖ (não se aplica sem o núcleo Kof). Dois textos do PARIDADE estavam velhos (cartão BIOS do
+Início e lista de BIOS da abertura já existem e têm e2e): corrigidos.
+**Medido / conferido:** `KOF_ANTIGO=… pnpm test` verde (domain 145, engine 56+1, app-core 34, desktop 14);
+`pnpm e2e` 51 ok + 1 ignorado.
+**Onde parou:** M14 (celular).
+
 ## 2026-11-14 · M16.4 · opções de emulação de todos os consoles
 
 **Pedido:** juntar a tarefa B (`agente-b/opcoes-nucleo`), fazer a tela (DIAGNOSTICO.md §4) e catalogar o N64 e os

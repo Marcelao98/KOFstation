@@ -137,6 +137,65 @@ vivo (só dá pra ver com o jogo rodando na tua placa), e se os valores dos perf
 (só o ⚖ Equilibrado é o que o app sempre usou). Os consoles em WebAssembly (N64, SNES, GB, NES, Mega Drive, GBA)
 dizem sempre "vale ao reabrir": ninguém mediu quais núcleos releem na hora.
 
+### T-JOGO · Jogar de verdade no PS1, N64 e com o analógico (M8, M11, N.6)
+
+1. Abra um jogo de PS1 (Biblioteca ou arrastando o `.cue`) e jogue uns 5 minutos: o som, o controle (teclado e, se tiver, um
+   controle), o analógico (setas/IJKL/TFGH, ou o analógico do controle), salvar com F5 e carregar com F8.
+2. Abra um jogo de N64 (`.z64`): mesma coisa. O analógico do N64 é só o esquerdo.
+3. Me diga o que ficou diferente do KOFstation antigo (imagem, som, resposta do controle). Um print do F3 ajuda.
+
+### T-OUVIR · Música do Início e jukebox (M9)
+
+1. Abra o app sem jogo, clique em qualquer lugar (a música só toca depois do primeiro gesto): toca a trilha FM ou o violino?
+   Troque pela escolha do Início, sorteie, desligue.
+2. Abra um jogo de SNES e outro de Mega Drive, aperte **F7** em cada um, abra a Jukebox (F7 no jogo ou pelo menu): vistas
+   Capa, Ondas e Notas, Mudo/Solo, exportar `.wav`, importar um `.spc` seu. Compare com o antigo se puder.
+
+### T-NEOGEO · Neo Geo de verdade (M11)
+
+Com o seu `neogeo.zip` guardado em 🔑 BIOS e um jogo (ex.: `mslug.zip`) na Biblioteca: abra, jogue, salve estado. Se o jogo
+for um clone, o zip do pai tem que estar na mesma pasta.
+
+### T-PS2 · PS2 (M12; a otimização está pausada)
+
+1. Guarde a BIOS do PS2 em 🔑 BIOS → PS2, ponha o jogo em `Kof Games/Games/ps2` e abra pela Biblioteca.
+2. Aperte **F3** numa cena pesada e me mande o print (fps, núcleo, leitura da placa). Se quiser medir de verdade:
+   Ajuda → 🩺 Modo diagnóstico, jogue 5–10 min, **Exportar relatório (.zip)** e me mande (vale o Shadow of the Colossus
+   e o Zone of the Enders 2 com o erro de memória: mande também o texto do aviso e quanto de RAM o PC tem).
+3. Não vou mexer em desempenho do PS2 até você reabrir o assunto.
+
+### T-REDE · Celular pela rede e controle (M13)
+
+Com o **KOFstation antigo fechado** (os dois usam a porta 8650) e o APK atual no celular, na mesma Wi-Fi:
+1. PC: 📡 Aparelhos → ➕ Parear um celular. Celular: 📡 Aparelhos → Ler o QR do PC (ou escolha o PC e digite o código).
+   O celular tem que aparecer 🟢 conectado no PC.
+2. Abra um jogo no PC; no celular, Controles → "Usar este celular como controle do PC": ele vira um jogador.
+3. No celular, 🎮 Jogar no PC: o jogo roda no PC e aparece no celular, com som. No PC: menu rápido → 📱 Levar pro celular /
+   📺 Voltar pra TV.
+4. O jeito antigo também: Arquivo → 📱 Celular como controle… com o endereço e a senha que o celular mostra.
+
+### T-INSTALAR · Instalar no Linux e no Windows (M15)
+
+Linux (comando único, o pacote da `teste-binarios`):
+
+```bash
+mkdir -p ~/Programas/"Kof Games" && curl -fL https://raw.githubusercontent.com/Marcelao98/KOFstation/teste-binarios/KOFstation-linux.tar.gz | tar -xz -C ~/Programas/"Kof Games" && ~/Programas/"Kof Games"/KOFstation/kofstation --instalar && ~/Programas/"Kof Games"/KOFstation/kofstation
+```
+
+Confira: aparece **KOFstation novo** no menu de aplicativos (com a xícara), abre por ali, e o antigo continua do jeito que
+estava, com os saves dele. Windows: `KOFstation-instalar.exe` (sem administrador) ou o `.zip` da mesma branch (você não
+tem Windows: peça pra alguém abrir e dizer se instala, abre e acha os núcleos).
+
+### T-DIAG · Gravar o diagnóstico (M16.3)
+
+Ajuda → 🩺 Modo diagnóstico → marque "gravar cada jogo que eu abrir" → jogue → **Exportar relatório (.zip)**. O **F3** agora
+mostra p50/p99, engasgos por minuto e quem causou, a CPU de cada linha e o gráfico dos últimos 10 s.
+
+### Pra você decidir
+
+- **Abertura da 1ª vez:** o título mostra o logo do tema; o antigo mostrava o ícone do app. Deixo assim ou volto ao ícone?
+- **T.2** (a última versão do antigo que leva pro novo): fica pra você decidir; não mexi.
+
 ## Esperando você testar ⏸
 
 **Novo (M16.3, 08/11): gravar o Shadow of the Colossus.** Pacote Linux atualizado na `teste-binarios` (`65bdcf0`). Em **Ajuda → 🩺 Modo

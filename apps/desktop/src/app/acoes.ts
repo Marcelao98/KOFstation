@@ -86,12 +86,11 @@ export function acao(nome: string, valor?: string): boolean {
       j.reiniciar();
       return true;
     case 'rapido':
-      if (!j.jogo) return semJogo();
+      // as mesmas mensagens do antigo (paridade): sem jogo, e com jogo mas em outra tela
       if (j.rapidoAberto) j.fecharRapido();
-      else {
-        telas.abrir('jogo');
-        j.abrirRapido();
-      }
+      else if (!j.jogo) usarAvisos.getState().avisar('abra um jogo primeiro');
+      else if (telas.atual !== 'jogo') usarAvisos.getState().avisar('o menu rápido é só durante o jogo');
+      else j.abrirRapido();
       return true;
     case 'mudo':
       j.alternarMudo();

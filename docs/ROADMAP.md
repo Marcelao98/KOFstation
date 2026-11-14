@@ -323,7 +323,7 @@ Arquitetura e pesquisa (PCSX2, DuckStation) em [DIAGNOSTICO.md](DIAGNOSTICO.md).
 
 | Passo | O que faço | Checkpoint | Estado |
 |---|---|---|---|
-| T.1 | Conferir o PARIDADE.md 100% verificado | lista completa | ⬜ |
+| T.1 | Conferir o PARIDADE.md 100% verificado | lista completa | ✅ feito (14/11): tudo que dá pra provar sem o Marcelo está ✅ com teste (os testes com o antigo rodam com `KOF_ANTIGO`); o resto virou ⏸ com passo a passo no SITUACAO |
 | T.2 | O app antigo publica uma última versão que avisa e leva pro novo | **você decide quando** | ⬜ |
 
 ---

@@ -2,6 +2,7 @@
 // e Avançado (grupos, busca, ↺), comparar, ⭐ salvar, .kofvisual, por console e por jogo. F4 abre e fecha.
 import { KofVisual, type ValoresVisuais as Valores } from '@kof/app-core';
 import { useEffect, useRef, useState } from 'react';
+import { usarAvisos } from '../../stores/avisos';
 import { config } from '../../stores/config';
 import { usarJogo } from '../../stores/jogo';
 import { escalarVisual, guardarPorSis, meusJeitos, usarPainel } from '../../stores/painel';
@@ -150,8 +151,10 @@ export function Visual() {
           defaultChecked={!!(regId && config().ler('visual.jogo.' + regId))}
           onChange={(e) => {
             if (!regId) return;
-            if (e.target.checked) config().guardar('visual.jogo.' + regId, JSON.stringify({ pre, v }));
-            else config().apagar('visual.jogo.' + regId);
+            if (e.target.checked) {
+              config().guardar('visual.jogo.' + regId, JSON.stringify({ pre, v }));
+              usarAvisos.getState().avisar('🎛 este jogo vai abrir sempre com esse jeito', 2500);
+            } else config().apagar('visual.jogo.' + regId);
           }}
         />{' '}
         Lembrar um jeito só pra este jogo

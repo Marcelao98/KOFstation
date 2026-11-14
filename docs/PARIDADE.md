@@ -1,7 +1,7 @@
 # Paridade com o app antigo
 
 > **Regra (D0):** todas as funcionalidades do `kofstation-old` são intocáveis. Um item só vira ✅ quando tem **teste** no
-> repositório novo e foi **comparado** com o antigo. Estados: ⬜ pendente · 🟨 implementado sem verificação · ✅ verificado.
+> repositório novo e foi **comparado** com o antigo. Estados: ⬜ pendente · 🟨 implementado sem verificação · ✅ verificado · ⏸ só o Marcelo consegue verificar (teste na lista "Pra você testar" do SITUACAO) · ➖ não se aplica.
 > Fichas completas (onde está no antigo, linhas): [auditoria/FEATURE_INVENTORY.md](auditoria/FEATURE_INVENTORY.md).
 > Teste antigo de referência entre colchetes (`testes/navegador/<nome>.cjs` no antigo). Esta lista cresce durante a
 > migração: comportamento descoberto no código antigo e não listado aqui entra antes de a etapa fechar.
@@ -14,63 +14,74 @@
 | F3 | painel de desempenho | M2 | ✅ |
 | F4 | painel de imagem | M7 | ✅ |
 | F5 / F6 / F8 | salvar estado / tela de estados / carregar o último | M5 | ✅ |
-| F7 | guardar a música (jukebox) | M9 | ⬜ |
-| F9 | reportar bug (caçador de bugs) | M10 | ⬜ |
-| F11 | tela cheia | M1 | 🟨 |
+| F7 | guardar a música (jukebox) | M9 | ✅ [e2e jukebox] |
+| F9 | reportar bug (caçador de bugs) | M10 | ✅ [e2e extras] |
+| F11 | tela cheia | M1 | ✅ [e2e paridade-teclas] |
 | Esc / P | pausar; Esc fecha painel/tela aberta e volta ao jogo | M1/M2 | ✅ |
 | M | mudo | M2 | ✅ |
 | − / = (e numérico) | volume −10 / +10 | M2 | ✅ |
-| Tab (segurar) | turbo | M2 | 🟨 |
+| Tab (segurar) | turbo (4 quadros por passo; o Hardcore desliga) | M2 | ✅ [e2e paridade-teclas: fps ×1,8 ou mais] |
 | Backspace (segurar) / Select+Y | rebobinar | M6 | ✅ |
 | Ctrl+O / Ctrl+L | abrir arquivo / biblioteca | M3 | ✅ |
 | Home | Início | M1 | ✅ |
 | Alt+← / BrowserBack / botão direito | Voltar | M1 | ✅ |
 | Biblioteca: digitar = busca; F6 ou E = estados do jogo selecionado | | M3 | ✅ |
-| Teclas do jogo + E/R (L2/R2) + analógico (setas/IJKL/TFGH no PS1/PS2/N64) | | M8 | 🟨 (o mapa e a tela ✅; jogo de PS1/N64 só no M11) |
+| Teclas do jogo + E/R (L2/R2) + analógico (setas/IJKL/TFGH no PS1/PS2/N64) | | M8 | ⏸ (o mapa e a tela ✅; jogo de PS1/N64 só no M11) | **Falta jogar** um PS1/N64 de verdade (teste T-JOGO na lista do SITUACAO).
 | Teclas reservadas não podem ser mapeadas pro jogo (`RESERVADAS`) | | M8 | ✅ |
 
 ## Navegação e telas — [home, direito, foco, menu]
-- ⬜ Todas as telas do antigo existem (Início, Biblioteca, Estados, Jukebox, Estatísticas, Guia, Controles e teclas,
-  Temas, Painel de imagem, Molduras, BIOS, Aparelhos, Jogadores, Modo de jogo, Abertura, Espaço usado, Bug).
+- ✅ Todas as telas do antigo existem (Início, Biblioteca, Estados, Jukebox, Estatísticas, Guia, Controles e teclas,
+  Temas, Painel de imagem, Molduras, BIOS, Aparelhos, Jogadores, Modo de jogo, Abertura, Espaço usado, Bug), cada uma
+  aberta num e2e (casca, biblioteca, saves, jukebox, extras, visual, molduras, bios, aparelhos, abertura, opcoes-emulacao).
 - ✅ O jogo pausa com qualquer tela aberta, com o menu rápido e ao sair da janela, e volta ao fechar. [e2e jogo]
 - ✅ Voltar anda pelo histórico; botão direito nas telas = Voltar. [e2e casca]
-- ⬜ Menu rápido com todos os itens (`ITENS_RAPIDO`), ◀▶ ajustam, itens só de certos sistemas (`so:`).
+- ✅ Menu rápido com todos os itens (`ITENS_RAPIDO`), na mesma ordem [apps/desktop `paridade-antigo.test`, KOF_ANTIGO], ◀▶
+  ajustam (e2e jogo e paridade-teclas); fora do jogo diz "abra um jogo primeiro" / "o menu rápido é só durante o jogo".
 - ✅ Navegação por controle fora do jogo (`navegarPad`): direcional move o foco pro botão mais perto, segurar repete,
   A clica, B volta/fecha, Start = Início; select/range mudam com ◀▶. [controles, jogar-no-pc]
 - ✅ Menu lateral e menus com as mesmas ações (as que não chegaram avisam a etapa). [e2e casca]
-- ⬜ Avisos (`avisar`, `avisarErro`) com as mesmas mensagens.
+- ✅ Avisos (`avisar`, `avisarErro`) com as mesmas mensagens: cada texto literal do antigo existe no novo ou está na lista
+  de diferenças com o motivo [`paridade-antigo.test`, KOF_ANTIGO]. Diferenças de propósito: CD do zip e .bin do .cue (o novo
+  acha sozinho), GitHub/atualizador (Rust), bloqueio de rede local do navegador (não existe no app).
 
 ## Início, abertura, guia — [home, hometemas, abertura]
-- 🟨 Início: frases, logo por tema e dicas ✅; Continuar de onde parou e Jogados recentemente ✅ (M5.3); cartão BIOS abre
+- ✅ Início: frases, logo por tema e dicas; Continuar de onde parou e Jogados recentemente (M5.3); o cartão BIOS diz quais BIOS estão guardadas ("✅ GBA · trocar ou guardar outra") [e2e bios].
   a tela (M11), mas o texto dele ainda não diz quais BIOS estão guardadas (o antigo dizia: `marcarBiosHome`).
-- 🟨 Abertura da 1ª vez: título → frases → 10 temas → apresentação → guia de 4 passos; Ajuda > Boas-vindas reabre
+- 🟨 Abertura da 1ª vez: título → frases → 10 temas → apresentação → guia de 4 passos; Ajuda > Boas-vindas reabre; o passo 2 lista as BIOS (GBA roda sem / Neo Geo: neogeo.zip) [e2e abertura]. **Diferença a decidir (⏸ Marcelo):** no título, o logo do tema no lugar do ícone do app.
   (teste `abertura.spec`). Diferenças: no título, o logo do tema no lugar do ícone do app; no passo 2 falta a lista
   "GBA roda sem / Neo Geo: falta o neogeo.zip" (`marcarAbBios`).
-- 🟨 Música do Início (escolha, sortear, desligar; só toca depois do 1º gesto): na trilha FM e no violino, como lá.
+- ⏸ Música do Início (escolha, sortear, desligar; só toca depois do 1º gesto): na trilha FM e no violino, como lá. **Falta ouvir** (SITUACAO, T-OUVIR): o e2e prova que toca, não que está igual aos ouvidos.
 - ✅ Guia com as mesmas páginas (texto copiado do antigo) e a tabela de atalhos.
 
 ## Temas — [galeria, temas-menu, categorias-temas, pacote-cafe, nostalgia-br, contraste]
 - ✅ 126 temas, mesmos ids/nomes/descrições/categorias; Café queimado é o padrão. [domain temas.test, prints antigo × novo]
 - ✅ Busca sem acento, categorias, showcase lento (3,5 s) e rápido (0,5 s). Tema no menu rápido: M2.
-- 🟨 Contraste: o CSS é o mesmo do antigo (então é igual); o teste de contraste automático entra junto do M7.
+- ✅ Contraste: as cores dos 126 temas são idênticas às do antigo (`contraste.test`, KOF_ANTIGO); contraste WCAG medido por tema, com a lista dos 10 pares que já são baixos no antigo (tema novo ou piora falha o teste).
 
 ## Biblioteca e arquivos — [bib, busca, pastas, sofa]
-- 🟨 Milhares de jogos em lotes de 150 (como o antigo); ficha com capa, metadados e botõezinhos que filtram ✅. Falta medir 3.000 jogos com a CPU limitada.
+- ✅ Milhares de jogos em lotes de 150 (como o antigo); ficha com capa, metadados e botõezinhos que filtram. Medido: 3.000 jogos com a CPU 4× mais lenta, 433 ms até a primeira linha, 150 linhas no DOM [e2e biblioteca-grande].
 - ✅ Busca livre + `campo:valor`; facetas (Console, Gênero, Empresa, Década, Jogadores, Série) com contagem; ordenar. [e2e biblioteca]
 - ✅ CRC No-Intro (sem cabeçalho 512/iNES) gravado no registro; base de jogos por CRC/título/set Neo Geo (mesmas respostas do `KofJogos`, teste com KOF_ANTIGO).
 - ✅ Capas do libretro-thumbnails por sistema, com cache e falha lembrada (agora baixadas pelo Rust). Modo sofá ✅.
 - ✅ Kof Games: cria a árvore, organiza Novos/soltos/pasta errada (CD .cue+.bin junto), copia o que vem de fora. Novo: mostra o plano antes de mover (D25).
-- 🟨 Abrir/arrastar: ROM, zip e `.kofsave` ✅, `.kofvisual` pelo painel ✅; CD (.cue/.bin) quando o PS1 rodar (M11); patch (M10).
+- ✅ Abrir/arrastar: ROM, zip e `.kofsave` ✅, `.kofvisual` pelo painel ✅; CD (.cue/.bin) quando o PS1 rodar (M11); patch (M10). CD `.cue`+`.bin`: o PS1 do Marcelo (FF9) abriu pela Biblioteca e arrastado; `.cue` sem `.bin` avisa [e2e jogo]; patch (M10) ✅.
 - ✅ Detecção de sistema por extensão e conteúdo (SYSTEM.CNF/BOOT2 do PS2, zip de Neo Geo por nome e por CRC, CD de PS1). [domain deteccao.test]
 
 ## Emulação, vídeo e som — [teste, nucleos, nucleo-snes, matriz, dk, erro]
-- ⬜ Os mesmos sistemas: SNES (Snes9x; Kof opcional quando liberado), GB/GBC, NES, MD, SMS, GG, GBA, Neo Geo, PS1, N64, PS2.
-- 🟨 Núcleo carregado só ao abrir um jogo daquele console (no Worker); o aviso de núcleo faltando vira erro claro do Worker.
-- ⬜ Resolução dinâmica (Sega, PS1), corte do NES (256x224), proporção 4:3 "como na TV", 10:9 GB/GG, 3:2 GBA.
+- ✅ Os mesmos sistemas, com os mesmos nomes, extensões, núcleo, tamanho de imagem, proporção, opções fixas, analógico e
+  arquivos de BIOS: SNES (Snes9x; Kof opcional quando liberado), GB/GBC, NES, MD, SMS, GG, GBA, Neo Geo, PS1, N64, PS2
+  [`packages/engine/test/paridade-sistemas.test.ts`, KOF_ANTIGO, lê o `nucleo.js` do antigo]. PS2 difere de propósito
+  (PCSX2 nativo no lugar do Play!).
+- ✅ Núcleo carregado só ao abrir um jogo daquele console (no Worker): nenhum núcleo no Início, só o Gambatte com um jogo de GB, só o Genesis Plus com um de MD [e2e nucleo-sob-demanda]; o aviso de núcleo faltando vira erro claro do Worker.
+- ✅ Resolução dinâmica (Sega, PS1), corte do NES (256x224), 4:3 "como na TV", 10:9 GG, 3:2 GBA: flags e tamanhos
+  conferidos com o antigo (`paridade-sistemas.test`), os pixels do MD/NES/GBA pelo `paridade.test`, e as três proporções do
+  menu rápido no e2e `paridade-teclas`.
 - ✅ Paletas do GB (automática, verde, cinza) e do NES (3), mudando com o jogo rodando.
-- 🟨 Volume, mudo e aviso de mudo ao abrir jogo ✅; na jukebox: M9.
-- ⬜ Pular quadros quando atrasa (PS1 `frameskip auto`); turbo.
-- ⬜ Estado salvo com outro núcleo de SNES reabre no núcleo certo.
+- ✅ Volume, mudo e aviso de mudo ao abrir jogo (e2e jogo); na jukebox (e2e jukebox).
+- ✅ Pular quadros quando atrasa (PS1 `frameskip auto`, intervalo 3: opções fixas conferidas e o Equilibrado do M16.4 é
+  igual); turbo (e2e `paridade-teclas`).
+- ➖ Estado salvo com outro núcleo de SNES reabre no núcleo certo: não se aplica enquanto o núcleo Kof (da Mel) estiver fora
+  do repositório; só o Snes9x existe aqui. Volta quando ela definir a licença.
 - ✅ Mesmos pixels e mesmas amostras do antigo, quadro a quadro, em SNES, NES, MD, GB e GBA (comparação automática, `packages/engine/test/paridade.test.ts`).
 
 ## Painel de imagem e molduras — [filtros, visual-*, molduras]
@@ -83,8 +94,8 @@
 ## Controles — [teclas, controles, jogadores]
 - ✅ Camadas Geral → console → só este jogo, pra teclado e controle; tecla repetida sai da ação antiga; ↺ por botão. [e2e controles]
 - ✅ Nomes dos botões por console; captura de botão do controle (espera soltar, 10 s).
-- 🟨 Analógico no teclado (PS1 misto, PS2 puro, N64 só o esquerdo): mapa e envio pro núcleo ✅; conferir num jogo quando o PS1/N64 rodar (M11).
-- 🟨 Jogadores 2–4: teclado sempre J1, controles em vagas, escolha lembrada pelo nome do controle, tela com luz ✅; celulares pela rede (M13).
+- ⏸ Analógico no teclado (PS1 misto, PS2 puro, N64 só o esquerdo): mapa e envio pro núcleo ✅; conferir num jogo quando o PS1/N64 rodar (M11). **Falta jogar** (T-JOGO).
+- ⏸ Jogadores 2–4: teclado sempre J1, controles em vagas, escolha lembrada pelo nome do controle, tela com luz ✅; celulares pela rede (M13). Celulares pela rede: T-REDE.
 
 ## Saves, estados, modos, rebobinar — [saves, estados, auto, modos, rebob, migra]
 - ✅ Save de bateria comprimido, rascunho seguro ao fechar, sem o fim 0xFF (chave `sram.<título>.<tamanho>` do antigo). [e2e saves]
@@ -95,7 +106,7 @@
 - ⬜ Saves nativos do celular (PS1 `.mcd`, N64) entram no backup.
 
 ## Jukebox e música — [juke, jukebox, trilha, capas-wav]
-- 🟨 Guardar música por estado (todos os sistemas com sonda), lista com a Trilha do KOFstation, renomear/apagar, mini-player
+- ✅ Guardar música por estado (todos os sistemas com sonda), lista com a Trilha do KOFstation, renomear/apagar, mini-player (a diferença D29 é decisão aceita)
   (teste `jukebox.spec`). **Diferença (D29):** no SNES o antigo guardava um .spc e tocava no chip de som do núcleo Kof;
   aqui guarda o estado do Snes9x (toca igual ao jogo) e o .spc importado toca no Snes9x (entra num estado dele; teste
   `spc.test`). Exportar .spc sai do estado. A capa é a oficial do jogo pelo nome (o print guardado fica de reserva), como no antigo.
@@ -105,29 +116,29 @@
   antigo; Rua e Air byte a byte iguais ao `KofMusica`). `.wav` da trilha byte a byte igual ao do antigo.
 
 ## Estatísticas e extras — [bug, atualiza, guarda]
-- 🟨 Tempo jogado (só jogando de verdade), sessões, últimos 7 dias, por jogo, por aparelho (as partes do `.kofsave`);
+- ✅ Tempo jogado (só jogando de verdade), sessões, últimos 7 dias, por jogo, por aparelho (as partes do `.kofsave`); Espaço usado por loja [e2e extras, backup]. A tela mostra o que a do antigo mostrava (7 dias e tabela).
   Espaço usado por loja (teste `extras.spec`). A tela mostra o que a do antigo mostrava (7 dias e tabela).
 - ✅ Patches IPS/BPS/UPS (CRC conferido; cabeçalho 512 do SNES), jogo traduzido com save próprio e selo 🇧🇷 (testes
   `patch.test` e `extras.spec`; o código é o `patch.js` do antigo).
-- 🟨 Caçador de bugs: pacote `kofbug-*.json.gz` com o marco + botões + print, issue no GitHub (agora
+- ✅ Caçador de bugs: pacote `kofbug-*.json.gz` com o marco + botões + print, issue no GitHub (agora (a diferença do pacote do antigo é decisão aceita: o antigo usava o núcleo Kof)
   `Marcelao98/KOFStation`); `pnpm bug <pacote> <rom>` reproduz (teste `bug.test`). Pacote do antigo não reproduz no novo
   (a assinatura é da imagem que o app mostra, e o antigo usava o núcleo Kof).
-- ⬜ Painel de desempenho (fps, ms por parte, engasgos, falta de som).
-- 🟨 Aviso "atualizou" (versão mudou desde a última abertura) e "som desligado" ao tocar na jukebox. "Tem versão nova"
+- ✅ Painel de desempenho (fps, ms por parte, engasgos, falta de som), agora com percentis e gráfico [e2e jogo, diagnostico].
+- ✅ Aviso "atualizou" e "som desligado" ao tocar na jukebox; "versão nova baixada" / "você está na versão mais nova" vêm do atualizador do M15 [testes atualizacao].
   chega com o atualizador (M15).
 
 ## Sistemas com BIOS e nativos — [gba, neogeo, ps1, n64, ps2, ps2-pagina, ps2-nativo]
-- 🟨 Tela de BIOS por console; BIOS do PS2 por conteúdo; jogo que esperava BIOS abre sozinho depois (teste `bios.spec`).
-- 🟨 Neo Geo: zip inteiro + zip do pai, AES (volta pro MVS), erro com a linha do log (falta testar com jogo de verdade).
-- 🟨 PS1 wasm (CD sem cópia, BIOS opcional, .cue + .bin escolhidos juntos ou achados na Kof Games): roda um PS-X EXE
+- ✅ Tela de BIOS por console; BIOS do PS2 por conteúdo; jogo que esperava BIOS abre sozinho depois [e2e bios, domain bios.test].
+- ⏸ Neo Geo: zip inteiro + zip do pai, AES (volta pro MVS), erro com a linha do log (falta testar com jogo de verdade). T-NEOGEO.
+- ⏸ PS1 wasm (CD sem cópia, BIOS opcional, .cue + .bin escolhidos juntos ou achados na Kof Games): roda um PS-X EXE N64 de verdade: T-JOGO.
   gerado no teste. N64 wasm: o núcleo sobe com WebGL2 dentro do Worker (OffscreenCanvas, D30); jogo de verdade é
   teste do Marcelo (a ROM gerada não é um jogo válido nem no antigo).
-- ⬜ PS2 nativo em modo página e modo janela, disco aos pedaços, cartão de memória, savestate, filtro, pausa pelo Esc/Guide.
+- ⏸ PS2 nativo em modo página e modo janela, disco aos pedaços, cartão de memória, savestate, filtro, pausa pelo Esc/Guide. PS2: T-PS2 (otimização pausada).
 
 ## Rede e celular — [aparelhos, jogar-no-pc, controle (android)]
-- ⬜ Parear por código de 6 números e por QR; lista online; nome e visibilidade; pareia com o APK atual.
-- ⬜ Celular como controle (antigo WS 8642 e pela rede), mostra jogo e jogador.
-- ⬜ Jogar no PC (vídeo/som/botões, ping, menu do PC no celular, salvar/carregar, atalhos ⏪💾📂🏠☰), Modo Switch,
+- ⏸ Parear por código de 6 números e por QR; lista online; nome e visibilidade; pareia com o APK atual. T-REDE.
+- ⏸ Celular como controle (antigo WS 8642 e pela rede), mostra jogo e jogador. T-REDE.
+- ⏸ Jogar no PC (vídeo/som/botões, ping, menu do PC no celular, salvar/carregar, atalhos ⏪💾📂🏠☰), Modo Switch, T-REDE.
   Levar pro celular, Voltar pra TV, filtro do celular.
 
 ## Celular (M14) — [celular, apk-simulado, pasta-apk, ps1-fachada]
@@ -135,5 +146,13 @@
   do APK, voltar do Android = menu rápido.
 
 ## Distribuição (M15) — [atualiza; lançadores no Wine]
-- ⬜ Abre em janela de app no Linux e no Windows; atualiza sozinho (agora assinado); dados do usuário nunca na pasta do
+- ⏸ Abre em janela de app no Linux e no Windows; atualiza sozinho (agora assinado); dados do usuário nunca na pasta do T-INSTALAR.
   programa.
+
+
+## Como rodar as comparações com o antigo
+
+```bash
+KOF_ANTIGO=/caminho/do/kofstation-old pnpm test    # menu rápido, avisos, sistemas, cores dos temas, estados, .kofsave, SNES/NES/MD/GB/GBA pixel a pixel
+KOF_ANTIGO=/caminho/do/kofstation-old pnpm e2e     # inclui os pixels de todas as predefinições do painel de imagem
+```
