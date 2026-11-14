@@ -15,8 +15,11 @@ test.afterEach(() => expect(erros).toEqual([]));
 
 test('F4 sem jogo: cartela, cartões com prévia, escolher, Avançado e voltar ao original', async ({ page }) => {
   test.setTimeout(60_000);
-  await page.keyboard.press('F4');
-  await expect(page.locator('#visual')).toBeVisible({ timeout: 15_000 });
+  // a tecla pode chegar antes do App ligar os atalhos (já falhou no CI com a máquina cheia): repete até o painel abrir
+  await expect(async () => {
+    if (!(await page.locator('#visual').isVisible())) await page.keyboard.press('F4');
+    await expect(page.locator('#visual')).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 20_000, intervals: [500] });
   await expect(page.locator('body')).toHaveClass(/com-visual/);
   await expect(page.locator('#vis-pre .vis-card')).toHaveCount(42);
   await page.click('[data-vis-cat="TV de tubo"]');
