@@ -1,6 +1,6 @@
 // Salvar automático e Continuar (app.js `salvarAuto`/`continuar` do antigo): a cada N segundos de jogo (15/30/60,
 // padrão 30), ao sair da janela, ao fechar e antes de abrir outro jogo; ao jogar de novo, continua de onde parou.
-import { AUTO_SEG, bytesDoJogo, guardarAuto, lerAuto, registrar, textoDoErro } from '@kof/app-core';
+import { AUTO_SEG, autoSegundos, bytesDoJogo, guardarAuto, lerAuto, registrar, textoDoErro } from '@kof/app-core';
 import { quando, type RegistroJogo } from '@kof/domain';
 import { NUCLEOS } from '@kof/engine';
 import { fotoDoQuadro } from '../app/foto';
@@ -65,7 +65,13 @@ export function alternarAuto(): void {
 // a cada 5 s confere se já passou o tempo (com o jogo andando)
 setInterval(() => {
   const j = usarJogo.getState();
-  if (j.jogo && !j.pausaManual && document.visibilityState === 'visible' && Date.now() - antes > autoSeg() * 1000)
+  const nativo = !!(j.jogo as { nativo?: boolean } | null)?.nativo; // PS1/N64/PS2 nativos: estado grande, no mínimo a cada 2 min
+  if (
+    j.jogo &&
+    !j.pausaManual &&
+    document.visibilityState === 'visible' &&
+    Date.now() - antes > autoSegundos(autoSeg(), nativo) * 1000
+  )
     void salvarAuto();
 }, 5000);
 addEventListener('pagehide', () => void salvarAuto());

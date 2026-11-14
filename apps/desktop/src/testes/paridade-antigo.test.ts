@@ -36,6 +36,14 @@ function fonteDoNovo(): string {
 }
 
 describe.skipIf(!antigo)('paridade com o código do antigo', () => {
+  it('salvar automático: núcleo nativo no mínimo a cada 2 min, como o setInterval do app.js (o celular travava a cada 30 s)', async () => {
+    const js = appJs();
+    expect(js).toContain('snes.nativo ? Math.max(120, autoSeg()) : autoSeg()');
+    const { autoSegundos } = await import('@kof/app-core');
+    expect(autoSegundos(30, true)).toBe(120);
+    expect(autoSegundos(30, false)).toBe(30);
+  });
+
   it('menu rápido: os mesmos itens (ITENS_RAPIDO), na mesma ordem', () => {
     const js = appJs();
     const bloco = js.slice(js.indexOf('const ITENS_RAPIDO = ['), js.indexOf('function montarRapido'));

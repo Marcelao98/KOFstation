@@ -21,6 +21,22 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-14 · Paridade do PS1/N64 no APK (travando) · salvar automático e estado grande
+
+**Pedido:** o PS1/N64 trava no APK novo (no antigo tinha sido resolvido): "faz o teste de paridade; tá tudo igual?".
+**O que eu NÃO tinha feito:** teste de desempenho/paridade do PS1/N64. Só testava a lógica com casca falsa.
+**Conferido agora:** (1) o Java e as `.so` são idênticos ao antigo (`diff` de Ps1Jogo/N64Jogo/Ps1/N64/SavesNativos/Rede/ControleServidor).
+(2) `tools/paridade-casca.mjs` roda a página do APK antigo e a do novo com a MESMA `KOFnesApk` falsa: chamadas por nome (Pad ≈ 460/8 s nas
+duas, Area/Volume a cada 30 quadros nas duas), tempo de script e tarefas longas (nenhuma nas duas): **o ritmo de chamadas à casca é igual**.
+Única diferença no uso da casca: o antigo chama `Reiniciar` uma vez depois de abrir (`s.reset()`, app.js 2475); o novo não chamava → agora chama.
+**Bug de paridade achado:** o antigo salva automático nos nativos no mínimo a cada **2 min** ("o estado é grande", app.js 2774); o novo salvava a cada
+**30 s** em tudo. No celular cada salvamento passa 4–16 MB pela ponte síncrona (medido: bytes→base64 de 16 MB = 3 s a CPU 6× mais lenta) =
+travada de segundos. Corrigido: `autoSegundos(escolhido, nativo)` (piso de 120 s, igual ao antigo, com teste contra o app.js do antigo).
+**Melhoria no caminho dos estados grandes:** gravação em pedaços de 384 KB (`store.put.parte`, a página respira entre eles) e leitura por URL
+(`/kofdados/<loja>/<chave>` servida pelo `MainActivity`, sem base64); testes de JVM e unit.
+**Não consegui provar:** que essa seja a única causa do travamento no seu celular (sem aparelho aqui). Se ainda travar, preciso saber SE é só no
+launch ou a cada ~2 min, e o modelo do celular; o próximo passo é perfilar na WebView (`chrome://inspect`).
+
 ## 2026-11-14 · M14.3 e M14.5 · pasta de ROMs e atualizador do APK (reaproveitando o antigo)
 
 **Como:** sobre o que já estava na casca do antigo. **M14.3:** a `Pasta.java` (SAF) ganhou o caminho relativo de cada arquivo; a nova

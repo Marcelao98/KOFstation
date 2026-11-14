@@ -59,4 +59,26 @@ describe('backend do Android (ponte KofAndroid)', () => {
       code: 'BACKEND_BAD_RESPONSE',
     });
   });
+
+  it('gravação grande vai em pedaços pequenos (não trava a tela) e remonta igual', async () => {
+    const pedacos: { parte: number; total: number; tam: number }[] = [];
+    const b = falsa((cmd, args, corpo) => {
+      const a = JSON.parse(args) as { parte?: number; total?: number };
+      if (cmd === 'store.put.parte')
+        pedacos.push({ parte: a.parte ?? -1, total: a.total ?? -1, tam: deBase64(corpo).length });
+      return JSON.stringify({ ok: true, data: null });
+    });
+    const grande = new Uint8Array(1_000_000);
+    await b.enviarBinario('store.put', { store: 'autos', key: 'k' }, grande);
+    expect(pedacos.length).toBe(3);
+    expect(pedacos.map((p) => p.parte)).toEqual([0, 1, 2]);
+    expect(pedacos.every((p) => p.total === 3 && p.tam <= 384 << 10)).toBe(true);
+    expect(pedacos.reduce((s, p) => s + p.tam, 0)).toBe(1_000_000);
+    // pequeno continua numa chamada só
+    pedacos.length = 0;
+    const chamadas: string[] = [];
+    const c = falsa((cmd) => (chamadas.push(cmd), JSON.stringify({ ok: true, data: null })));
+    await c.enviarBinario('store.put', { store: 'saves', key: 'k' }, new Uint8Array(1000));
+    expect(chamadas).toEqual(['store.put']);
+  });
 });

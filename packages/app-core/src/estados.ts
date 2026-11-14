@@ -96,6 +96,14 @@ export async function lerEstado(arm: Armazem, key: string): Promise<EstadoDoNucl
 
 export const AUTO_SEG = [15, 30, 60] as const;
 
+/**
+ * De quanto em quanto tempo o salvar automático roda. Núcleo nativo (PS1, N64, PS2): o estado é grande (4 a 16 MB), então no
+ * mínimo a cada 2 minutos, como o antigo (`snes.nativo ? Math.max(120, autoSeg()) : autoSeg()`, app.js 2774). Sem esse piso o
+ * celular travava vários segundos a cada 30 s.
+ */
+export const autoSegundos = (escolhido: number, nativo: boolean): number =>
+  nativo ? Math.max(120, escolhido) : escolhido;
+
 export async function guardarAuto(
   arm: Armazem,
   jogo: string,

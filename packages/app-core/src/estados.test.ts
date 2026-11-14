@@ -23,3 +23,14 @@ describe('savestates (formato do antigo)', () => {
     expect((await estadosDe(arm)).length).toBe(3);
   });
 });
+
+describe('salvar automático: intervalo', () => {
+  it('núcleo nativo: no mínimo 2 minutos; o resto, o que a pessoa escolheu (igual ao antigo)', async () => {
+    const { autoSegundos } = await import('./estados');
+    expect(autoSegundos(30, true)).toBe(120);
+    expect(autoSegundos(15, true)).toBe(120);
+    expect(autoSegundos(60, true)).toBe(120);
+    expect(autoSegundos(30, false)).toBe(30);
+    expect(autoSegundos(15, false)).toBe(15);
+  });
+});

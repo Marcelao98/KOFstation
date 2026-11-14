@@ -54,6 +54,20 @@ public class ComandosTeste {
         conferir(erro(c, "store.put", new JSONObject().put("store", "nao-existe").put("key", "k")).startsWith("INVALID_ARGS"), "loja desconhecida é recusada");
         conferir(erro(c, "store.get", new JSONObject().put("store", "saves")).startsWith("INVALID_ARGS"), "sem chave é recusado");
 
+        // gravação em pedaços (estado grande): 3 pedaços viram o mesmo registro de um put só, e o arquivo sai por URL
+        byte[] grande = new byte[100_000];
+        for (int i = 0; i < grande.length; i++) grande[i] = (byte) (i * 7);
+        for (int k = 0; k < 3; k++) {
+            int ini = k * 40_000, fim = Math.min(grande.length, ini + 40_000);
+            c.chamar("store.put.parte", new JSONObject().put("store", "estados").put("key", "ps1|grande").put("parte", k).put("total", 3)
+                    .put("meta", new JSONObject().put("n", grande.length)), java.util.Arrays.copyOfRange(grande, ini, fim));
+        }
+        conferir(java.util.Arrays.equals(grande, c.chamar("store.get", new JSONObject().put("store", "estados").put("key", "ps1|grande"), new byte[0]).bin), "put em pedaços: os bytes voltam iguais");
+        conferir(((JSONObject) c.chamar("store.meta", new JSONObject().put("store", "estados").put("key", "ps1|grande"), new byte[0]).data).getInt("n") == grande.length, "put em pedaços: metadados no último pedaço");
+        conferir(c.arquivoDe("estados", "ps1|grande") != null && c.arquivoDe("estados", "ps1|grande").length() == grande.length, "arquivoDe acha o .bin pra servir por URL");
+        conferir(c.arquivoDe("estados", "nao-existe") == null, "arquivoDe sem o registro: null");
+        conferir(erro(c, "store.put.parte", new JSONObject().put("store", "estados").put("key", "sem-comeco").put("parte", 2).put("total", 3)).startsWith("INVALID_ARGS"), "pedaço sem o começo é recusado");
+
         // o que ainda não existe diz o porquê, em português
         String e = erro(c, "library.scan", new JSONObject());
         conferir(e.startsWith("UNSUPPORTED") && e.contains("só existe no PC"), "library.scan sem a casca da pasta: UNSUPPORTED explicando");

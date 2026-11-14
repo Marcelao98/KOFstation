@@ -15,6 +15,10 @@ public final class Ponte {
 
     public Ponte(Comandos comandos) { this.comandos = comandos; }
 
+    /** A página pode ler os bytes de uma loja por URL (`/kofdados/<loja>/<chave>`), sem base64. */
+    @JavascriptInterface
+    public boolean dadosPorUrl() { return true; }
+
     @JavascriptInterface
     public String chamar(String cmd, String argsJson, String corpoBase64) {
         try {

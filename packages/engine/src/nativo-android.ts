@@ -87,6 +87,7 @@ export class JogoNativoAndroid {
         }
       },
     );
+    chamar(amb.apk, c + 'Reiniciar'); // como o antigo: depois de abrir, `s.reset()` (app.js 2475)
     const j = new JogoNativoAndroid(amb, o);
     j.info = {
       sistema: c,

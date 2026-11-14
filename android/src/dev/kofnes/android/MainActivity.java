@@ -55,6 +55,7 @@ public class MainActivity extends Activity {
     private ControleServidor controle;   // o celular como controle do PC (null = desligado)
     private N64Jogo n64;   // Nintendo 64 nativo (null = sem N64 nesse aparelho)
     private Pasta pasta;
+    private dev.kofstation.android.Comandos comandos;   // os comandos do app novo (também serve os bytes das lojas por URL)
     private Rede rede;   // aparelhos pareados (PC): criada no 1º redeCmd
     private android.webkit.PermissionRequest pedidoCamera;
     private static final int PEDIDO_CAMERA = 4;
@@ -85,7 +86,7 @@ public class MainActivity extends Activity {
         try { WebView.setWebContentsDebuggingEnabled(true); } catch (Throwable t) { /* sem depuração */ }
         web.addJavascriptInterface(new Ponte(), "KOFnesApk");   // a ponte do antigo (PS1/N64 nativos, pasta de ROMs, rede)
         // a ponte do app novo (contrato docs/API_CONTRACTS.md): config, lojas, app.info...
-        dev.kofstation.android.Comandos comandos = new dev.kofstation.android.Comandos(getFilesDir(), "@VERSAO_NOME@");
+        comandos = new dev.kofstation.android.Comandos(getFilesDir(), "@VERSAO_NOME@");
         // a pasta de ROMs (Pasta.java, SAF) vista pelo contrato do app novo: library.*, file.*, pasta.preparar
         final PastaComandos daPasta = new PastaComandos(pasta, new Preparar() {
             @Override public void preparar(String uri) {
@@ -117,6 +118,7 @@ public class MainActivity extends Activity {
             public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
                 Uri u = r.getUrl();
                 if (HOST.equals(u.getHost()) && "/pasta".equals(u.getPath())) return pasta.servir(u, r.getRequestHeaders());
+                if (HOST.equals(u.getHost()) && u.getPath() != null && u.getPath().startsWith("/kofdados/")) return servirDados(u.getPath());
                 if (HOST.equals(u.getHost())) return servir(u.getPath());
                 return null;                       // o resto (capas na internet...) segue normal
             }
@@ -199,6 +201,21 @@ public class MainActivity extends Activity {
     }
 
     /** O app novo (apps/desktop/dist, em assets/web/) com os cabeçalhos de isolamento que ele exige (SharedArrayBuffer). */
+    /** `/kofdados/<loja>/<chave>`: os bytes de um registro das lojas, direto do arquivo (estado de PS1/N64 tem MB: sem base64). */
+    private WebResourceResponse servirDados(String caminho) {
+        try {
+            String[] p = caminho.substring("/kofdados/".length()).split("/", 2);
+            java.io.File f = p.length == 2 ? comandos.arquivoDe(p[0], Uri.decode(p[1])) : null;
+            if (f == null) return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", new java.util.HashMap<String, String>(), new ByteArrayInputStream(new byte[0]));
+            java.util.Map<String, String> h = new java.util.HashMap<String, String>();
+            h.put("Cache-Control", "no-store");
+            h.put("Content-Length", String.valueOf(f.length()));
+            return new WebResourceResponse("application/octet-stream", null, 200, "OK", h, new FileInputStream(f));
+        } catch (Exception e) {
+            return new WebResourceResponse("text/plain", "utf-8", 500, "Erro", new java.util.HashMap<String, String>(), new ByteArrayInputStream(new byte[0]));
+        }
+    }
+
     private WebResourceResponse servir(String caminho) {
         String nome = (caminho == null || caminho.equals("/") || caminho.isEmpty()) ? "index.html" : caminho.substring(1);
         int status = 200;

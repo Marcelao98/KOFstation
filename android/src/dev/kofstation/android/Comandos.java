@@ -67,6 +67,7 @@ public final class Comandos {
                 case "store.get": return new Saida(null, pegar(a.optString("store"), a.optString("key", null)));
                 case "store.meta": return json(meta(a.optString("store"), a.optString("key", null)));
                 case "store.put": por(a.optString("store"), a.optString("key", null), a.optJSONObject("meta"), corpo); return json(JSONObject.NULL);
+                case "store.put.parte": porParte(a, corpo); return json(JSONObject.NULL);
                 case "store.delete": apagar(a.optString("store"), a.optString("key", null)); return json(JSONObject.NULL);
                 case "store.space": return json(espaco());
                 case "nativo.disponivel": return json(new JSONObject().put("sistemas", new JSONArray()));
@@ -151,7 +152,7 @@ public final class Comandos {
     // ---------------------------------------------------------------- lojas (store.*)
 
     /** A chave vira nome de arquivo com %XX no que não for letra, número, '_' , '-' ou '.' (não no começo nem repetido). */
-    static String codificar(String chave) throws Erro {
+    public static String codificar(String chave) throws Erro {
         if (chave == null || chave.isEmpty() || chave.getBytes(StandardCharsets.UTF_8).length > 400)
             throw new Erro("INVALID_ARGS", "key: chave vazia ou grande demais");
         StringBuilder s = new StringBuilder();
@@ -190,6 +191,35 @@ public final class Comandos {
         if (bytes == null || bytes.length == 0) { if (bin.exists() && !bin.delete()) throw new IOException("não consegui apagar " + bin); }
         else gravarAtomico(bin, bytes);
         gravarAtomico(new File(d, c + ".json"), (meta == null ? "null" : meta.toString()).getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * `store.put` em pedaços (estado de PS1/N64 tem 4 a 16 MB): cada pedaço é uma chamada pequena, então a página não trava
+     * numa conversão gigante. O último pedaço troca o arquivo e grava os metadados; um pedaço fora de ordem recomeça.
+     */
+    private void porParte(JSONObject a, byte[] corpo) throws Erro, IOException {
+        String loja = a.optString("store"), chave = a.optString("key", null);
+        File d = pastaDaLoja(loja);
+        if (!d.isDirectory() && !d.mkdirs()) throw new IOException("não consegui criar " + d);
+        String c = codificar(chave);
+        File tmp = new File(d, c + ".bin.parte");
+        int parte = a.optInt("parte"), total = a.optInt("total", 1);
+        if (parte == 0 && tmp.exists() && !tmp.delete()) throw new IOException("não consegui recomeçar " + tmp);
+        if (parte > 0 && !tmp.exists()) throw new Erro("INVALID_ARGS", "pedaço " + parte + " de " + chave + " sem o começo");
+        try (FileOutputStream o = new FileOutputStream(tmp, true)) { o.write(corpo); }
+        if (parte + 1 >= total) {
+            File bin = new File(d, c + ".bin");
+            if (bin.exists() && !bin.delete()) throw new IOException("não consegui trocar " + bin);
+            if (!tmp.renameTo(bin)) throw new IOException("não consegui concluir " + bin);
+            JSONObject meta = a.optJSONObject("meta");
+            gravarAtomico(new File(d, c + ".json"), (meta == null ? "null" : meta.toString()).getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    /** O .bin de um registro (pra servir por URL sem base64), ou null. */
+    public File arquivoDe(String loja, String chave) throws Erro {
+        File f = new File(pastaDaLoja(loja), codificar(chave) + ".bin");
+        return f.isFile() ? f : null;
     }
 
     private byte[] pegar(String loja, String chave) throws Erro, IOException {
