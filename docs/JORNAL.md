@@ -21,6 +21,18 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-17 · PS2 liso reaberto: tarefa D pro agente no PC do Marcelo
+
+**Pedido:** voltar ao PS2 liso (M16.5), agora pelo Claude Code local, que tem a placa, a BIOS e os jogos: ele abre os
+jogos e testa sozinho até ficar "tão liso quanto o PCSX2", vendo primeiro o que fazemos diferente do PCSX2 e chegando
+perto aos poucos, **documentando tudo**. E: **nome de jogo não vai pro repositório**.
+**Feito:** `docs/agentes/D-ps2-liso.md` (regras, o que existe, fases: banco de medição que roda sozinho → régua com o
+PCSX2 e o antigo → tabela de diferenças → um passo por vez com antes × depois; diário em `docs/PS2-LISO.md`). Os nomes
+dos jogos saíram dos docs, comentários e testes: agora são **jogo pesado A** (engasga), **B** (erro de memória) e **C**.
+O histórico do git ainda tem os nomes antigos (reescrever histórico é decisão do Marcelo).
+**Onde parou:** o Marcelo abre o Claude Code local com o texto do fim da tarefa D e diz os caminhos dos jogos na conversa.
+Eu (orquestrador) não mexo em PS2; quando a `agente-d/ps2-liso` tiver relatório, reviso e trago.
+
 ## 2026-11-16 · Atalhos da rede no Início e no ☰ do meio
 
 **O que aconteceu:** o Marcelo testou o pareamento ("funfou bem") e pediu que ver o jogo do PC e usar o celular como
@@ -270,32 +282,32 @@ depender do Marcelo vira ⏸ e entra na lista "Pra você testar" do `docs/SITUAC
 juntadas**. Ninguém mexe em otimização de PS2 até ele reabrir o assunto.
 **Onde parou:** começando pelo M16.4 (juntar `agente-b/opcoes-nucleo` e fazer a tela), depois T.1 e M14.
 
-## 2026-11-10 · Conferência · o C entrou, o SotC continua não liso
+## 2026-11-10 · Conferência · o C entrou, o jogo pesado A continua não liso
 
-**Pedido:** o Marcelo jogou o pacote com a tarefa C: o Shadow of the Colossus **continua não liso** (no antigo roda
+**Pedido:** o Marcelo jogou o pacote com a tarefa C: o jogo pesado A **continua não liso** (no antigo roda
 liso). Limites do Codex e do Claude acabando: retomar no sábado.
 **Conferido:** a junção do C pelo Codex está certa (`filho.rs` manda todo quadro; `canal.rs` fila de até 6; fila por
 vsync comum em `engine/fila-de-quadros.ts`); CI verde no Linux e no Windows (`1f91825`, run 104). B (`agente-b/opcoes-nucleo`)
 ainda **não** junto.
 **Conclusão:** o quadro perdido na origem era real (60% → 0 no teste) mas não era o que o olho do Marcelo vê, ou não
 era o único. Sem o `.zip` do 🩺 não dá pra saber o culpado.
-**Onde parou (sábado):** 1) o Marcelo manda o `.zip` do 🩺 do SotC (Ajuda → 🩺, jogar 5 min, Exportar) e diz **se no
+**Onde parou (sábado):** 1) o Marcelo manda o `.zip` do 🩺 do jogo pesado A (Ajuda → 🩺, jogar 5 min, Exportar) e diz **se no
 antigo o PS2 abre numa janela própria ou dentro da página do app**; 2) se o culpado for núcleo/CPU: opções (B, M16.4);
 se for ritmo/página: o **modo janela própria** como o antigo (D36), que é o caminho mais provável pra "liso igual ao
-antigo"; 3) a memória do ZoE2 com a saída do `journalctl` (comando no `CONTINUAR.md`).
+antigo"; 3) a memória do jogo pesado B com a saída do `journalctl` (comando no `CONTINUAR.md`).
 
 ## 2026-11-09 · M16 · ritmo do PS2/PS1 nativo (tarefa C)
 
 **Pedido:** continuar de `docs/agentes/CONTINUAR.md`, integrar o que chegou na branch `claude/busy-ritchie-wrvk8h` e enviar, sem PR.
 **Feito:** revisada e integrada `agente-c/ritmo-nativo` (merge `d7e57d3`). `filho.rs` publica cada quadro; `canal.rs` mantém fila limitada; `JogoNativo` e o wasm usam `FilaDeQuadros` por vsync.
 **Medido / conferido:** teste `ritmo`: 284 quadros rodados, 0 sem envio. `pnpm check` passou; e2e passou com 44 testes (1 ignorado) usando dois workers. Formatação e clippy passaram. Na suíte Rust completa, todos os alvos passaram exceto `opengl`, que entregou 64 quadros de 120 sob este backend gráfico e falhou no limite do teste; os testes `pcsx`, `lrps2`, `processo` e `ritmo` passaram. Build Linux e `tools/testar-ps2.mjs`: DVD sintético de 4,3 GB abriu, núcleo ficou vivo e a memória da página ficou em 753 MB. Pacote Linux SHA-256 `da4cf8bb…`, publicado em `teste-binarios` (`65bdcf0`). Os artefatos Windows foram preservados da versão anterior e estão marcados como sem C.
-**Onde parou:** ⏸ o Marcelo testa SotC com diagnóstico e envia o `.zip`; repete com ZoE2 até o erro de memória. Depois integrar B e iniciar M16.4.
+**Onde parou:** ⏸ o Marcelo testa jogo pesado A com diagnóstico e envia o `.zip`; repete com jogo pesado B até o erro de memória. Depois integrar B e iniciar M16.4.
 
 ## 2026-11-08 · Passagem · onde parou pro próximo orquestrador (Codex local)
 
 **Pedido:** o limite do Marcelo estava acabando; salvar exatamente onde parou pra continuar pelo Codex.
-**Feito:** `docs/agentes/CONTINUAR.md` (o que ele quer hoje: SotC liso; o que foi descartado na falta de memória do
-ZoE2: DVD na RAM, opções, envio de imagens, troca de resolução; a causa achada das engasgadas; os passos em ordem).
+**Feito:** `docs/agentes/CONTINUAR.md` (o que ele quer hoje: jogo pesado A liso; o que foi descartado na falta de memória do
+jogo pesado B: DVD na RAM, opções, envio de imagens, troca de resolução; a causa achada das engasgadas; os passos em ordem).
 Tarefa C (ritmo do nativo) e B (opções) disparadas em sessões na nuvem (branches `agente-c/ritmo-nativo`,
 `agente-b/opcoes-nucleo`). `tests/lrps2.rs` garante `need_fullpath` (`eb4980a`).
 **Onde parou:** ver `docs/agentes/CONTINUAR.md`, "Próximos passos".
@@ -314,15 +326,15 @@ mede antigo × novo com a mesma ROM gerada.
 pesar: medir a latência do botão até a tela antes de dar como fechado (fica pro M16.5).
 **Não afeta o PS2** (nativo, outro caminho): a tarefa era só dos consoles em WebAssembly.
 **Onde parou:** **B** (catálogo de opções) não chegou no GitHub: pedir ao Marcelo a branch ou rodar de novo. ⏸ o
-Marcelo grava o SotC e o ZoE2 com o pacote da `teste-binarios` (o pacote ainda não tem o A: sai no próximo).
+Marcelo grava o jogo pesado A e o jogo pesado B com o pacote da `teste-binarios` (o pacote ainda não tem o A: sai no próximo).
 
 ## 2026-11-08 · M16.1–M16.3 · medidor quadro a quadro, F3 com gráfico e modo diagnóstico
 
-**Pedido:** fazer o M16 na ordem, sem parar nos checkpoints até o M16.3 (lá o Marcelo grava o Shadow of the
-Colossus). No meio: "o PCSX2 está em WebAssembly?" (não: o PS2 é só nativo, `soNativo` em `engine/nucleos.ts`; o
+**Pedido:** fazer o M16 na ordem, sem parar nos checkpoints até o M16.3 (lá o Marcelo grava o jogo
+pesado A). No meio: "o PCSX2 está em WebAssembly?" (não: o PS2 é só nativo, `soNativo` em `engine/nucleos.ts`; o
 "mesmo formato no Worker do wasm" é pros outros consoles); "que diabos é o kof-nativo, deixa o núcleo separado" (é o
 suporte que roda o `.so`/`.dll` num processo filho; o núcleo segue arquivo à parte, vindo pelo manifesto, D32). Contou
-que **o antigo roda bem mais liso** e que o **Zone of the Enders 2 deu problema de memória**. Pediu pra salvar a sessão
+que **o antigo roda bem mais liso** e que o **jogo pesado B deu problema de memória**. Pediu pra salvar a sessão
 e estimar o que falta.
 **Feito:**
 - M16.1: `domain/desempenho.ts` (p50/p95/p99, fps suavizado como o PCSX2, engasgo > 1,5× o quadro ou falta de som, o
@@ -352,13 +364,13 @@ mexer em JORNAL/ROADMAP/README, relatório no fim do arquivo da tarefa), **A** `
 `agente-a/ritmo-wasm`) e **B** `B-opcoes-nucleo.md` (branch `agente-b/opcoes-nucleo`); aviso no topo do AGENTS.md.
 **Onde parou:** M16.1–M16.3 feitos e enviados; CI do M16.1/M16.2 verde no Linux e no Windows (o `cpu.rs` do Windows
 compila e passa lá). Pacote novo na `teste-binarios` (`4058e25`), com o executável do pacote passando no
-`tools/testar-ps2.mjs`. **⏸ M16.3:** o Marcelo grava o SotC e o ZoE2 (o erro de memória: texto do aviso, o `.zip` e
+`tools/testar-ps2.mjs`. **⏸ M16.3:** o Marcelo grava o jogo pesado A e o jogo pesado B (o erro de memória: texto do aviso, o `.zip` e
 quanto de RAM tem). **Próximo do orquestrador:** revisar as branches dos agentes A e B quando o Marcelo avisar; depois
-M16.4 (a tela das opções em cima do catálogo do B) e M16.5 (prioridade: a memória do ZoE2; o ritmo do wasm é do A).
+M16.4 (a tela das opções em cima do catálogo do B) e M16.5 (prioridade: a memória do jogo pesado B; o ritmo do wasm é do A).
 
 ## 2026-11-08 · Planejamento · M16 (desempenho, diagnóstico, opções de emulação) · onde parou pra próxima sessão
 
-**Pedido:** o Marcelo testou o PS2 (Shadow of the Colossus "rodou relativamente bem, umas engasgadas aqui e ali") e
+**Pedido:** o Marcelo testou o PS2 (jogo pesado A "rodou relativamente bem, umas engasgadas aqui e ali") e
 pediu, antes de corrigir, medição de verdade: modo diagnóstico que grava logs e estatísticas, e opções de emulação do
 PS1 em diante. "Não basta rodar, tem que rodar bem." Etapa essencial, no meio da migração, antes do M14. Pediu pra
 pesquisar quem já faz, desenhar a arquitetura e parar (contexto grande): a implementação fica pra próxima sessão.
@@ -373,11 +385,11 @@ pesquisar quem já faz, desenhar a arquitetura e parar (contexto grande): a impl
    `desempenho` (campo novo, opcional, nos dois lados do contrato e nas fixtures de `packages/contracts/fixtures`).
 3. CPU por linha (Linux `/proc/self/task/*/stat`, Windows `GetThreadTimes`), agrupada pelo nome da linha.
 4. O mesmo formato no Worker do WebAssembly (`packages/engine`) e o tempo de desenho/chegada na página.
-Depois M16.2 (F3 com gráfico), M16.3 (modo diagnóstico; ⏸ o Marcelo grava o SotC e manda), M16.4 (opções de
-emulação), M16.5 (otimizar pelos relatórios). Pergunta em aberto pro Marcelo: os engasgos do SotC foram na primeira
+Depois M16.2 (F3 com gráfico), M16.3 (modo diagnóstico; ⏸ o Marcelo grava o jogo pesado A e manda), M16.4 (opções de
+emulação), M16.5 (otimizar pelos relatórios). Pergunta em aberto pro Marcelo: os engasgos do jogo pesado A foram na primeira
 vez que aparece um lugar/efeito (shader sendo montado) ou espalhados?
 **Também esperando o Marcelo:** a chave do atualizador (SITUACAO, "Pra você fazer"), o teste da rede com o celular,
-os pacotes do Linux/Windows, e o PS2 nos outros dois jogos (Zone of the Enders 2, Gran Turismo 4) com print do F3.
+os pacotes do Linux/Windows, e o PS2 nos outros dois jogos (jogo pesado B, jogo pesado C) com print do F3.
 **Ambiente da próxima sessão:** `pnpm install`, `KOF_NATIVOS=todas pnpm nucleos` (traz o LRPS2), e pros testes
 nativos/PS2: `sudo apt-get install -y libasound2-dev genisoimage libegl1 libegl-mesa0 libgl1-mesa-dri`. O teste
 `kof-nativo --test pcsx` morre com SIGILL em container (CPU), no CI passa. Pros testes de paridade da rede:
@@ -425,7 +437,7 @@ verdade e o executável do pacote, DVD de 4,3 GB (esparso) pela biblioteca, proc
 `j 0xBFC00000` no vetor de reset deixa ele parado e o resto do caminho testável. (2) PS2 agora "roda": a BIOS
 obrigatória fazia a tela de BIOS abrir antes de avisar que falta o núcleo; o aviso do núcleo vem primeiro. (3) Imagem
 de verdade só com BIOS de verdade (a falsa não liga o vídeo do PS2): **não vi um quadro de PS2 aqui**.
-**Onde parou:** ⏸ Marcelo: BIOS + um jogo de verdade (Shadow of the Colossus) no pacote novo, print do F3 numa cena
+**Onde parou:** ⏸ Marcelo: BIOS + um jogo de verdade (jogo pesado A) no pacote novo, print do F3 numa cena
 pesada, e se possível o mesmo jogo no PCSX2 sozinho pra comparar. Com os números: decidir o P.7 (modo direto) e
 ajustar opções. Também pendente: cartão de memória do PS2 no backup `.kofsave` (hoje fica em
 `<dados>/nativo/saves/ps2`, persistente), conferir no Windows (WGL nunca rodou), estados do PS2 com jogo de verdade.

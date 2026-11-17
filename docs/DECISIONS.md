@@ -235,8 +235,8 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - A imagem vai pra página como a do PS1 nativo (filtros e molduras iguais). Na resolução nativa (640×448) são ~70 MB/s
   dentro do PC. Se o Marcelo precisar de resolução aumentada ou os números mostrarem gargalo na cópia, entra o "modo
   direto" (janela nativa sem cópia, P.7).
-- Opções iniciais como o antigo: renderer OpenGL e `pcsx2_ee_cycle_skip = Mild Underclock` (60 fps no Shadow of the
-  Colossus no Ryzen 5 4600H). Pra comparar com o PCSX2 sozinho, ele pode desligar pela opção do núcleo.
+- Opções iniciais como o antigo: renderer OpenGL e `pcsx2_ee_cycle_skip = Mild Underclock` (60 fps no jogo
+  pesado A no Ryzen 5 4600H). Pra comparar com o PCSX2 sozinho, ele pode desligar pela opção do núcleo.
 
 ## D37. Medir antes de otimizar: medidor por quadro, modo diagnóstico e opções de emulação no meio da migração — **aceita** (Marcelo, 08/11)
 - Depois do primeiro teste do PS2 ("relativamente bem, umas engasgadas"), o Marcelo pôs o M16 antes do M14: medição

@@ -5,7 +5,7 @@
 ## O contexto
 
 O M16 é "rodar bem, não só rodar". O passo **M16.4** dá ao Marcelo opções de emulação por console (do PS1 em diante),
-com perfis **⚡ Rápido / ⚖ Equilibrado / 🎯 Fiel**, uma parte **Avançado** e ajuste por jogo (o Shadow of the Colossus
+com perfis **⚡ Rápido / ⚖ Equilibrado / 🎯 Fiel**, uma parte **Avançado** e ajuste por jogo (o jogo pesado A
 pode ter o dele). A arquitetura está em [../DIAGNOSTICO.md](../DIAGNOSTICO.md), seção "4. Opções de emulação".
 
 **Sua parte são os dados: o catálogo, puro e testado.** A tela, as camadas (geral → console → jogo) e o "vale na
@@ -51,7 +51,7 @@ cai nesse formato. Hoje o `nucleo.rs` só guarda o **padrão** de cada uma.
    cache de shaders, o que houver de ritmo/vsync/som) e **PS1** (recompilador, frameskip, resolução/Neon, dithering);
    N64 se der. Use as chaves e os valores **do commit fixado** de cada núcleo (o `libretro_core_options.h` ou o
    `SET_VARIABLES` do código). O **Equilibrado** do PS2 tem que bater com o que o app usa hoje (o
-   `Mild Underclock`, que deixou o Shadow of the Colossus em 60 fps num Ryzen 5 4600H). `pcsx2_bios` e
+   `Mild Underclock`, que deixou o jogo pesado A em 60 fps num Ryzen 5 4600H). `pcsx2_bios` e
    `pcsx2_renderer` não entram no catálogo: são do app, fixos.
 2. **Teste** (`opcoes-nucleo.test.ts`): todo `padrao` e todo valor de perfil existe em `valores`; nenhuma chave
    repetida; `valoresDoPerfil('ps2','equilibrado')` inclui o `pcsx2_ee_cycle_skip` de hoje; `conferirOpcoes` recusa

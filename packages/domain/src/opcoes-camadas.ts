@@ -2,7 +2,7 @@
 //
 // - **geral**: o perfil de todos os consoles (Equilibrado, que é o que o app sempre usou);
 // - **console**: o perfil do console (ou "igual ao geral") + ajustes opção por opção;
-// - **jogo**: o mesmo, só pra aquele jogo (Shadow of the Colossus pode ter o dele).
+// - **jogo**: o mesmo, só pra aquele jogo (jogo pesado A pode ter o dele).
 // Cada camada vence a de cima. Tudo que não está no catálogo (chave ou valor desconhecido) é descartado ao ler.
 import { OPCOES_DE_NUCLEO, PERFIS, valoresDoPerfil, type OpcaoDeNucleo, type Perfil } from './opcoes-nucleo';
 import type { SistemaId } from './sistemas';

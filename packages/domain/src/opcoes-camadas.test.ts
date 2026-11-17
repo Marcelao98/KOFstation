@@ -25,19 +25,19 @@ describe('camadas das opções de emulação', () => {
     let e = ajustarPerfil(escolhasVazias(), 'geral', 'ps2', undefined, 'rapido');
     expect(opcoesParaNucleo(e, 'ps2').pcsx2_ee_cycle_skip).toBe('Moderate Underclock');
     e = ajustarOpcao(e, 'console', 'ps2', undefined, 'pcsx2_ee_cycle_skip', 'disabled');
-    expect(opcoesParaNucleo(e, 'ps2', 'sotc').pcsx2_ee_cycle_skip).toBe('disabled');
-    e = ajustarOpcao(e, 'jogo', 'ps2', 'sotc', 'pcsx2_ee_cycle_skip', 'Maximum Underclock');
-    expect(opcoesParaNucleo(e, 'ps2', 'sotc').pcsx2_ee_cycle_skip).toBe('Maximum Underclock');
+    expect(opcoesParaNucleo(e, 'ps2', 'jogo-a').pcsx2_ee_cycle_skip).toBe('disabled');
+    e = ajustarOpcao(e, 'jogo', 'ps2', 'jogo-a', 'pcsx2_ee_cycle_skip', 'Maximum Underclock');
+    expect(opcoesParaNucleo(e, 'ps2', 'jogo-a').pcsx2_ee_cycle_skip).toBe('Maximum Underclock');
     expect(opcoesParaNucleo(e, 'ps2', 'outro').pcsx2_ee_cycle_skip).toBe('disabled');
-    const o = resolverOpcoes(e, 'ps2', 'sotc').find((x) => x.def.chave === 'pcsx2_ee_cycle_skip');
+    const o = resolverOpcoes(e, 'ps2', 'jogo-a').find((x) => x.def.chave === 'pcsx2_ee_cycle_skip');
     expect(o?.origem).toBe('jogo');
   });
 
   it('perfil do jogo troca o perfil só nele; valor null volta a herdar', () => {
-    let e = ajustarPerfil(escolhasVazias(), 'jogo', 'ps2', 'sotc', 'fiel');
-    expect(perfilEfetivo(e, 'ps2', 'sotc')).toBe('fiel');
+    let e = ajustarPerfil(escolhasVazias(), 'jogo', 'ps2', 'jogo-a', 'fiel');
+    expect(perfilEfetivo(e, 'ps2', 'jogo-a')).toBe('fiel');
     expect(perfilEfetivo(e, 'ps2', 'zoe2')).toBe('equilibrado');
-    e = ajustarPerfil(e, 'jogo', 'ps2', 'sotc', null);
+    e = ajustarPerfil(e, 'jogo', 'ps2', 'jogo-a', null);
     expect(e.jogos).toEqual({});
     e = ajustarOpcao(e, 'console', 'ps1', undefined, 'pcsx_rearmed_drc', 'disabled');
     expect(Object.keys(e.consoles)).toEqual(['ps1']);
@@ -53,7 +53,7 @@ describe('camadas das opções de emulação', () => {
 
   it('ida e volta pelo texto; texto estragado, chave e valor desconhecidos são descartados', () => {
     let e = ajustarPerfil(escolhasVazias(), 'geral', 'ps2', undefined, 'fiel');
-    e = ajustarOpcao(e, 'jogo', 'ps2', 'sotc', 'pcsx2_mtvu', 'enabled');
+    e = ajustarOpcao(e, 'jogo', 'ps2', 'jogo-a', 'pcsx2_mtvu', 'enabled');
     expect(lerEscolhas(textoDasEscolhas(e))).toEqual(e);
     expect(lerEscolhas('{não é json')).toEqual(escolhasVazias());
     expect(lerEscolhas(null)).toEqual(escolhasVazias());

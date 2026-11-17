@@ -31,8 +31,8 @@ Arquivos quentes (uma tarefa por vez): `apps/desktop/src/stores/jogo.ts`, `packa
 | Tarefa | O quê | Depende de | Mexe em | Tamanho |
 |---|---|---|---|---|
 | **E** | **M16.4 Tela das opções de emulação:** perfis, Avançado, por jogo (camadas D19), "vale na hora" (`Comando::Variavel`) ou "ao reabrir" | B | `screens/Estados/OpcoesEmu.tsx`, `stores/jogo.ts`, `engine/nucleos.ts` | M |
-| **F** | **M16.5a Memória do Zone of the Enders 2** | ⏸ Marcelo manda o `.zip` e o erro | `kof-nativo`, `kof-app/nativo.rs` | P–M |
-| **G** | **M16.5b PS2 pelos relatórios:** o culpado que o diagnóstico do SotC apontar (shader na 1ª vez, EE, som, leitura) | ⏸ relatório do SotC; F (mesmos arquivos) | `kof-nativo` | M |
+| **F** | **M16.5a Memória do jogo pesado B** | ⏸ Marcelo manda o `.zip` e o erro | `kof-nativo`, `kof-app/nativo.rs` | P–M |
+| **G** | **M16.5b PS2 pelos relatórios:** o culpado que o diagnóstico do jogo pesado A apontar (shader na 1ª vez, EE, som, leitura) | ⏸ relatório do jogo pesado A; F (mesmos arquivos) | `kof-nativo` | M |
 | **H** | **M14.1 A casca Java do APK atual serve o app novo** (adaptador `android` em `apps/desktop/src/platform/`) | — (pode já, se tiver o Android SDK no ambiente do agente) | `platform/android.ts` (novo), casca Java | M–G |
 
 ### Onda 3: celular, em cima do H

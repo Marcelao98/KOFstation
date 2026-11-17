@@ -48,7 +48,7 @@ flowchart LR
 | Mupen64Plus-Next | N64 (PC) | libretro/mupen64plus-libretro-nx `15bada85` + libco por fibers + ASYNCIFY | wasm + WebGL2 | GPL-2 | ✅ (pouco testado com jogo real) |
 | Mupen64Plus-Next GLES3 | N64 (celular) | LemuroidCores (SONAME trocado com patchelf) | `.so` | GPL-2 | ⚠️ binário de terceiro |
 | LRPS2 (PCSX2 libretro) | PS2 (PC) | libretro/ps2 `38d3a83f` + `lrps2-windows.patch` | `.so` / `.dll` nativos | GPL-3 | ⚠️ Windows sem teste real (Wine cai no VirtualAlloc2) |
-| Play! | PS2 (reserva, wasm) | jpd002/Play- `505dac73` + `play-kof.patch` | wasm com threads (emsdk 4.0.1) | BSD-2 | ⚠️ falha no SotC; precisa SharedArrayBuffer |
+| Play! | PS2 (reserva, wasm) | jpd002/Play- `505dac73` + `play-kof.patch` | wasm com threads (emsdk 4.0.1) | BSD-2 | ⚠️ falha no jogo pesado A; precisa SharedArrayBuffer |
 | Núcleo Kof | SNES (opção) | `snes/*.kf` (próprio) | JS gerado pelo Kof 0.6.3 com patch | do projeto | ⚠️ opcional; build depende do compilador com patch |
 
 **Frontends libretro próprios** (não são dependências externas, mas são o que "integra os emuladores"):

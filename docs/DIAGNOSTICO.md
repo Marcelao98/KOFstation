@@ -94,13 +94,13 @@ flowchart LR
   - PS1: recompilador, frameskip, resolução (PCSX-ReARMed Neon), dithering.
   - N64 (quando nativo): resolução, plugin. Os do WebAssembly entram com o que já existe.
 - **Avançado:** todas as opções que o núcleo declara (`SET_VARIABLES`), como ele chama, pra quem quiser.
-- **Camadas** que já existem (D19/M4): geral → console → jogo. Shadow of the Colossus pode ter o dele.
+- **Camadas** que já existem (D19/M4): geral → console → jogo. jogo pesado A pode ter o dele.
 - **Tela:** a aba "⚙ Opções de emulação" (a dos modos de jogo, M5) ganha a seção do console do jogo aberto;
   mudar com o jogo aberto aplica na hora (`Comando::Variavel` já existe no nativo) ou avisa "vale ao reabrir".
 - O diagnóstico grava as opções, então antes × depois de uma opção vira número.
 
 ### 5. Otimizar com os dados (M16.5)
-Com o relatório do Marcelo nos jogos pesados (Shadow of the Colossus, Zone of the Enders 2, Gran Turismo 4): atacar o
+Com o relatório do Marcelo nos jogos pesados (jogo pesado A, jogo pesado B, jogo pesado C): atacar o
 culpado que aparecer. Suspeitas do PS2, em ordem: shader montado na primeira vez (cache já existe; dá pra aquecer),
 CPU do PS2 (EE cycle skip/rate por jogo), buffer de som (alvo de ms por console), ritmo dos quadros, leitura da placa.
 

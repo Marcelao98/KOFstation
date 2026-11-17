@@ -7,7 +7,7 @@
 
 O PS2 (LRPS2) e o PS1 rodam num processo à parte (`crates/kof-nativo`, o `kofstation --nativo`). O núcleo desenha na
 placa de vídeo, a imagem volta pra CPU e vai pra página por uma WebSocket local, e a página desenha. O Marcelo jogou o
-Shadow of the Colossus: "rodou relativamente bem, umas engasgadas aqui e ali", e **o antigo é bem mais liso** (lá o
+jogo pesado A: "rodou relativamente bem, umas engasgadas aqui e ali", e **o antigo é bem mais liso** (lá o
 padrão era uma janela SDL própria, sem passar pela página).
 
 Suspeitas, nesta ordem (confirme com número antes de mexer):
@@ -79,7 +79,7 @@ laço roda 2–3 quadros por lote e só o último ia pra página; o canal ainda 
 
 **Não feito:** adaptar o `tools/medir-ritmo.mjs` pra jogo nativo (o PCSX morre com SIGILL aqui e não deu tempo de
 fazer o caminho com o núcleo de teste). Não medi com PS2/GPU de verdade (sem placa no container): o Marcelo precisa
-jogar o Shadow of the Colossus pra confirmar a sensação.
+jogar o jogo pesado A pra confirmar a sensação.
 
 **Conferir:** `cargo test -p kof-nativo --test ritmo -- --nocapture` (linha `RITMO:`), `pnpm check`, `pnpm e2e`
 (44 ok), `cargo test --workspace --no-fail-fast` (só o `pcsx` com SIGILL), `node tools/testar-ps2.mjs` (ok).

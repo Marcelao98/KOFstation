@@ -50,7 +50,7 @@ const igual = (x: string): Record<Perfil, string> => perfis(x, x, x);
 
 // ---------------------------------------------------------------------------------------------------------------------
 // PS2 · LRPS2 (libretro/ps2, commit 38d3a83f). O Equilibrado é o que o app usa hoje: padrões do núcleo, só com o
-// `pcsx2_ee_cycle_skip` em 'Mild Underclock' (deixou o Shadow of the Colossus em 60 fps num Ryzen 5 4600H).
+// `pcsx2_ee_cycle_skip` em 'Mild Underclock' (deixou o jogo pesado A em 60 fps num Ryzen 5 4600H).
 
 const PS2: OpcaoDeNucleo[] = [
   {

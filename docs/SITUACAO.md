@@ -168,13 +168,14 @@ dizem sempre "vale ao reabrir": ninguém mediu quais núcleos releem na hora.
 Com o seu `neogeo.zip` guardado em 🔑 BIOS e um jogo (ex.: `mslug.zip`) na Biblioteca: abra, jogue, salve estado. Se o jogo
 for um clone, o zip do pai tem que estar na mesma pasta.
 
-### T-PS2 · PS2 (M12; a otimização está pausada)
+### T-PS2 · PS2 (M12; a otimização é a tarefa D, no teu PC)
 
 1. Guarde a BIOS do PS2 em 🔑 BIOS → PS2, ponha o jogo em `Kof Games/Games/ps2` e abra pela Biblioteca.
 2. Aperte **F3** numa cena pesada e me mande o print (fps, núcleo, leitura da placa). Se quiser medir de verdade:
-   Ajuda → 🩺 Modo diagnóstico, jogue 5–10 min, **Exportar relatório (.zip)** e me mande (vale o Shadow of the Colossus
-   e o Zone of the Enders 2 com o erro de memória: mande também o texto do aviso e quanto de RAM o PC tem).
-3. Não vou mexer em desempenho do PS2 até você reabrir o assunto.
+   Ajuda → 🩺 Modo diagnóstico, jogue 5–10 min, **Exportar relatório (.zip)** e me mande (vale o jogo pesado A
+   e o jogo pesado B com o erro de memória: mande também o texto do aviso e quanto de RAM o PC tem).
+3. **Reaberto em 17/11:** o PS2 liso virou a tarefa D (`docs/agentes/D-ps2-liso.md`), feita pelo Claude Code no teu PC.
+   Cole nele o texto do fim da tarefa e diga onde estão a BIOS e os jogos (só na conversa, nunca no repositório).
 
 ### T-REDE · Celular pela rede e controle (M13)
 
@@ -238,14 +239,14 @@ mostra p50/p99, engasgos por minuto e quem causou, a CPU de cada linha e o gráf
 
 ## Esperando você testar ⏸
 
-**Novo (M16.3, 08/11): gravar o Shadow of the Colossus.** Pacote Linux atualizado na `teste-binarios` (`65bdcf0`). Em **Ajuda → 🩺 Modo
+**Novo (M16.3, 08/11): gravar o jogo pesado A.** Pacote Linux atualizado na `teste-binarios` (`65bdcf0`). Em **Ajuda → 🩺 Modo
 diagnóstico**, marque "gravar cada jogo que eu abrir", jogue uns 5–10 minutos e depois clique em **Exportar
-relatório (.zip)** e me mande. Faça o mesmo com o **Zone of the Enders 2** até o erro de memória (manda também o texto
+relatório (.zip)** e me mande. Faça o mesmo com o **jogo pesado B** até o erro de memória (manda também o texto
 do aviso e quanto de RAM o PC tem). O **F3** agora mostra p50/p99, engasgos por minuto e quem causou, a CPU de cada
 linha e o gráfico dos últimos 10 s.
 
 **Ritmo nativo (09/11):** integrado envio de cada quadro do PS2/PS1 e apresentação por vsync. A medição foi 0/284
-quadros sem envio; o PS2 sintético também passou no pacote. O Marcelo confirma no SotC real e envia o `.zip` do ZoE2
+quadros sem envio; o PS2 sintético também passou no pacote. O Marcelo confirma no jogo pesado A real e envia o `.zip` do jogo pesado B
 para investigar a memória. Os pacotes Windows permanecem na versão anterior (`4058e25`), sem a correção C.
 
 **Novo (PS2):** no pacote da `teste-binarios`: guarde a BIOS do PS2 (🔑 BIOS → PS2), ponha o jogo em
@@ -312,7 +313,7 @@ O PS2 ficou pro fim porque é o mais caro em token. Os custos são estimativa (t
 
 **Agora (14/11):** M16.4, T.1, M14.1 e M14.2 feitos; faltam M14.3–M14.5 e os teus testes (lista "Pra você testar").
 **Antes:** M15, M13 e o **PS2** feitos (faltam a chave e os teus testes). Entrou o **M16** (desempenho, antes do M14):
-M16.1–M16.3 feitos, ⏸ você grava o SotC e o ZoE2; depois M16.4 (opções de emulação) e M16.5 (otimizar), ~300–550
+M16.1–M16.3 feitos, ⏸ você grava o jogo pesado A e o jogo pesado B; depois M16.4 (opções de emulação) e M16.5 (otimizar), ~300–550
 mil tokens, 2–3 sessões. Em paralelo, dois agentes com tarefa (`docs/agentes/`): **A** ritmo dos quadros no
 WebAssembly (o "antigo mais liso") e **B** o catálogo das opções de emulação.
 

@@ -59,8 +59,8 @@ describe('CSV do diagnóstico', () => {
   });
 
   it('nome da pasta da sessão', () => {
-    expect(nomeDaSessao(new Date(2026, 10, 8, 9, 5), 'Shadow of the Colossus (USA).iso')).toBe(
-      '2026-11-08_0905_Shadow_of_the_Colossus_USA_iso',
+    expect(nomeDaSessao(new Date(2026, 10, 8, 9, 5), 'jogo pesado A (USA).iso')).toBe(
+      '2026-11-08_0905_jogo_pesado_A_USA_iso',
     );
     expect(nomeSeguro('../../etc')).toBe('etc');
     expect(nomeSeguro('ção ñ')).toBe('cao_n');

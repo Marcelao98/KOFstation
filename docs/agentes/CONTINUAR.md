@@ -5,10 +5,10 @@
 
 ## O que o Marcelo quer hoje
 
-**Jogar Shadow of the Colossus liso no app novo.** No app antigo (`kofstation-old`) roda tranquilo. Duas queixas:
+**Jogar jogo pesado A liso no app novo.** No app antigo (`kofstation-old`) roda tranquilo. Duas queixas:
 
 1. **Engasgadas no PS2** ("umas engasgadas aqui e ali").
-2. **Zone of the Enders 2 crashou por falta de memória** (no antigo não acontece). Ele desconfia de memória e leitura
+2. **jogo pesado B crashou por falta de memória** (no antigo não acontece). Ele desconfia de memória e leitura
    de disco.
 
 ## Onde está cada coisa
@@ -39,11 +39,11 @@ roda 2–3 quadros seguidos quando a placa de som consome um bloco, e **só depo
 fila por vsync em `packages/engine/src/jogo.ts`. É a tarefa C. **Contar:** no `porQuadro` de cada segundo, quadro com
 `envio == 0` = não foi mandado.
 
-Se depois disso ainda engasgar: o relatório do 🩺 do SotC aponta o culpado (núcleo, leitura da placa, som). A
+Se depois disso ainda engasgar: o relatório do 🩺 do jogo pesado A aponta o culpado (núcleo, leitura da placa, som). A
 alavanca grande é desenhar o PS2 numa janela própria, como o antigo fazia por padrão (SDL), sem passar pela página
 (decisão D36 deixou isso "só se os números pedirem"): meio dia a um dia.
 
-## Falta de memória do ZoE2: o que já foi descartado
+## Falta de memória do jogo pesado B: o que já foi descartado
 
 - **O DVD inteiro na RAM: não.** O frontend só lê o arquivo todo se `need_fullpath` for falso; o LRPS2 responde
   `true` (agora garantido em `crates/kof-nativo/tests/lrps2.rs`). O antigo lia o disco pela página via VFS
@@ -70,7 +70,7 @@ journalctl -k --since "-6 hours" | grep -iE "out of memory|oom|killed process" |
 
 1. **Feito:** C revisada e integrada; `pnpm check`, e2e (44 passaram, 1 ignorado), teste `ritmo` (284 quadros, 0 sem envio), build Linux e `tools/testar-ps2.mjs` passaram.
 2. **Feito:** pacote Linux atualizado e enviado em `teste-binarios` (`65bdcf0`), commit órfão único. Os binários Windows continuam na versão anterior.
-3. O Marcelo joga o SotC com o 🩺 ligado e manda o `.zip`. Com o log do ZoE2, atacar a memória.
+3. O Marcelo joga o jogo pesado A com o 🩺 ligado e manda o `.zip`. Com o log do jogo pesado B, atacar a memória.
 4. Juntar o B; depois o M16.4 (tela das opções, tarefa E do PLANO).
 
 Regras de sempre: nunca ROM/BIOS/jogo em lugar nenhum; commits em português, sem nome de modelo de IA; `git status`
