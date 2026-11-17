@@ -56,7 +56,6 @@ const opcoes = [...defs.matchAll(re)].map((m) => {
   return {
     chave: m[1],
     descricao: str(m[2]) ?? m[1],
-    curta: str(m[3]),
     info: str(m[4]) ?? '',
     categoria: str(m[6]),
     valores,
@@ -88,11 +87,7 @@ export interface OpcaoDeclarada {
 
 export const CATEGORIAS_LRPS2: readonly { chave: string; nome: string }[] = ${JSON.stringify(categorias, null, 2)};
 
-export const OPCOES_LRPS2: readonly OpcaoDeclarada[] = ${JSON.stringify(
-  opcoes.map(({ curta: _curta, ...o }) => o),
-  null,
-  2,
-)};
+export const OPCOES_LRPS2: readonly OpcaoDeclarada[] = ${JSON.stringify(opcoes, null, 2)};
 `;
 const destino = join(import.meta.dirname, '../packages/domain/src/opcoes-lrps2.ts');
 writeFileSync(destino, saida);

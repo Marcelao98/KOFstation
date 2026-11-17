@@ -13,7 +13,8 @@
       "perfis": {
         "rapido": "1x (Native)",
         "equilibrado": "1x (Native)",
-        "fiel": "2x"
+        "fiel": "2x",
+        "bonito": "2x"
       }
     },
     {
@@ -29,7 +30,8 @@
       "perfis": {
         "rapido": "Moderate Underclock",
         "equilibrado": "Mild Underclock",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -48,7 +50,8 @@
       "perfis": {
         "rapido": "100% (Normal Speed)",
         "equilibrado": "100% (Normal Speed)",
-        "fiel": "100% (Normal Speed)"
+        "fiel": "100% (Normal Speed)",
+        "bonito": "100% (Normal Speed)"
       }
     },
     {
@@ -62,7 +65,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -76,7 +80,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "enabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -90,7 +95,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -106,7 +112,8 @@
       "perfis": {
         "rapido": "Nearest",
         "equilibrado": "Bilinear (PS2)",
-        "fiel": "Bilinear (PS2)"
+        "fiel": "Bilinear (PS2)",
+        "bonito": "Bilinear (PS2)"
       }
     },
     {
@@ -122,7 +129,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "Automatic",
-        "fiel": "Trilinear (PS2)"
+        "fiel": "Trilinear (PS2)",
+        "bonito": "Trilinear (PS2)"
       }
     },
     {
@@ -139,7 +147,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "4x"
+        "fiel": "4x",
+        "bonito": "8x"
       }
     },
     {
@@ -157,7 +166,8 @@
       "perfis": {
         "rapido": "Minimum",
         "equilibrado": "Basic",
-        "fiel": "High"
+        "fiel": "High",
+        "bonito": "High"
       }
     },
     {
@@ -173,7 +183,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "Unscaled",
-        "fiel": "Unscaled"
+        "fiel": "Unscaled",
+        "bonito": "Unscaled"
       }
     },
     {
@@ -189,7 +200,8 @@
       "perfis": {
         "rapido": "Disable Readbacks",
         "equilibrado": "Accurate",
-        "fiel": "Accurate"
+        "fiel": "Accurate",
+        "bonito": "Accurate"
       }
     },
     {
@@ -211,7 +223,8 @@
       "perfis": {
         "rapido": "Automatic",
         "equilibrado": "Automatic",
-        "fiel": "Automatic"
+        "fiel": "Automatic",
+        "bonito": "Automatic"
       }
     },
     {
@@ -225,7 +238,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -239,7 +253,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -253,7 +268,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -267,7 +283,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -281,7 +298,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -298,7 +316,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -312,7 +331,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -326,7 +346,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -340,7 +361,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -354,7 +376,1393 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_usb_camera",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "eyetoy",
+        "capture_eye"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_shared_memory_cards",
+      "padrao": "enabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "pcsx2_enable_cheats",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_hint_language_unlock",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_dev9_hdd",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_dev9_hdd_size",
+      "padrao": "40 GiB",
+      "naHora": true,
+      "valores": [
+        "8 GiB",
+        "16 GiB",
+        "20 GiB",
+        "40 GiB",
+        "80 GiB",
+        "120 GiB"
+      ],
+      "perfis": {
+        "rapido": "40 GiB",
+        "equilibrado": "40 GiB",
+        "fiel": "40 GiB",
+        "bonito": "40 GiB"
+      }
+    },
+    {
+      "chave": "pcsx2_dev9_eth",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_native_scaling",
+      "padrao": "Automatic",
+      "naHora": true,
+      "valores": [
+        "Automatic",
+        "disabled",
+        "Normal",
+        "Aggressive"
+      ],
+      "perfis": {
+        "rapido": "Automatic",
+        "equilibrado": "Automatic",
+        "fiel": "Automatic",
+        "bonito": "Automatic"
+      }
+    },
+    {
+      "chave": "pcsx2_pgs_ssaa",
+      "padrao": "Native",
+      "naHora": true,
+      "valores": [
+        "Native",
+        "2x SSAA",
+        "4x SSAA (sparse grid)",
+        "4x SSAA (ordered, can high-res)",
+        "8x SSAA (can high-res)",
+        "16x SSAA (can high-res)",
+        "16x SSAA (ordered, can high-res 4x)",
+        "32x SSAA (ordered, can high-res 4x full)"
+      ],
+      "perfis": {
+        "rapido": "Native",
+        "equilibrado": "Native",
+        "fiel": "Native",
+        "bonito": "Native"
+      }
+    },
+    {
+      "chave": "pcsx2_pgs_high_res_scanout",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "enabled (4x)",
+        "enabled (4x, anti-aliased)",
+        "enabled (4x, full field height)",
+        "enabled (4x, anti-aliased, full field height)",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_pgs_ss_tex",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_pgs_deblur",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_vr_mode",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "stereoscopic"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_vr_depth",
+      "padrao": "100%",
+      "naHora": true,
+      "valores": [
+        "25%",
+        "50%",
+        "75%",
+        "100%",
+        "125%",
+        "150%",
+        "200%"
+      ],
+      "perfis": {
+        "rapido": "100%",
+        "equilibrado": "100%",
+        "fiel": "100%",
+        "bonito": "100%"
+      }
+    },
+    {
+      "chave": "pcsx2_pcrtc_antiblur",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "pcsx2_pcrtc_screen_offsets",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_disable_interlace_offset",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_auto_flush_software",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "pcsx2_sw_renderer_threads",
+      "padrao": "2",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11"
+      ],
+      "perfis": {
+        "rapido": "2",
+        "equilibrado": "2",
+        "fiel": "2",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "pcsx2_vu_accurate_addsub",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_vu0_softfloat",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_vu1_softfloat",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_ee_cpu",
+      "padrao": "Recompiler",
+      "naHora": false,
+      "valores": [
+        "Recompiler",
+        "Interpreter"
+      ],
+      "perfis": {
+        "rapido": "Recompiler",
+        "equilibrado": "Recompiler",
+        "fiel": "Recompiler",
+        "bonito": "Recompiler"
+      }
+    },
+    {
+      "chave": "pcsx2_fastmem",
+      "padrao": "enabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "pcsx2_game_enhancements_hint",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_uncapped_framerate_hint",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "disabled",
+        "enabled",
+        "60fps PAL-to-NTSC"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_enable_hw_hacks",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_cpu_sprite_size",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "pcsx2_cpu_sprite_level",
+      "padrao": "Sprites Only",
+      "naHora": true,
+      "valores": [
+        "Sprites Only",
+        "Sprites/Triangles",
+        "Blended Sprites/Triangles"
+      ],
+      "perfis": {
+        "rapido": "Sprites Only",
+        "equilibrado": "Sprites Only",
+        "fiel": "Sprites Only",
+        "bonito": "Sprites Only"
+      }
+    },
+    {
+      "chave": "pcsx2_software_clut_render",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "Normal",
+        "Aggressive"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_auto_flush",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "Sprites Only",
+        "All Primitives"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_texture_inside_rt",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "Inside Target",
+        "Merge Targets"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_disable_depth_conversion",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_use_external_gameindex",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_framebuffer_conversion",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_disable_partial_invalidation",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_gpu_palette_conversion",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_half_pixel_offset",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "Normal (Vertex)",
+        "Special (Texture)",
+        "Special (Texture - Aggressive)",
+        "Align to Native"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_round_sprite",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "Half",
+        "Full"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_align_sprite",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_merge_sprite",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_unscaled_palette_draw",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_force_sprite_position",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_axis_deadzone1",
+      "padrao": "15%",
+      "naHora": true,
+      "valores": [
+        "0%",
+        "1%",
+        "2%",
+        "3%",
+        "4%",
+        "5%",
+        "6%",
+        "7%",
+        "8%",
+        "9%",
+        "10%",
+        "11%",
+        "12%",
+        "13%",
+        "14%",
+        "15%",
+        "16%",
+        "17%",
+        "18%",
+        "19%",
+        "20%",
+        "21%",
+        "22%",
+        "23%",
+        "24%",
+        "25%",
+        "26%",
+        "27%",
+        "28%",
+        "29%",
+        "30%",
+        "31%",
+        "32%",
+        "33%",
+        "34%",
+        "35%",
+        "36%",
+        "37%",
+        "38%",
+        "39%",
+        "40%",
+        "41%",
+        "42%",
+        "43%",
+        "44%",
+        "45%",
+        "46%",
+        "47%",
+        "48%",
+        "49%",
+        "50%"
+      ],
+      "perfis": {
+        "rapido": "15%",
+        "equilibrado": "15%",
+        "fiel": "15%",
+        "bonito": "15%"
+      }
+    },
+    {
+      "chave": "pcsx2_button_deadzone1",
+      "padrao": "0%",
+      "naHora": true,
+      "valores": [
+        "0%",
+        "1%",
+        "2%",
+        "3%",
+        "4%",
+        "5%",
+        "6%",
+        "7%",
+        "8%",
+        "9%",
+        "10%",
+        "11%",
+        "12%",
+        "13%",
+        "14%",
+        "15%",
+        "16%",
+        "17%",
+        "18%",
+        "19%",
+        "20%",
+        "21%",
+        "22%",
+        "23%",
+        "24%",
+        "25%",
+        "26%",
+        "27%",
+        "28%",
+        "29%",
+        "30%",
+        "31%",
+        "32%",
+        "33%",
+        "34%",
+        "35%",
+        "36%",
+        "37%",
+        "38%",
+        "39%",
+        "40%",
+        "41%",
+        "42%",
+        "43%",
+        "44%",
+        "45%",
+        "46%",
+        "47%",
+        "48%",
+        "49%",
+        "50%"
+      ],
+      "perfis": {
+        "rapido": "0%",
+        "equilibrado": "0%",
+        "fiel": "0%",
+        "bonito": "0%"
+      }
+    },
+    {
+      "chave": "pcsx2_axis_scale1",
+      "padrao": "133%",
+      "naHora": true,
+      "valores": [
+        "80%",
+        "81%",
+        "82%",
+        "83%",
+        "84%",
+        "85%",
+        "86%",
+        "87%",
+        "88%",
+        "89%",
+        "90%",
+        "91%",
+        "92%",
+        "93%",
+        "94%",
+        "95%",
+        "96%",
+        "97%",
+        "98%",
+        "99%",
+        "100%",
+        "101%",
+        "102%",
+        "103%",
+        "104%",
+        "105%",
+        "106%",
+        "107%",
+        "108%",
+        "109%",
+        "110%",
+        "111%",
+        "112%",
+        "113%",
+        "114%",
+        "115%",
+        "116%",
+        "117%",
+        "118%",
+        "119%",
+        "120%",
+        "121%",
+        "122%",
+        "123%",
+        "124%",
+        "125%",
+        "126%",
+        "127%",
+        "128%",
+        "129%",
+        "130%",
+        "131%",
+        "132%",
+        "133%",
+        "134%",
+        "135%",
+        "136%",
+        "137%",
+        "138%",
+        "139%",
+        "140%",
+        "141%",
+        "142%",
+        "143%",
+        "144%",
+        "145%",
+        "146%",
+        "147%",
+        "148%",
+        "149%",
+        "150%",
+        "151%",
+        "152%",
+        "153%",
+        "154%",
+        "155%",
+        "156%",
+        "157%",
+        "158%",
+        "159%",
+        "160%",
+        "161%",
+        "162%",
+        "163%",
+        "164%",
+        "165%",
+        "166%",
+        "167%",
+        "168%",
+        "169%",
+        "170%",
+        "171%",
+        "172%",
+        "173%",
+        "174%",
+        "175%",
+        "176%",
+        "177%",
+        "178%",
+        "179%",
+        "180%",
+        "181%",
+        "182%",
+        "183%",
+        "184%",
+        "185%",
+        "186%",
+        "187%",
+        "188%",
+        "189%",
+        "190%",
+        "191%",
+        "192%",
+        "193%",
+        "194%",
+        "195%",
+        "196%",
+        "197%",
+        "198%",
+        "199%",
+        "200%"
+      ],
+      "perfis": {
+        "rapido": "133%",
+        "equilibrado": "133%",
+        "fiel": "133%",
+        "bonito": "133%"
+      }
+    },
+    {
+      "chave": "pcsx2_invert_left_stick1",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "x_axis",
+        "y_axis",
+        "all"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_invert_right_stick1",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "x_axis",
+        "y_axis",
+        "all"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_analog_mode1",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_enable_rumble1",
+      "padrao": "100%",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "5%",
+        "10%",
+        "15%",
+        "20%",
+        "25%",
+        "30%",
+        "35%",
+        "40%",
+        "45%",
+        "50%",
+        "55%",
+        "60%",
+        "65%",
+        "70%",
+        "75%",
+        "80%",
+        "85%",
+        "90%",
+        "95%",
+        "100%"
+      ],
+      "perfis": {
+        "rapido": "100%",
+        "equilibrado": "100%",
+        "fiel": "100%",
+        "bonito": "100%"
+      }
+    },
+    {
+      "chave": "pcsx2_axis_deadzone2",
+      "padrao": "15%",
+      "naHora": true,
+      "valores": [
+        "0%",
+        "1%",
+        "2%",
+        "3%",
+        "4%",
+        "5%",
+        "6%",
+        "7%",
+        "8%",
+        "9%",
+        "10%",
+        "11%",
+        "12%",
+        "13%",
+        "14%",
+        "15%",
+        "16%",
+        "17%",
+        "18%",
+        "19%",
+        "20%",
+        "21%",
+        "22%",
+        "23%",
+        "24%",
+        "25%",
+        "26%",
+        "27%",
+        "28%",
+        "29%",
+        "30%",
+        "31%",
+        "32%",
+        "33%",
+        "34%",
+        "35%",
+        "36%",
+        "37%",
+        "38%",
+        "39%",
+        "40%",
+        "41%",
+        "42%",
+        "43%",
+        "44%",
+        "45%",
+        "46%",
+        "47%",
+        "48%",
+        "49%",
+        "50%"
+      ],
+      "perfis": {
+        "rapido": "15%",
+        "equilibrado": "15%",
+        "fiel": "15%",
+        "bonito": "15%"
+      }
+    },
+    {
+      "chave": "pcsx2_button_deadzone2",
+      "padrao": "0%",
+      "naHora": true,
+      "valores": [
+        "0%",
+        "1%",
+        "2%",
+        "3%",
+        "4%",
+        "5%",
+        "6%",
+        "7%",
+        "8%",
+        "9%",
+        "10%",
+        "11%",
+        "12%",
+        "13%",
+        "14%",
+        "15%",
+        "16%",
+        "17%",
+        "18%",
+        "19%",
+        "20%",
+        "21%",
+        "22%",
+        "23%",
+        "24%",
+        "25%",
+        "26%",
+        "27%",
+        "28%",
+        "29%",
+        "30%",
+        "31%",
+        "32%",
+        "33%",
+        "34%",
+        "35%",
+        "36%",
+        "37%",
+        "38%",
+        "39%",
+        "40%",
+        "41%",
+        "42%",
+        "43%",
+        "44%",
+        "45%",
+        "46%",
+        "47%",
+        "48%",
+        "49%",
+        "50%"
+      ],
+      "perfis": {
+        "rapido": "0%",
+        "equilibrado": "0%",
+        "fiel": "0%",
+        "bonito": "0%"
+      }
+    },
+    {
+      "chave": "pcsx2_axis_scale2",
+      "padrao": "133%",
+      "naHora": true,
+      "valores": [
+        "80%",
+        "81%",
+        "82%",
+        "83%",
+        "84%",
+        "85%",
+        "86%",
+        "87%",
+        "88%",
+        "89%",
+        "90%",
+        "91%",
+        "92%",
+        "93%",
+        "94%",
+        "95%",
+        "96%",
+        "97%",
+        "98%",
+        "99%",
+        "100%",
+        "101%",
+        "102%",
+        "103%",
+        "104%",
+        "105%",
+        "106%",
+        "107%",
+        "108%",
+        "109%",
+        "110%",
+        "111%",
+        "112%",
+        "113%",
+        "114%",
+        "115%",
+        "116%",
+        "117%",
+        "118%",
+        "119%",
+        "120%",
+        "121%",
+        "122%",
+        "123%",
+        "124%",
+        "125%",
+        "126%",
+        "127%",
+        "128%",
+        "129%",
+        "130%",
+        "131%",
+        "132%",
+        "133%",
+        "134%",
+        "135%",
+        "136%",
+        "137%",
+        "138%",
+        "139%",
+        "140%",
+        "141%",
+        "142%",
+        "143%",
+        "144%",
+        "145%",
+        "146%",
+        "147%",
+        "148%",
+        "149%",
+        "150%",
+        "151%",
+        "152%",
+        "153%",
+        "154%",
+        "155%",
+        "156%",
+        "157%",
+        "158%",
+        "159%",
+        "160%",
+        "161%",
+        "162%",
+        "163%",
+        "164%",
+        "165%",
+        "166%",
+        "167%",
+        "168%",
+        "169%",
+        "170%",
+        "171%",
+        "172%",
+        "173%",
+        "174%",
+        "175%",
+        "176%",
+        "177%",
+        "178%",
+        "179%",
+        "180%",
+        "181%",
+        "182%",
+        "183%",
+        "184%",
+        "185%",
+        "186%",
+        "187%",
+        "188%",
+        "189%",
+        "190%",
+        "191%",
+        "192%",
+        "193%",
+        "194%",
+        "195%",
+        "196%",
+        "197%",
+        "198%",
+        "199%",
+        "200%"
+      ],
+      "perfis": {
+        "rapido": "133%",
+        "equilibrado": "133%",
+        "fiel": "133%",
+        "bonito": "133%"
+      }
+    },
+    {
+      "chave": "pcsx2_invert_left_stick2",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "x_axis",
+        "y_axis",
+        "all"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_invert_right_stick2",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "x_axis",
+        "y_axis",
+        "all"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_analog_mode2",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "pcsx2_enable_rumble2",
+      "padrao": "100%",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "5%",
+        "10%",
+        "15%",
+        "20%",
+        "25%",
+        "30%",
+        "35%",
+        "40%",
+        "45%",
+        "50%",
+        "55%",
+        "60%",
+        "65%",
+        "70%",
+        "75%",
+        "80%",
+        "85%",
+        "90%",
+        "95%",
+        "100%"
+      ],
+      "perfis": {
+        "rapido": "100%",
+        "equilibrado": "100%",
+        "fiel": "100%",
+        "bonito": "100%"
       }
     }
   ],
@@ -370,7 +1778,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -386,7 +1795,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "auto",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -408,7 +1818,8 @@
       "perfis": {
         "rapido": "3",
         "equilibrado": "3",
-        "fiel": "3"
+        "fiel": "3",
+        "bonito": "3"
       }
     },
     {
@@ -440,7 +1851,8 @@
       "perfis": {
         "rapido": "33",
         "equilibrado": "33",
-        "fiel": "33"
+        "fiel": "33",
+        "bonito": "33"
       }
     },
     {
@@ -455,7 +1867,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "auto",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -469,7 +1882,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -485,7 +1899,8 @@
       "perfis": {
         "rapido": "off",
         "equilibrado": "simple",
-        "fiel": "gaussian"
+        "fiel": "gaussian",
+        "bonito": "gaussian"
       }
     },
     {
@@ -499,7 +1914,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -513,7 +1929,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -528,7 +1945,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -542,7 +1960,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -556,7 +1975,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -570,7 +1990,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -584,7 +2005,8 @@
       "perfis": {
         "rapido": "enabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -599,7 +2021,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "auto",
-        "fiel": "auto"
+        "fiel": "auto",
+        "bonito": "auto"
       }
     }
   ],
@@ -617,7 +2040,8 @@
       "perfis": {
         "rapido": "320x240",
         "equilibrado": "320x240",
-        "fiel": "640x480"
+        "fiel": "640x480",
+        "bonito": "640x480"
       }
     },
     {
@@ -634,7 +2058,8 @@
       "perfis": {
         "rapido": "1",
         "equilibrado": "1",
-        "fiel": "2"
+        "fiel": "2",
+        "bonito": "2"
       }
     },
     {
@@ -648,7 +2073,8 @@
       "perfis": {
         "rapido": "standard",
         "equilibrado": "standard",
-        "fiel": "3point"
+        "fiel": "3point",
+        "bonito": "3point"
       }
     },
     {
@@ -662,7 +2088,8 @@
       "perfis": {
         "rapido": "0",
         "equilibrado": "0",
-        "fiel": "1"
+        "fiel": "1",
+        "bonito": "1"
       }
     },
     {
@@ -679,7 +2106,8 @@
       "perfis": {
         "rapido": "0",
         "equilibrado": "0",
-        "fiel": "0"
+        "fiel": "0",
+        "bonito": "0"
       }
     },
     {
@@ -693,7 +2121,8 @@
       "perfis": {
         "rapido": "False",
         "equilibrado": "True",
-        "fiel": "True"
+        "fiel": "True",
+        "bonito": "True"
       }
     },
     {
@@ -707,7 +2136,8 @@
       "perfis": {
         "rapido": "False",
         "equilibrado": "True",
-        "fiel": "True"
+        "fiel": "True",
+        "bonito": "True"
       }
     },
     {
@@ -721,7 +2151,8 @@
       "perfis": {
         "rapido": "False",
         "equilibrado": "False",
-        "fiel": "True"
+        "fiel": "True",
+        "bonito": "True"
       }
     },
     {
@@ -737,7 +2168,8 @@
       "perfis": {
         "rapido": "Off",
         "equilibrado": "Async",
-        "fiel": "Sync"
+        "fiel": "Sync",
+        "bonito": "Sync"
       }
     },
     {
@@ -751,7 +2183,8 @@
       "perfis": {
         "rapido": "True",
         "equilibrado": "False",
-        "fiel": "False"
+        "fiel": "False",
+        "bonito": "False"
       }
     },
     {
@@ -765,7 +2198,8 @@
       "perfis": {
         "rapido": "cached_interpreter",
         "equilibrado": "cached_interpreter",
-        "fiel": "cached_interpreter"
+        "fiel": "cached_interpreter",
+        "bonito": "cached_interpreter"
       }
     },
     {
@@ -781,7 +2215,8 @@
       "perfis": {
         "rapido": "memory",
         "equilibrado": "memory",
-        "fiel": "memory"
+        "fiel": "memory",
+        "bonito": "memory"
       }
     }
   ],
@@ -800,7 +2235,8 @@
       "perfis": {
         "rapido": "linear",
         "equilibrado": "gaussian",
-        "fiel": "gaussian"
+        "fiel": "gaussian",
+        "bonito": "gaussian"
       }
     },
     {
@@ -816,7 +2252,8 @@
       "perfis": {
         "rapido": "compatible",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -830,7 +2267,8 @@
       "perfis": {
         "rapido": "compat",
         "equilibrado": "compat",
-        "fiel": "hardware"
+        "fiel": "hardware",
+        "bonito": "hardware"
       }
     },
     {
@@ -847,7 +2285,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -862,7 +2301,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "auto",
-        "fiel": "auto"
+        "fiel": "auto",
+        "bonito": "auto"
       }
     }
   ],
@@ -878,7 +2318,8 @@
       "perfis": {
         "rapido": "cc",
         "equilibrado": "sinc",
-        "fiel": "sinc"
+        "fiel": "sinc",
+        "bonito": "sinc"
       }
     },
     {
@@ -893,7 +2334,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "GBC only",
-        "fiel": "GBC only"
+        "fiel": "GBC only",
+        "bonito": "GBC only"
       }
     },
     {
@@ -907,7 +2349,8 @@
       "perfis": {
         "rapido": "fast",
         "equilibrado": "accurate",
-        "fiel": "accurate"
+        "fiel": "accurate",
+        "bonito": "accurate"
       }
     },
     {
@@ -923,7 +2366,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "lcd_ghosting"
+        "fiel": "lcd_ghosting",
+        "bonito": "lcd_ghosting"
       }
     },
     {
@@ -937,7 +2381,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "enabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -953,7 +2398,8 @@
       "perfis": {
         "rapido": "Auto",
         "equilibrado": "Auto",
-        "fiel": "Auto"
+        "fiel": "Auto",
+        "bonito": "Auto"
       }
     }
   ],
@@ -970,7 +2416,8 @@
       "perfis": {
         "rapido": "Low",
         "equilibrado": "High",
-        "fiel": "Very High"
+        "fiel": "Very High",
+        "bonito": "Very High"
       }
     },
     {
@@ -984,7 +2431,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "enabled"
+        "fiel": "enabled",
+        "bonito": "enabled"
       }
     },
     {
@@ -998,7 +2446,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1013,7 +2462,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1029,7 +2479,8 @@
       "perfis": {
         "rapido": "Auto",
         "equilibrado": "Auto",
-        "fiel": "Auto"
+        "fiel": "Auto",
+        "bonito": "Auto"
       }
     }
   ],
@@ -1048,7 +2499,8 @@
       "perfis": {
         "rapido": "mame (ym2612)",
         "equilibrado": "mame (ym2612)",
-        "fiel": "nuked (ym2612)"
+        "fiel": "nuked (ym2612)",
+        "bonito": "nuked (ym2612)"
       }
     },
     {
@@ -1062,7 +2514,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "low-pass"
+        "fiel": "low-pass",
+        "bonito": "low-pass"
       }
     },
     {
@@ -1077,7 +2530,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1091,7 +2545,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1107,7 +2562,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "auto",
-        "fiel": "auto"
+        "fiel": "auto",
+        "bonito": "auto"
       }
     }
   ],
@@ -1126,7 +2582,8 @@
       "perfis": {
         "rapido": "mame (ym2612)",
         "equilibrado": "mame (ym2612)",
-        "fiel": "nuked (ym2612)"
+        "fiel": "nuked (ym2612)",
+        "bonito": "nuked (ym2612)"
       }
     },
     {
@@ -1140,7 +2597,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "low-pass"
+        "fiel": "low-pass",
+        "bonito": "low-pass"
       }
     },
     {
@@ -1155,7 +2613,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1169,7 +2628,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1185,7 +2645,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "auto",
-        "fiel": "auto"
+        "fiel": "auto",
+        "bonito": "auto"
       }
     }
   ],
@@ -1204,7 +2665,8 @@
       "perfis": {
         "rapido": "mame (ym2612)",
         "equilibrado": "mame (ym2612)",
-        "fiel": "nuked (ym2612)"
+        "fiel": "nuked (ym2612)",
+        "bonito": "nuked (ym2612)"
       }
     },
     {
@@ -1218,7 +2680,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "low-pass"
+        "fiel": "low-pass",
+        "bonito": "low-pass"
       }
     },
     {
@@ -1233,7 +2696,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1247,7 +2711,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1263,7 +2728,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "auto",
-        "fiel": "auto"
+        "fiel": "auto",
+        "bonito": "auto"
       }
     }
   ],
@@ -1281,7 +2747,8 @@
       "perfis": {
         "rapido": "auto",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     },
     {
@@ -1296,7 +2763,8 @@
       "perfis": {
         "rapido": "Detect and Remove",
         "equilibrado": "Remove Known",
-        "fiel": "Don't Remove"
+        "fiel": "Don't Remove",
+        "bonito": "Don't Remove"
       }
     },
     {
@@ -1310,7 +2778,8 @@
       "perfis": {
         "rapido": "ON",
         "equilibrado": "OFF",
-        "fiel": "OFF"
+        "fiel": "OFF",
+        "bonito": "OFF"
       }
     },
     {
@@ -1326,7 +2795,8 @@
       "perfis": {
         "rapido": "OFF",
         "equilibrado": "OFF",
-        "fiel": "GBA"
+        "fiel": "GBA",
+        "bonito": "GBA"
       }
     },
     {
@@ -1343,7 +2813,8 @@
       "perfis": {
         "rapido": "OFF",
         "equilibrado": "OFF",
-        "fiel": "lcd_ghosting"
+        "fiel": "lcd_ghosting",
+        "bonito": "lcd_ghosting"
       }
     },
     {
@@ -1357,7 +2828,8 @@
       "perfis": {
         "rapido": "disabled",
         "equilibrado": "disabled",
-        "fiel": "disabled"
+        "fiel": "disabled",
+        "bonito": "disabled"
       }
     }
   ]
