@@ -124,3 +124,10 @@ salvar pelo jogo deve sobreviver a fechar e reabrir (a conferir com ele).
 
 Comandos: `node tools/medir-ps2.mjs --jogo A --rodadas 1 --aquecer 15 --segundos 10 --fechar-janela` e o
 `ps2_de_verdade` acima.
+
+### Achado 5 · ✨ Bonito no jogo pesado A: engasga muito (o Marcelo jogando, 17/11)
+
+O perfil ✨ Bonito do PS2 (resolução interna 2x, anisotrópico 8x, MTVU ligado) **engasgou muito** na máquina do
+Marcelo. Ainda sem número: medir cada peça separada com o banco (`--opcao pcsx2_upscale_multiplier=2x`, depois só o
+anisotrópico, depois só o MTVU) e deixar no Bonito só o que couber liso. Suspeita principal: a resolução 2x (quatro
+vezes os pixels, e a página recebe cada quadro 4× maior).
