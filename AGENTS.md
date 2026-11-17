@@ -24,8 +24,9 @@ Não leia o `app.js` do antigo inteiro (308 KB): vá direto às linhas que a fic
 ## Como trabalhar
 
 - **Uma etapa por sessão** (o Marcelo se preocupa com tokens). Siga "Como cada etapa é executada" no ROADMAP.
-- **Paridade total** ([docs/PARIDADE.md](docs/PARIDADE.md)): o comportamento do antigo é a especificação. Compare
-  com o antigo (pixels, som, arquivos) sempre que der; o determinismo dos núcleos permite comparar automaticamente.
+- **O novo é o produto** (D38, 17/11): o antigo foi a especificação da migração ([docs/PARIDADE.md](docs/PARIDADE.md))
+  e virou arquivo. Os testes que comparam com o antigo continuam (protegem contra regressão), mas melhorar e mudar é
+  permitido. O repositório antigo **não** pode ser apagado: o novo ainda baixa núcleos e as `.so` do celular de lá.
 - **Camadas** (conferidas pelo ESLint): `domain` puro; `engine` sem React; telas não falam com a engine nem com o
   backend direto (passam por `app-core`/stores). O Rust só expõe comandos com nome e escopo (nada de shell genérico).
 - **Nada de erro escondido**: erro tem código e mensagem em português; `catch` vazio só com comentário dizendo por quê.
@@ -49,7 +50,7 @@ núcleo Kof do SNES.
 
 - **Nunca** commitar, distribuir ou indicar onde baixar ROM, BIOS ou jogo (nem em teste ou doc). ROMs de teste são
   geradas pelos próprios testes.
-- **Não mexer no `kofstation-old`** nesta migração. **Nunca criar um repositório chamado `KOFSnes`** (os atualizadores
+- **Não mexer no `kofstation-old`** (só leitura; nem apagar). **Nunca criar um repositório chamado `KOFSnes`** (os atualizadores
   do app antigo baixam por esse nome, que redireciona pro `kofstation-old`).
 - O núcleo Kof é da Mel: fora deste repositório até ela definir a licença.
 - Commits em português, **sem nome de modelo de IA**, com as linhas de co-autoria/sessão que o sistema indicar.

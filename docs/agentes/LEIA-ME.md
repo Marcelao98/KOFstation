@@ -47,3 +47,4 @@ O plano do resto do roadmap em tarefas (ondas, dependências, quem mexe em quê)
 | B · Catálogo das opções de emulação (dados do M16.4) | [B-opcoes-nucleo.md](B-opcoes-nucleo.md) | `agente-b/opcoes-nucleo` | aberta |
 | C · Ritmo dos quadros do PS2/PS1 nativo (PS2 liso) | [C-ritmo-nativo.md](C-ritmo-nativo.md) | `agente-c/ritmo-nativo` | ✅ junta em 09/11 (`d7e57d3`) |
 | D · PS2 liso como o PCSX2 (M16.5; roda no PC do Marcelo, mede sozinho) | [D-ps2-liso.md](D-ps2-liso.md) | `agente-d/ps2-liso` | aberta (17/11) |
+| E · PS2: cartão de memória, menu de salvar e o pacote completo de opções (PS2 e PS1) | [E-ps2-cartao-e-opcoes.md](E-ps2-cartao-e-opcoes.md) | `agente-d/ps2-liso` (junto com a D) | aberta (17/11) |

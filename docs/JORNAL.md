@@ -21,6 +21,19 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-17 · Tarefa E (cartão do PS2 e opções completas) e o novo substitui o antigo
+
+**Pedido:** o Marcelo jogou o jogo pesado A no novo: roda relativamente liso, **engasga em alguns momentos**, e **no
+menu de salvar não desce nem salva no cartão de memória**. Quer também o **pacote completo de opções** (PS2 como o
+PCSX2, PS1 com várias opções de gráfico e emulação). Tudo pelo Claude Code local, com instruções minhas. E: "o novo
+está melhor que o antigo, podemos descartar o antigo".
+**Feito:** `docs/agentes/E-ps2-cartao-e-opcoes.md` (parte 1: cartão de memória e o "pra baixo", com as hipóteses e
+onde olhar; parte 2: Avançado com tudo o que o núcleo declara, grupos como os do PCSX2, renderer escolhível, perfis
+revistos com número). Ordem pro agente local: E1 → D Fases 0–2 (o trecho que engasga) → E2 → D Fase 3, parando pra
+mostrar ao fim de cada parte. **D38**: o novo é o produto; paridade não trava mais; o repositório antigo fica (o novo
+ainda baixa núcleos e as `.so` do celular de lá). AGENTS.md atualizado.
+**Onde parou:** o Marcelo cola o texto do fim da tarefa E no Claude Code local. T.2 continua com ele.
+
 ## 2026-11-17 · PS2 liso reaberto: tarefa D pro agente no PC do Marcelo
 
 **Pedido:** voltar ao PS2 liso (M16.5), agora pelo Claude Code local, que tem a placa, a BIOS e os jogos: ele abre os
