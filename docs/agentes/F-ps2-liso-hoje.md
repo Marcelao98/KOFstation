@@ -89,9 +89,9 @@ Detalhes e números em [docs/PS2-LISO.md](../PS2-LISO.md) (17/11). Resumo:
 - **Passo 3 (feito, sem mudança):** a bateria do PS2 tem 0 bytes; pedir a cada 1 s não custa nada.
 - **Memória:** a máquina tem 7,2 GB e estava com 4,6 GB na swap (o Firefox ~2 GB); o processo do jogo foi parar
   parcialmente na swap. Orientação: fechar o Firefox pra jogar.
-- **Passo 5 ("não desce"):** o direcional do PS2 é T F G H, as setas são o analógico. Aviso na tela ao abrir PS2. O
-  modo "misto" (analógico aperta o direcional) foi tentado e desfeito: no jogo pesado A o direcional troca de arma.
-- **Passo 5 (cartão):** o `Mcd001.ps2` (slot 1) está todo 0xFF (nunca formatado); o slot 2 está formatado. Falta ver
-  se o jogo formata quando pede e se grava (agora que dá pra escolher no menu).
+- **Passo 5 ("não desce"):** o direcional do PS2 é T F G H, as setas são o analógico. O modo "misto" (analógico aperta o
+  direcional) e um aviso na tela foram tentados e desfeitos: controles como estavam.
+- **Passo 5 (cartão):** o `Mcd001.ps2` (slot 1) está todo 0xFF (nunca formatado); o slot 2 está formatado. O Marcelo
+  formatou pelo jogo e salvou; falta conferir que sobrevive a fechar e reabrir.
 - **Ficou pra depois:** passo 4 (fila de quadros / GC / janela própria, com desenho antes), passo 6 (shader: o cache
   `gl_programs.bin` existe), passo 7 (opções), o `WebSocket.send` de 48 MB no F8 (~255 ms).

@@ -87,15 +87,13 @@ tarefa F).
 No PS2, as **setas** são o **analógico** e o **direcional** fica em **T F G H** (`DIRECIONAL_ANALOG` em
 `packages/domain/src/entrada.ts`). A pergunta "salvar no cartão?" do jogo pesado A só lê o direcional: o "pra baixo" é
 o **G**. Tentado: fazer o analógico apertar o direcional também (modo "misto", como o PS1). O menu desceu, mas
-no jogo o direcional troca de arma e as setas passaram a trocar de arma enquanto ele andava. **Desfeito.** Feito no lugar: ao abrir um jogo de PS2 (uma vez por abertura do app), o aviso
-"PS2: setas = analógico · T F G H = direcional (menus do cartão)", com as teclas que estiverem configuradas
-(`dicaDoDirecional` em `packages/domain/src/entrada.ts`, chamado em `apps/desktop/src/stores/entrada.ts`). O controle de
-verdade já separa os dois (alavanca = analógico, cruz = direcional).
+no jogo o direcional troca de arma e as setas passaram a trocar de arma enquanto ele andava. **Desfeito.** O aviso na tela com as teclas do direcional também foi feito e desfeito a pedido do Marcelo: os
+controles ficam como estavam (setas = analógico, T F G H = direcional).
 
 ### Achado 4 · Cartão de memória
 
 Os cartões ficam em `<dados>/nativo/sistema/ps2/pcsx2/memcards/` (o núcleo cuida deles; o app não vê: a bateria do PS2
 tem 0 bytes). O `Mcd001.ps2` (slot 1) está **todo 0xFF** (cartão nunca formatado) e não muda desde 10/11; o
 `Mcd002.ps2` (slot 2) está formatado ("Sony PS2 Memory Card Format") e foi gravado hoje às 12:49, com o Marcelo
-jogando. A investigar: por que o slot 1 nasceu sem formatação, se o jogo oferece formatar e falha, e a opção
-`pcsx2_shared_memory_cards` (cartão por jogo ou compartilhado).
+jogando. O Marcelo formatou pelo jogo (17/11) e parece ter salvo. A conferir: o `Mcd001.ps2` passa a ter
+"Sony PS2 Memory Card Format", e o save sobrevive a fechar e reabrir o app.

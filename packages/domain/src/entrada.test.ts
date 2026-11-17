@@ -1,14 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BOTAO } from './controle';
-import {
-  acoesDe,
-  dicaDoDirecional,
-  eixosDoTeclado,   gravarNaCamada,
-  mapaDe,
-  montarEntrada,
-  nomeTecla,
-  tecladoBits,
-} from './entrada';
+import { acoesDe, eixosDoTeclado, gravarNaCamada, mapaDe, montarEntrada, nomeTecla, tecladoBits } from './entrada';
 
 const cfg = (v: Record<string, unknown>) => (k: string) => (k in v ? JSON.stringify(v[k]) : null);
 
@@ -49,13 +41,5 @@ describe('controles em camadas (regras do antigo)', () => {
     expect(cam).toEqual({ B: 'KeyX', A: 'KeyZ' });
     expect(nomeTecla('KeyZ')).toBe('Z');
     expect(nomeTecla('ShiftLeft')).toBe('Shift esq.');
-  });
-  it('PS2: a dica diz as teclas do direcional (os menus do cartão não descem com as setas)', () => {
-    const vazio = cfg({});
-    expect(dicaDoDirecional(montarEntrada(vazio, 'ps2'), 'ps2')).toBe(
-      'PS2: setas = analógico · T F G H = direcional (menus do cartão)',
-    );
-    expect(dicaDoDirecional(montarEntrada(vazio, 'ps1'), 'ps1')).toBeNull();
-    expect(dicaDoDirecional(montarEntrada(vazio, 'snes'), 'snes')).toBeNull();
   });
 });
