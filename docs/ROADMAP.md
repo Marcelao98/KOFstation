@@ -1,6 +1,8 @@
-# Roadmap do KOFstation
+# Roadmap do KOFstation (passo a passo, com entregável e checkpoint em cada passo)
 
 > Estado: ⬜ não começou · 🟨 em andamento · ⏸ esperando o Marcelo · ✅ pronto.
+> Cada passo tem um **entregável** (o que existe quando ele acaba) e termina num **checkpoint**: paro, mostro e espero
+> o "segue" (ou ele aprova vários de uma vez). A coluna **Tarefa** diz quem faz (ver "Divisão de tarefas").
 
 ## A migração está completa ✅ (17/11/2026)
 
@@ -54,99 +56,136 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 
 ---
 
+## Divisão de tarefas
+
+> Como na migração: um agente **orquestrador** (na nuvem: este roadmap, as decisões, revisar e juntar as branches,
+> JORNAL/SITUACAO, os pacotes da `teste-binarios`) e agentes com **uma tarefa cada**, descrita em
+> `docs/agentes/<letra>-<nome>.md`. Regras pra quem faz tarefa: [agentes/LEIA-ME.md](agentes/LEIA-ME.md).
+> **Local** = Claude Code no PC do Marcelo (placa de vídeo, BIOS, jogos de verdade). **Nuvem** = sem jogo de verdade.
+
+| Tarefa | O quê | Onde | Branch | Depende de | Fases | Estado |
+|---|---|---|---|---|---|---|
+| **F** | [Jogo pesado A liso hoje](agentes/F-ps2-liso-hoje.md): experimentos curtos que apontam o culpado dos engasgos + cartão de memória | local | `agente-d/ps2-liso` | — | 2, 3 (atalho) | **agora** |
+| **D** | [PS2 liso como o PCSX2](agentes/D-ps2-liso.md): régua de medição, tabela de diferenças, um passo por vez | local | `agente-d/ps2-liso` | F | 1, 3 | aberta |
+| **E** | [Cartão, opções completas e gráficos](agentes/E-ps2-cartao-e-opcoes.md) | local | `agente-d/ps2-liso` | F (parte 1), D (perfis) | 2, 4, 5 | aberta |
+| **G** | Todos os consoles lisos (o método das fases 1–3 no PS1, N64 e WebAssembly) | local + nuvem | a definir | D | 6 | a escrever |
+| **H** | Celular afinado | local (aparelho) | a definir | 0.2 | 7 | a escrever |
+| **O** | Orquestrador: revisar e juntar, pacotes, docs, fase 8 | nuvem | `claude/busy-ritchie-wrvk8h` | — | 0, 8 | contínua |
+
+Arquivos quentes (uma tarefa por vez): `crates/kof-nativo/src/{nucleo,filho,canal}.rs`, `packages/engine/src/nativo.ts`,
+`apps/desktop/src/stores/jogo.ts`, `packages/contracts/*`. F, D e E mexem neles: por isso rodam **em sequência, na mesma
+branch**, não em paralelo.
+
+---
+
 ## Fase 0 · Conferir no uso (os ⏸ que sobraram da migração)
 
 O passo a passo de cada um está em "Pra você testar" do [SITUACAO.md](SITUACAO.md). Bug achado aqui entra como passo
-na fase que cuida daquele assunto (ou na hora, se for grave).
+na fase que cuida do assunto (ou na hora, se for grave).
 
-| # | O quê | Estado |
-|---|---|---|
-| 0.1 | Rede e celular como controle (atalhos novos no Início e no ☰), "jogar no PC" | ⏸ funcionou no teste de 16/11; falta a opinião dos atalhos |
-| 0.2 | APK no celular: PS1/N64 nativos, pasta de ROMs, controle por console, atualizador | ⏸ "mais ou menos certo" (14/11) |
-| 0.3 | Neo Geo, N64, jukebox, estatísticas, tradução, caçador de bugs | ⏸ |
-| 0.4 | Instalar no Windows | ⏸ (precisa de alguém com Windows) |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 0.1 | Rede, atalhos no Início e no ☰, "jogar no PC" | atalhos (feito 16/11) | ele usa e opina | O | ⏸ |
+| 0.2 | APK: PS1/N64 nativos, pasta de ROMs, controle por console, atualizador | APK da `teste-binarios` | ele usa no celular | O | ⏸ |
+| 0.3 | Neo Geo, N64, jukebox, estatísticas, tradução, caçador de bugs | pacote atual | ele usa | O | ⏸ |
+| 0.4 | Instalar no Windows | `KOFstation-instalar.exe` | alguém com Windows instala e abre | O | ⏸ |
 
-## Fase 1 · A régua de medição (tarefa [D](agentes/D-ps2-liso.md), fases 0, 0b e 1)
+## Fase 1 · A régua de medição
 
-| # | O quê | Checkpoint | Estado |
-|---|---|---|---|
-| 1.1 | Banco automático: abre o jogo, carrega um estado, aperta uma sequência fixa e grava fps, p50/p95/p99, engasgos/min, quadros repetidos, CPU por linha, buracos de som | 3 rodadas iguais dão números próximos | ⬜ |
-| 1.2 | Memória por processo (jogo, cada processo do Chromium, `kofstation`), memória livre/swap e o momento de cada engasgo, cruzados | gráfico memória × engasgos do jogo pesado A | ⬜ |
-| 1.3 | Vídeo da janela + contagem de quadros repetidos (o que o olho vê) | o número bate com o que o Marcelo sente | ⬜ |
-| 1.4 | A régua: o PCSX2 de verdade e o KOFstation antigo no mesmo trecho, na mesma máquina | tabela PCSX2 · antigo · novo em `docs/PS2-LISO.md` | ⬜ |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 1.1 | Banco automático | `tools/medir-ps2.mjs`: abre o jogo, carrega um estado, aperta uma sequência fixa e imprime fps, p50/p95/p99, engasgos/min, quadros repetidos, CPU por linha, buracos de som | 3 rodadas iguais dão números próximos | D | ⬜ |
+| 1.2 | Memória × engasgos | memória por processo (jogo, Chromium, `kofstation`), livre/swap e o momento de cada engasgo, no mesmo gráfico | gráfico do jogo pesado A | F → D | ⬜ |
+| 1.3 | O que o olho vê | vídeo da janela + contagem de quadros repetidos | o número bate com o que ele sente | D | ⬜ |
+| 1.4 | A régua | tabela PCSX2 · antigo · novo no mesmo trecho, em `docs/PS2-LISO.md` | ele vê a tabela | D | ⬜ |
 
-## Fase 2 · PS2 sem defeito (tarefa [E](agentes/E-ps2-cartao-e-opcoes.md), parte 1)
+## Fase 2 · PS2 sem defeito
 
-| # | O quê | Checkpoint | Estado |
-|---|---|---|---|
-| 2.1 | Cartão de memória: o jogo salva, fecha, reabre e carrega | teste automático + o Marcelo salva no jogo pesado A | ⬜ |
-| 2.2 | O "pra baixo" no menu de salvar (D-pad × analógico no PS2) | o menu desce com teclado e com controle | ⬜ |
-| 2.3 | Jogo pesado B não morre por memória | abre e joga 10 min | ⬜ |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 2.1 | Cartão de memória | o jogo salva no cartão, fecha, reabre e carrega; teste automático em `kof-nativo/tests` | ele salva no jogo pesado A | F (E parte 1) | ⬜ |
+| 2.2 | O "pra baixo" no menu de salvar | D-pad e analógico corretos no PS2 | o menu desce com teclado e controle | F (E parte 1) | ⬜ |
+| 2.3 | Jogo pesado B sem erro de memória | o motivo achado (log do sistema) e corrigido | ele joga 10 min | D | ⬜ |
 
-## Fase 3 · PS2 liso (tarefa D, fases 2 e 3)
+## Fase 3 · PS2 liso
 
-| # | O quê | Checkpoint | Estado |
-|---|---|---|---|
-| 3.1 | Tabela "o que o PCSX2 faz × o que nós fazemos", com o custo medido de cada diferença | tabela no diário | ⬜ |
-| 3.2 | Os engasgos esporádicos, suspeito por suspeito: lixo de quadros na página, salvar automático pela página, bateria copiada a cada 1 s, shader na 1ª vez, swap | cada um: medido, corrigido ou descartado | ⬜ |
-| 3.3 | Menos RAM: filas menores, quadro no tamanho da tela, estado e bateria pelo Rust, Chromium enxuto | memória total antes × depois | ⬜ |
-| 3.4 | **Janela própria** pro PS2 (o jogo desenha direto na placa, como o PCSX2): desenho mostrado ao Marcelo antes | p99 e engasgos iguais ao PCSX2, X11 e Wayland | ⬜ |
-| 3.5 | Ritmo e linhas (laço pelo relógio com o som se ajustando, MTVU, prioridade das linhas), se a medição pedir | número antes × depois | ⬜ |
-| 3.6 | **"Tão liso quanto o PCSX2"**: os dois jogos pesados, 10 min cada, sem engasgo, e o Marcelo concorda | ⏸ o Marcelo joga | ⬜ |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 3.1 | Os engasgos esporádicos | cada suspeito (salvar automático, bateria a cada 1 s, lixo de quadros, shader na 1ª vez, swap) medido e corrigido ou descartado | números antes × depois | **F** | 🟨 hoje |
+| 3.2 | Menos RAM | filas menores, quadro no tamanho da tela, estado e bateria pelo Rust, Chromium enxuto | memória total antes × depois | F → D | ⬜ |
+| 3.3 | Diferenças do PCSX2 | tabela "PCSX2 × nós" com o custo de cada diferença | tabela no diário | D | ⬜ |
+| 3.4 | Janela própria pro PS2 | o jogo desenha direto na placa (opção experimental primeiro), X11 e Wayland, F3/menu/print funcionando | desenho aprovado antes; p99 igual ao PCSX2 | F/D | ⬜ |
+| 3.5 | Ritmo e linhas | laço pelo relógio, MTVU, prioridade, se a medição pedir | número antes × depois | D | ⬜ |
+| 3.6 | **Liso como o PCSX2** | os dois jogos pesados, 10 min cada, sem engasgo | ⏸ ele joga e concorda | F/D | ⬜ |
 
-## Fase 4 · Opções completas (tarefa E, parte 2)
+## Fase 4 · Opções completas
 
-| # | O quê | Checkpoint | Estado |
-|---|---|---|---|
-| 4.1 | Comando que lista tudo o que o núcleo declara (Rust → contrato → `app-core` → tela) | teste Rust + unit | ⬜ |
-| 4.2 | **Toda opção no menu**: grupos como no PCSX2 (Gráficos, Emulação, Som, Cartão, Correções, Sistema), Avançado com o resto, ⚠ nas perigosas, ⚡/↻ conferidos, "voltar ao perfil" | print da tela com PS2 e PS1 | ⬜ |
-| 4.3 | Perfil **✨ Bonito** (além de ⚡ ⚖ 🎯) e os valores de todos os perfis decididos com a régua | tabela de perfis no diário | ⬜ |
-| 4.4 | Renderer do PS2 escolhível (OpenGL/Vulkan) | medido antes de virar padrão | ⬜ |
-| 4.5 | Remendos de tela larga e 60 fps: desligados por padrão, botão por jogo | um jogo com tela larga funcionando | ⬜ |
-| 4.6 | Os outros consoles com o mesmo menu (o que cada núcleo declarar) | print de cada um | ⬜ |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 4.1 | Lista do núcleo | comando que leva tudo o que o núcleo declara até a tela (Rust → contrato → `app-core`) | teste Rust + unit | E | ⬜ |
+| 4.2 | **Toda opção no menu** | grupos como no PCSX2 (Gráficos, Emulação, Som, Cartão, Correções, Sistema), Avançado, ⚠ nas perigosas, ⚡/↻ conferidos, "voltar ao perfil" | print com PS2 e PS1 | E | ⬜ |
+| 4.3 | Perfil ✨ Bonito | o 4º perfil + os valores de todos os perfis decididos com a régua | tabela no diário | E | ⬜ |
+| 4.4 | Renderer do PS2 | OpenGL/Vulkan escolhível | medido antes de virar padrão | E | ⬜ |
+| 4.5 | Tela larga e 60 fps | desligados por padrão, botão por jogo | um jogo com tela larga | E | ⬜ |
+| 4.6 | Os outros consoles | o mesmo menu com o que cada núcleo declarar | print de cada um | E/G | ⬜ |
 
-## Fase 5 · Gráficos melhores (tarefa E, parte 3)
+## Fase 5 · Gráficos melhores
 
-| # | O quê | Checkpoint | Estado |
-|---|---|---|---|
-| 5.1 | PS2 no núcleo: correções de resolução alta, nitidez (CAS), FXAA, ajuste de cor, texturas HD se houver | antes × depois em print, custo em fps | ⬜ |
-| 5.2 | Filtros da tela (F4, todos os consoles): nitidez, ampliação mais esperta (estilo FSR/xBR), bloom melhor | teste de pixels + print | ⬜ |
-| 5.3 | ✨ Bonito revisto com o que entrou | o Marcelo aprova o visual | ⬜ |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 5.1 | PS2 no núcleo | correções de resolução alta, nitidez (CAS), FXAA, ajuste de cor, texturas HD se houver | print antes × depois + custo em fps | E | ⬜ |
+| 5.2 | Filtros da tela (F4) | nitidez, ampliação estilo FSR/xBR, bloom melhor, pra todos os consoles | teste de pixels + print | E | ⬜ |
+| 5.3 | ✨ Bonito revisto | o perfil com o que entrou | ⏸ ele aprova o visual | E | ⬜ |
 
 ## Fase 6 · Todos os consoles lisos
 
-O mesmo método das fases 1–3 em cada um, com o banco automático (ROM de teste gerada pelo teste quando der; jogo de
-verdade no PC do Marcelo quando precisar).
-
-| # | O quê | Estado |
-|---|---|---|
-| 6.1 | PS1 nativo no PC (PCSX-ReARMed): engasgos, memória, latência | ⬜ |
-| 6.2 | N64 | ⬜ |
-| 6.3 | Os WebAssembly (SNES, Mega Drive, GBA, Neo Geo…): ritmo, abertura, memória da página | ⬜ |
-| 6.4 | Latência de entrada (do botão à tela) medida e comparada com o RetroArch | ⬜ |
-| 6.5 | Abertura do app e da biblioteca grande (tempo até jogar) | ⬜ |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 6.1 | PS1 nativo no PC | engasgos, memória e latência medidos e corrigidos | números + ele joga | G | ⬜ |
+| 6.2 | N64 | idem | idem | G | ⬜ |
+| 6.3 | WebAssembly (SNES, Mega Drive, GBA, Neo Geo…) | ritmo, abertura, memória da página | números | G | ⬜ |
+| 6.4 | Latência de entrada | do botão à tela, comparada com o RetroArch | tabela | G | ⬜ |
+| 6.5 | Abertura | tempo até jogar (app e biblioteca grande) | número antes × depois | G | ⬜ |
 
 ## Fase 7 · Celular afinado
 
-| # | O quê | Estado |
-|---|---|---|
-| 7.1 | Medir no aparelho: abertura, PS1/N64 nativos, bateria, temperatura | ⬜ |
-| 7.2 | O que a fase 0 (0.1, 0.2) apontar | ⬜ |
-| 7.3 | O APK sem depender do APK antigo (as `.so` vindo das Releases do repositório novo) | ⬜ |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 7.1 | Medir no aparelho | abertura, PS1/N64, bateria, temperatura | números do celular dele | H | ⬜ |
+| 7.2 | O que a fase 0 apontar | correções | ele usa | H | ⬜ |
+| 7.3 | APK sem o APK antigo | as `.so` das Releases do repositório novo | APK monta no CI sem o antigo | H | ⬜ |
 
 ## Fase 8 · Casa própria (decisões do Marcelo; anda a qualquer momento)
 
-| # | O quê | Estado |
-|---|---|---|
-| 8.1 | Juntar a branch de trabalho na `main` (PR quando ele pedir) | ⬜ |
-| 8.2 | Chave do atualizador (só ele: `docs/SITUACAO.md`, "Pra você fazer") → cada envio na `main` vira versão e o app se atualiza sozinho | ⏸ |
-| 8.3 | Núcleos e `.so` nas Releases do repositório novo (o novo para de baixar do antigo) | ⬜ |
-| 8.4 | **T.2**: a última versão do antigo avisa e leva pro novo | ⬜ ele decide quando |
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| 8.1 | Juntar na `main` | PR da branch de trabalho | ele pede e aprova | O | ⬜ |
+| 8.2 | Chave do atualizador | cada envio na `main` vira versão e o app se atualiza sozinho | ⏸ ele cria a chave ("Pra você fazer" no SITUACAO) | O | ⏸ |
+| 8.3 | Releases próprias | núcleos e `.so` no repositório novo; o novo para de baixar do antigo | CI sem o antigo | O | ⬜ |
+| 8.4 | T.2 | a última versão do antigo avisa e leva pro novo | ele decide quando | O | ⬜ |
 
 ## Fase 9 · Só depois de tudo acima: emuladores novos
 
-Candidatos (nada decidido; cada um entra pelo mesmo caminho: manifesto com SHA-256, Linux e Windows, testes, régua):
+Nada decidido; cada um entra pelo mesmo caminho (manifesto com SHA-256, Linux e Windows, testes, régua):
 
-- **PS1 com gráfico melhor** no PC (Beetle PSX HW ou SwanStation: resolução alta, PGXP, cor de 24 bits), mantendo o
-  PCSX-ReARMed no celular. Já combinado como "depois" (17/11).
-- Outros consoles que o Marcelo quiser (ex.: PSP, GameCube/Wii, Saturn, DS) — ele escolhe a ordem.
+- **PS1 com gráfico melhor** no PC (Beetle PSX HW ou SwanStation), mantendo o PCSX-ReARMed no celular ("depois", 17/11).
+- Outros consoles que o Marcelo quiser (ex.: PSP, GameCube/Wii, Saturn, DS): ele escolhe a ordem.
+
+---
+
+## Instrução pro Claude Code local (agora: tarefa F)
+
+Na pasta do repositório, no PC do Marcelo:
+
+```bash
+git fetch origin && git checkout claude/busy-ritchie-wrvk8h && git pull && git checkout -B agente-d/ps2-liso
+```
+
+E no Claude Code:
+
+> Leia `AGENTS.md`, `docs/agentes/LEIA-ME.md`, a seção "Regras desta tarefa" de `docs/agentes/D-ps2-liso.md` e
+> `docs/agentes/F-ps2-liso-hoje.md`, e faça a tarefa F (estamos na branch `agente-d/ps2-liso`). Objetivo: eu jogar o
+> jogo pesado A liso hoje e conseguir salvar no cartão. BIOS: (caminho). Jogo pesado A: (caminho). Estado no trecho que
+> engasga: (caminho). Estado no menu de salvar: (caminho, se tiver). Nunca escreva nome de jogo no repositório. Me
+> mostre os números a cada achado e me chame pra jogar quando achar que melhorou. Antes de fazer a janela própria, me
+> mostre o desenho.

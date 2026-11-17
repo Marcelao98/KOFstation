@@ -1,4 +1,6 @@
-# Plano do resto do roadmap em tarefas (orquestração)
+# Plano do resto do roadmap em tarefas (orquestração) — histórico da migração
+
+> **A migração terminou (17/11/2026).** A divisão de tarefas de agora está no [ROADMAP](../ROADMAP.md).
 
 > Combinado em 08/11: o Marcelo usa um agente como **orquestrador** (este plano, as decisões, a revisão e a junção das
 > branches, o JORNAL/ROADMAP/SITUACAO, os pacotes da `teste-binarios`) e outros agentes nas **tarefas** abaixo. Cada

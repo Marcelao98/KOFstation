@@ -21,6 +21,16 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-17 · Roadmap com entregáveis e tarefas; tarefa F (jogo A liso hoje)
+
+**Pedido:** o roadmap novo no mesmo formato do da migração (entregável e divisão de tarefas) e a instrução pro Claude
+local. O que ele quer: "jogar o jogo pesado A liso, liso, hoje".
+**Feito:** cada passo do `docs/ROADMAP.md` ganhou entregável, checkpoint e tarefa; seção "Divisão de tarefas" (F, D, E
+no PC dele, em sequência na mesma branch por mexerem nos mesmos arquivos; G, H depois; O = orquestrador) e a instrução
+pronta no fim. Tarefa nova `docs/agentes/F-ps2-liso-hoje.md`: o atalho de hoje (linha de base, salvar automático,
+bateria a cada 1 s, lixo de quadros, cartão, shader, opções), cada um com experimento curto e número.
+**Onde parou:** o Marcelo cola a instrução no Claude Code local.
+
 ## 2026-11-17 · A migração está completa; roadmap novo
 
 **Pedido:** "novo roadmap: antes de adicionar outros emuladores, otimizar e melhorar o que temos. Agora não é mais
