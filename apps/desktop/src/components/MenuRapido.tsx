@@ -4,6 +4,8 @@ import { nomeDoTema, TODOS_TEMAS, MODOS, nomeModo } from '@kof/domain';
 import { useEffect, useState } from 'react';
 import { acao } from '../app/acoes';
 import { emModoCelular } from '../app/celular';
+import { pcOnline } from '../stores/modoControle';
+import { ATALHOS_DO_CELULAR, usarComoControle, verJogoDoPc } from './AtalhosDaRede';
 import { PROPORCOES, usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarModo } from '../stores/modo';
@@ -50,6 +52,19 @@ function itens(): Item[] {
       so: () => usarTransmissao.getState().ligada,
       f: depois(() => pararTransmissao('o jogo voltou pra TV')),
     },
+    ...(emModoCelular()
+      ? [
+          {
+            t: ATALHOS_DO_CELULAR.ver.t,
+            so: () => !!pcOnline(),
+            f: depois(() => {
+              const pc = pcOnline();
+              if (pc) verJogoDoPc(pc.id);
+            }),
+          },
+          { t: ATALHOS_DO_CELULAR.controle.t, so: () => !!pcOnline(), f: depois(usarComoControle) },
+        ]
+      : []),
     ...(emModoCelular()
       ? [
           { t: '🏠 Início', f: depois(() => acao('home')) },

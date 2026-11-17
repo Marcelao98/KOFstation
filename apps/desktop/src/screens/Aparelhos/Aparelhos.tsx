@@ -8,6 +8,7 @@ import { emModoCelular } from '../../app/celular';
 import { entrarModoControle } from '../../stores/modoControle';
 import { usarRede } from '../../stores/rede';
 import { LerQr } from './LerQr';
+import { AtalhosDaRede } from '../../components/AtalhosDaRede';
 
 function Qr({ texto }: { texto: string }) {
   const svg = useMemo(() => {
@@ -83,13 +84,15 @@ export function Aparelhos() {
         </p>
         <div className="ap-fases">
           <p>
-            <b>✅ Já funciona:</b> parear, ver quem está conectado e <b>usar o celular como controle</b> (no celular:
-            Controles → Usar este celular como controle do PC).
+            <b>✅ Já funciona:</b> parear, ver quem está conectado, <b>ver o jogo do PC no celular</b> e{' '}
+            <b>usar o celular como controle do PC</b> (no celular: os botões aqui embaixo, no Início ou no ☰ do meio do
+            jogo).
           </p>
           <p>
             <b>🔜 Próximas versões:</b> saves e estados sincronizando sozinhos entre os aparelhos.
           </p>
         </div>
+        <AtalhosDaRede onde="aparelhos" />
         <NomeDoAparelho nome={r.eu?.nome ?? ''} />
         <h3>Pareados</h3>
         <ul id="ap-lista" className="ap-lista">

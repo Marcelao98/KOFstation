@@ -181,6 +181,9 @@ for um clone, o zip do pai tem que estar na mesma pasta.
 Com o **KOFstation antigo fechado** (os dois usam a porta 8650) e o APK atual no celular, na mesma Wi-Fi:
 1. PC: 📡 Aparelhos → ➕ Parear um celular. Celular: 📡 Aparelhos → Ler o QR do PC (ou escolha o PC e digite o código).
    O celular tem que aparecer 🟢 conectado no PC.
+   **Novo (16/11):** com os dois conectados, o Início do celular mostra no topo **📺 Ver o jogo do PC aqui** e **🎮 Usar
+   como controle do PC** (também no ☰ do meio do jogo e no 📡 Aparelhos). No PC, com jogo aberto, o Início mostra
+   **📱 Levar o jogo pro celular**. Teste os três e me diga se ficou fácil.
 2. Abra um jogo no PC; no celular, Controles → "Usar este celular como controle do PC": ele vira um jogador.
 3. No celular, 🎮 Jogar no PC: o jogo roda no PC e aparece no celular, com som. No PC: menu rápido → 📱 Levar pro celular /
    📺 Voltar pra TV.

@@ -222,3 +222,89 @@ test('celular como controle pela rede pareada: o PC diz o jogador e o console, e
   await ctxPc.close();
   await ctxCel.close();
 });
+
+test('atalhos da rede (16/11): no Início e no ☰ do meio, ver o jogo do PC aqui e usar o celular como controle', async ({
+  browser,
+}) => {
+  const erros: string[] = [];
+  const ctxPc = await browser.newContext();
+  const ctxCel = await browser.newContext({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+  const pc = await ctxPc.newPage();
+  const cel = await ctxCel.newPage();
+  for (const p of [pc, cel]) p.on('pageerror', (e) => erros.push(e.message));
+  await pc.goto('/');
+  await cel.goto('/?celular=1');
+  const R = (p: Page, f: string, ...a: unknown[]) =>
+    p.evaluate(
+      ([fn, args]) => {
+        const r = (globalThis as unknown as { __kofTeste: { rede: Record<string, unknown> } }).__kofTeste.rede[
+          fn as string
+        ];
+        return typeof r === 'function' ? (r as (...x: unknown[]) => unknown)(...(args as unknown[])) : r;
+      },
+      [f, a] as const,
+    );
+  // sem ninguém conectado, o Início não mostra os atalhos
+  await expect(cel.locator('#home')).toBeVisible();
+  await expect(cel.locator('#atalhos-rede-inicio')).toHaveCount(0);
+  const idCel = (await R(pc, 'adicionar', 'celular', 'Moto', '')) as string;
+  const idPc = (await R(cel, 'adicionar', 'pc', 'PC de teste', '')) as string;
+  for (const [p, id] of [
+    [cel, idPc],
+    [pc, idCel],
+  ] as const)
+    await expect.poll(async () => (await R(p, 'ligar', id, true), await redeOk(p)), { timeout: 10_000 }).toBe(true);
+  const vistos = { pc: 0, cel: 0 };
+  let parou = false;
+  const cabo = (async () => {
+    while (!parou) {
+      for (const [de, para, id, chave] of [
+        [pc, cel, idPc, 'pc'],
+        [cel, pc, idCel, 'cel'],
+      ] as const) {
+        const todos = (await R(de, 'enviados')) as { canal: string; dados: string }[];
+        for (const m of todos.slice(vistos[chave])) await R(para, 'mensagem', id, m.canal, m.dados);
+        vistos[chave] = todos.length;
+      }
+      await new Promise((r) => setTimeout(r, 50));
+    }
+  })();
+  // celular: o Início mostra o PC conectado e os dois botões
+  const atalhos = cel.locator('#atalhos-rede-inicio');
+  await expect(atalhos).toContainText('PC de teste conectado');
+  await expect(atalhos.locator('[data-acao="rede-ver-jogo"]')).toContainText('Ver o jogo do PC aqui');
+  await expect(atalhos.locator('[data-acao="rede-controle"]')).toContainText('Usar como controle do PC');
+  // 🎮 Usar como controle: vira o controle do PC pela rede pareada (sem endereço e senha)
+  await atalhos.locator('[data-acao="rede-controle"]').click();
+  await expect(cel.locator('#modo-controle.ligado .mc-status')).toContainText('PC de teste', { timeout: 15_000 });
+  await cel.locator('.mc-sair').click();
+  await expect(cel.locator('#modo-controle')).toHaveCount(0);
+  // PC: com um jogo aberto e o celular conectado, o Início do PC oferece levar o jogo pro celular
+  await pc.setInputFiles('#arquivo', {
+    name: 'Teste Vermelho.md',
+    mimeType: 'application/octet-stream',
+    buffer: romVermelha(),
+  });
+  await expect(pc.locator('#st-jogo')).toHaveText('Teste Vermelho');
+  await pc.evaluate(() => (document.querySelector('[data-acao="home"]') as HTMLElement | null)?.click());
+  await expect(pc.locator('#atalhos-rede-inicio')).toContainText('Moto conectado');
+  await expect(pc.locator('#atalhos-rede-inicio [data-acao="rede-levar"]')).toBeVisible();
+  // celular com um jogo aberto: o ☰ do meio (menu rápido) tem os dois atalhos
+  await cel.setInputFiles('#arquivo', {
+    name: 'Teste Vermelho.md',
+    mimeType: 'application/octet-stream',
+    buffer: romVermelha(),
+  });
+  await expect(cel.locator('#st-jogo')).toHaveText('Teste Vermelho');
+  await cel.keyboard.press('F2');
+  await expect(cel.locator('#rapido-lista')).toContainText('📺 Ver o jogo do PC aqui');
+  await expect(cel.locator('#rapido-lista')).toContainText('🎮 Usar como controle do PC');
+  // 📺 Ver o jogo do PC aqui: o jogo do PC aparece no celular
+  await cel.locator('#rapido-lista li', { hasText: 'Ver o jogo do PC aqui' }).click();
+  await expect(cel.locator('#modo-controle.ligado .mc-jogo')).toHaveText('Teste Vermelho', { timeout: 25_000 });
+  parou = true;
+  await cabo;
+  expect(erros).toEqual([]);
+  await ctxPc.close();
+  await ctxCel.close();
+});

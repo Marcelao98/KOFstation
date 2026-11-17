@@ -21,6 +21,17 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-16 · Atalhos da rede no Início e no ☰ do meio
+
+**O que aconteceu:** o Marcelo testou o pareamento ("funfou bem") e pediu que ver o jogo do PC e usar o celular como
+controle ficassem à mão, sem ir em Controles. Novo `components/AtalhosDaRede.tsx`: com o outro aparelho pareado e
+conectado, o **Início** (no topo) e o **📡 Aparelhos** mostram, no celular, 📺 Ver o jogo do PC aqui (o Jogar no PC) e
+🎮 Usar como controle do PC (o controle total pela rede pareada, que mexe nos menus e no jogo do PC); no PC, com jogo
+aberto, 📱 Levar o jogo pro celular / 📺 Voltar pra TV. O **☰ do meio** (menu rápido) do celular ganhou os dois itens.
+Nada novo por baixo: chamam as mesmas funções de antes. e2e novo em `celular-pc.spec` (Início, controle, PC, ☰ e ver o
+jogo); `pnpm check` e os 67 e2e passaram.
+**Onde parou:** pacote novo na `teste-binarios` pra ele testar (T-REDE atualizado).
+
 ## 2026-11-14 · O CI da paridade do celular estava vermelho
 
 **O que aconteceu:** os dois últimos envios (o do zip com a ISO e o do controle por console) falharam no CI do Linux no
