@@ -1,8 +1,14 @@
 // Quem monta/desmonta o estado: o Worker (estado-worker.ts) quando o estado é grande e o ambiente tem Worker; senão,
-// aqui mesmo (estado pequeno não compensa a cópia; nos testes do Node não há Worker).
-import { registrar } from './log';
-import { desempacotarEstado, empacotarEstado, type EstadoDoNucleo } from './estado-texto';
+// aqui mesmo (estado pequeno não compensa a cópia; nos testes do Node não há Worker). O aviso de quando cai pra fazer
+// aqui vai pro log do app pelo `avisarEstados` (a engine não conhece o log).
+import { desempacotarEstado, empacotarEstado, type EstadoDoNucleo } from '@kof/domain';
 import type { PedidoDeEstado } from './estado-worker';
+
+let avisar: (mensagem: string) => void = (m) => console.warn('[estados]', m);
+/** Quem recebe o aviso de quando o Worker dos estados não está disponível (o app-core liga no log). */
+export function avisarEstados(f: (mensagem: string) => void): void {
+  avisar = f;
+}
 
 /** Acima disso vai pro Worker (o maior estado do wasm, o do PS1, tem ~4 MB e já travava um pouco no celular). */
 const GRANDE = 1 << 20;
@@ -24,7 +30,7 @@ function oWorker(): Worker | null {
       else e?.falhou(new Error(r.erro ?? 'o estado não pôde ser lido'));
     };
     worker.onerror = (ev) => {
-      registrar('warn', 'estados', `o trabalhador dos estados caiu (${ev.message}); seguindo na página`);
+      avisar(`o trabalhador dos estados caiu (${ev.message}); seguindo na página`);
       for (const e of esperando.values()) e.falhou(new Error('o trabalhador dos estados caiu'));
       esperando.clear();
       worker?.terminate();
@@ -32,11 +38,7 @@ function oWorker(): Worker | null {
       semWorker = true;
     };
   } catch (e) {
-    registrar(
-      'warn',
-      'estados',
-      `sem trabalhador pros estados (${e instanceof Error ? e.message : String(e)}); seguindo na página`,
-    );
+    avisar(`sem trabalhador pros estados (${e instanceof Error ? e.message : String(e)}); seguindo na página`);
     semWorker = true;
   }
   return worker;

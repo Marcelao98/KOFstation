@@ -137,12 +137,12 @@ export function acao(nome: string, valor?: string): boolean {
       void usarEstados.getState().carregarUltimo();
       return true;
     case 'estados':
-      void usarEstados.getState().mostrar(null, 'estados');
+      void usarEstados.getState().mostrar(null);
       return true;
     case 'estados-do-sel': {
       const b = usarBiblioteca.getState();
       const r = b.visiveis[b.selecionada];
-      void usarEstados.getState().mostrar(r?.jogo?.id ?? null, 'estados');
+      void usarEstados.getState().mostrar(r?.jogo?.id ?? null);
       return true;
     }
     case 'auto-toggle':

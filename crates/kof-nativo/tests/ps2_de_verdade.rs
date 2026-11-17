@@ -17,7 +17,14 @@ fn ms(t: Instant) -> f64 {
 fn custo_de_estado_e_bateria_no_ps2() {
     let jogo = PathBuf::from(std::env::var("KOF_JOGO").expect("KOF_JOGO"));
     let bios = PathBuf::from(std::env::var("KOF_BIOS_PS2").expect("KOF_BIOS_PS2"));
-    let lib = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../third_party/cores/nativos/linux-x64/pcsx2_libretro.so");
+    let lib = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../third_party/cores/nativos")
+        .join(kof_nativo::plataforma())
+        .join(if cfg!(windows) {
+            "pcsx2_libretro.dll"
+        } else {
+            "pcsx2_libretro.so"
+        });
     let dir = tempfile::tempdir().unwrap();
     let sistema = dir.path().join("sistema");
     std::fs::create_dir_all(sistema.join("pcsx2/bios")).unwrap();

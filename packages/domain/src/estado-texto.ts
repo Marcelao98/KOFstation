@@ -1,6 +1,6 @@
 // O formato do estado salvo (o mesmo do antigo): o JSON {lr: núcleo, d: base64 do estado} (o Snes9x também com s9x: 1),
-// em gzip na loja `estados` e sem gzip na `autos`. Só funções puras: o Worker (estado-worker.ts) usa as mesmas.
-import { gz, ungz } from '@kof/domain';
+// em gzip na loja `estados` e sem gzip na `autos`. Só funções puras: o Worker da engine (estado-worker.ts) usa as mesmas.
+import { gz, ungz } from './guarda';
 
 export interface EstadoDoNucleo {
   lr?: string;

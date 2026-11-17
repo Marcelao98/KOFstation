@@ -30,7 +30,7 @@ export function Estados() {
         </button>
       </div>
       <div className="abas-estados">
-        <button data-acao="aba-estados" className="ativo" onClick={() => e.mudarAba('estados')}>
+        <button data-acao="aba-estados" className="ativo">
           💾 Estados
         </button>
         <button data-acao="aba-emu" onClick={() => acao('emu-opcoes')}>

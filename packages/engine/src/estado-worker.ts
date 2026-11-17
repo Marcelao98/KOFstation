@@ -1,6 +1,6 @@
 // Monta e desmonta os estados salvos fora da linha da página: com o PS2 (~48 MB de estado) o base64 + gzip na página
 // paravam a tela ~2 s a cada F5, F8 e salvar automático. Pedido: {id, tipo, ...}; resposta: {id, ok, dados|erro}.
-import { desempacotarEstado, empacotarEstado } from './estado-texto';
+import { desempacotarEstado, empacotarEstado } from '@kof/domain';
 
 export type PedidoDeEstado =
   | { id: number; tipo: 'empacotar'; nucleo: string; estado: Uint8Array; comprimir: boolean }

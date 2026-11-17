@@ -1,13 +1,25 @@
 // Savestates (app.js `salvarEstado`/`limitarEstados`/`carregarEstado`/`estadosDe` do antigo), no mesmo formato: os
 // dados são o JSON {lr: núcleo, d: base64 do estado} (o Snes9x também com s9x: 1) comprimido em gzip, e cada estado
 // guarda o print do momento (capa). Na loja `estados`, a chave é "<jogoId>/<quando>".
+import type { EstadoDoNucleo } from '@kof/domain';
+import { avisarEstados, desempacotar, empacotar } from '@kof/engine';
 import type { Armazem } from './armazem';
-import { desempacotar, empacotar } from './estado-trabalho';
-import type { EstadoDoNucleo } from './estado-texto';
 import { mudarJogo } from './jogos';
+import { registrar } from './log';
 import { chaveDoEstado, type MetaEstado } from './saves';
 
-export * from './estado-texto';
+// o formato mora no domain; quem já importava daqui continua importando
+export {
+  b64,
+  bytesDoCapturado,
+  capturado,
+  capturadoDoTexto,
+  deB64,
+  textoDoCapturado,
+  type EstadoDoNucleo,
+} from '@kof/domain';
+
+avisarEstados((m) => registrar('warn', 'estados', m));
 
 export const LIMITES_ESTADOS = [10, 20, 50, 100, 0] as const;
 

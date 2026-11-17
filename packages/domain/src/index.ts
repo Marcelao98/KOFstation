@@ -14,6 +14,7 @@ export * from './busca';
 export * from './capas';
 export * from './config';
 export * from './guarda';
+export * from './estado-texto';
 export * from './modos';
 export * from './entrada';
 export * from './jogadores';

@@ -22,3 +22,4 @@ export * from './oitobits';
 export * from './tocador';
 export * from './violino';
 export * from './bug';
+export { avisarEstados, desempacotar, empacotar } from './estado-trabalho';

@@ -197,9 +197,7 @@ fn catalogo_bate_com_o_que_os_nucleos_declaram() {
         if let Ok(pasta) = std::env::var("KOF_LISTA_OPCOES") {
             let lista: Vec<_> = declaradas
                 .iter()
-                .map(|d| {
-                    serde_json::json!({ "chave": d.chave, "descricao": d.descricao, "valores": d.valores })
-                })
+                .map(|d| serde_json::json!({ "chave": d.chave, "descricao": d.descricao, "valores": d.valores }))
                 .collect();
             let arq = Path::new(&pasta).join(format!("{sistema}.json"));
             std::fs::write(&arq, serde_json::to_string_pretty(&lista).unwrap()).unwrap();
