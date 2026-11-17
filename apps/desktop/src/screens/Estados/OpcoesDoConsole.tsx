@@ -1,7 +1,10 @@
-// Opções de emulação do console (M16.4): perfis ⚡ Rápido / ⚖ Equilibrado / 🎯 Fiel, ajuste fino e Avançado, valendo
-// pro console todo ou só pro jogo aberto. Cada opção diz se vale na hora ou só ao reabrir.
+// Opções de emulação do console (M16.4 + tarefa E): perfis ⚡ Rápido / ⚖ Equilibrado / 🎯 Fiel / ✨ Bonito, grupos como
+// no PCSX2 e o Avançado com TODO o resto que o núcleo declara (nada escondido), valendo pro console todo ou só pro jogo
+// aberto. Cada opção diz se vale na hora ou só ao reabrir; as que podem quebrar o jogo mostram ⚠ e o motivo.
 import {
   DICA_DO_PERFIL,
+  FIXAS_PELO_APP,
+  GRUPOS_DE_OPCAO,
   NOME_DO_PERFIL,
   OPCOES_DE_NUCLEO,
   PERFIS,
@@ -15,14 +18,6 @@ import {
 import { useState } from 'react';
 import { usarEmulacao } from '../../stores/emulacao';
 import { usarJogo } from '../../stores/jogo';
-
-const GRUPOS: [string, string][] = [
-  ['imagem', 'Imagem'],
-  ['velocidade', 'Velocidade'],
-  ['som', 'Som'],
-  ['precisao', 'Precisão'],
-  ['outros', 'Outros'],
-];
 
 const sistemasComCatalogo = (Object.keys(OPCOES_DE_NUCLEO) as SistemaId[]).filter((s) => OPCOES_DE_NUCLEO[s]?.length);
 const nomeDe = (s: string) => SISTEMAS.find((x) => x.id === s)?.nome ?? s;
@@ -41,7 +36,13 @@ function Linha({
   return (
     <label className="emu-op emu-op-nucleo" data-chave={o.def.chave}>
       <span>
+        {o.def.aviso && (
+          <b className="emu-aviso" title={o.def.aviso}>
+            ⚠{' '}
+          </b>
+        )}
         {o.def.nome} {meu && <b title="ajustado por você aqui">•</b>}
+        {o.def.original && <i className="emu-original"> (nome do núcleo)</i>}
       </span>
       <select value={o.valor} onChange={(e) => onMudar(e.target.value)} id={'emuc-' + o.def.chave}>
         {o.def.valores.map((v) => (
@@ -51,6 +52,7 @@ function Linha({
         ))}
       </select>
       <small className="dica">
+        {o.def.aviso && <b className="emu-aviso">⚠ {o.def.aviso}. </b>}
         {o.def.dica} <i>{o.def.naHora ? '⚡ vale na hora' : '↻ vale ao reabrir o jogo'}</i>
         {!meu && herdado !== 'perfil' && ` · vem do ajuste do ${herdado}`}
         {meu && (
@@ -87,7 +89,7 @@ export function OpcoesDoConsole() {
   const mostrar = (avancada: boolean) => resolvidas.filter((o) => !!o.def.avancada === avancada);
 
   const lista = (itens: OpcaoResolvida[]) =>
-    GRUPOS.map(([g, nome]) => {
+    GRUPOS_DE_OPCAO.map(([g, nome]) => {
       const doGrupo = itens.filter((o) => o.def.grupo === g);
       return (
         doGrupo.length > 0 && (
@@ -169,8 +171,19 @@ export function OpcoesDoConsole() {
       {lista(mostrar(false))}
 
       <details id="emu-avancado">
-        <summary>Avançado</summary>
+        <summary>Avançado (tudo o que o núcleo oferece)</summary>
         {lista(mostrar(true))}
+        {sistema === 'ps2' && (
+          <fieldset className="emu-grupo" id="emu-fixas">
+            <legend>Fixas pelo app</legend>
+            {Object.entries(FIXAS_PELO_APP).map(([chave, f]) => (
+              <p key={chave} className="emu-op" data-chave={chave}>
+                <span>{f.nome}</span>
+                <small className="dica">{f.motivo}</small>
+              </p>
+            ))}
+          </fieldset>
+        )}
       </details>
 
       {(daCamada.perfil || daCamada.opcoes) && (

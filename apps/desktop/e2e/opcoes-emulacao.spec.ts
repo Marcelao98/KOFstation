@@ -36,6 +36,11 @@ test('perfis, ajuste fino por console e Avançado no PS2', async ({ page }) => {
   await expect(page.locator('#emu-avancado [data-chave="pcsx2_ee_cycle_rate"]')).toBeHidden();
   await page.click('#emu-avancado summary');
   await expect(page.locator('#emu-avancado [data-chave="pcsx2_ee_cycle_rate"]')).toBeVisible();
+  // tarefa E: o Avançado tem tudo o que o núcleo declara, com ⚠ nas que podem quebrar, e as fixas com o motivo
+  await expect(page.locator('#emu-avancado [data-chave="pcsx2_enable_hw_hacks"]')).toContainText('⚠');
+  await expect(page.locator('#emu-avancado [data-chave="pcsx2_axis_deadzone1"]')).toBeVisible();
+  await expect(page.locator('#emu-fixas [data-chave="pcsx2_renderer"]')).toContainText('OpenGL');
+  await expect(page.locator('#emu-perfil option[value="bonito"]')).toHaveCount(1);
   // apagar os ajustes volta ao perfil geral
   await page.click('#emu-limpar');
   await expect(page.locator('#emuc-pcsx2_ee_cycle_skip')).toHaveValue('Mild Underclock');

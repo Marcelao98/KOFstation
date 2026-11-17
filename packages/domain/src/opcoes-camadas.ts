@@ -27,12 +27,14 @@ export const NOME_DO_PERFIL: Record<Perfil, string> = {
   rapido: '⚡ Rápido',
   equilibrado: '⚖ Equilibrado',
   fiel: '🎯 Fiel',
+  bonito: '✨ Bonito',
 };
 
 export const DICA_DO_PERFIL: Record<Perfil, string> = {
   rapido: 'abre mão de fidelidade pra rodar liso em PC modesto',
   equilibrado: 'o que o KOFstation sempre usou: bom na maioria dos PCs',
   fiel: 'o mais parecido com o console de verdade, pesa mais',
+  bonito: 'o máximo de gráfico que ainda roda liso (resolução e filtros acima do original)',
 };
 
 export const escolhasVazias = (): EscolhasDeEmulacao => ({ geral: PERFIL_PADRAO, consoles: {}, jogos: {} });

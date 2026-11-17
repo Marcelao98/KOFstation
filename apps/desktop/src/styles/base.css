@@ -87,3 +87,7 @@
   font-weight: 400;
   opacity: 0.8;
 }
+
+/* Opções de emulação (tarefa E): ⚠ nas que podem quebrar o jogo, marca do nome original do núcleo */
+.emu-op .emu-aviso { color: #f2b544; font-weight: 600; }
+.emu-op .emu-original { opacity: 0.6; font-size: 0.85em; }

@@ -1,6 +1,15 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { conferirOpcoes, OPCOES_DE_NUCLEO, PERFIS, valoresDoPerfil } from './opcoes-nucleo';
+import { OPCOES_LRPS2 } from './opcoes-lrps2';
+import { TRADUCAO_LRPS2 } from './opcoes-lrps2-pt';
+import {
+  conferirOpcoes,
+  FIXAS_PELO_APP,
+  OPCOES_DE_NUCLEO,
+  opcaoDeclarada,
+  PERFIS,
+  valoresDoPerfil,
+} from './opcoes-nucleo';
 import type { SistemaId } from './sistemas';
 
 const sistemas = Object.keys(OPCOES_DE_NUCLEO) as SistemaId[];
@@ -74,6 +83,44 @@ describe('catálogo de opções de emulação', () => {
         ).toBe(true);
       }
     }
+  });
+
+  describe('PS2: tudo o que o núcleo declara (nada escondido)', () => {
+    const ps2 = OPCOES_DE_NUCLEO.ps2 ?? [];
+    it('cada opção declarada está no catálogo, menos as fixas pelo app', () => {
+      for (const d of OPCOES_LRPS2) {
+        const tem = ps2.some((o) => o.chave === d.chave);
+        expect(tem, d.chave).toBe(!FIXAS_PELO_APP[d.chave]);
+      }
+      expect(OPCOES_LRPS2.length).toBe(82);
+    });
+    it('toda tradução aponta pra uma opção que o núcleo declara', () => {
+      const declaradas = new Set(OPCOES_LRPS2.map((d) => d.chave));
+      for (const k of Object.keys(TRADUCAO_LRPS2)) expect(declaradas.has(k), k).toBe(true);
+    });
+    it('as declaradas sem curadoria vão pro Avançado, com o padrão do núcleo em todo perfil', () => {
+      const extra = ps2.filter((o) => o.chave === 'pcsx2_enable_hw_hacks')[0];
+      expect(extra?.avancada).toBe(true);
+      expect(extra?.grupo).toBe('correcoes');
+      expect(extra?.aviso).toMatch(/pode/);
+      for (const p of PERFIS) expect(extra?.perfis[p]).toBe(extra?.padrao);
+      expect(ps2.find((o) => o.chave === 'pcsx2_shared_memory_cards')?.grupo).toBe('cartao');
+    });
+    it('"(Restart)" no nome do núcleo = só vale ao reabrir; sem tradução, fica o nome original', () => {
+      const o = opcaoDeclarada({
+        chave: 'pcsx2_inventada',
+        descricao: 'Video > Coisa Nova (Restart)',
+        info: 'Does a thing.',
+        categoria: 'video',
+        valores: [
+          { valor: 'disabled', rotulo: null },
+          { valor: 'Fast', rotulo: 'Fast mode' },
+        ],
+        padrao: 'disabled',
+      });
+      expect(o).toMatchObject({ nome: 'Coisa Nova', naHora: false, grupo: 'graficos', original: true });
+      expect(o.valores.map((v) => v.nome)).toEqual(['Desligado', 'Fast mode']);
+    });
   });
 
   describe('conferirOpcoes', () => {

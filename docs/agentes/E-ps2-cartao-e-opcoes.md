@@ -107,4 +107,26 @@ se a parte 1 confirmar o D-pad). Testes: unit do catálogo/camadas, teste Rust d
 
 ## Relatório
 
-*(o agente preenche: o que fez em cada parte, números antes × depois, o que ficou de fora, comandos pra conferir)*
+### Parte 1 (17/11, junto da tarefa F)
+
+O "não desce" era o direcional do PS2 estar em T F G H (as setas são o analógico); o cartão se perdia porque o app
+saía sem fechar o jogo. Detalhes e números em [docs/PS2-LISO.md](../PS2-LISO.md) (Achados 3 e 4).
+
+### Parte 2 (17/11, em andamento)
+
+Feito (escrito com o Marcelo jogando; **testes ainda não rodados**, ver abaixo):
+- `tools/opcoes-lrps2.mjs` gera `packages/domain/src/opcoes-lrps2.ts` com as **82** opções que o LRPS2 declara
+  (do `libretro/libretro_core_options.h` do commit `38d3a83f`; resolve `#ifdef ARCH_ARM64` pro PC e expande as macros
+  de listas). Em vez do comando em tempo de execução, a lista vem do código do núcleo e o teste Rust `opcoes.rs`
+  continua conferindo contra o que o núcleo declara de verdade.
+- `opcoes-lrps2-pt.ts`: português (nome, dica, ⚠ quando pode quebrar) das 57 que o catálogo curado não tinha.
+- Catálogo do PS2 = as 23 curadas + as outras 57 no Avançado (perfis = padrão do núcleo: nada muda no jogo sem o
+  jogador mexer). Fixas pelo app, listadas na tela com o motivo: BIOS e renderizador (o app só tem contexto OpenGL).
+- Grupos como no PCSX2: Gráficos, Emulação, Som, Cartão de memória, Correções do jogo, Sistema, Controle.
+- Perfil **✨ Bonito** em todo console (sem valor próprio = igual ao Fiel). PS2: resolução 2x, anisotrópico 8x, MTVU
+  ligado; **a medir** com o banco da tarefa D antes de confiar que fica liso.
+- Tela: ⚠ com o motivo, "(nome do núcleo)" quando não houver tradução, bloco "Fixas pelo app".
+
+Falta: rodar os testes e regravar a fixture (`KOF_ATUALIZAR_FIXTURES=1 pnpm --filter @kof/domain test`), o mesmo pro
+PS1 (PCSX-ReARMed: gerar a lista completa do mesmo jeito), medir o ✨ Bonito, e os remendos de tela larga/60 fps por
+jogo (já estão no Avançado: `pcsx2_widescreen_hint` curada, `pcsx2_uncapped_framerate_hint` com ⚠).
