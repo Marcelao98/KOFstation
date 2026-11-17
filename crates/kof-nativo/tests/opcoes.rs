@@ -193,6 +193,18 @@ fn catalogo_bate_com_o_que_os_nucleos_declaram() {
         };
         let declaradas = n.opcoes_declaradas();
         assert!(!declaradas.is_empty(), "{sistema}: o núcleo não declarou nenhuma opção");
+        // KOF_LISTA_OPCOES=<pasta>: grava a lista de verdade (o tools/opcoes-do-nucleo.mjs gera o catálogo completo dela)
+        if let Ok(pasta) = std::env::var("KOF_LISTA_OPCOES") {
+            let lista: Vec<_> = declaradas
+                .iter()
+                .map(|d| {
+                    serde_json::json!({ "chave": d.chave, "descricao": d.descricao, "valores": d.valores })
+                })
+                .collect();
+            let arq = Path::new(&pasta).join(format!("{sistema}.json"));
+            std::fs::write(&arq, serde_json::to_string_pretty(&lista).unwrap()).unwrap();
+            eprintln!("{sistema}: lista declarada gravada em {}", arq.display());
+        }
         eprintln!(
             "{sistema}: o núcleo declara {} opções; o catálogo tem {}",
             declaradas.len(),

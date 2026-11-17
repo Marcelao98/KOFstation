@@ -27,12 +27,10 @@ for (const l of readFileSync(arquivo, 'utf8').split('\n')) {
 }
 // as listas de valores repetidas vêm por #define (ex.: PERCENT_0_50): expande o nome pelo corpo
 const macros = new Map();
-const semMacros = linhas
-  .join('\n')
-  .replace(/^#define\s+([A-Z0-9_]+)((?:[^\n]*\\\n)*[^\n]*)$/gm, (_, nome, corpo) => {
-    macros.set(nome, corpo.replace(/\\\n/g, '\n'));
-    return '';
-  });
+const semMacros = linhas.join('\n').replace(/^#define\s+([A-Z0-9_]+)((?:[^\n]*\\\n)*[^\n]*)$/gm, (_, nome, corpo) => {
+  macros.set(nome, corpo.replace(/\\\n/g, '\n'));
+  return '';
+});
 const texto = semMacros.replace(/\b([A-Z][A-Z0-9_]+)\b/g, (m) => macros.get(m) ?? m);
 
 const str = (s) => (s === 'NULL' ? null : JSON.parse(s));

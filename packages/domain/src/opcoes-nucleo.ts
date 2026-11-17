@@ -7,7 +7,7 @@
 // português quando opcoes-lrps2-pt.ts traduz, no Avançado: nada escondido. Fixas pelo app (fora do catálogo, a tela
 // diz por quê): `pcsx2_bios` e `pcsx2_renderer` (FIXAS_PELO_APP).
 import { OPCOES_LRPS2, type OpcaoDeclarada } from './opcoes-lrps2';
-import { TRADUCAO_LRPS2 } from './opcoes-lrps2-pt';
+import { TRADUCAO_LRPS2, type TraducaoDeOpcao } from './opcoes-lrps2-pt';
 import { GB, GBA, GENPLUS, N64, NES, SNES } from './opcoes-nucleo-wasm';
 import type { SistemaId } from './sistemas';
 
@@ -586,14 +586,19 @@ const GRUPO_DA_CATEGORIA: Record<string, GrupoDeOpcao> = {
   emulation: 'emulacao',
   hw_hacks: 'correcoes',
   input: 'controle',
+  audio: 'som',
 };
 
 /**
  * Uma opção que o núcleo declara e o catálogo curado não detalha: vai pro Avançado, com o padrão do núcleo nos perfis
  * (os perfis não mexem nela), em português quando há tradução. "(Restart)" no nome = só vale ao reabrir.
  */
-export function opcaoDeclarada(d: OpcaoDeclarada, grupo?: GrupoDeOpcao): OpcaoDeNucleo {
-  const t = TRADUCAO_LRPS2[d.chave];
+export function opcaoDeclarada(
+  d: OpcaoDeclarada,
+  grupo?: GrupoDeOpcao,
+  traducao: Readonly<Record<string, TraducaoDeOpcao>> = TRADUCAO_LRPS2,
+): OpcaoDeNucleo {
+  const t = traducao[d.chave];
   const nomeOriginal = d.descricao.replace(/^[^>]*>\s*/, '').replace(/\s*\(Restart\)\s*$/, '');
   return {
     chave: d.chave,
@@ -602,7 +607,10 @@ export function opcaoDeclarada(d: OpcaoDeclarada, grupo?: GrupoDeOpcao): OpcaoDe
     grupo:
       grupo ??
       (d.chave === 'pcsx2_shared_memory_cards' ? 'cartao' : (GRUPO_DA_CATEGORIA[d.categoria ?? ''] ?? 'correcoes')),
-    valores: d.valores.map((x) => ({ valor: x.valor, nome: t?.valores?.[x.valor] ?? SIM_NAO[x.valor] ?? x.rotulo ?? x.valor })),
+    valores: d.valores.map((x) => ({
+      valor: x.valor,
+      nome: t?.valores?.[x.valor] ?? SIM_NAO[x.valor] ?? x.rotulo ?? x.valor,
+    })),
     padrao: d.padrao,
     naHora: !d.descricao.includes('(Restart)'),
     perfis: igual(d.padrao),

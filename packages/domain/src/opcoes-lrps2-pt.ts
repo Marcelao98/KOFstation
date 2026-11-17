@@ -52,7 +52,11 @@ export const TRADUCAO_LRPS2: Readonly<Record<string, TraducaoDeOpcao>> = {
     nome: 'Ampliação nativa',
     dica: 'Como desenhar efeitos de pós-processamento quando a resolução interna é maior que a original.',
   },
-  pcsx2_pgs_ssaa: { nome: 'Supersampling (paraLLEl)', dica: 'Anti-serrilhado do renderizador paraLLEl.', aviso: SO_PARALLEL },
+  pcsx2_pgs_ssaa: {
+    nome: 'Supersampling (paraLLEl)',
+    dica: 'Anti-serrilhado do renderizador paraLLEl.',
+    aviso: SO_PARALLEL,
+  },
   pcsx2_pgs_high_res_scanout: {
     nome: 'Saída em alta resolução (paraLLEl)',
     dica: 'Imagem acima da original no renderizador paraLLEl.',
@@ -138,23 +142,55 @@ export const TRADUCAO_LRPS2: Readonly<Record<string, TraducaoDeOpcao>> = {
     dica: 'Sem isto ligado, as correções abaixo não valem. O núcleo já aplica as certas por jogo sozinho.',
     aviso: CORRECAO,
   },
-  pcsx2_cpu_sprite_size: { nome: 'Tamanho do sprite pelo processador', dica: 'Desenha sprites pequenos no processador.', aviso: CORRECAO },
-  pcsx2_cpu_sprite_level: { nome: 'Nível do sprite pelo processador', dica: 'Quais sprites vão pro processador.', aviso: CORRECAO },
-  pcsx2_software_clut_render: { nome: 'Paleta (CLUT) por software', dica: 'Desenha paletas no processador.', aviso: CORRECAO },
-  pcsx2_auto_flush: { nome: 'Descarga automática', dica: 'Conserta efeitos de sombra/luz em alguns jogos.', aviso: CORRECAO },
-  pcsx2_texture_inside_rt: { nome: 'Textura dentro do alvo', dica: 'Conserta efeitos que leem a própria imagem.', aviso: CORRECAO },
-  pcsx2_disable_depth_conversion: { nome: 'Sem conversão de profundidade', dica: 'Pode tirar efeitos quebrados.', aviso: CORRECAO },
+  pcsx2_cpu_sprite_size: {
+    nome: 'Tamanho do sprite pelo processador',
+    dica: 'Desenha sprites pequenos no processador.',
+    aviso: CORRECAO,
+  },
+  pcsx2_cpu_sprite_level: {
+    nome: 'Nível do sprite pelo processador',
+    dica: 'Quais sprites vão pro processador.',
+    aviso: CORRECAO,
+  },
+  pcsx2_software_clut_render: {
+    nome: 'Paleta (CLUT) por software',
+    dica: 'Desenha paletas no processador.',
+    aviso: CORRECAO,
+  },
+  pcsx2_auto_flush: {
+    nome: 'Descarga automática',
+    dica: 'Conserta efeitos de sombra/luz em alguns jogos.',
+    aviso: CORRECAO,
+  },
+  pcsx2_texture_inside_rt: {
+    nome: 'Textura dentro do alvo',
+    dica: 'Conserta efeitos que leem a própria imagem.',
+    aviso: CORRECAO,
+  },
+  pcsx2_disable_depth_conversion: {
+    nome: 'Sem conversão de profundidade',
+    dica: 'Pode tirar efeitos quebrados.',
+    aviso: CORRECAO,
+  },
   pcsx2_use_external_gameindex: {
     nome: 'Banco de jogos externo',
     dica: 'Usa um GameIndex.yaml da pasta do sistema em vez do embutido no núcleo.',
   },
-  pcsx2_framebuffer_conversion: { nome: 'Conversão do framebuffer', dica: 'Conserta cores erradas em alguns jogos.', aviso: CORRECAO },
+  pcsx2_framebuffer_conversion: {
+    nome: 'Conversão do framebuffer',
+    dica: 'Conserta cores erradas em alguns jogos.',
+    aviso: CORRECAO,
+  },
   pcsx2_disable_partial_invalidation: {
     nome: 'Sem invalidação parcial',
     dica: 'Conserta texturas que piscam em alguns jogos.',
     aviso: CORRECAO,
   },
-  pcsx2_gpu_palette_conversion: { nome: 'Paleta na placa de vídeo', dica: 'Converte paletas na placa.', aviso: CORRECAO },
+  pcsx2_gpu_palette_conversion: {
+    nome: 'Paleta na placa de vídeo',
+    dica: 'Converte paletas na placa.',
+    aviso: CORRECAO,
+  },
   pcsx2_half_pixel_offset: {
     nome: 'Meio pixel (alta resolução)',
     dica: 'Tira linhas e bordas borradas que aparecem ao aumentar a resolução interna.',
@@ -202,8 +238,14 @@ function porta(n: 1 | 2): Record<string, TraducaoDeOpcao> {
       nome: `${p}: sensibilidade do analógico`,
       dica: 'Acima de 100% a alavanca chega no máximo antes do fim do curso.',
     },
-    [`pcsx2_invert_left_stick${n}`]: { nome: `${p}: inverter o analógico esquerdo`, dica: 'Inverte os eixos escolhidos.' },
-    [`pcsx2_invert_right_stick${n}`]: { nome: `${p}: inverter o analógico direito`, dica: 'Inverte os eixos escolhidos.' },
+    [`pcsx2_invert_left_stick${n}`]: {
+      nome: `${p}: inverter o analógico esquerdo`,
+      dica: 'Inverte os eixos escolhidos.',
+    },
+    [`pcsx2_invert_right_stick${n}`]: {
+      nome: `${p}: inverter o analógico direito`,
+      dica: 'Inverte os eixos escolhidos.',
+    },
     [`pcsx2_analog_mode${n}`]: {
       nome: `${p}: começar no modo analógico`,
       dica: 'Liga o modo analógico (a luz ANALOG do controle) ao abrir o jogo.',
