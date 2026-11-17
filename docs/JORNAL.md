@@ -21,6 +21,16 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-17 · Decisões das opções e os engasgos por memória (pras tarefas D e E)
+
+**Decidido com o Marcelo:** toda opção do núcleo aparece no menu (grupos como o PCSX2 + Avançado com o resto, nada
+escondido); entra o perfil **✨ Bonito**; tela larga e 60 fps desligados por padrão com botão por jogo; **o PS1 fica no
+PCSX-ReARMed por enquanto** (trocar depois). Ordem: cartão → engasgos e memória → opções → gráficos.
+**Engasgos:** continuam esporádicos no jogo pesado A; ele desconfia de RAM. Li o código: suspeitos em ordem são o lixo
+de quadros na página (um `ArrayBuffer` novo por quadro), o salvar automático do nativo pela página, a bateria copiada a
+cada 1 s, shader na 1ª vez e swap. Viraram a "Fase 0b" da tarefa D; a parte 3 (gráficos) entrou na tarefa E.
+**Onde parou:** o Marcelo cola o texto do fim da tarefa E no Claude Code local.
+
 ## 2026-11-17 · Tarefa E (cartão do PS2 e opções completas) e o novo substitui o antigo
 
 **Pedido:** o Marcelo jogou o jogo pesado A no novo: roda relativamente liso, **engasga em alguns momentos**, e **no

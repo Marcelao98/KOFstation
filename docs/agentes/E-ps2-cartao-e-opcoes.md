@@ -72,12 +72,36 @@ pedido novo), `packages/contracts/**` (o comando novo), `crates/kof-app/src/**` 
 se a parte 1 confirmar o D-pad). Testes: unit do catálogo/camadas, teste Rust da lista declarada, e2e da tela
 (`apps/desktop/e2e/opcoes-emulacao.spec.ts`).
 
+### Decidido com o Marcelo (17/11) pra parte 2
+
+- **Toda opção aparece no menu, nada escondido.** Organização: perfis em cima; grupos abertos (Gráficos, Emulação,
+  Som, Cartão de memória, Correções, Sistema) com nome em português e dica; o **Avançado** (fechado até clicar) com
+  todo o resto que o núcleo declara, com o nome original quando não houver tradução. Opção que pode quebrar o jogo ou
+  derrubar o fps aparece com ⚠ e o motivo. Cada uma diz ⚡ vale na hora / ↻ ao reabrir e se está mudada só neste jogo.
+  Botão "voltar ao perfil".
+- **Perfil novo ✨ Bonito**: o máximo de gráfico que a máquina aguenta **liso** (medido com o banco da tarefa D),
+  além de ⚡ Rápido, ⚖ Equilibrado e 🎯 Fiel. Vale pra todo console com catálogo (`PERFIS` em `opcoes-nucleo.ts`).
+- **Remendos de tela larga e 60 fps**: desligados por padrão, um botão por jogo (camada "jogo"), com ⚠ "pode quebrar".
+- **PS1 continua no PCSX-ReARMed** por enquanto (trocar por um emulador com gráfico melhor é depois, decisão dele).
+  O PS1 do PC ganha as opções que o núcleo dele declara e os filtros da tela.
+
+### Parte 3 · Gráficos melhores (depois da parte 2)
+
+1. **No núcleo do PS2**, se ele declarar (confira na lista da parte 2): correções pra resolução alta (alinhar
+   sprites, meio pixel, arredondar sprites…), nitidez adaptativa (CAS), FXAA, ajuste de brilho/contraste/saturação
+   ("shade boost"), renderer OpenGL/Vulkan, remendos de tela larga/60 fps/sem entrelaçamento, texturas em HD (se houver).
+   Cada uma com número de custo (fps, p99) no `docs/PS2-LISO.md`; o ✨ Bonito usa as que couberem lisas.
+2. **Filtros da tela** (painel F4, `packages/engine/src/visual/kofvisual.js` + `render.ts`, valem pra qualquer console):
+   pelo D38 o arquivo agora pode mudar (o teste `visual.test.ts` que exige igualdade com o antigo passa a conferir
+   só que os ajustes antigos continuam dando os mesmos pixels). Acrescentar: nitidez (estilo CAS), ampliação mais
+   esperta (estilo FSR 1 / xBR melhor) e bloom mais caprichado. Teste de pixels pra cada ajuste novo.
+
 ## Pra começar (o Marcelo cola no Claude Code local, na pasta do repositório)
 
 > Leia `AGENTS.md`, `docs/agentes/LEIA-ME.md`, `docs/agentes/D-ps2-liso.md` e `docs/agentes/E-ps2-cartao-e-opcoes.md`.
 > `git fetch origin && git checkout claude/busy-ritchie-wrvk8h && git pull && git checkout -B agente-d/ps2-liso`.
-> Faça nesta ordem: tarefa E parte 1 (cartão e o "pra baixo"), tarefa D Fases 0–2 com o trecho que engasga, tarefa E
-> parte 2 (opções completas), tarefa D Fase 3. A BIOS e os jogos estão em: (caminhos aqui). O jogo pesado A é (arquivo)
+> Faça nesta ordem: tarefa E parte 1 (cartão e o "pra baixo"), tarefa D Fases 0–2 com o trecho que engasga e a
+> memória, tarefa E parte 2 (opções completas, perfil ✨ Bonito), tarefa D Fase 3, tarefa E parte 3 (gráficos). A BIOS e os jogos estão em: (caminhos aqui). O jogo pesado A é (arquivo)
 > e o B é (arquivo). Nunca escreva nome de jogo no repositório. Pare e me mostre ao fim de cada parte (print, números,
 > o que mudou), e antes de fazer o modo janela própria.
 

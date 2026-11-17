@@ -74,6 +74,32 @@ Sem isso o resto é achismo. Um comando só (ex.: `node tools/medir-ps2.mjs`) qu
 Confira que o banco **enxerga** o que o Marcelo sente: grave também um vídeo curto da janela (ex.: `ffmpeg` com
 `x11grab`/`kmsgrab` ou PipeWire) e conte quadros repetidos nele, porque "número bom e imagem engasgando" já aconteceu.
 
+### Fase 0b · Os engasgos esporádicos e a memória (17/11)
+
+O Marcelo: no jogo pesado A os engasgos **continuam**, em momentos esporádicos (não o tempo todo), e ele desconfia de
+**RAM** ("o KOFstation está consumindo muita RAM"). O banco da Fase 0 tem que gravar, por segundo: a memória de cada
+processo (o filho `--nativo`, cada processo do Chromium, o `kofstation`), a memória livre e a swap do sistema, e o
+**momento exato de cada engasgo**, pra cruzar. Suspeitos, em ordem (confirme com número antes de mexer):
+
+1. **Lixo de quadros na página**: cada quadro chega pela WebSocket como um `ArrayBuffer` novo (4–10 MB conforme a
+   resolução, 60 por segundo; `packages/engine/src/nativo.ts`, `receber`). O coletor de lixo do Chromium para de vez em
+   quando = engasgo esporádico + RAM alta. Conferir com o perfil de desempenho do Chromium (pausas de GC) ou com
+   `performance.measureUserAgentSpecificMemory`/`--js-flags=--trace-gc` no modo de teste.
+2. **Salvar automático** (`apps/desktop/src/stores/auto.ts`, no nativo no mínimo a cada 2 min): o estado do PS2 (dezenas
+   de MB) é gerado parando o laço do filho e atravessa a página. Engasgo a cada ~2 min = ele. Teste: desligar o
+   automático e ver se some.
+3. **Bateria conferida a cada 1 s** (`nativo.ts`, `conferirSram`; `nucleo.rs` `bateria()` copia toda a
+   `RETRO_MEMORY_SAVE_RAM`): no PS2 pode ser o cartão (8 MB) copiado e comparado todo segundo. Liga com a tarefa E parte 1.
+4. **Shader montado na primeira vez** que um efeito aparece (o clássico do PCSX2): engasga na 1ª passagem e não na 2ª.
+5. **RAM do sistema cheia → swap** (Chromium inteiro + o PS2, ~1,5–2 GB, + filas: até 6 quadros em `canal.rs` e 3 em
+   `fila-de-quadros.ts`).
+
+Correções candidatas, uma por vez e medidas: o Rust compara a bateria e só manda quando muda; o salvar automático do
+nativo é gravado pelo Rust direto no disco (comprimido, fora do laço quando der) e a página só recebe "salvo"; filas
+menores; quadro no tamanho da tela quando a resolução interna for maior; enxugar o Chromium (o que o app não usa); e
+o grande, **a janela própria** (Fase 3, item 1), que tira a imagem da página e resolve RAM e esse tipo de engasgo de uma
+vez. Critério: nenhum engasgo esporádico no trecho de teste e memória total anotada antes × depois no diário.
+
 ### Fase 1 · A régua: o PCSX2 de verdade na mesma máquina
 
 Instale o PCSX2 oficial (pacote da distribuição, Flatpak ou AppImage do site do projeto) e meça **os mesmos trechos**,
