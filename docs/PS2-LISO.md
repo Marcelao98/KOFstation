@@ -131,3 +131,8 @@ O perfil ✨ Bonito do PS2 (resolução interna 2x, anisotrópico 8x, MTVU ligad
 Marcelo. Ainda sem número: medir cada peça separada com o banco (`--opcao pcsx2_upscale_multiplier=2x`, depois só o
 anisotrópico, depois só o MTVU) e deixar no Bonito só o que couber liso. Suspeita principal: a resolução 2x (quatro
 vezes os pixels, e a página recebe cada quadro 4× maior).
+
+Atualização (17/11, à noite): o Marcelo aumentou só a **resolução interna** pelo painel e jogou o jogo pesado A
+"de boa". Então a 2x sozinha cabe; a suspeita do engasgo do Bonito passa pro **anisotrópico 8x** ou o **MTVU**
+(a medir). O resumo de tudo pra quem for fazer o próximo núcleo pesado está em
+[NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md).

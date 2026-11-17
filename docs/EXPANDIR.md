@@ -62,6 +62,8 @@ apps/desktop (telas React, stores Zustand)  →  packages/app-core (casos de uso
    em `domain/capas.ts`; ações e nomes dos botões em `domain/entrada.ts`.
 4. Teste de paridade em `packages/engine/test/` (ROM gerada; com `KOF_ANTIGO=<pasta do kofstation-old>` compara com o
    adaptador do antigo quadro a quadro).
+5. Núcleo nativo pesado (PS2, GameCube/Wii…): leia antes [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md)
+   (caminho do quadro, estados grandes, cartão de memória, opções geradas, como medir).
 
 ### Filtro de imagem ou moldura
 
