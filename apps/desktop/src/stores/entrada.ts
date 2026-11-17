@@ -1,7 +1,8 @@
 // Os controles que valem agora (aplicarControles do antigo): o mapa do console e do jogo aberto, refeito ao abrir um jogo
 // e quando a tela Controles muda alguma coisa. Sem jogo, vale o do SNES.
-import { acoesDe, ANALOGICO, montarEntrada, type Entrada } from '@kof/domain';
+import { acoesDe, ANALOGICO, dicaDoDirecional, montarEntrada, type Entrada } from '@kof/domain';
 import { create } from 'zustand';
+import { usarAvisos } from './avisos';
 import { config } from './config';
 import { depoisDeAbrirJogo, usarJogo } from './jogo';
 
@@ -36,7 +37,14 @@ export function marcarConsole(sis: string, nativo: boolean): void {
   b.classList.toggle('nativo', nativo);
 }
 
+let dicaDada = false;
 depoisDeAbrirJogo.add(() => {
   usarEntrada.getState().aplicar();
+  // uma vez por abertura do app: no PS2 o direcional não está nas setas (os menus do cartão só leem ele)
+  const dica = dicaDada ? null : dicaDoDirecional(usarEntrada.getState().entrada, sisAtual());
+  if (dica) {
+    dicaDada = true;
+    usarAvisos.getState().avisar(dica, 6000);
+  }
   marcarConsole(sisAtual(), !!(usarJogo.getState().jogo as { nativo?: boolean } | null)?.nativo);
 });

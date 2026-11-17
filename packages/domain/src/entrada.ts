@@ -219,6 +219,18 @@ export interface Entrada {
   botoes: [number, number][];
 }
 
+/**
+ * No PS2 as setas são o analógico e o direcional fica em outras teclas (T F G H por padrão). Os menus que só leem o
+ * direcional (o "salvar no cartão?" de alguns jogos) não descem com as setas: a dica diz quais teclas usar. Null quando
+ * o console não separa os dois ou quando o direcional está nas mesmas teclas do analógico.
+ */
+export function dicaDoDirecional(e: Entrada, sis: string): string | null {
+  if (sis !== 'ps2') return null;
+  const d = ['Cima', 'Esquerda', 'Baixo', 'Direita'].map((n) => e.mapa[n]);
+  if (d.some((t) => !t) || d.some((t) => t && e.teclasEixo[t])) return null;
+  return `PS2: setas = analógico · ${d.map(nomeTecla).join(' ')} = direcional (menus do cartão)`;
+}
+
 export function montarEntrada(ler: (k: string) => string | null, sis: string, jogo?: string | null): Entrada {
   const usa = new Set(acoesDe(sis));
   const mapa = mapaDe(ler, 'teclas', sis, jogo);

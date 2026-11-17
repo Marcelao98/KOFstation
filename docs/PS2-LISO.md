@@ -87,9 +87,10 @@ tarefa F).
 No PS2, as **setas** são o **analógico** e o **direcional** fica em **T F G H** (`DIRECIONAL_ANALOG` em
 `packages/domain/src/entrada.ts`). A pergunta "salvar no cartão?" do jogo pesado A só lê o direcional: o "pra baixo" é
 o **G**. Tentado: fazer o analógico apertar o direcional também (modo "misto", como o PS1). O menu desceu, mas
-no jogo o direcional troca de arma e as setas passaram a trocar de arma enquanto ele andava. **Desfeito.** Fica:
-- mostrar na tela, ao abrir um jogo de PS2, que o direcional é T F G H (ou na tela Controles), e
-- o controle de verdade já separa os dois (alavanca = analógico, cruz = direcional).
+no jogo o direcional troca de arma e as setas passaram a trocar de arma enquanto ele andava. **Desfeito.** Feito no lugar: ao abrir um jogo de PS2 (uma vez por abertura do app), o aviso
+"PS2: setas = analógico · T F G H = direcional (menus do cartão)", com as teclas que estiverem configuradas
+(`dicaDoDirecional` em `packages/domain/src/entrada.ts`, chamado em `apps/desktop/src/stores/entrada.ts`). O controle de
+verdade já separa os dois (alavanca = analógico, cruz = direcional).
 
 ### Achado 4 · Cartão de memória
 

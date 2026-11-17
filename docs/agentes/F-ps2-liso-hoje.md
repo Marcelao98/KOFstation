@@ -80,4 +80,18 @@ Veja o bloco "Instrução pro Claude Code local" no fim do [ROADMAP](../ROADMAP.
 
 ## Relatório
 
-*(o agente preenche: o que achou em cada passo, números antes × depois, o que corrigiu, o que ficou pra D/E)*
+Detalhes e números em [docs/PS2-LISO.md](../PS2-LISO.md) (17/11). Resumo:
+
+- **Passo 2/estado (feito):** a travada ao salvar/carregar estado e no salvar automático era a página (base64 byte a
+  byte 2,1 s + gzip 1,6 s + cópia do fetch 0,5 s, com 48 MB), não o núcleo (40 ms). Corrigido em `packages/app-core`
+  (base64 nativo, Worker, Blob). Medido no Chrome isolado: parada da tela 1.617 → 33 ms. No app: F5 2,2 → 1,5 s antes do
+  Blob; com o Blob, falta medir.
+- **Passo 3 (feito, sem mudança):** a bateria do PS2 tem 0 bytes; pedir a cada 1 s não custa nada.
+- **Memória:** a máquina tem 7,2 GB e estava com 4,6 GB na swap (o Firefox ~2 GB); o processo do jogo foi parar
+  parcialmente na swap. Orientação: fechar o Firefox pra jogar.
+- **Passo 5 ("não desce"):** o direcional do PS2 é T F G H, as setas são o analógico. Aviso na tela ao abrir PS2. O
+  modo "misto" (analógico aperta o direcional) foi tentado e desfeito: no jogo pesado A o direcional troca de arma.
+- **Passo 5 (cartão):** o `Mcd001.ps2` (slot 1) está todo 0xFF (nunca formatado); o slot 2 está formatado. Falta ver
+  se o jogo formata quando pede e se grava (agora que dá pra escolher no menu).
+- **Ficou pra depois:** passo 4 (fila de quadros / GC / janela própria, com desenho antes), passo 6 (shader: o cache
+  `gl_programs.bin` existe), passo 7 (opções), o `WebSocket.send` de 48 MB no F8 (~255 ms).
