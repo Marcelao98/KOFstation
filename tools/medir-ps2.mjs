@@ -112,7 +112,7 @@ function processos() {
 }
 
 /** Roda na página: a cada vsync anota o instante e uma assinatura miúda do canvas do jogo (novo ou repetido?). */
-function instalarSonda({ segundos }) {
+function instalarSonda({ segundos, leve }) {
   const w = document.createElement('canvas');
   w.width = 64;
   w.height = 36;
@@ -126,6 +126,9 @@ function instalarSonda({ segundos }) {
     const laco = (t) => {
       if (t > fim) return ok(amostras);
       requestAnimationFrame(laco);
+      // --sonda-leve: só o relógio de cada vsync (ler a tela espera a placa e pesa por conta própria); aí "quadro novo"
+      // não é medido e cada vsync conta como novo
+      if (leve) return void amostras.push([t, amostras.length]);
       const c = document.querySelector('#tela');
       if (!c || !g) return;
       g.drawImage(c, 0, 0, 64, 36);
@@ -353,7 +356,7 @@ async function rodada(n) {
     await dormir(aquecer * 1000);
     await print(`${rotulo}-${qual}-${n}-2-trecho`);
     const inicioTrecho = Date.now() - aberto;
-    await page.evaluate(instalarSonda, { segundos });
+    await page.evaluate(instalarSonda, { segundos, leve: tem('sonda-leve') });
     const teclas = [];
     let mexendo = MEXER;
     const mexer = (async () => {
@@ -395,7 +398,7 @@ async function rodada(n) {
         console.log(
           `perfil ${tecla}: ` +
             Object.entries(dt)
-              .filter(([k]) => !k.startsWith('(idle)') && !k.startsWith('(program)'))
+              .filter(([k]) => !k.startsWith('(idle)'))
               .sort((a, b) => b[1] - a[1])
               .slice(0, 12)
               .map(([k, v]) => `${Math.round(v)} ms ${k}`)

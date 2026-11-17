@@ -56,12 +56,17 @@ No app de verdade (3 min jogando, F5, F5 e F8, sonda ligada):
 |---|---|---|---|---|
 | antes (página de hoje)¹ | 1.666–2.166 ms | 0–1.666 ms | 106–115 | 26,4–26,8 ms |
 | + base64 rápido + Worker | 1.466–1.533 ms | 650 ms | 98 | 26,2 ms |
-| + Blob no `fetch` | *a medir* | | | |
+| + Blob no `fetch` (3 min mexendo, sonda pesada) | 983–1.017 ms | 1.266 ms | 68 | 26,0 ms |
+| + Blob, sonda leve (só o relógio do vsync, 2 × 40 s) | 600–717 ms | 467–500 ms | 15–33 | 24,2–25,0 ms |
 
 ¹ a primeira medição pode ter rodado com a página antiga ou já com o base64 rápido (o binário de teste não foi conferido
 antes dela); o "antes" seguro é o do Chrome isolado acima.
 
-O que sobrou de parada no F5 com o Worker, pelo profiler: `fetch` ~490 ms (resolvido com o Blob, falta medir) e
+Com tudo junto, o código do app no F5 gasta ~100 ms; o resto da parada (~0,5 s) é o próprio Chrome recebendo os 48 MB
+do estado pela WebSocket ("(program)" no profiler) e, no F8, mandando (`send`, ~200 ms). Próximo passo: o estado não
+passa mais pela página (o processo do jogo grava num arquivo de troca e o Rust do app converte e guarda).
+
+Antes do Blob, pelo profiler: `fetch` ~490 ms (resolvido com o Blob, falta medir) e
 `getImageData` 470–680 ms, que é da própria sonda da medição. No F8: `WebSocket.send` dos 48 MB pro processo do jogo,
 ~255 ms (próximo passo: mandar o estado pelo disco ou em pedaços).
 
