@@ -7,7 +7,7 @@ use kof_nativo::ProcessoNativo;
 use serde_json::Value;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 /// Sistemas com núcleo nativo na pasta `nativo/` (ou no repositório, rodando do código).
 pub fn sistemas() -> Vec<&'static str> {
@@ -40,7 +40,22 @@ impl ArgsAbrir {
 
 #[derive(Default)]
 pub struct Nativos {
-    atual: Mutex<Option<ProcessoNativo>>,
+    atual: Arc<Mutex<Option<ProcessoNativo>>>,
+}
+
+/// Fecha o jogo nativo aberto de outra linha (o fim do programa): o processo do jogo fecha com calma e o núcleo grava o
+/// que guardava na memória. O cartão de memória do PS2 fica num buffer de 64 KB do núcleo até o cartão fechar; com o
+/// `process::exit` direto ao fechar a janela, o save feito no jogo se perdia.
+#[derive(Clone)]
+pub struct Fechador(Arc<Mutex<Option<ProcessoNativo>>>);
+
+impl Fechador {
+    pub fn fechar(&self) {
+        if let Some(p) = self.0.lock().unwrap_or_else(|e| e.into_inner()).take() {
+            let s = p.fechar();
+            tracing::info!(?s, "jogo nativo fechado");
+        }
+    }
 }
 
 /// Nome de arquivo simples (sem pasta, sem `..`): as BIOS vão pro /sistema com o nome da chave.
@@ -120,10 +135,11 @@ impl Nativos {
     }
 
     pub fn fechar(&self) {
-        if let Some(p) = self.atual.lock().unwrap_or_else(|e| e.into_inner()).take() {
-            let s = p.fechar();
-            tracing::info!(?s, "jogo nativo fechado");
-        }
+        self.fechador().fechar();
+    }
+
+    pub fn fechador(&self) -> Fechador {
+        Fechador(Arc::clone(&self.atual))
     }
 
     /// Últimas linhas do log do processo e se ele ainda está vivo (o caçador de bugs manda junto quando cai).

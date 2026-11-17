@@ -12,7 +12,16 @@
 //
 // Saída: uma linha por rodada e a variação entre elas; o JSON completo em <medidas>/resultados/.
 import { spawn } from 'node:child_process';
-import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  statSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs';
 import { createRequire } from 'node:module';
 import { homedir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
@@ -182,6 +191,26 @@ async function rodada(n) {
   });
   let nav;
   const fechar = async () => {
+    // --fechar-janela: fecha o navegador como quem clica no X e espera o app sair sozinho (o caminho que deve gravar o
+    // cartão de memória); confere se o cartão do PS2 foi tocado ao fechar
+    if (tem('fechar-janela') && nav) {
+      const cartoes = join(dados, 'KOFstation', 'nativo', 'sistema', 'ps2', 'pcsx2', 'memcards');
+      const antes = Date.now();
+      const s = await nav.newBrowserCDPSession().catch(() => null);
+      await s?.send('Browser.close').catch(() => {});
+      let saiu = false;
+      for (let i = 0; i < 60 && !saiu; i++) {
+        await dormir(500);
+        saiu = app.exitCode !== null || app.signalCode !== null;
+      }
+      const tocados = existsSync(cartoes)
+        ? readdirSync(cartoes).filter((f) => statSync(join(cartoes, f)).mtimeMs >= antes - 1000)
+        : [];
+      console.log(
+        `fechar pela janela: o app ${saiu ? `saiu em ${((Date.now() - antes) / 1000).toFixed(1)} s` : 'NÃO saiu em 30 s'}; ` +
+          `cartões gravados ao fechar: ${tocados.length ? tocados.join(', ') : 'nenhum'}`,
+      );
+    }
     await nav?.close().catch(() => {});
     try {
       process.kill(-app.pid, 'SIGTERM');

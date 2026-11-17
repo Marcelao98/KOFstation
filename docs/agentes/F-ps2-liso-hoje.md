@@ -91,7 +91,9 @@ Detalhes e números em [docs/PS2-LISO.md](../PS2-LISO.md) (17/11). Resumo:
   parcialmente na swap. Orientação: fechar o Firefox pra jogar.
 - **Passo 5 ("não desce"):** o direcional do PS2 é T F G H, as setas são o analógico. O modo "misto" (analógico aperta o
   direcional) e um aviso na tela foram tentados e desfeitos: controles como estavam.
-- **Passo 5 (cartão):** o `Mcd001.ps2` (slot 1) está todo 0xFF (nunca formatado); o slot 2 está formatado. O Marcelo
-  formatou pelo jogo e salvou; falta conferir que sobrevive a fechar e reabrir.
+- **Passo 5 (cartão):** o `Mcd001.ps2` (slot 1) está todo 0xFF (nunca formatado); o slot 2 está formatado. Achado o
+  motivo de não salvar: o núcleo segura o cartão num buffer de 64 KB até fechar, e o app saía com `process::exit`
+  sem fechar o jogo. Corrigido (o app fecha o jogo antes de sair); medido: antes nenhum cartão gravado ao fechar a
+  janela, depois os dois.
 - **Ficou pra depois:** passo 4 (fila de quadros / GC / janela própria, com desenho antes), passo 6 (shader: o cache
   `gl_programs.bin` existe), passo 7 (opções), o `WebSocket.send` de 48 MB no F8 (~255 ms).

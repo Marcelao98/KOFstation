@@ -51,7 +51,11 @@ fn custo_de_estado_e_bateria_no_ps2() {
         for i in 0..3 {
             let t = Instant::now();
             n.carregar_estado(&d).expect("carregou");
-            eprintln!("carregar estado #{i}: {:.0} ms ({:.1} MB)", ms(t), d.len() as f64 / 1048576.0);
+            eprintln!(
+                "carregar estado #{i}: {:.0} ms ({:.1} MB)",
+                ms(t),
+                d.len() as f64 / 1048576.0
+            );
             rodar(&mut n, 120);
         }
     }
@@ -60,7 +64,11 @@ fn custo_de_estado_e_bateria_no_ps2() {
     for i in 0..3 {
         let t = Instant::now();
         let e = n.salvar_estado().expect("salvou");
-        eprintln!("salvar estado #{i}: {:.0} ms ({:.1} MB)", ms(t), e.len() as f64 / 1048576.0);
+        eprintln!(
+            "salvar estado #{i}: {:.0} ms ({:.1} MB)",
+            ms(t),
+            e.len() as f64 / 1048576.0
+        );
         rodar(&mut n, 60);
     }
     let mut t_bat = Vec::new();
@@ -76,5 +84,22 @@ fn custo_de_estado_e_bateria_no_ps2() {
         tam as f64 / 1048576.0,
         t_bat.iter().cloned().fold(f64::MAX, f64::min),
         t_bat.iter().cloned().fold(0.0, f64::max)
+    );
+    // o cartão de memória fica num buffer do núcleo e só é fechado (soma de verificação gravada) no fim: fechar o
+    // núcleo tem que tocar no arquivo do cartão, e o tempo disso diz quanto o processo do jogo precisa pra sair
+    let cartao = dir.path().join("sistema/pcsx2/memcards/Mcd001.ps2");
+    assert!(
+        cartao.is_file(),
+        "o núcleo cria o cartão do slot 1 em sistema/pcsx2/memcards"
+    );
+    std::thread::sleep(std::time::Duration::from_millis(1100)); // o relógio do arquivo tem resolução de segundos em alguns sistemas
+    let antes = std::time::SystemTime::now();
+    let t = Instant::now();
+    drop(n);
+    eprintln!("fechar o núcleo: {:.0} ms", ms(t));
+    let mudou = std::fs::metadata(&cartao).unwrap().modified().unwrap();
+    assert!(
+        mudou >= antes - std::time::Duration::from_millis(500),
+        "ao fechar, o núcleo grava o cartão (senão o save que estava no buffer se perde)"
     );
 }

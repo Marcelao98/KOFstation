@@ -166,14 +166,15 @@ impl ProcessoNativo {
         }
     }
 
-    /// Fecha: o filho vê o stdin fechar e sai (salvando o que tiver); se não sair em 3 s, é encerrado à força.
+    /// Fecha: o filho vê o stdin fechar e sai (salvando o que tiver); se não sair em 10 s, é encerrado à força (o PS2
+    /// leva alguns segundos pra desligar e só grava o cartão de memória no fim).
     pub fn fechar(mut self) -> Option<ExitStatus> {
         self.encerrar()
     }
 
     fn encerrar(&mut self) -> Option<ExitStatus> {
         self.stdin.take();
-        if let Some(s) = self.esperar(Duration::from_secs(3)) {
+        if let Some(s) = self.esperar(Duration::from_secs(10)) {
             return Some(s);
         }
         tracing::warn!("o processo nativo não fechou sozinho: encerrando");

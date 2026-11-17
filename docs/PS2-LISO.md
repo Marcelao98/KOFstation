@@ -90,10 +90,32 @@ o **G**. Tentado: fazer o analógico apertar o direcional também (modo "misto",
 no jogo o direcional troca de arma e as setas passaram a trocar de arma enquanto ele andava. **Desfeito.** O aviso na tela com as teclas do direcional também foi feito e desfeito a pedido do Marcelo: os
 controles ficam como estavam (setas = analógico, T F G H = direcional).
 
-### Achado 4 · Cartão de memória
+### Achado 4 · Cartão de memória: o save se perdia ao fechar a janela
 
-Os cartões ficam em `<dados>/nativo/sistema/ps2/pcsx2/memcards/` (o núcleo cuida deles; o app não vê: a bateria do PS2
-tem 0 bytes). O `Mcd001.ps2` (slot 1) está **todo 0xFF** (cartão nunca formatado) e não muda desde 10/11; o
-`Mcd002.ps2` (slot 2) está formatado ("Sony PS2 Memory Card Format") e foi gravado hoje às 12:49, com o Marcelo
-jogando. O Marcelo formatou pelo jogo (17/11) e parece ter salvo. A conferir: o `Mcd001.ps2` passa a ter
-"Sony PS2 Memory Card Format", e o save sobrevive a fechar e reabrir o app.
+Os cartões ficam em `<dados>/nativo/sistema/ps2/pcsx2/memcards/` (o núcleo cuida deles; a bateria do PS2 tem 0 bytes).
+Lendo o LRPS2 (`pcsx2/MemoryCardFile.cpp` e `libretro-common/vfs/vfs_implementation.c`, commit `38d3a83f`): cada escrita
+do jogo vai pro arquivo na hora, mas por um `FILE*` com **buffer de 64 KB** (`setvbuf`), e o cartão só é fechado
+(buffer descarregado + soma de verificação) no `VMManager::Shutdown`, dentro do `retro_unload_game`. O núcleo não pede
+a camada de arquivos ao frontend (não dá pra trocar o buffer por fora).
+
+O app, ao fechar a janela, fazia `std::process::exit(0)` na hora (`crates/kof-app/src/main.rs`), sem fechar o processo
+do jogo: o núcleo nunca fechava o cartão e o fim do save (o que estava no buffer) se perdia. Sinal disso no dia: o
+slot 2 foi formatado às 12:49 (formatar escreve MB, o buffer transbordou) e, ao fechar às 12:54, o arquivo nem foi
+tocado.
+
+Correção: antes de sair (janela fechada ou sem sinal de vida), o app fecha o jogo nativo e espera
+(`nativo::Fechador`); a espera antes de forçar subiu de 3 pra 10 s (`supervisor.rs`).
+
+| Fechar pela janela (jogo pesado A aberto) | O app sai em | Cartões gravados ao fechar |
+|---|---|---|
+| antes | 0,5 s | nenhum |
+| depois | 0,5 s | Mcd001 e Mcd002 |
+
+No núcleo sozinho (`ps2_de_verdade`): fechar leva **186 ms** e grava o cartão (o teste confere). Fica de risco: se o
+processo do jogo cair no meio, até 64 KB do último save ainda podem se perder (só um VFS próprio no núcleo resolve).
+
+O `Mcd001.ps2` do Marcelo continua sem formatação (todo 0xFF) e o slot 2 formatado e vazio: com a correção, formatar e
+salvar pelo jogo deve sobreviver a fechar e reabrir (a conferir com ele).
+
+Comandos: `node tools/medir-ps2.mjs --jogo A --rodadas 1 --aquecer 15 --segundos 10 --fechar-janela` e o
+`ps2_de_verdade` acima.
