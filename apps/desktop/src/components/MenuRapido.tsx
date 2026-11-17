@@ -127,7 +127,7 @@ function itens(): Item[] {
         const novo = MODOS[(i + d + MODOS.length) % MODOS.length];
         if (novo) usarModo.getState().mudar(novo[0]);
       },
-      f: depois(() => acao('emu-opcoes')),
+      f: depois(() => acao('emu-geral')),
     },
     {
       t: '🎨 Tema',

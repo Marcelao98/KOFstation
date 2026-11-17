@@ -127,6 +127,15 @@ Feito (escrito com o Marcelo jogando; **testes ainda não rodados**, ver abaixo)
   ligado; **a medir** com o banco da tarefa D antes de confiar que fica liso.
 - Tela: ⚠ com o motivo, "(nome do núcleo)" quando não houver tradução, bloco "Fixas pelo app".
 
-Falta: rodar os testes e regravar a fixture (`KOF_ATUALIZAR_FIXTURES=1 pnpm --filter @kof/domain test`), o mesmo pro
+**Tela própria (pedido do Marcelo, 17/11):** a aba dentro dos estados cortava embaixo (a janela `#estados` tem
+altura máxima e a aba não rolava) e era pequena. Agora é a tela `screens/Emulacao` ("⚙ Opções de emulação"), como a dos
+Controles: abas **Geral** (perfil de todos os consoles + modo de jogo, salvar automático, rebobinar, limite de estados,
+núcleo do PS1, pausar ao sair) e **uma por console**; em cada console, "todo o console / só este jogo", os perfis em
+botão (⚡ ⚖ 🎯 ✨ e "igual ao geral"), as seções como no PCSX2 (Gráficos, Emulação, Som, Cartão, Correções, Sistema,
+Controle) com as principais primeiro e "mais opções" (o resto que o núcleo declara) depois, e uma busca sem acento em
+todas as seções. A janela rola inteira. Abre no console do jogo aberto (menu Emulação, botão direito → ⚙ Opções de
+emulação, botão nos estados); o "🎮 Modo" do menu rápido abre no Geral.
+
+Falta: rodar os testes (e2e da tela reescrito) e regravar a fixture (`KOF_ATUALIZAR_FIXTURES=1 pnpm --filter @kof/domain test`), o mesmo pro
 PS1 (PCSX-ReARMed: gerar a lista completa do mesmo jeito), medir o ✨ Bonito, e os remendos de tela larga/60 fps por
 jogo (já estão no Avançado: `pcsx2_widescreen_hint` curada, `pcsx2_uncapped_framerate_hint` com ⚠).

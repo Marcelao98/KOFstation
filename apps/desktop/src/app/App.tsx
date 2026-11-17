@@ -30,6 +30,7 @@ import { Estatisticas } from '../screens/Estatisticas/Estatisticas';
 import { Bug } from '../screens/Bug/Bug';
 import { Diagnostico } from '../screens/Diagnostico/Diagnostico';
 import { BiosTela } from '../screens/Bios/BiosTela';
+import { Emulacao } from '../screens/Emulacao/Emulacao';
 import { usarBug } from '../stores/bug';
 import { usarDiagnostico } from '../stores/diagnostico';
 import '../stores/estatisticas';
@@ -69,6 +70,7 @@ const PRONTAS: string[] = [
   'jukebox',
   'estatisticas',
   'bios-tela',
+  'emulacao',
 ];
 
 const SETAS: Record<string, [number, number]> = {
@@ -261,6 +263,7 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'jukebox' && <Jukebox />}
         {atual === 'estatisticas' && <Estatisticas />}
         {atual === 'bios-tela' && <BiosTela />}
+        {atual === 'emulacao' && <Emulacao />}
         {!PRONTAS.includes(atual) && <Pendente tela={atual as TelaId} />}
         <div id="moldura" hidden={atual !== 'jogo'}>
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>

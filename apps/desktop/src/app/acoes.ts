@@ -11,7 +11,7 @@ import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 import { usarVisual } from '../stores/visual';
 import { usarPainel } from '../stores/painel';
-import '../stores/emulacao'; // registra as opções de emulação no jogo (efeito colateral)
+import { usarEmulacao } from '../stores/emulacao'; // também registra as opções de emulação no jogo
 import { usarMoldura } from '../stores/moldura';
 import { usarJukebox } from '../stores/jukebox';
 import { usarAbertura } from '../stores/abertura';
@@ -149,7 +149,9 @@ export function acao(nome: string, valor?: string): boolean {
       void import('../stores/auto').then((m) => m.alternarAuto());
       return true;
     case 'emu-opcoes':
-      void usarEstados.getState().mostrar(null, 'emu');
+    case 'emu-geral': // o Modo de jogo e as opções do app ficam na aba Geral
+      usarEmulacao.setState({ abaInicial: nome === 'emu-geral' ? 'geral' : null });
+      usarTelas.getState().abrir('emulacao');
       return true;
     case 'pausa-auto': {
       const liga = config().ler('pausaAuto') === '0';

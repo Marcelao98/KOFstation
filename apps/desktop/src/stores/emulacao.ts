@@ -36,6 +36,8 @@ interface EstadoEmulacao {
     valor: string | null,
   ) => void;
   limpar: (camada: Exclude<CamadaEditavel, 'geral'>, sistema: SistemaId, jogoId: string | undefined) => void;
+  /** a aba em que a tela ⚙ Opções de emulação abre da próxima vez (null = a do console do jogo aberto) */
+  abaInicial: string | null;
 }
 
 export const usarEmulacao = create<EstadoEmulacao>()((set, get) => {
@@ -52,6 +54,7 @@ export const usarEmulacao = create<EstadoEmulacao>()((set, get) => {
     opcao: (camada, sistema, jogoId, chave, valor) =>
       aplicar(ajustarOpcao(get().escolhas, camada, sistema, jogoId, chave, valor)),
     limpar: (camada, sistema, jogoId) => aplicar(limparCamada(get().escolhas, camada, sistema, jogoId)),
+    abaInicial: null,
   };
 });
 
