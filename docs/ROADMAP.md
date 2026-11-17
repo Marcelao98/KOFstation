@@ -170,6 +170,9 @@ Nada decidido; cada um entra pelo mesmo caminho (manifesto com SHA-256, Linux e 
 
 - **PS1 com gráfico melhor** no PC (Beetle PSX HW ou SwanStation), mantendo o PCSX-ReARMed no celular ("depois", 17/11).
 - Outros consoles que o Marcelo quiser (ex.: PSP, GameCube/Wii, Saturn, DS): ele escolhe a ordem.
+- **Ideia do Marcelo pro Wii (17/11): o celular como Wiimote.** O giroscópio/acelerômetro do celular vira o movimento e
+  a mira (ponteiro na tela), o toque vira os botões, pela rede pareada que já existe (o mesmo caminho do "celular como
+  controle"). É a parte mais trabalhosa do Wii; entra junto com ele, nunca antes das fases 1–8.
 
 ---
 
