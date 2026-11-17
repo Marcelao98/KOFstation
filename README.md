@@ -6,9 +6,10 @@ Central de jogos retrô para **Linux e Windows** (e Android, mais pra frente): b
 jukebox, saves, rebobinar, o celular como controle. Os emuladores são núcleos **libretro** consagrados; o KOFstation é a
 camada de experiência em volta deles.
 
-> **Este repositório é a arquitetura nova, em construção.** O app que funciona hoje, completo, está em
-> [Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old) e continua sendo o produto até a troca.
-> A migração anda em etapas com paridade total: nada do antigo pode se perder ([docs/PARIDADE.md](docs/PARIDADE.md)).
+> **A migração está completa (17/11/2026): este é o KOFstation.** O app antigo
+> ([Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old)) virou arquivo; o novo já faz tudo o que ele
+> fazia ([docs/PARIDADE.md](docs/PARIDADE.md)) e é o produto. Agora a regra é **melhorar o que temos antes de crescer**:
+> [docs/ROADMAP.md](docs/ROADMAP.md).
 
 **Onde estamos:** o retrato pra ler em 5 minutos está em [docs/SITUACAO.md](docs/SITUACAO.md). Resumo (03/11/2026): M11b feito até o N.8 (PS1 nativo padrão, jukebox do SNES com Ondas/Notas, N64
 desenhando), esperando o Marcelo testar; o PS2 nativo (N.9) é o próximo. Antes: M3 a M8 aprovados pelo Marcelo; **M9 a M11 feitos**, esperando ele testar — jukebox

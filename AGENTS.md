@@ -1,7 +1,8 @@
 # Para agentes de IA (Claude, Codex, etc.)
 
-Você está no **KOFstation novo**: a reconstrução do app `Marcelao98/kofstation-old` (o produto atual) numa arquitetura
-React + TypeScript + Rust, etapa por etapa, sem perder nenhuma funcionalidade.
+Você está no **KOFstation**: o app reconstruído em React + TypeScript + Rust a partir do `Marcelao98/kofstation-old`.
+**A migração está completa (17/11/2026)** e o novo é o produto; o plano agora é melhorar o que temos antes de crescer
+([docs/ROADMAP.md](docs/ROADMAP.md); a migração está em [docs/ROADMAP-MIGRACAO.md](docs/ROADMAP-MIGRACAO.md)).
 
 > **Continuando a sessão de 08/11 à noite?** Comece por [docs/agentes/CONTINUAR.md](docs/agentes/CONTINUAR.md).
 >
@@ -12,7 +13,8 @@ React + TypeScript + Rust, etapa por etapa, sem perder nenhuma funcionalidade.
 ## Antes de mexer em qualquer coisa, leia nesta ordem
 
 1. **[docs/JORNAL.md](docs/JORNAL.md) — só a primeira entrada** (a mais nova): o que aconteceu por último e **onde parou**.
-2. **[docs/ROADMAP.md](docs/ROADMAP.md)** — a etapa atual, os passos e os checkpoints (⏸ = esperando o Marcelo).
+2. **[docs/ROADMAP.md](docs/ROADMAP.md)** — a fase atual, os passos e os checkpoints (⏸ = esperando o Marcelo); "Como cada
+   passo é feito" de lá vale pra tudo (medir antes e depois, uma mudança por vez).
 3. **[README.md](README.md)** — a arquitetura como está hoje (diagramas). Pra humano: [docs/SITUACAO.md](docs/SITUACAO.md)
    é o retrato da situação; atualize quando uma etapa for aprovada ou a ordem mudar.
 4. Só quando a etapa pedir: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/FRONTEND.md](docs/FRONTEND.md),

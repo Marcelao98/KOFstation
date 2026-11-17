@@ -8,6 +8,11 @@ fim). Este aqui é atualizado quando a situação muda de verdade (etapa aprovad
 
 ## Em uma frase
 
+> **17/11/2026: a migração está completa.** O novo é o produto (D38) e o plano agora é o [ROADMAP.md](ROADMAP.md) novo:
+> melhorar o que temos antes de crescer (PS2 sem defeito e liso como o PCSX2, todas as opções no menu com o perfil
+> ✨ Bonito, gráficos melhores, depois os outros consoles e o celular; emulador novo só no fim). O PS2 é feito pelo
+> Claude Code no teu PC (tarefas D e E em `docs/agentes/`). O texto abaixo é o retrato da migração.
+
 O KOFstation novo já roda **todos os consoles do antigo menos o PS2**, com biblioteca, saves, rebobinar, filtros,
 controles, jukebox e estatísticas, e agora o **PlayStation roda nativo** (bem mais leve). Falta você testar o pacote
 atual; depois vêm distribuição, celular e, por último, o PS2.

@@ -21,6 +21,17 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-17 · A migração está completa; roadmap novo
+
+**Pedido:** "novo roadmap: antes de adicionar outros emuladores, otimizar e melhorar o que temos. Agora não é mais
+migração: diga que a migração foi completa."
+**Feito:** o roadmap da migração virou `docs/ROADMAP-MIGRACAO.md` (histórico, com o aviso de concluída). `docs/ROADMAP.md`
+novo: fase 0 conferir no uso (os ⏸ que sobraram), 1 régua de medição, 2 PS2 sem defeito, 3 PS2 liso, 4 opções
+completas (✨ Bonito), 5 gráficos, 6 todos os consoles lisos, 7 celular, 8 casa própria (main, atualizador, Releases
+próprias, T.2), 9 só então emuladores novos. Regra: medir antes e depois, uma mudança por vez. README, AGENTS.md,
+docs/README.md e SITUACAO dizem que a migração terminou.
+**Onde parou:** fases 1–5 com o Claude Code no PC do Marcelo (tarefas D e E); eu reviso e junto.
+
 ## 2026-11-17 · Decisões das opções e os engasgos por memória (pras tarefas D e E)
 
 **Decidido com o Marcelo:** toda opção do núcleo aparece no menu (grupos como o PCSX2 + Avançado com o resto, nada
