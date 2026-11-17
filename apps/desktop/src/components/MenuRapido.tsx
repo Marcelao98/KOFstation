@@ -1,6 +1,16 @@
 // Menu rápido (#rapido) no meio do jogo: F2, botão direito ou Select+Start. Mesmos itens do antigo (ITENS_RAPIDO); o que
 // ainda não chegou no app novo avisa a etapa. ↑↓ escolhe, ◀▶ ajusta, Enter/A confirma, Esc/B fecha.
-import { nomeDoTema, TODOS_TEMAS, MODOS, nomeModo } from '@kof/domain';
+import {
+  nomeDoTema,
+  TODOS_TEMAS,
+  MODOS,
+  nomeModo,
+  NOME_DO_PERFIL,
+  OPCOES_DE_NUCLEO,
+  PERFIS,
+  perfilEfetivo,
+  type SistemaId,
+} from '@kof/domain';
 import { useEffect, useState } from 'react';
 import { acao } from '../app/acoes';
 import { emModoCelular } from '../app/celular';
@@ -9,6 +19,7 @@ import { ATALHOS_DO_CELULAR, usarComoControle, verJogoDoPc } from './AtalhosDaRe
 import { PROPORCOES, usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarModo } from '../stores/modo';
+import { usarEmulacao } from '../stores/emulacao';
 import { MOLDURAS, usarMoldura } from '../stores/moldura';
 import { FILTROS, usarVisual } from '../stores/visual';
 import { PALETAS_GB, PALETAS_NES } from '@kof/app-core';
@@ -32,6 +43,11 @@ const ciclar = (l: [string, string][], atual: string, d: number) => {
 };
 
 const fechar = () => usarJogo.getState().fecharRapido();
+/** o console do jogo aberto, se ele tem opções de emulação no catálogo */
+const sisComOpcoes = (): SistemaId | null => {
+  const s = usarJogo.getState().info?.sistema as SistemaId | undefined;
+  return s && OPCOES_DE_NUCLEO[s]?.length ? s : null;
+};
 const depois = (f: () => void) => () => {
   fechar();
   f();
@@ -71,6 +87,24 @@ function itens(): Item[] {
           { t: '🎮 Controle virtual', f: depois(() => acao('teclas')) },
         ]
       : []),
+    // opções de emulação do console do jogo aberto (tarefa E): o perfil troca aqui mesmo com ◀▶; Enter abre a tela
+    {
+      t: '⚙ Perfil de emulação',
+      so: () => !!sisComOpcoes(),
+      v: () => {
+        const s = sisComOpcoes();
+        return s ? NOME_DO_PERFIL[perfilEfetivo(usarEmulacao.getState().escolhas, s, j.registro?.id)] : '';
+      },
+      aj: (d) => {
+        const s = sisComOpcoes();
+        if (!s) return;
+        const atual = perfilEfetivo(usarEmulacao.getState().escolhas, s, j.registro?.id);
+        const novo = PERFIS[(PERFIS.indexOf(atual) + d + PERFIS.length) % PERFIS.length];
+        if (novo) usarEmulacao.getState().perfil('console', s, undefined, novo);
+      },
+      f: depois(() => acao('emu-opcoes')),
+    },
+    { t: '⚙ Opções de emulação…', so: () => !!sisComOpcoes(), f: depois(() => acao('emu-opcoes')) },
     { t: '💾 Salvar estado', f: depois(() => acao('salvar-estado')) },
     { t: '⟲ Carregar último estado', f: depois(() => acao('carregar-ultimo')) },
     { t: '🎵 Guardar esta música', f: depois(() => acao('guardar-musica')) },
