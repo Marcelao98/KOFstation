@@ -1,55 +1,15 @@
 // Savestates (app.js `salvarEstado`/`limitarEstados`/`carregarEstado`/`estadosDe` do antigo), no mesmo formato: os
 // dados são o JSON {lr: núcleo, d: base64 do estado} (o Snes9x também com s9x: 1) comprimido em gzip, e cada estado
 // guarda o print do momento (capa). Na loja `estados`, a chave é "<jogoId>/<quando>".
-import { gz, ungz } from '@kof/domain';
 import type { Armazem } from './armazem';
+import { desempacotar, empacotar } from './estado-trabalho';
+import type { EstadoDoNucleo } from './estado-texto';
 import { mudarJogo } from './jogos';
 import { chaveDoEstado, type MetaEstado } from './saves';
 
+export * from './estado-texto';
+
 export const LIMITES_ESTADOS = [10, 20, 50, 100, 0] as const;
-
-const b64 = (u8: Uint8Array) => {
-  let s = '';
-  for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000));
-  return btoa(s);
-};
-const deB64 = (t: string) => {
-  const s = atob(t);
-  const u8 = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) u8[i] = s.charCodeAt(i);
-  return u8;
-};
-
-export interface EstadoDoNucleo {
-  lr?: string;
-  d?: string;
-  s9x?: number;
-}
-
-/** O objeto que o antigo guardava (KofEstado.capturar de um núcleo libretro). */
-export function capturado(nucleo: string, estado: Uint8Array): EstadoDoNucleo {
-  return Object.assign(nucleo === 'snes9x' ? { s9x: 1 } : {}, { lr: nucleo, d: b64(estado) });
-}
-
-/** Os bytes do estado, se for do mesmo núcleo (o KofEstado.restaurar do antigo). */
-export function bytesDoCapturado(o: EstadoDoNucleo, nucleo: string): Uint8Array {
-  const de = o.lr ?? (o.s9x ? 'snes9x' : 'kof');
-  if (de !== nucleo)
-    throw new Error(
-      de === 'kof'
-        ? 'esse estado é do núcleo Kof do SNES (ele entra no app novo quando a Mel liberar a licença dele)'
-        : 'esse estado é de outro núcleo',
-    );
-  if (!o.d) throw new Error('estado vazio');
-  return deB64(o.d);
-}
-
-export async function comprimirTexto(t: string): Promise<Uint8Array> {
-  return gz(new TextEncoder().encode(t));
-}
-export async function descomprimirTexto(u8: Uint8Array): Promise<string> {
-  return new TextDecoder().decode(await ungz(u8));
-}
 
 export interface EstadoSalvo extends MetaEstado {
   key: string;
@@ -69,7 +29,7 @@ export async function guardarEstado(
   nucleo: string,
   estado: Uint8Array,
 ): Promise<string> {
-  const dados = await comprimirTexto(JSON.stringify(capturado(nucleo, estado)));
+  const dados = await empacotar(nucleo, estado, true);
   const k = chaveDoEstado(meta.jogo, meta.quando);
   await arm.por('estados', k, meta, dados);
   return k;
@@ -87,7 +47,7 @@ export async function limitarEstados(arm: Armazem, jogo: string, max: number): P
 export async function lerEstado(arm: Armazem, key: string): Promise<EstadoDoNucleo> {
   const dados = await arm.pegar('estados', key);
   if (!dados) throw new Error('esse estado não existe mais');
-  return JSON.parse(await descomprimirTexto(dados)) as EstadoDoNucleo;
+  return desempacotar(dados, true);
 }
 
 // ---------- salvar automático (o "suspender" do console) ----------
@@ -112,7 +72,7 @@ export async function guardarAuto(
   capa: string,
 ): Promise<number> {
   const quando = Date.now();
-  await arm.por('autos', jogo, { quando }, new TextEncoder().encode(JSON.stringify(capturado(nucleo, estado))));
+  await arm.por('autos', jogo, { quando }, await empacotar(nucleo, estado, false));
   await mudarJogo(arm, jogo, (j) => ({
     ...j,
     temAuto: true,
@@ -126,5 +86,5 @@ export async function guardarAuto(
 
 export async function lerAuto(arm: Armazem, jogo: string): Promise<EstadoDoNucleo | null> {
   const b = await arm.pegar('autos', jogo);
-  return b ? (JSON.parse(new TextDecoder().decode(b)) as EstadoDoNucleo) : null;
+  return b ? desempacotar(b, false) : null;
 }

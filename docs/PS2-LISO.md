@@ -1,0 +1,100 @@
+# PS2 liso: diário de medições (tarefas D e F)
+
+Só números e "jogo pesado A/B" (nome de jogo nunca entra aqui). Medições na máquina do Marcelo (Linux, 7,2 GB de RAM,
+Chrome 157, LRPS2 `38d3a83f`). Relatórios completos (com o nome do jogo dentro) ficam em `~/kof-medidas/`.
+
+## Como medir
+
+```bash
+source ~/kof-medidas/ambiente.sh               # KOF_JOGO_A, KOF_BIOS_PS2, KOF_APP (fora do repositório)
+node tools/medir-ps2.mjs --jogo A --rodadas 1 --aquecer 20 --segundos 180 \
+  --estado <arquivo .bin da loja estados> --teclas --mexer [--perfil]
+```
+
+- `--estado`: começa do estado salvo (copia pra loja do app de medição e aperta F8).
+- `--teclas`: aperta F5, F5 e F8 aos 15%, 45% e 75% do trecho e mede, nos 8 s seguintes, a maior parada da página e o
+  maior tempo sem quadro novo.
+- `--mexer`: anda pelo cenário (setas seguradas 1–3 s, às vezes com o botão de correr).
+- `--perfil`: liga o profiler do Chrome nos 4 s depois de cada tecla e imprime as funções que mais pararam a página.
+  Cuidado: a sonda da medição faz `getImageData` a cada vsync e ela mesma pesa quando a placa está ocupada.
+
+O custo dentro do processo do jogo (sem página):
+
+```bash
+KOF_JOGO="$KOF_JOGO_A" KOF_ESTADO=<estado cru do núcleo> \
+  cargo test -p kof-nativo --release --test ps2_de_verdade -- --ignored --nocapture
+```
+
+## 17/11 · Tarefa F
+
+### Achado 1 · Salvar e carregar estado travavam a tela (e o salvar automático a cada 2 min)
+
+O estado do PS2 tem **48 MB** crus. No processo do jogo, o custo é pequeno:
+
+| No núcleo (jogo pesado A) | Tempo |
+|---|---|
+| quadro (p50 / p99) | 5,6 / 7,9 ms |
+| salvar estado | 35–42 ms |
+| carregar estado | 21 ms (125 ms na 1ª) |
+| bateria (`RETRO_MEMORY_SAVE_RAM`, pedida a cada 1 s) | **0 bytes**, 0 ms |
+
+Quem travava era a **página**, na mesma linha que desenha o jogo (Chrome 157, 48 MB):
+
+| Parte | Antes | Depois |
+|---|---|---|
+| base64 (`String.fromCharCode` + `btoa` numa string gigante) | 2.145 ms | 59 ms (`toBase64`) |
+| `JSON.stringify` com o base64 dentro | 187 ms | 0 (texto montado na mão) |
+| gzip (`CompressionStream`, roda na linha da página) | 1.617 ms | no Worker |
+| `fetch` com corpo `Uint8Array` de 18 MB (cópia na página) | ~490 ms | Blob (sai por fora) |
+| carregar: de-base64 + `JSON.parse` | 311 + 133 ms | `fromBase64` no Worker, base64 recortado sem parse |
+
+Teste isolado no Chrome: a maior parada da tela durante o gzip caiu de **1.617 ms pra 33 ms** com tudo no Worker.
+
+No app de verdade (3 min jogando, F5, F5 e F8, sonda ligada):
+
+| Versão | F5 (página parada) | F8 | Engasgos/min | p99 |
+|---|---|---|---|---|
+| antes (página de hoje)¹ | 1.666–2.166 ms | 0–1.666 ms | 106–115 | 26,4–26,8 ms |
+| + base64 rápido + Worker | 1.466–1.533 ms | 650 ms | 98 | 26,2 ms |
+| + Blob no `fetch` | *a medir* | | | |
+
+¹ a primeira medição pode ter rodado com a página antiga ou já com o base64 rápido (o binário de teste não foi conferido
+antes dela); o "antes" seguro é o do Chrome isolado acima.
+
+O que sobrou de parada no F5 com o Worker, pelo profiler: `fetch` ~490 ms (resolvido com o Blob, falta medir) e
+`getImageData` 470–680 ms, que é da própria sonda da medição. No F8: `WebSocket.send` dos 48 MB pro processo do jogo,
+~255 ms (próximo passo: mandar o estado pelo disco ou em pedaços).
+
+**O que mudou** (`packages/app-core`):
+- `estado-texto.ts`: o formato (o mesmo de antes, byte a byte) com base64 nativo e texto montado/recortado sem
+  `JSON.stringify`/`JSON.parse` nos MB do base64. Teste em `estados.test.ts` confere que o texto é idêntico ao do
+  `JSON.stringify` e que a volta sem `toBase64` (pedaços múltiplos de 3) dá o mesmo base64.
+- `estado-worker.ts` + `estado-trabalho.ts`: estados de 1 MB pra cima são montados e desmontados num Worker; sem Worker
+  (Node, erro), faz na hora e registra o aviso no log.
+- `armazem.ts`: `por()` aceita Blob e manda pelo `enviarArquivo` (o fetch lê o Blob sem copiar na página).
+
+### Achado 2 · Memória: a máquina está sem folga
+
+Com o jogo aberto: 7,2 GB de RAM, **4,6 GB na swap**, 1,9 GB disponíveis. O processo do jogo chegou a ter 194–275 MB
+na swap durante as medições, o que por si só dá engasgo esporádico. Quem mais ocupa fora do app: o Firefox e as abas
+dele (~2 GB entre RAM e swap). No app: jogo ~410→470 MB, página 600–1.170 MB (com o Chrome da GPU).
+
+Pra jogar: fechar o Firefox. Próximo passo no app: a página ainda pesa (a fila de quadros de 4–10 MB cada, passo 4 da
+tarefa F).
+
+### Achado 3 · "O menu do cartão não desce"
+
+No PS2, as **setas** são o **analógico** e o **direcional** fica em **T F G H** (`DIRECIONAL_ANALOG` em
+`packages/domain/src/entrada.ts`). A pergunta "salvar no cartão?" do jogo pesado A só lê o direcional: o "pra baixo" é
+o **G**. Tentado: fazer o analógico apertar o direcional também (modo "misto", como o PS1). O menu desceu, mas
+no jogo o direcional troca de arma e as setas passaram a trocar de arma enquanto ele andava. **Desfeito.** Fica:
+- mostrar na tela, ao abrir um jogo de PS2, que o direcional é T F G H (ou na tela Controles), e
+- o controle de verdade já separa os dois (alavanca = analógico, cruz = direcional).
+
+### Achado 4 · Cartão de memória
+
+Os cartões ficam em `<dados>/nativo/sistema/ps2/pcsx2/memcards/` (o núcleo cuida deles; o app não vê: a bateria do PS2
+tem 0 bytes). O `Mcd001.ps2` (slot 1) está **todo 0xFF** (cartão nunca formatado) e não muda desde 10/11; o
+`Mcd002.ps2` (slot 2) está formatado ("Sony PS2 Memory Card Format") e foi gravado hoje às 12:49, com o Marcelo
+jogando. A investigar: por que o slot 1 nasceu sem formatação, se o jogo oferece formatar e falha, e a opção
+`pcsx2_shared_memory_cards` (cartão por jogo ou compartilhado).
