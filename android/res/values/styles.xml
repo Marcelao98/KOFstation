@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- tela cheia, fundo do tema Café (#1a110b) enquanto a página carrega -->
+    <style name="TemaKofstation" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:statusBarColor">#1a110b</item>
+        <item name="android:navigationBarColor">#1a110b</item>
+    </style>
+</resources>

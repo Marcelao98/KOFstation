@@ -1,7 +1,8 @@
 // O jogo rodando, do lado da página: cria o Worker do núcleo e o som (AudioWorklet), manda os botões e recebe os quadros.
 // Sem React: a tela do jogo só recebe callbacks (o laço não passa pelo render).
 import type { SistemaId } from '@kof/domain';
-import { CODIGO_WORKLET } from './anel';
+import { CODIGO_WORKLET, CODIGO_WORKLET_PCM } from './anel';
+import { FilaDeQuadros } from './fila-de-quadros';
 import type { ExtrasDoJogo, InfoDoJogo } from './libretro';
 import type { DoWorker, Medicao, ParaWorker, Pedido, ReplayDoBug, SituacaoRebob } from './mensagens';
 import { NUCLEOS } from './nucleos';
@@ -43,6 +44,8 @@ export class Jogo {
   private ctx: AudioContext | null = null;
   private ganho: GainNode | null = null;
   private saidaSom: AudioWorkletNode | null = null;
+  /** quantas amostras o AudioWorklet sem memória compartilhada já tocou (teste e F3) */
+  amostrasTocadas = 0;
   /** transmitindo pro celular (Jogar no PC): o som sai lá, aqui fica mudo */
   private transmitindo = false;
   private botoes = [0, 0, 0, 0];
@@ -50,6 +53,13 @@ export class Jogo {
   private mudo: boolean;
   private acordar = () => void this.ctx?.resume();
   private proximoId = 1;
+  /** Quadros que o Worker mandou e ainda não foram pra tela: saem um por vsync (ver `FilaDeQuadros`). */
+  private fila = new FilaDeQuadros();
+  private pedidoDoLaco = 0;
+  /** quadros que ficaram pra trás na fila (a página engasgou ou o turbo está ligado) e foram jogados fora */
+  get descartados(): number {
+    return this.fila.descartados;
+  }
   private esperando = new Map<number, { ok: (b: Uint8Array | null) => void; falhou: (e: Error) => void }>();
 
   private constructor(
@@ -65,7 +75,7 @@ export class Jogo {
     const c = NUCLEOS[opcoes.sistema];
     if (!c) throw new Error(`o app novo ainda não roda esse sistema (${opcoes.sistema})`);
     const j = new Jogo(eventos, opcoes);
-    const sab = await j.ligarSom();
+    const { sab, pcm } = await j.ligarSom();
     const pronto = new Promise<InfoDoJogo>((ok, falhou) => {
       j.worker.onmessage = ({ data }: MessageEvent<DoWorker>) => {
         if (data.tipo === 'pronto') ok(data.info);
@@ -89,6 +99,7 @@ export class Jogo {
         rom: opcoes.rom,
         urlNucleo: new URL(`${c.nucleo}.js`, opcoes.baseNucleos).href,
         sab,
+        pcm,
         taxaSaida: j.ctx?.sampleRate ?? 48000,
         sram: opcoes.sram ?? null,
         opcoes: opcoes.opcoes ?? {},
@@ -103,21 +114,38 @@ export class Jogo {
       throw e;
     }
     j.worker.onmessage = ({ data }: MessageEvent<DoWorker>) => j.receber(data);
+    j.pedidoDoLaco = requestAnimationFrame(j.laco);
     j.worker.onerror = (e) => j.eventos.erro?.(e.message || 'o Worker do núcleo caiu', []);
     return j;
   }
 
-  private async ligarSom(): Promise<SharedArrayBuffer | null> {
-    if (typeof AudioWorkletNode !== 'function' || typeof SharedArrayBuffer !== 'function' || !self.crossOriginIsolated)
-      return null;
+  /**
+   * Liga o som. Com isolamento (SharedArrayBuffer) o Worker escreve direto no anel que o AudioWorklet lê. Sem ele (WebView do
+   * Android, que não tem isolamento de origem) o som vai por mensagem: Worker → página → AudioWorklet (`pcm`).
+   */
+  private async ligarSom(): Promise<{ sab: SharedArrayBuffer | null; pcm: boolean }> {
+    const nenhum = { sab: null, pcm: false };
+    if (typeof AudioWorkletNode !== 'function') return nenhum;
+    const isolado = typeof SharedArrayBuffer === 'function' && !!self.crossOriginIsolated;
     try {
       const ctx = new AudioContext({ latencyHint: 'interactive' });
-      const url = URL.createObjectURL(new Blob([CODIGO_WORKLET], { type: 'text/javascript' }));
+      const url = URL.createObjectURL(
+        new Blob([isolado ? CODIGO_WORKLET : CODIGO_WORKLET_PCM], { type: 'text/javascript' }),
+      );
       await ctx.audioWorklet.addModule(url);
       URL.revokeObjectURL(url);
-      const cap = Math.round(ctx.sampleRate * 0.5);
-      const sab = new SharedArrayBuffer(16 + cap * 8);
-      const no = new AudioWorkletNode(ctx, 'kof-som', { outputChannelCount: [2], processorOptions: { sab } });
+      let sab: SharedArrayBuffer | null = null;
+      let no: AudioWorkletNode;
+      if (isolado) {
+        const cap = Math.round(ctx.sampleRate * 0.5);
+        sab = new SharedArrayBuffer(16 + cap * 8);
+        no = new AudioWorkletNode(ctx, 'kof-som', { outputChannelCount: [2], processorOptions: { sab } });
+      } else {
+        no = new AudioWorkletNode(ctx, 'kof-som-pcm', { outputChannelCount: [2] });
+        no.port.onmessage = (e: MessageEvent<{ tocadas?: number }>) => {
+          if (typeof e.data.tocadas === 'number') this.amostrasTocadas = e.data.tocadas;
+        };
+      }
       this.ganho = ctx.createGain();
       no.connect(this.ganho).connect(ctx.destination);
       this.saidaSom = no;
@@ -131,15 +159,29 @@ export class Jogo {
         addEventListener('keydown', this.acordar, true);
       }
       queueMicrotask(() => this.mandar({ tipo: 'som', tocando: ctx.state === 'running' }));
-      return sab;
+      return { sab, pcm: !isolado };
     } catch {
       this.comSom = false; // sem placa de som ou worklet bloqueado: o jogo roda mudo, no relógio do núcleo
-      return null;
+      return nenhum;
     }
   }
 
+  /** A cada vsync: solta um quadro da fila. */
+  private laco = (agora: number) => {
+    this.pedidoDoLaco = requestAnimationFrame(this.laco);
+    const q = this.fila.tirar(agora);
+    if (q) this.eventos.quadro?.(q.pixels, q.largura, q.altura);
+  };
+
   private receber(m: DoWorker) {
-    if (m.tipo === 'quadro') this.eventos.quadro?.(new Uint32Array(m.pixels), m.largura, m.altura);
+    if (m.tipo === 'pcm') this.saidaSom?.port.postMessage(m.dados, [m.dados.buffer]);
+    else if (m.tipo === 'quadro')
+      this.fila.empurrar({
+        pixels: new Uint32Array(m.pixels),
+        largura: m.largura,
+        altura: m.altura,
+        chegou: performance.now(),
+      });
     else if (m.tipo === 'medicao') this.eventos.medicao?.(m.m);
     else if (m.tipo === 'erro') this.eventos.erro?.(m.mensagem, m.log);
     else if (m.tipo === 'sram') this.eventos.sram?.(m.bytes);
@@ -280,6 +322,8 @@ export class Jogo {
     this.esperando.clear();
     this.mandar({ tipo: 'parar' });
     this.worker.terminate();
+    cancelAnimationFrame(this.pedidoDoLaco);
+    this.fila.limpar();
     removeEventListener('pointerdown', this.acordar, true);
     removeEventListener('keydown', this.acordar, true);
     void this.ctx?.close().catch(() => undefined);
@@ -288,4 +332,4 @@ export class Jogo {
 }
 
 /** O jogo aberto: no núcleo em wasm (Worker) ou num núcleo nativo (processo à parte). */
-export type SessaoDeJogo = Jogo | import('./nativo').JogoNativo;
+export type SessaoDeJogo = Jogo | import('./nativo').JogoNativo | import('./nativo-android').JogoNativoAndroid;

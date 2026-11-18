@@ -11,6 +11,7 @@ import {
   type ComandoNativo,
 } from '@kof/contracts';
 import type { SistemaId } from '@kof/domain';
+import { FilaDeQuadros } from './fila-de-quadros';
 import type { EventosDoJogo } from './jogo';
 import type { InfoDoJogo } from './libretro';
 import type { ReplayDoBug } from './mensagens';
@@ -54,8 +55,17 @@ export class JogoNativo {
   private sramAntes: Uint8Array | null = null;
   private relogioSram = 0;
   private medAntes: { t: number; quadros: number; faltas: number } | null = null;
+  /** o núcleo que o processo abriu e a placa de vídeo dele (pro diagnóstico) */
+  sobreNucleo: { nome: string; versao: string; placa?: string } = { nome: '?', versao: '?' };
   private volume: number;
   private mudo: boolean;
+  /** quadros que o processo mandou e ainda não foram pra tela: saem um por vsync (como no wasm) */
+  private fila = new FilaDeQuadros();
+  private pedidoDoLaco = 0;
+  /** quadros que ficaram pra trás na fila (a página engasgou) e foram jogados fora */
+  get descartados(): number {
+    return this.fila.descartados;
+  }
 
   private constructor(
     private eventos: EventosDoJogo,
@@ -104,7 +114,10 @@ export class JogoNativo {
       proporcao: p.proporcao,
     };
     j.comSom = p.taxaSaida > 0;
+    j.sobreNucleo = { nome: p.nucleo, versao: p.versao, ...(p.placa ? { placa: p.placa } : {}) };
     j.ligar();
+    // sem requestAnimationFrame (testes no Node) o quadro vai direto pra tela, sem fila
+    if (typeof requestAnimationFrame === 'function') j.pedidoDoLaco = requestAnimationFrame(j.laco);
     j.aplicarVolume();
     if (o.sram?.length) {
       j.sramAntes = o.sram;
@@ -149,6 +162,13 @@ export class JogoNativo {
     };
   }
 
+  /** A cada vsync: solta um quadro da fila (ver `FilaDeQuadros`). */
+  private laco = (agora: number) => {
+    this.pedidoDoLaco = requestAnimationFrame(this.laco);
+    const q = this.fila.tirar(agora);
+    if (q) this.eventos.quadro?.(q.pixels, q.largura, q.altura);
+  };
+
   private receber(d: string | ArrayBuffer) {
     if (typeof d === 'string') {
       const a = lerAviso(d);
@@ -174,7 +194,9 @@ export class JogoNativo {
     if (b.tipo === 'quadro') {
       // o RGBA começa no byte 12 (múltiplo de 4): vira Uint32Array sem cópia
       const px = new Uint32Array(b.rgba.buffer, b.rgba.byteOffset, b.largura * b.altura);
-      this.eventos.quadro?.(px, b.largura, b.altura);
+      if (this.pedidoDoLaco)
+        this.fila.empurrar({ pixels: px, largura: b.largura, altura: b.altura, chegou: performance.now() });
+      else this.eventos.quadro?.(px, b.largura, b.altura);
     } else if (b.pedido === PEDIDO_SRAM) {
       if (b.dados.length && !iguais(this.sramAntes, b.dados)) {
         this.sramAntes = b.dados.slice();
@@ -318,6 +340,9 @@ export class JogoNativo {
   fechar() {
     this.fechando = true;
     clearInterval(this.relogioSram);
+    if (this.pedidoDoLaco) cancelAnimationFrame(this.pedidoDoLaco);
+    this.pedidoDoLaco = 0;
+    this.fila.limpar();
     this.falharTudo('o jogo fechou');
     this.enviar({ cmd: 'fechar' });
     try {

@@ -21,9 +21,416 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-18 · Revisão e junção da tarefa F (PS2 liso) e o roadmap depois dela
+
+**Pedido:** "verifica tudo que foi feito: o Claude local fez muita coisa, o PS2 está rodando liso liso". Depois: "o que
+falta? pra mim está bem otimizado; não preciso me preocupar com mais gráficos".
+**Revisado:** os 15 commits da `agente-d/ps2-liso` (nenhum nome de jogo nos commits nem nos arquivos; o diário
+`docs/PS2-LISO.md` e o guia `docs/NUCLEO-NATIVO-PESADO.md` estão bons). O que deixou liso: estado de 48 MB montado na
+página (base64 + JSON + gzip, até 2 s parada) passou pra base64 nativo e Worker (parada isolada 1,6 s → 33 ms;
+engasgos/min ~110 → 15–33); cartão do PS2 perdia o save porque o app saía sem fechar o jogo (agora fecha e espera,
+`nativo::Fechador`); o "pra baixo" era o direcional no T F G H (controles ficaram como estavam); 82 opções do PS2 em
+português, tela própria de opções, ✨ Bonito (engasga: anisotrópico 8× ou MTVU, a medir).
+**Conferido:** junção direta (fast-forward) na `claude/busy-ritchie-wrvk8h`; `pnpm check` ok; Rust ok menos o `pcsx`
+(SIGILL do container, sabido); e2e 68 ok. O CI de `d45e6f0` caiu no e2e do F4 (navegador fechou a sessão; instável
+conhecido, commit só de docs).
+**Decidido:** o resto das fases 1, 3, 4 e 5 fica sem pressa; foco em conferir no uso (fase 0) e casa própria (fase 8).
+**Onde parou:** o Marcelo confere o cartão (formatar, salvar, fechar, reabrir, carregar) e decide a fase 8.
+
+## 2026-11-17 · Roadmap com entregáveis e tarefas; tarefa F (jogo A liso hoje)
+
+**Pedido:** o roadmap novo no mesmo formato do da migração (entregável e divisão de tarefas) e a instrução pro Claude
+local. O que ele quer: "jogar o jogo pesado A liso, liso, hoje".
+**Feito:** cada passo do `docs/ROADMAP.md` ganhou entregável, checkpoint e tarefa; seção "Divisão de tarefas" (F, D, E
+no PC dele, em sequência na mesma branch por mexerem nos mesmos arquivos; G, H depois; O = orquestrador) e a instrução
+pronta no fim. Tarefa nova `docs/agentes/F-ps2-liso-hoje.md`: o atalho de hoje (linha de base, salvar automático,
+bateria a cada 1 s, lixo de quadros, cartão, shader, opções), cada um com experimento curto e número.
+**Onde parou:** o Marcelo cola a instrução no Claude Code local.
+
+## 2026-11-17 · A migração está completa; roadmap novo
+
+**Pedido:** "novo roadmap: antes de adicionar outros emuladores, otimizar e melhorar o que temos. Agora não é mais
+migração: diga que a migração foi completa."
+**Feito:** o roadmap da migração virou `docs/ROADMAP-MIGRACAO.md` (histórico, com o aviso de concluída). `docs/ROADMAP.md`
+novo: fase 0 conferir no uso (os ⏸ que sobraram), 1 régua de medição, 2 PS2 sem defeito, 3 PS2 liso, 4 opções
+completas (✨ Bonito), 5 gráficos, 6 todos os consoles lisos, 7 celular, 8 casa própria (main, atualizador, Releases
+próprias, T.2), 9 só então emuladores novos. Regra: medir antes e depois, uma mudança por vez. README, AGENTS.md,
+docs/README.md e SITUACAO dizem que a migração terminou.
+**Onde parou:** fases 1–5 com o Claude Code no PC do Marcelo (tarefas D e E); eu reviso e junto.
+
+## 2026-11-17 · Decisões das opções e os engasgos por memória (pras tarefas D e E)
+
+**Decidido com o Marcelo:** toda opção do núcleo aparece no menu (grupos como o PCSX2 + Avançado com o resto, nada
+escondido); entra o perfil **✨ Bonito**; tela larga e 60 fps desligados por padrão com botão por jogo; **o PS1 fica no
+PCSX-ReARMed por enquanto** (trocar depois). Ordem: cartão → engasgos e memória → opções → gráficos.
+**Engasgos:** continuam esporádicos no jogo pesado A; ele desconfia de RAM. Li o código: suspeitos em ordem são o lixo
+de quadros na página (um `ArrayBuffer` novo por quadro), o salvar automático do nativo pela página, a bateria copiada a
+cada 1 s, shader na 1ª vez e swap. Viraram a "Fase 0b" da tarefa D; a parte 3 (gráficos) entrou na tarefa E.
+**Onde parou:** o Marcelo cola o texto do fim da tarefa E no Claude Code local.
+
+## 2026-11-17 · Tarefa E (cartão do PS2 e opções completas) e o novo substitui o antigo
+
+**Pedido:** o Marcelo jogou o jogo pesado A no novo: roda relativamente liso, **engasga em alguns momentos**, e **no
+menu de salvar não desce nem salva no cartão de memória**. Quer também o **pacote completo de opções** (PS2 como o
+PCSX2, PS1 com várias opções de gráfico e emulação). Tudo pelo Claude Code local, com instruções minhas. E: "o novo
+está melhor que o antigo, podemos descartar o antigo".
+**Feito:** `docs/agentes/E-ps2-cartao-e-opcoes.md` (parte 1: cartão de memória e o "pra baixo", com as hipóteses e
+onde olhar; parte 2: Avançado com tudo o que o núcleo declara, grupos como os do PCSX2, renderer escolhível, perfis
+revistos com número). Ordem pro agente local: E1 → D Fases 0–2 (o trecho que engasga) → E2 → D Fase 3, parando pra
+mostrar ao fim de cada parte. **D38**: o novo é o produto; paridade não trava mais; o repositório antigo fica (o novo
+ainda baixa núcleos e as `.so` do celular de lá). AGENTS.md atualizado.
+**Onde parou:** o Marcelo cola o texto do fim da tarefa E no Claude Code local. T.2 continua com ele.
+
+## 2026-11-17 · PS2 liso reaberto: tarefa D pro agente no PC do Marcelo
+
+**Pedido:** voltar ao PS2 liso (M16.5), agora pelo Claude Code local, que tem a placa, a BIOS e os jogos: ele abre os
+jogos e testa sozinho até ficar "tão liso quanto o PCSX2", vendo primeiro o que fazemos diferente do PCSX2 e chegando
+perto aos poucos, **documentando tudo**. E: **nome de jogo não vai pro repositório**.
+**Feito:** `docs/agentes/D-ps2-liso.md` (regras, o que existe, fases: banco de medição que roda sozinho → régua com o
+PCSX2 e o antigo → tabela de diferenças → um passo por vez com antes × depois; diário em `docs/PS2-LISO.md`). Os nomes
+dos jogos saíram dos docs, comentários e testes: agora são **jogo pesado A** (engasga), **B** (erro de memória) e **C**.
+O histórico do git ainda tem os nomes antigos (reescrever histórico é decisão do Marcelo).
+**Onde parou:** o Marcelo abre o Claude Code local com o texto do fim da tarefa D e diz os caminhos dos jogos na conversa.
+Eu (orquestrador) não mexo em PS2; quando a `agente-d/ps2-liso` tiver relatório, reviso e trago.
+
+## 2026-11-16 · Atalhos da rede no Início e no ☰ do meio
+
+**O que aconteceu:** o Marcelo testou o pareamento ("funfou bem") e pediu que ver o jogo do PC e usar o celular como
+controle ficassem à mão, sem ir em Controles. Novo `components/AtalhosDaRede.tsx`: com o outro aparelho pareado e
+conectado, o **Início** (no topo) e o **📡 Aparelhos** mostram, no celular, 📺 Ver o jogo do PC aqui (o Jogar no PC) e
+🎮 Usar como controle do PC (o controle total pela rede pareada, que mexe nos menus e no jogo do PC); no PC, com jogo
+aberto, 📱 Levar o jogo pro celular / 📺 Voltar pra TV. O **☰ do meio** (menu rápido) do celular ganhou os dois itens.
+Nada novo por baixo: chamam as mesmas funções de antes. e2e novo em `celular-pc.spec` (Início, controle, PC, ☰ e ver o
+jogo); `pnpm check` e os 67 e2e passaram.
+**Onde parou:** pacote novo na `teste-binarios` pra ele testar (T-REDE atualizado).
+
+## 2026-11-14 · O CI da paridade do celular estava vermelho
+
+**O que aconteceu:** os dois últimos envios (o do zip com a ISO e o do controle por console) falharam no CI do Linux no
+passo novo "Paridade da abertura e do controle de toque": `tools/paridade-*.mjs` pediam o pacote `playwright`, que só
+existe na minha máquina; o projeto tem o `@playwright/test`, que exporta o mesmo `chromium`. Troquei nas três
+ferramentas e rodei o passo igual ao CI (página do antigo no commit fixado `ceba493`): abertura TUDO IGUAL, controle
+TUDO IGUAL. No CI faltava também esperar o `vite preview` subir (era `sleep 4` fixo; agora espera a porta, em
+127.0.0.1) e o teste do som sem isolamento media 2 s e exigia 30 mil amostras/s: o CI com 2 testes juntos deu 27 mil
+(som saindo, só mais devagar). Agora mede 4 s e o piso é 20 mil; o defeito que ele pega é o mudo. Código do app não mudou; o pacote da `teste-binarios` continua valendo.
+**Onde parou:** só falta o teste de pareamento (T-REDE), que o Marcelo faz em casa. T.2 e o PS2 seguem com ele.
+
+## 2026-11-14 · O controle de toque por console no celular (vinha o do Super Nintendo no PS1)
+
+**Pedido:** "abri o PS1 e veio o controle do Super Nintendo; no antigo o sistema detecta o console e muda o controle. Por que não veio?".
+**Por quê:** eu tinha testado o controle de toque só com Mega Drive no navegador e o nativo com uma casca falsa sem apertar botão;
+nunca comparei console por console com o antigo. Faltavam as marcas que o antigo põe no `<body>` ao abrir o jogo (`app.js` 2479–2483):
+`analogico` (o direcional vira joystick: PS1/PS2/N64 — sem ela aparecia a cruz do SNES), `so-ab` (GB/NES/SMS/GG/GBA sem X/Y/L/R) e
+`nativo` (sem ⏩ no PS1/N64). **Feito (portado como está):** `marcarConsole(sis, nativo)` em `stores/entrada.ts` (ao abrir o jogo) e o
+mesmo no controle do PC (`consoleDoControle`, android.js 356–360 e 411–415).
+**Teste de paridade:** `tools/paridade-controle.mjs` abre o mesmo jogo (PS1 por zip, N64, GB, MD) nas duas páginas, aperta cada botão
+do controle de toque e compara marcas, rótulos (inclusive os escondidos) e o código que chega no núcleo: antes **9 diferenças**, agora
+**TUDO IGUAL**. Entrou no CI junto do da abertura.
+
+## 2026-11-14 · A abertura do zip com a ISO no celular (o motivo do "nem abre" e do "trava")
+
+**Pedido:** "o antigo abre a ROM e o novo nem abre; faz o teste de paridade da parte que abre a ISO do zip; traz igual ao antigo".
+**Causa (achada comparando o código):** o antigo decide se o jogo vai pro núcleo nativo ANTES de ler o arquivo (`consoleNativo` do
+`android.js`): `.zip` pelo diretório (`itensDoZip`/`cdDoZip`), `.bin` pelo começo. O novo olhava só a extensão: o `.zip` com a ISO caía
+no WebAssembly, que lê o CD inteiro na página (travava; com CD maior, nem abria). Pela Biblioteca o novo também não sabia que tinha
+PS1/N64 nativos (lia o arquivo inteiro).
+**Feito (portado como está no antigo):** `consoleNativoDoApk`/`nomesDoZip` em `platform/android-nativo.ts`; `nativo.disponivel` no Android
+= os nativos da casca; `nativoLigado('n64')` (só o APK tem). **Teste de paridade de verdade:** `tools/paridade-abrir.mjs` (página antiga ×
+nova, 9 arquivos gerados): a versão anterior dava **4 DIFERENÇAS (todas com zip)**; agora **TUDO IGUAL**, lendo só o diretório do zip
+(~250 B). Entrou no CI e num e2e (`android-simulado`: zip com ISO, zip com .cue+.bin e zip de N64 vão pro nativo; zip de GB não).
+**Aprendido:** eu tinha testado a lógica nova com arquivos soltos (`.cue`, `.z64`), nunca o caminho real (zip) contra o antigo. A paridade
+tem que ser medida com os mesmos arquivos nas duas páginas, não suposta.
+
+## 2026-11-14 · PS1/N64 no APK: as duas últimas diferenças do antigo, e a otimização documentada
+
+**Pedido:** ainda travando no APK novo (com a correção do salvar automático): trazer as diferenças que achei e deixar idêntico ao
+antigo; documentar como a otimização foi feita, pra repetir no PS2.
+**Feito:** (1) a página não desenha nada por baixo do PS1/N64 nativo rodando, nem o chiado/fita dos filtros animados
+(`useTelaDoJogo`: `j.android && !j.parado` = sai; `JogoNativoAndroid.parado`), como o `app.js` 1145/1178 do antigo; (2) a casca serve
+a página **sem COOP/COEP**, como o antigo. `docs/NATIVO-LISO.md`: arquitetura, as 8 regras (antigo × novo, com arquivo e linha), como
+medir e a lista de conferência pro PS2.
+**Não provado aqui:** o efeito no aparelho.
+
+## 2026-11-14 · Paridade do PS1/N64 no APK (travando) · salvar automático e estado grande
+
+**Pedido:** o PS1/N64 trava no APK novo (no antigo tinha sido resolvido): "faz o teste de paridade; tá tudo igual?".
+**O que eu NÃO tinha feito:** teste de desempenho/paridade do PS1/N64. Só testava a lógica com casca falsa.
+**Conferido agora:** (1) o Java e as `.so` são idênticos ao antigo (`diff` de Ps1Jogo/N64Jogo/Ps1/N64/SavesNativos/Rede/ControleServidor).
+(2) `tools/paridade-casca.mjs` roda a página do APK antigo e a do novo com a MESMA `KOFnesApk` falsa: chamadas por nome (Pad ≈ 460/8 s nas
+duas, Area/Volume a cada 30 quadros nas duas), tempo de script e tarefas longas (nenhuma nas duas): **o ritmo de chamadas à casca é igual**.
+Única diferença no uso da casca: o antigo chama `Reiniciar` uma vez depois de abrir (`s.reset()`, app.js 2475); o novo não chamava → agora chama.
+**Bug de paridade achado:** o antigo salva automático nos nativos no mínimo a cada **2 min** ("o estado é grande", app.js 2774); o novo salvava a cada
+**30 s** em tudo. No celular cada salvamento passa 4–16 MB pela ponte síncrona (medido: bytes→base64 de 16 MB = 3 s a CPU 6× mais lenta) =
+travada de segundos. Corrigido: `autoSegundos(escolhido, nativo)` (piso de 120 s, igual ao antigo, com teste contra o app.js do antigo).
+**Melhoria no caminho dos estados grandes:** gravação em pedaços de 384 KB (`store.put.parte`, a página respira entre eles) e leitura por URL
+(`/kofdados/<loja>/<chave>` servida pelo `MainActivity`, sem base64); testes de JVM e unit.
+**Não consegui provar:** que essa seja a única causa do travamento no seu celular (sem aparelho aqui). Se ainda travar, preciso saber SE é só no
+launch ou a cada ~2 min, e o modelo do celular; o próximo passo é perfilar na WebView (`chrome://inspect`).
+
+## 2026-11-14 · M14.3 e M14.5 · pasta de ROMs e atualizador do APK (reaproveitando o antigo)
+
+**Como:** sobre o que já estava na casca do antigo. **M14.3:** a `Pasta.java` (SAF) ganhou o caminho relativo de cada arquivo; a nova
+`PastaComandos.java` atende `library.root.get/scan/crc/inventory`, `file.read/stat`, `file.zip.list/read` (diretório central do zip lido por
+posição; inflate raw) e `pasta.preparar` (o PS1/N64 nativo copia o CD da pasta); `Comandos.java` ganhou um `Delegado` pros comandos da casca.
+TS: `abrirPedirPasta` abre o seletor do Android (`KOFnesApk.pastaEscolher` + `__pastaEscolhida`) e jogo da pasta que é PS1/N64 vai pro
+nativo (`pasta.preparar` + `JogoNativoAndroid`). **M14.5:** `AtualizacaoApk.java` (`app.atualizacao`: compara o `codigo` do
+`android-versao.txt` da última Release com o `versionCode` e pergunta "Baixar"); `versao.yml` monta o APK e sobe `KOFstation-novo.apk` + `android-versao.txt`;
+`ci.yml` roda `android/testar.sh` e monta o APK. **Conferido:** e2e `android-pasta` (escolhe a pasta, lista, abre GB por `file.read`, abre PS1 por
+`pasta.preparar` + `ps1Abrir`); `android/testar.sh` (JVM) ok; APK de 13 MB assina. **Não provado aqui:** o SAF e o `HttpURLConnection` de verdade
+(só no aparelho / numa Release).
+
+## 2026-11-14 · M13/M14 · rede e controle no APK novo (lado do celular)
+
+**Pedido:** "testa a rede entre aparelhos no APK novo e as opções do controle; faz a paridade total".
+**Como:** em cima do que já existia (casca, `Rede.java`, `ControleServidor.java`, `libkofrede.so` do APK antigo). O que faltava era a
+**tela do celular no app novo** (o `android.js` do antigo): `platform/android.ts` ganhou `rede()` (KOFnesApk.redeCmd + `window.__rede`) e o APK
+passou a levar a `libkofrede.so`; `stores/modoControle.ts` + `components/ModoControle.tsx` = o `entrarModoControle` do antigo (Jogar no PC por
+WebRTC com vídeo, ping, menu do PC, filtro do celular; controle pela rede pareada com jogador e console; servidor de endereço e senha do APK);
+`screens/Aparelhos/LerQr.tsx` (📷 Ler o QR do PC, BarcodeDetector ou `jsqr`) e 🎮 Jogar no PC por aparelho; botões `.so-pc`/`.so-cel`.
+**Conferido:** e2e `celular-pc.spec.ts` com **duas páginas de verdade** (PC e `?celular=1`) ligadas por um cabo de teste: o celular pede,
+chega o vídeo por WebRTC (videoWidth > 0), o ping, o botão apertado no celular chega no PC, o menu do PC aparece e "Voltar pra TV"; e o
+controle pela rede ("PC de teste · Jogador 1", console Mega Drive). Estável 3×. `pnpm check` com o antigo e `pnpm e2e` (64 ok).
+**Falta provar no aparelho:** o `libkofrede.so` de verdade (UDP 8650 na Wi-Fi) e a câmera do QR no Android (T-REDE no SITUACAO).
+
+## 2026-11-14 · Auditoria, som do APK e fecho de qualidade
+
+**Pedido:** olhar o repositório e o roadmap, rodar todos os testes, deixar o app "igualzinho" ao antigo e descobrir por que o APK
+saiu sem áudio.
+**Causa do mudo:** `Jogo.ligarSom` e `Tocador.ligarSom` só ligavam o som com `SharedArrayBuffer` + `crossOriginIsolated`. O WebView do
+Android **não tem isolamento de origem** (os cabeçalhos COOP/COEP que a casca manda não o ativam), então os dois devolviam "sem som" e os
+jogos de WebAssembly (SNES, GB, NES, Mega Drive, GBA...) e a música do Início rodavam mudos. O PS1/N64 nativos tocam pelo Java e não
+tinham esse problema. O teste daquela versão só cobria o PC (isolado), por isso passou.
+**Feito:** som sem memória compartilhada: o Worker escreve num anel só dele, `drenar` tira os quadros e manda `{tipo:'pcm'}`; a página
+repassa ao AudioWorklet `kof-som-pcm` (fila com teto de ~250 ms, silêncio quando seca). A jukebox e a trilha usam um relógio virtual
+pra saber quanto já tocou. Com isolamento (PC) nada muda: o caminho antigo continua igual. e2e novo `som-sem-isolamento` (força
+`crossOriginIsolated=false`, mede ≈ 48.000 amostras por segundo tocadas e sem "sem som" no F3).
+**Auditoria de paridade:** o teste com o antigo achou uma regressão minha (🏠 Início e 🎮 Controle virtual no menu rápido; no antigo
+também só existem no celular: teste ajustado). A "diferença" da abertura (logo do tema × ícone) era uma nota velha do PARIDADE: o
+novo já mostra a xícara.
+**Medido:** `KOF_ANTIGO=… pnpm check` (domain 145, engine 61+1, app-core 34, desktop 20), `pnpm e2e` 62 ok, `cargo fmt/clippy`, `cargo test
+--workspace --no-fail-fast` (só o `pcsx` com SIGILL, sabido), `android/testar.sh`.
+
+## 2026-11-14 · M14.4 · PS1 e N64 nativos no APK (reaproveitando a casca do antigo)
+
+**Pedido:** o APK novo tem que rodar PS1 e N64 como o antigo ("não recria do zero, rearquiteta").
+**Erro meu:** escrevi uma casca nova do zero, apaguei o `pcsx.js`/`mupen64.js` do APK e disse que PS1/N64 rodavam no
+WebAssembly: **não rodavam** (o APK anterior não abria nenhum dos dois). O antigo roda nativo (`.so` ARM64 + `Ps1Jogo`/`N64Jogo`).
+**Achado:** o APK pronto do antigo (`android/apk/KOFstation.apk`) traz as `.so`; **não precisa de NDK**.
+**Feito:** `android/` agora é a casca do antigo com o mínimo mudado (assets do app novo com COOP/COEP, ponte nova `KofAndroid` ao
+lado da `KOFnesApk`, Voltar, sem o Atualizador do antigo); `construir-apk.sh` extrai as `.so` do APK antigo na hora de montar
+(nada de binário no histórico) e mantém o WebAssembly do PS1/N64 de reserva. TS: `engine/nativo-android.ts`
+(`JogoNativoAndroid`, a `fachada()` do `android.js` com a cara de sessão do app novo: botões a cada 16 ms, área do jogo, volume,
+savestate em base64), `platform/android-nativo.ts` (decide por extensão se vai pro nativo), `stores/jogo.ts` (ramo
+`nativoAndroid`: o CD não passa pela página, o "arquivo" guardado é uma marca de 16 bytes, sem cópia na loja `roms`).
+**Medido / conferido:** unit (5) e e2e com `KOFnesApk` falsa: `.cue` → `ps1Abrir`, depois `ps1Pad`/`ps1Area`/`ps1Volume`, sem baixar o
+WebAssembly do PS1; `.z64` → `n64Abrir` e o PS1 fecha; pausar para de mandar botões (é o sinal que esconde a tela nativa). Nomes
+JNI das `.so` (`Java_dev_kofnes_android_Ps1_*`, `..._N64_*`) batem com as classes copiadas. APK 13 MB assina e verifica.
+**Falta:** jogar no celular (T-CELULAR passo 4); reabrir CD nativo pela Biblioteca (depende do M14.3, a `Pasta.java` já está lá).
+**Onde parou:** ⏸ o Marcelo testa PS1/N64 no APK; depois M14.3.
+
+## 2026-11-14 · Fecho da sessão · onde parou
+
+**Feito nesta sessão (um commit por passo):** M16.4 (`047e047`), T.1 (`ad355eb`), M14.2 (`802bb61`), M14.1 (`d45ab03`),
+e2e do F4 mais firme, `tools/publicar-teste.sh`. Pacote novo na `teste-binarios` (um commit órfão com Linux, Windows e o
+`KOFstation-novo.apk`; os executáveis e o APK foram conferidos com `grep` pelo código novo antes de publicar). Essa branch
+tinha o pacote com as tentativas do PS2 (`rascunho/ps2-liso`): foi substituída pelo pacote sem elas.
+**Pausado por decisão do Marcelo:** M16.5 (otimização do PS2). **Não mexi** nos ⏸ de M9–M13, M15 e PS2 (só preparei os testes na
+lista "Pra você testar" do SITUACAO). **T.2 não foi feito** (fica pra ele decidir).
+**Não feito, com motivo:** M14.3, M14.4 e M14.5 (SAF/biblioteca em Java sem aparelho, NDK ausente, atualizador sem canal
+de publicação do APK): `docs/ANDROID.md` tem a ordem sugerida. A lista completa do Avançado ("tudo que o núcleo
+declara") também ficou pra depois (precisa de um comando que abra o núcleo só pra listar).
+**Próximo passo:** o Marcelo faz os testes da lista "Pra você testar" (T-M16.4 e T-CELULAR primeiro) e diz o que quebrou.
+Depois: M14.3 (Java com teste de JVM) e, com o NDK, M14.4.
+
+## 2026-11-14 · M14.1 · casca do Android e o app novo dentro (APK)
+
+**Pedido:** M14.1 a M14.5; sem o Android SDK, fazer o que der e dizer o que faltou.
+**Ambiente:** `dl.google.com` é bloqueado (sem SDK/NDK), mas o `apt` tem as ferramentas que o antigo já usava (aapt,
+dalvik-exchange, apksigner, zipalign, `android-23.jar`, `org.json`): instalei e o APK monta e assina aqui. **NDK não existe**.
+**Feito:** `platform/android.ts` (adaptador `Backend` sobre `window.KofAndroid`, base64, erro do contrato, com teste);
+`escolher.ts` usa ele dentro do APK; `ligarModoCelular` liga o modo celular sozinho; `window.__kofVoltar` pro botão Voltar.
+`android/`: `Comandos.java` (Java puro: app.*, log.write, config.*, store.* com os mesmos nomes de arquivo do Rust,
+nativo.disponivel vazio, library.root.get sem pasta; o resto devolve `UNSUPPORTED` dizendo qual passo falta), `Ponte.java`,
+`MainActivity.java` (WebView em `https://kofstation.local/` servindo `assets/web` com COOP/COEP, seletor de arquivos, Voltar,
+tela cheia), `AndroidManifest.xml`, `construir-apk.sh` (sem lambda: o dx do minSdk 24 não aceita invokedynamic), chave de
+teste `kofstation-teste.keystore` (como a do antigo; `applicationId` próprio `dev.kofstation.android`). `docs/ANDROID.md`.
+**Medido / conferido:** `android/testar.sh`: 22 verificações de JVM dos comandos (config, lojas, erros, nomes de arquivo
+iguais aos do Rust). `unit` do adaptador (6). e2e `android-simulado.spec.ts` com uma ponte KofAndroid falsa em JS: o app liga no
+modo celular sozinho, abre um jogo, o save vai pra loja da "casca" (`sram.KOFSAVE.32768`), a biblioteca sem pasta não
+quebra. APK de 8,5 MB compila contra o `android.jar`, o `apksigner verify` passa (v2/v3) e o `aapt dump badging` mostra
+`dev.kofstation.android`, minSdk 24, ícone da xícara.
+**Não feito (e por quê):** M14.3 (pasta de ROMs por SAF: `library.*`/`file.*` em Java é grande e não dá pra provar sem
+aparelho), M14.4 (precisa do NDK), M14.5 (depende de publicar o APK junto das versões e de decidir a verificação). Tudo
+anotado no ROADMAP e em `docs/ANDROID.md`, com a ordem sugerida.
+**Onde parou:** ⏸ o Marcelo instala o APK (T-CELULAR). Próximo código: M14.3 em Java com teste de JVM.
+
+## 2026-11-14 · M14.2 · controle de toque e layout do celular
+
+**Pedido:** M14.2 (controle de toque dos 6 modelos e o layout), feito e testado no navegador com tela de celular.
+**Feito:** `?celular=1` (ou aparelho de toque Android, ou o APK) liga a classe `celular` no `<html>` (`app/celular.ts`).
+`styles/celular.css` é o `android.css` do antigo (a marcação do novo usa os mesmos ids e classes). `components/ControleDeToque.tsx`
+é o `#ctl` do antigo em React: multitoque por `pointerId`, deslizar troca de botão, direcional com zona morta que vira
+analógico nos consoles que têm (misto no PS1, puro no N64/PS2), ☰ = menu rápido, ⏪ = rebobinar, ⏩ = turbo, rótulos por
+console (Mega Drive A/B/C, PS1 ✕○□△, N64...). `stores/toque.ts` guarda os dedos e as preferências (chaves do antigo ctlModelo,
+ctlTam, ctlOpa, ctlVibrar, ctlCanhoto); `hooks/useEntradaDoJogo` soma o toque ao teclado do J1. Tela Controles no
+celular = galeria dos 6 modelos com miniatura, tamanho, transparência, vibrar, canhoto e "restaurar o padrão"
+(`screens/Teclas/ControlesDeToque.tsx`); menu rápido ganha 🏠 Início e 🎮 Controle virtual.
+**Medido / conferido:** e2e `celular.spec.ts` com viewport de celular (390×780 e 844×390, toque): o controle aparece só
+jogando; A+Start juntos (multitoque), soltar um mantém o outro, deslizar de B pra Y; diagonal do direcional e zona morta;
+☰ abre o menu rápido; os 6 modelos mudam e ficam guardados depois de recarregar; deitado o direcional fica à esquerda
+da imagem e os botões à direita, sem cobrir. Prints: `apps/desktop/test-results/celular-*.png`. `pnpm check` e `pnpm e2e` (57 ok).
+CI do T.1 verde no Linux e no Windows; o do M16.4 (run 110) falhou só no e2e do F4 (carregamento do painel de imagem
+sob carga), que passou de novo no run seguinte: instabilidade já vista, sem relação com o commit.
+**Deu errado / aprendido:** um `usarJogo(...) && usarTelas(...)` chamou o hook condicionalmente e derrubou o App
+("reading 'length'" do React): hooks nunca em curto-circuito. E `prettier --write` rodado dentro de `apps/desktop` ignora o
+`.prettierignore` da raiz e reformatou o `estilo.css` do antigo: rodar sempre da raiz.
+**Onde parou:** M14.1 (casca Java servindo o app novo).
+
+## 2026-11-14 · T.1 · paridade fechada com testes contra o antigo
+
+**Pedido:** fechar os itens não verificados do `PARIDADE.md`, com teste automático contra o `kofstation-old` (só leitura)
+onde der.
+**Feito:** (1) `apps/desktop/src/testes/paridade-antigo.test.ts` (KOF_ANTIGO): o menu rápido tem os mesmos itens na mesma
+ordem do `ITENS_RAPIDO`; cada aviso literal do antigo (53) existe no novo ou está numa lista de diferenças com o motivo.
+O teste achou 2 mensagens que faltavam e elas foram copiadas ("o menu rápido é só durante o jogo"/"abra um jogo
+primeiro", "este jogo vai abrir sempre com esse jeito"). (2) `packages/engine/test/paridade-sistemas.test.ts`: lê o
+`nucleo.js` do antigo e compara sistemas, extensões, núcleo, tamanho de imagem, proporção, opções fixas, analógico e
+BIOS. (3) `contraste.test.ts`: as cores dos 126 temas são idênticas às do antigo; contraste WCAG medido (10 pares já
+eram baixos no antigo: lista fixa, que só pode encolher). (4) e2e novos: `paridade-teclas` (Tab = turbo ×1,8 ou mais,
+F11, proporções 4:3/8:7/esticar), `biblioteca-grande` (3.000 jogos, CPU 4× mais lenta: 433 ms até a primeira linha,
+150 linhas no DOM), `nucleo-sob-demanda` (nenhum núcleo no Início; só o do console do jogo).
+**Decidido:** os itens que só o Marcelo verifica ganharam o estado ⏸ no PARIDADE e um teste com passo a passo na lista
+"Pra você testar" do SITUACAO (T-JOGO, T-OUVIR, T-NEOGEO, T-PS2, T-REDE, T-INSTALAR, T-DIAG). "Estado salvo com outro
+núcleo de SNES" ficou ➖ (não se aplica sem o núcleo Kof). Dois textos do PARIDADE estavam velhos (cartão BIOS do
+Início e lista de BIOS da abertura já existem e têm e2e): corrigidos.
+**Medido / conferido:** `KOF_ANTIGO=… pnpm test` verde (domain 145, engine 56+1, app-core 34, desktop 14);
+`pnpm e2e` 51 ok + 1 ignorado.
+**Onde parou:** M14 (celular).
+
+## 2026-11-14 · M16.4 · opções de emulação de todos os consoles
+
+**Pedido:** juntar a tarefa B (`agente-b/opcoes-nucleo`), fazer a tela (DIAGNOSTICO.md §4) e catalogar o N64 e os
+consoles em WebAssembly.
+**Feito:** (1) merge da branch do B (catálogo PS1/PS2, teste Rust contra os `.so`). (2) `domain/opcoes-camadas.ts`: as
+camadas geral → console → jogo (puro, com teste): `resolverOpcoes`, `opcoesParaNucleo`, `compararOpcoes` ("na hora"
+× "ao reabrir"), ajustes que não mexem no objeto antigo. (3) `stores/emulacao.ts`: guarda tudo na chave `emuOpcoes` da
+configuração; ao abrir o jogo as opções entram no núcleo (nativo e WebAssembly); mudar com o jogo aberto manda o que
+vale na hora (`Comando::Variavel` / `opcoes` do Worker) e avisa o resto. (4) `screens/Estados/OpcoesDoConsole.tsx`:
+perfil geral, console, "valer para o console todo ou só este jogo", perfil do console/jogo, opções por grupo com o
+selo ⚡/↻, **Avançado**, "voltar ao perfil" e "apagar os ajustes". (5) Catálogo dos WebAssembly em
+`domain/opcoes-nucleo-wasm.ts`: N64 (12), SNES (5), GB (6), NES (5), Mega Drive/SMS/GG (5), GBA (6).
+**Medido / conferido:** os núcleos WebAssembly do antigo não expõem as opções que declaram (a ponte ignora o
+`SET_VARIABLES`). `tools/opcoes-wasm.mjs` varre a memória estática de cada módulo (tabelas `retro_core_option_v2`) e
+gera `packages/contracts/fixtures/opcoes-wasm.json` (chave, valores e padrão **de verdade**); o teste
+`opcoes-nucleo-wasm.test.ts` falha se o catálogo disser outra coisa. Isso mostrou, por exemplo, que o Mupen64 do
+WebAssembly só tem GLideN64 e interpretador (sem recompilador, sem Angrylion). Novo e2e `opcoes-emulacao.spec.ts`
+(perfis, ajuste fino, Avançado, persistência depois de recarregar). `pnpm check`, `pnpm e2e` (46 ok),
+`cargo clippy`/`fmt` ok, `cargo test --workspace --no-fail-fast` ok (só o `pcsx` com SIGILL, sabido).
+**Decidido:** o Equilibrado é sempre o que o app já usava (testado), então quem não mexer em nada não percebe
+diferença. As opções dos WebAssembly dizem sempre "vale ao reabrir" até alguém medir quem relê. O "Avançado" mostra o
+que o catálogo marcou como avançado; **a lista completa do que o núcleo declara (`SET_VARIABLES`) fica pendente**:
+precisaria abrir o núcleo só pra listar (o PS1/PS2 têm `Nucleo::opcoes_declaradas`, falta um comando no `kof-app`).
+**Deu errado / aprendido:** o container não tinha `libasound2-dev` (instalei com apt pra compilar o `kof-app`).
+**Onde parou:** pacote novo na `teste-binarios` a fazer (fim da etapa), depois T.1 (paridade).
+
+## 2026-11-14 · M16.5 · otimização do PS2 pausada por decisão do Marcelo
+
+**Pedido:** terminar o roadmap até o fim (M16.4, T.1, M14), um passo depois do outro, sem parar nos checkpoints; o que
+depender do Marcelo vira ⏸ e entra na lista "Pra você testar" do `docs/SITUACAO.md`. T.2 fica pra ele decidir.
+**Decidido:** a **otimização do PS2 (M16.5) está pausada por decisão do Marcelo.** As tentativas ficam na branch
+`rascunho/ps2-liso` (ritmo pelo relógio como o PCSX2, medição de CPU fora do laço, MTVU ligado) e **não devem ser
+juntadas**. Ninguém mexe em otimização de PS2 até ele reabrir o assunto.
+**Onde parou:** começando pelo M16.4 (juntar `agente-b/opcoes-nucleo` e fazer a tela), depois T.1 e M14.
+
+## 2026-11-10 · Conferência · o C entrou, o jogo pesado A continua não liso
+
+**Pedido:** o Marcelo jogou o pacote com a tarefa C: o jogo pesado A **continua não liso** (no antigo roda
+liso). Limites do Codex e do Claude acabando: retomar no sábado.
+**Conferido:** a junção do C pelo Codex está certa (`filho.rs` manda todo quadro; `canal.rs` fila de até 6; fila por
+vsync comum em `engine/fila-de-quadros.ts`); CI verde no Linux e no Windows (`1f91825`, run 104). B (`agente-b/opcoes-nucleo`)
+ainda **não** junto.
+**Conclusão:** o quadro perdido na origem era real (60% → 0 no teste) mas não era o que o olho do Marcelo vê, ou não
+era o único. Sem o `.zip` do 🩺 não dá pra saber o culpado.
+**Onde parou (sábado):** 1) o Marcelo manda o `.zip` do 🩺 do jogo pesado A (Ajuda → 🩺, jogar 5 min, Exportar) e diz **se no
+antigo o PS2 abre numa janela própria ou dentro da página do app**; 2) se o culpado for núcleo/CPU: opções (B, M16.4);
+se for ritmo/página: o **modo janela própria** como o antigo (D36), que é o caminho mais provável pra "liso igual ao
+antigo"; 3) a memória do jogo pesado B com a saída do `journalctl` (comando no `CONTINUAR.md`).
+
+## 2026-11-09 · M16 · ritmo do PS2/PS1 nativo (tarefa C)
+
+**Pedido:** continuar de `docs/agentes/CONTINUAR.md`, integrar o que chegou na branch `claude/busy-ritchie-wrvk8h` e enviar, sem PR.
+**Feito:** revisada e integrada `agente-c/ritmo-nativo` (merge `d7e57d3`). `filho.rs` publica cada quadro; `canal.rs` mantém fila limitada; `JogoNativo` e o wasm usam `FilaDeQuadros` por vsync.
+**Medido / conferido:** teste `ritmo`: 284 quadros rodados, 0 sem envio. `pnpm check` passou; e2e passou com 44 testes (1 ignorado) usando dois workers. Formatação e clippy passaram. Na suíte Rust completa, todos os alvos passaram exceto `opengl`, que entregou 64 quadros de 120 sob este backend gráfico e falhou no limite do teste; os testes `pcsx`, `lrps2`, `processo` e `ritmo` passaram. Build Linux e `tools/testar-ps2.mjs`: DVD sintético de 4,3 GB abriu, núcleo ficou vivo e a memória da página ficou em 753 MB. Pacote Linux SHA-256 `da4cf8bb…`, publicado em `teste-binarios` (`65bdcf0`). Os artefatos Windows foram preservados da versão anterior e estão marcados como sem C.
+**Onde parou:** ⏸ o Marcelo testa jogo pesado A com diagnóstico e envia o `.zip`; repete com jogo pesado B até o erro de memória. Depois integrar B e iniciar M16.4.
+
+## 2026-11-08 · Passagem · onde parou pro próximo orquestrador (Codex local)
+
+**Pedido:** o limite do Marcelo estava acabando; salvar exatamente onde parou pra continuar pelo Codex.
+**Feito:** `docs/agentes/CONTINUAR.md` (o que ele quer hoje: jogo pesado A liso; o que foi descartado na falta de memória do
+jogo pesado B: DVD na RAM, opções, envio de imagens, troca de resolução; a causa achada das engasgadas; os passos em ordem).
+Tarefa C (ritmo do nativo) e B (opções) disparadas em sessões na nuvem (branches `agente-c/ritmo-nativo`,
+`agente-b/opcoes-nucleo`). `tests/lrps2.rs` garante `need_fullpath` (`eb4980a`).
+**Onde parou:** ver `docs/agentes/CONTINUAR.md`, "Próximos passos".
+
+## 2026-11-08 · Orquestração · tarefa A junta (ritmo do WebAssembly) · B não chegou
+
+**Pedido:** o Marcelo rodou os dois agentes (Sonnet, sessões na nuvem; o Codex pelo `tools/agentes.sh` não enviou
+nada, causa ainda não vista: falta o log) e pediu pra conferir.
+**Feito:** revisada e junta a branch do A (`claude/fervent-brahmagupta-zq12qz` → `cbe109e`): a causa era a falta de
+fila entre a chegada dos quadros do Worker (em rajadas, pelo `setTimeout(4)` + ritmo pelo som) e o vsync; agora
+`engine/jogo.ts` guarda os quadros e solta um por vsync, com 1 quadro de folga (máx. 3 na fila). `tools/medir-ritmo.mjs`
+mede antigo × novo com a mesma ROM gerada.
+**Medido / conferido (aqui):** 15 s, Game Boy, 60 Hz: novo 0 pulados e 17 repetidos/min (antes ~450 pulados), antigo
+0 e 0; p50/p95/p99 16,67 nos dois. `pnpm check` e 44 e2e verdes. Custo: ~1 quadro (16 ms) a mais de atraso de imagem
+(a folga da fila); o laço da fila roda antes do desenho no mesmo vsync (registrado primeiro). Num jogo de luta pode
+pesar: medir a latência do botão até a tela antes de dar como fechado (fica pro M16.5).
+**Não afeta o PS2** (nativo, outro caminho): a tarefa era só dos consoles em WebAssembly.
+**Onde parou:** **B** (catálogo de opções) não chegou no GitHub: pedir ao Marcelo a branch ou rodar de novo. ⏸ o
+Marcelo grava o jogo pesado A e o jogo pesado B com o pacote da `teste-binarios` (o pacote ainda não tem o A: sai no próximo).
+
+## 2026-11-08 · M16.1–M16.3 · medidor quadro a quadro, F3 com gráfico e modo diagnóstico
+
+**Pedido:** fazer o M16 na ordem, sem parar nos checkpoints até o M16.3 (lá o Marcelo grava o jogo
+pesado A). No meio: "o PCSX2 está em WebAssembly?" (não: o PS2 é só nativo, `soNativo` em `engine/nucleos.ts`; o
+"mesmo formato no Worker do wasm" é pros outros consoles); "que diabos é o kof-nativo, deixa o núcleo separado" (é o
+suporte que roda o `.so`/`.dll` num processo filho; o núcleo segue arquivo à parte, vindo pelo manifesto, D32). Contou
+que **o antigo roda bem mais liso** e que o **jogo pesado B deu problema de memória**. Pediu pra salvar a sessão
+e estimar o que falta.
+**Feito:**
+- M16.1: `domain/desempenho.ts` (p50/p95/p99, fps suavizado como o PCSX2, engasgo > 1,5× o quadro ou falta de som, o
+  culpado: núcleo, leitura da placa, envio, página, som ou ritmo); `kof-nativo/src/medidor.rs` (600 quadros sem alocar)
+  e `cpu.rs` (CPU por linha: `/proc/self/task` no Linux, `GetThreadTimes` no Windows; **o Windows só foi conferido pelo
+  CI**); aviso `desempenho` com `porQuadro` (6 números/quadro em µs) e `cpu`, opcionais nos dois lados do contrato +
+  fixtures; o Worker do wasm manda o mesmo `porQuadro`; `app-core/desempenho.ts` (`MedidorDaSessao`) junta o tempo de
+  desenho da página a cada quadro mandado.
+- M16.2: F3 com p50/p99, pior quadro, engasgos/min com o culpado, CPU por linha e o gráfico dos últimos 600 quadros.
+- M16.3: `domain/diagnostico.ts` (CSVs com ponto no decimal, resumo da sessão em memória fixa por histograma,
+  `resumo.txt`); `app-core/diagnostico.ts` (`GravadorDiagnostico`: lotes a cada 5 s); Rust `kof-app/src/diag.rs`
+  (`diag.maquina|abrir|anotar|listar|exportar`, só a pasta `<dados>/diagnostico`, nomes conferidos, limite de 20 MB por
+  sessão, apaga as de 30 dias, tira a pasta do usuário dos logs); `kof-files::zip::montar` (zip com deflate, conferido
+  pelo `zipfile` do Python); placa de vídeo do núcleo (`GL_RENDERER`) no aviso `pronto`; janela Ajuda → 🩺 Modo
+  diagnóstico, selo 🩺 na barra, resumo num aviso ao fechar/trocar de jogo, F9 baixa o `.zip` junto quando ligado.
+**Medido / conferido:** `pnpm check` (domain 77, app-core 33 testes), testes Rust novos (medidor, cpu, zip, diag) e o
+`processo.rs` (o `porQuadro` chega com 1 registro por quadro), e2e `jogo.spec` (F3 com p99 e gráfico) e o novo
+`diagnostico.spec` (liga, grava, resume, exporta). Primeiro número de verdade: no Game Boy (wasm), **p50 18,75 ms com
+o certo 16,74**: o laço do Worker (setTimeout de 4 ms + ritmo pelo som) solta quadros desiguais. Suspeita pro "antigo
+mais liso": olhar isso no M16.5 com o antigo lado a lado.
+**Deu errado / aprendido:** um commit saiu com o Prettier reclamando (o `| tail` escondeu o código de saída: rodar o
+`pnpm format:check` sem pipe). O `cargo test` todo para no `pcsx` (SIGILL do container, já sabido): usar
+`--no-fail-fast` pra ver o resto.
+**Orquestração (pedido no fim):** o Marcelo passa a usar este agente como orquestrador e dois outros (Codex etc.) com
+tarefas fechadas: `docs/agentes/LEIA-ME.md` (regras: branch própria a partir desta, só os arquivos da tarefa, não
+mexer em JORNAL/ROADMAP/README, relatório no fim do arquivo da tarefa), **A** `A-ritmo-wasm.md` (branch
+`agente-a/ritmo-wasm`) e **B** `B-opcoes-nucleo.md` (branch `agente-b/opcoes-nucleo`); aviso no topo do AGENTS.md.
+**Onde parou:** M16.1–M16.3 feitos e enviados; CI do M16.1/M16.2 verde no Linux e no Windows (o `cpu.rs` do Windows
+compila e passa lá). Pacote novo na `teste-binarios` (`4058e25`), com o executável do pacote passando no
+`tools/testar-ps2.mjs`. **⏸ M16.3:** o Marcelo grava o jogo pesado A e o jogo pesado B (o erro de memória: texto do aviso, o `.zip` e
+quanto de RAM tem). **Próximo do orquestrador:** revisar as branches dos agentes A e B quando o Marcelo avisar; depois
+M16.4 (a tela das opções em cima do catálogo do B) e M16.5 (prioridade: a memória do jogo pesado B; o ritmo do wasm é do A).
+
 ## 2026-11-08 · Planejamento · M16 (desempenho, diagnóstico, opções de emulação) · onde parou pra próxima sessão
 
-**Pedido:** o Marcelo testou o PS2 (Shadow of the Colossus "rodou relativamente bem, umas engasgadas aqui e ali") e
+**Pedido:** o Marcelo testou o PS2 (jogo pesado A "rodou relativamente bem, umas engasgadas aqui e ali") e
 pediu, antes de corrigir, medição de verdade: modo diagnóstico que grava logs e estatísticas, e opções de emulação do
 PS1 em diante. "Não basta rodar, tem que rodar bem." Etapa essencial, no meio da migração, antes do M14. Pediu pra
 pesquisar quem já faz, desenhar a arquitetura e parar (contexto grande): a implementação fica pra próxima sessão.
@@ -38,11 +445,11 @@ pesquisar quem já faz, desenhar a arquitetura e parar (contexto grande): a impl
    `desempenho` (campo novo, opcional, nos dois lados do contrato e nas fixtures de `packages/contracts/fixtures`).
 3. CPU por linha (Linux `/proc/self/task/*/stat`, Windows `GetThreadTimes`), agrupada pelo nome da linha.
 4. O mesmo formato no Worker do WebAssembly (`packages/engine`) e o tempo de desenho/chegada na página.
-Depois M16.2 (F3 com gráfico), M16.3 (modo diagnóstico; ⏸ o Marcelo grava o SotC e manda), M16.4 (opções de
-emulação), M16.5 (otimizar pelos relatórios). Pergunta em aberto pro Marcelo: os engasgos do SotC foram na primeira
+Depois M16.2 (F3 com gráfico), M16.3 (modo diagnóstico; ⏸ o Marcelo grava o jogo pesado A e manda), M16.4 (opções de
+emulação), M16.5 (otimizar pelos relatórios). Pergunta em aberto pro Marcelo: os engasgos do jogo pesado A foram na primeira
 vez que aparece um lugar/efeito (shader sendo montado) ou espalhados?
 **Também esperando o Marcelo:** a chave do atualizador (SITUACAO, "Pra você fazer"), o teste da rede com o celular,
-os pacotes do Linux/Windows, e o PS2 nos outros dois jogos (Zone of the Enders 2, Gran Turismo 4) com print do F3.
+os pacotes do Linux/Windows, e o PS2 nos outros dois jogos (jogo pesado B, jogo pesado C) com print do F3.
 **Ambiente da próxima sessão:** `pnpm install`, `KOF_NATIVOS=todas pnpm nucleos` (traz o LRPS2), e pros testes
 nativos/PS2: `sudo apt-get install -y libasound2-dev genisoimage libegl1 libegl-mesa0 libgl1-mesa-dri`. O teste
 `kof-nativo --test pcsx` morre com SIGILL em container (CPU), no CI passa. Pros testes de paridade da rede:
@@ -90,7 +497,7 @@ verdade e o executável do pacote, DVD de 4,3 GB (esparso) pela biblioteca, proc
 `j 0xBFC00000` no vetor de reset deixa ele parado e o resto do caminho testável. (2) PS2 agora "roda": a BIOS
 obrigatória fazia a tela de BIOS abrir antes de avisar que falta o núcleo; o aviso do núcleo vem primeiro. (3) Imagem
 de verdade só com BIOS de verdade (a falsa não liga o vídeo do PS2): **não vi um quadro de PS2 aqui**.
-**Onde parou:** ⏸ Marcelo: BIOS + um jogo de verdade (Shadow of the Colossus) no pacote novo, print do F3 numa cena
+**Onde parou:** ⏸ Marcelo: BIOS + um jogo de verdade (jogo pesado A) no pacote novo, print do F3 numa cena
 pesada, e se possível o mesmo jogo no PCSX2 sozinho pra comparar. Com os números: decidir o P.7 (modo direto) e
 ajustar opções. Também pendente: cartão de memória do PS2 no backup `.kofsave` (hoje fica em
 `<dados>/nativo/saves/ps2`, persistente), conferir no Windows (WGL nunca rodou), estados do PS2 com jogo de verdade.

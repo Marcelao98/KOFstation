@@ -9,6 +9,8 @@ export type ParaWorker =
       rom: Uint8Array;
       urlNucleo: string;
       sab: SharedArrayBuffer | null;
+      /** sem SharedArrayBuffer mas com AudioWorklet: o som volta por mensagem `pcm` (ver anel.ts) */
+      pcm?: boolean;
       taxaSaida: number;
       /** save da bateria pra pôr antes do 1º quadro */
       sram?: Uint8Array | null;
@@ -75,6 +77,8 @@ export interface Medicao {
 export type DoWorker =
   | { tipo: 'pronto'; info: InfoDoJogo }
   | { tipo: 'quadro'; pixels: ArrayBuffer; largura: number; altura: number }
+  /** som sem SharedArrayBuffer: estéreo intercalado que a página repassa ao AudioWorklet */
+  | { tipo: 'pcm'; dados: Float32Array }
   | { tipo: 'medicao'; m: Medicao }
   | { tipo: 'erro'; mensagem: string; log: string[] }
   /** a bateria mudou (conferido 1x por segundo) */
@@ -117,6 +121,8 @@ export type ParaTocador =
       urlNucleo: string;
       /** null = só gerar o .wav (sem tocar) */
       sab: SharedArrayBuffer | null;
+      /** sem SharedArrayBuffer mas com AudioWorklet: o som volta por mensagem `pcm` (ver anel.ts) */
+      pcm?: boolean;
       taxaSaida: number;
       segundos: number;
       fadeMs: number;
@@ -130,6 +136,8 @@ export type ParaTocador =
   | { tipo: 'parar' };
 
 export type DoTocador =
+  /** som sem SharedArrayBuffer: estéreo intercalado que a página repassa ao AudioWorklet */
+  | { tipo: 'pcm'; dados: Float32Array }
   | {
       tipo: 'pronto';
       canais: number;

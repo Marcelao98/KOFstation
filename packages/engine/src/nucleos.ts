@@ -85,7 +85,7 @@ export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
   },
   // PlayStation 2 (LRPS2, o PCSX2 do libretro): só nativo, desenhando pela placa (OpenGL sem janela no processo do
   // jogo). O DVD é lido direto do disco pelo núcleo. Opções como o antigo: renderer OpenGL e o "EE cycle skip" leve,
-  // que deixou o Shadow of the Colossus em 60 no Ryzen 5 4600H (a CPU do PS2 é o gargalo em PC modesto)
+  // que deixou o jogo pesado A em 60 no Ryzen 5 4600H (a CPU do PS2 é o gargalo em PC modesto)
   ps2: {
     nucleo: 'pcsx2',
     largura: 640,

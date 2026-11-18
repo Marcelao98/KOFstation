@@ -4,7 +4,11 @@ import { quandoFoi } from '@kof/app-core';
 import qrcode from 'qrcode-generator';
 import { useEffect, useMemo, useState } from 'react';
 import { acao } from '../../app/acoes';
+import { emModoCelular } from '../../app/celular';
+import { entrarModoControle } from '../../stores/modoControle';
 import { usarRede } from '../../stores/rede';
+import { LerQr } from './LerQr';
+import { AtalhosDaRede } from '../../components/AtalhosDaRede';
 
 function Qr({ texto }: { texto: string }) {
   const svg = useMemo(() => {
@@ -80,13 +84,15 @@ export function Aparelhos() {
         </p>
         <div className="ap-fases">
           <p>
-            <b>✅ Já funciona:</b> parear, ver quem está conectado e <b>usar o celular como controle</b> (no celular:
-            Controles → Usar este celular como controle do PC).
+            <b>✅ Já funciona:</b> parear, ver quem está conectado, <b>ver o jogo do PC no celular</b> e{' '}
+            <b>usar o celular como controle do PC</b> (no celular: os botões aqui embaixo, no Início ou no ☰ do meio do
+            jogo).
           </p>
           <p>
             <b>🔜 Próximas versões:</b> saves e estados sincronizando sozinhos entre os aparelhos.
           </p>
         </div>
+        <AtalhosDaRede onde="aparelhos" />
         <NomeDoAparelho nome={r.eu?.nome ?? ''} />
         <h3>Pareados</h3>
         <ul id="ap-lista" className="ap-lista">
@@ -100,6 +106,17 @@ export function Aparelhos() {
                     : '⚪ fora da rede · visto ' + quandoFoi(a.visto)}
                 </small>
               </span>
+              {emModoCelular() && a.online && a.tipo === 'pc' && (
+                <button
+                  className="grande"
+                  onClick={() => {
+                    acao('fechar-tela');
+                    entrarModoControle({ pc: a.id }); // 🖥 Jogar no PC: o jogo que estiver aberto lá
+                  }}
+                >
+                  🎮 Jogar no PC
+                </button>
+              )}
               <button
                 className="grande sec"
                 onClick={() =>
@@ -116,8 +133,9 @@ export function Aparelhos() {
           Nenhum ainda.
         </p>
         <div>
+          <LerQr />
           <button
-            className="grande"
+            className="grande so-pc"
             data-acao="ap-parear"
             onClick={() => {
               r.setMsg('');

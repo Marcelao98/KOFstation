@@ -1,0 +1,415 @@
+/* ============ KOFnes no celular (só entra no KOFnes-android.html) ============ */
+html.celular, html.celular body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+html.celular .so-pc, html.celular kbd { display: none !important; }
+html:not(.celular) .so-cel { display: none !important; }
+
+/* sem barra de menu de computador: o que existia nela está no ☰ (menu rápido) e na barra de baixo */
+html.celular #menu { display: none; }
+html.celular body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto auto; height: 100dvh; }
+html.celular #palco { grid-row: 1; grid-column: 1; }
+html.celular #ctl { grid-row: 2; grid-column: 1; }
+html.celular #lateral { grid-row: 3; grid-column: 1; width: auto; }
+html.celular #status { grid-row: 4; display: none; }
+html.celular .lat-itens {
+  position: static; width: auto; flex-direction: row; justify-content: space-around; gap: 0; padding: 2px 4px calc(2px + env(safe-area-inset-bottom));
+  border-right: 0; border-top: 1px solid var(--borda); overflow: visible; transition: none;
+}
+html.celular #lateral:hover .lat-itens, html.celular #lateral:focus-within .lat-itens { width: auto; box-shadow: none; }
+html.celular .lat-itens button { flex-direction: column; gap: 0; width: auto; flex: 1 1 0; min-height: 50px; padding: 4px 2px; justify-content: center; text-align: center; font-size: 10px; }
+html.celular .lat-itens button span, html.celular #lateral:hover .lat-itens button span { opacity: .85; }
+html.celular .lat-itens button.ativo { box-shadow: inset 0 3px 0 var(--destaque); }
+html.celular .lat-itens hr, html.celular .lat-itens [data-acao="voltar"], html.celular .lat-itens [data-acao="cheia"], html.celular .lat-itens [data-acao="estatisticas"] { display: none; }
+/* jogando: a barra de baixo some e o controle ocupa o lugar */
+html.celular body.cel-jogo #lateral { display: none; }
+html.celular body:not(.cel-jogo) #ctl { display: none; }
+
+/* telas: tudo numa coluna, com dedo (alvos grandes) */
+html.celular #home { padding: 14px 12px 16px; gap: 14px; }
+html.celular .hm-topo { align-items: flex-start; }
+html.celular .hm-logo { width: 52px; height: 52px; font-size: 28px; }
+html.celular .hm-marca h1 { font-size: 28px; }
+html.celular .hm-corpo { display: flex; flex-direction: column; gap: 12px; }
+html.celular .hm-atalhos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+html.celular .hm-atalhos button { min-height: 76px; }
+html.celular .janela { max-width: 100vw; max-height: 100%; }
+html.celular button, html.celular input, html.celular select { min-height: 40px; }
+html.celular .previa { min-height: 150px; }
+html.celular #temas { width: 100vw; max-height: calc(100dvh - 60px); border-radius: 0; }
+html.celular .temas-grupo { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+
+/* ---------- o controle virtual ---------- */
+#ctl { display: none; position: relative; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; container-type: size; overflow: hidden; }
+html.celular #ctl { display: block; height: 40vh; max-height: 330px; background: var(--ctl-fundo, var(--painel)); border-top: 1px solid var(--borda); padding-bottom: env(safe-area-inset-bottom); }
+html.celular #ctl * { touch-action: none; -webkit-user-select: none; user-select: none; }
+#ctl .cb {
+  position: absolute; left: var(--x); top: var(--y); width: calc(var(--w) * var(--esc, 1)); height: calc(var(--h, var(--w)) * var(--esc, 1));
+  transform: translate(-50%, -50%); display: grid; place-items: center; box-sizing: border-box;
+  background: var(--bg); color: var(--fg); border: var(--borda-cb, 0); border-radius: var(--rd, 50%);
+  font: 800 calc(var(--fs, 8) * var(--u)) var(--fonte); letter-spacing: .04em; opacity: var(--opa, 1); text-transform: none;
+  box-shadow: var(--sombra, none); transition: transform .05s, box-shadow .05s, filter .05s;
+}
+#ctl .cb.on { transform: translate(-50%, -50%) scale(.94); filter: brightness(1.15) saturate(1.1); box-shadow: inset 0 4px 8px #000a, 0 1px 1px #0006 !important; }
+/* direcional: cruz com relevo, covinha no centro e setas nas pontas; o lado apertado acende */
+#ctl .dpad { --rd: 50%; filter: drop-shadow(0 3px 3px #0007); }
+#ctl .dpad i { position: absolute; border: var(--dpb, 0); box-sizing: border-box; }
+#ctl .dpad .h { left: 3%; right: 3%; top: 34%; bottom: 34%; border-radius: var(--dpr, 14%); background: var(--dph, var(--dp, #333)); }
+#ctl .dpad .v { top: 3%; bottom: 3%; left: 34%; right: 34%; border-radius: var(--dpr, 14%); background: var(--dpv, var(--dp, #333)); }
+#ctl .dpad::after { content: ""; position: absolute; left: 39%; top: 39%; width: 22%; height: 22%; border-radius: 50%; background: var(--covinha, radial-gradient(circle at 50% 38%, #0005, #0000 70%)); box-shadow: var(--covinha-sombra, inset 0 2px 3px #0008, 0 1px 0 #fff3); }
+#ctl .dpad .u, #ctl .dpad .d, #ctl .dpad .l, #ctl .dpad .r { background: transparent; border: 0; }
+#ctl .dpad .u { top: 3%; left: 34%; right: 34%; height: 31%; border-radius: var(--dpr, 14%) var(--dpr, 14%) 0 0; } #ctl .dpad .d { bottom: 3%; left: 34%; right: 34%; height: 31%; border-radius: 0 0 var(--dpr, 14%) var(--dpr, 14%); }
+#ctl .dpad .l { left: 3%; top: 34%; bottom: 34%; width: 31%; border-radius: var(--dpr, 14%) 0 0 var(--dpr, 14%); } #ctl .dpad .r { right: 3%; top: 34%; bottom: 34%; width: 31%; border-radius: 0 var(--dpr, 14%) var(--dpr, 14%) 0; }
+#ctl .dpad .u::before, #ctl .dpad .d::before, #ctl .dpad .l::before, #ctl .dpad .r::before { content: ""; position: absolute; background: var(--seta, #fff7); }
+#ctl .dpad .u::before { left: 22%; right: 22%; top: 24%; height: 40%; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+#ctl .dpad .d::before { left: 22%; right: 22%; bottom: 24%; height: 40%; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+#ctl .dpad .l::before { top: 22%; bottom: 22%; left: 24%; width: 40%; clip-path: polygon(0 50%, 100% 0, 100% 100%); }
+#ctl .dpad .r::before { top: 22%; bottom: 22%; right: 24%; width: 40%; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+#ctl .dpad[data-dir~="u"] .u, #ctl .dpad[data-dir~="d"] .d, #ctl .dpad[data-dir~="l"] .l, #ctl .dpad[data-dir~="r"] .r { background: var(--on, #fff8); }
+#ctl .dpad .k { display: none; }
+/* menu, voltar no tempo, turbo */
+#ctl .menu, #ctl .rew, #ctl .turbo { --fs: 6; --bg: var(--bgx); --fg: var(--fgx); }
+#ctl .pill { --w: calc(var(--u) * 22); --h: calc(var(--u) * 10); --rd: calc(var(--u) * 5); --fs: 4.4; }
+#ctl .shoulder { --w: calc(var(--u) * 34); --h: calc(var(--u) * 15); --rd: calc(var(--u) * 4); --fs: 7; }
+#ctl .face { --w: calc(var(--u) * 22); --fs: 9; }
+
+/* posições. Retrato: o painel tem uns 1,2:1, então tudo é medido pela largura (--u). Horizontal e miniaturas (uns 2,2:1): pela altura */
+#ctl { --u: 0.87cqw; }
+#ctl .ctl-mini, #ctl [data-b="dpad"] { --x: 27%; --y: 57%; --w: calc(var(--u) * 52); }
+#ctl [data-b="L"] { --x: 17%; --y: 10%; } #ctl [data-b="R"] { --x: 83%; --y: 10%; }
+#ctl [data-b="Select"] { --x: 40%; --y: 92%; } #ctl [data-b="Start"] { --x: 60%; --y: 92%; }
+#ctl [data-b="X"] { --x: 75%; --y: 38%; } #ctl [data-b="B"] { --x: 75%; --y: 76%; }
+#ctl [data-b="Y"] { --x: 62%; --y: 57%; } #ctl [data-b="A"] { --x: 88%; --y: 57%; }
+#ctl .face { --w: calc(var(--u) * 20); }
+#ctl .menu, #ctl .rew, #ctl .turbo { --w: calc(var(--u) * 14); --y: 10%; }
+#ctl .rew { --x: 37%; } #ctl .menu { --x: 50%; } #ctl .turbo { --x: 63%; }
+body.canhoto #ctl [data-b="dpad"] { --x: 73%; } body.canhoto #ctl [data-b="X"] { --x: 23%; } body.canhoto #ctl [data-b="B"] { --x: 23%; }
+body.canhoto #ctl [data-b="Y"] { --x: 10%; } body.canhoto #ctl [data-b="A"] { --x: 36%; }
+body.canhoto #ctl [data-b="L"] { --x: 83%; } body.canhoto #ctl [data-b="R"] { --x: 17%; }
+
+/* horizontal: o controle flutua por cima do jogo, nos cantos, sem fundo */
+@media (orientation: landscape) {
+  html.celular body.cel-jogo { grid-template-rows: minmax(0, 1fr); }
+  html.celular body.cel-jogo #palco { grid-row: 1; grid-column: 1; }
+  html.celular body.cel-jogo #ctl { position: fixed; inset: 0; height: auto; max-height: none; background: none; border: 0; pointer-events: none; z-index: 5; padding: 0; --u: 1cqh; --ctl-fundo: transparent; }
+  html.celular body.cel-jogo #ctl .cb { pointer-events: auto; }
+  /* o jogo usa a altura toda; os botões ficam nas duas faixas dos lados (40% da altura cada uma), sem cobrir a imagem.
+     Tudo medido pela altura (--u = 1% da altura): as posições valem pra qualquer largura de celular */
+  html.celular body.cel-jogo #palco { padding: 0 40vh; box-sizing: border-box; }
+  html.celular body.cel-jogo #ctl [data-b="dpad"] { --x: calc(var(--u) * 20); --y: 56%; --w: calc(var(--u) * 36); }
+  html.celular body.cel-jogo #ctl .face { --w: calc(var(--u) * 14); }
+  html.celular body.cel-jogo #ctl [data-b="X"] { --x: calc(100% - var(--u) * 20); --y: 44%; }
+  html.celular body.cel-jogo #ctl [data-b="B"] { --x: calc(100% - var(--u) * 20); --y: 68%; }
+  html.celular body.cel-jogo #ctl [data-b="Y"] { --x: calc(100% - var(--u) * 32); --y: 56%; }
+  html.celular body.cel-jogo #ctl [data-b="A"] { --x: calc(100% - var(--u) * 8); --y: 56%; }
+  html.celular body.cel-jogo #ctl .shoulder { --w: calc(var(--u) * 30); --h: calc(var(--u) * 12); }
+  html.celular body.cel-jogo #ctl [data-b="L"] { --x: calc(var(--u) * 18); --y: 9%; }
+  html.celular body.cel-jogo #ctl [data-b="R"] { --x: calc(100% - var(--u) * 18); --y: 9%; }
+  html.celular body.cel-jogo #ctl .pill { --w: calc(var(--u) * 18); --h: calc(var(--u) * 8); }
+  html.celular body.cel-jogo #ctl [data-b="Select"] { --x: calc(var(--u) * 20); --y: 92%; }
+  html.celular body.cel-jogo #ctl [data-b="Start"] { --x: calc(100% - var(--u) * 20); --y: 92%; }
+  html.celular body.cel-jogo #ctl .menu, html.celular body.cel-jogo #ctl .rew, html.celular body.cel-jogo #ctl .turbo { --w: calc(var(--u) * 10); --y: 25%; }
+  html.celular body.cel-jogo #ctl .rew { --x: calc(var(--u) * 9); } html.celular body.cel-jogo #ctl .menu { --x: calc(var(--u) * 21); }
+  html.celular body.cel-jogo #ctl .turbo { --x: calc(100% - var(--u) * 15); }
+  /* canhoto: espelhado */
+  html.celular body.cel-jogo.canhoto #ctl [data-b="dpad"] { --x: calc(100% - var(--u) * 20); }
+  html.celular body.cel-jogo.canhoto #ctl [data-b="X"], html.celular body.cel-jogo.canhoto #ctl [data-b="B"] { --x: calc(var(--u) * 20); }
+  html.celular body.cel-jogo.canhoto #ctl [data-b="Y"] { --x: calc(var(--u) * 8); } html.celular body.cel-jogo.canhoto #ctl [data-b="A"] { --x: calc(var(--u) * 32); }
+  html.celular body.cel-jogo.canhoto #ctl [data-b="L"] { --x: calc(100% - var(--u) * 18); } html.celular body.cel-jogo.canhoto #ctl [data-b="R"] { --x: calc(var(--u) * 18); }
+}
+
+/* ---------- modelos ---------- */
+/* receita dos botões redondos: brilho no alto à esquerda, cor com degradê, aro mais escuro e sombra por baixo */
+#ctl .face { --fs: 9; }
+#ctl .face, #ctl .shoulder, #ctl .pill, #ctl .menu, #ctl .rew, #ctl .turbo { text-shadow: var(--txs, 0 1px 2px #0008); }
+
+/* 1. Clássico SNES: corpo cinza, cruz grafite com setas e quatro botões coloridos */
+#ctl.skin-classico { --ctl-fundo: linear-gradient(#dedee5, #c6c6cf 55%, #b4b4bf); --fonte: "Trebuchet MS", "Segoe UI", sans-serif; }
+#ctl.skin-classico .dpad { --dph: linear-gradient(#63636f, #3a3a44 52%, #26262d); --dpv: linear-gradient(90deg, #63636f, #3a3a44 52%, #26262d); --seta: #a4a4b2; --on: #ff6b6baa; --dpb: 1px solid #1c1c22; }
+#ctl.skin-classico .face { color: #fff; background: radial-gradient(circle at 34% 26%, #fffa 0, #fff0 40%), radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--c) 80%, #fff), var(--c) 56%, color-mix(in srgb, var(--c) 62%, #000)); box-shadow: inset 0 -4px 6px #0004, inset 0 2px 3px #fff8, 0 4px 7px #0007, 0 0 0 3px color-mix(in srgb, var(--c) 40%, #2a2a30); }
+#ctl.skin-classico [data-b="A"] { --c: #d93b3d; } #ctl.skin-classico [data-b="B"] { --c: #eab824; } #ctl.skin-classico [data-b="X"] { --c: #2e6fd8; } #ctl.skin-classico [data-b="Y"] { --c: #2fa55d; }
+#ctl.skin-classico .shoulder { color: #fff; background: linear-gradient(#ffffff55, #fff0 40%, #0003), linear-gradient(#a6a6b2, #7a7a87); box-shadow: 0 3px 0 #54545f, 0 6px 7px #0005; border-radius: 40% 40% 14% 14% / 70% 70% 20% 20%; }
+#ctl.skin-classico .pill { color: #f2f2f6; background: linear-gradient(#92929f, #64646f); box-shadow: inset 0 2px 2px #fff6, 0 3px 4px #0006; transform: translate(-50%, -50%) rotate(-18deg); }
+#ctl.skin-classico .pill.on { transform: translate(-50%, -50%) rotate(-18deg) scale(.94); }
+#ctl.skin-classico .menu, #ctl.skin-classico .rew, #ctl.skin-classico .turbo { color: #fff; background: radial-gradient(circle at 36% 28%, #fff7, #fff0 45%), linear-gradient(#9a9aa7, #6a6a77); box-shadow: inset 0 -2px 3px #0004, 0 3px 5px #0006; }
+
+/* 2. Moderno: vidro escuro com aro colorido e analógico com bolinha 3D */
+#ctl.skin-moderno { --ctl-fundo: linear-gradient(#1d202c, #0f1118); }
+#ctl.skin-moderno .dpad { background: radial-gradient(circle at 50% 38%, #303445, #14161f 75%); border: 2px solid #ffffff2e; box-shadow: inset 0 0 16px #000b, 0 5px 12px #000a; filter: none; }
+#ctl.skin-moderno .dpad i, #ctl.skin-moderno .dpad::after { display: none; }
+#ctl.skin-moderno .dpad .k { display: block; position: absolute; width: 46%; height: 46%; border-radius: 50%; left: calc(27% + var(--kx, 0) * 22%); top: calc(27% + var(--ky, 0) * 22%); background: radial-gradient(circle at 36% 28%, #fff, #cfd2dc 42%, #8b90a2); box-shadow: 0 6px 9px #000b, inset 0 -3px 5px #0004; }
+#ctl.skin-moderno .face { color: var(--c); background: radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--c) 30%, #353a4c), #171a25 78%); border: 2px solid var(--c); box-shadow: inset 0 0 12px color-mix(in srgb, var(--c) 45%, transparent), 0 0 14px color-mix(in srgb, var(--c) 40%, transparent), 0 5px 8px #000a; text-shadow: 0 0 6px color-mix(in srgb, var(--c) 70%, transparent); }
+#ctl.skin-moderno .face.on { background: var(--c); color: #11131b; text-shadow: none; }
+#ctl.skin-moderno [data-b="B"] { --c: #4cd16b; } #ctl.skin-moderno [data-b="A"] { --c: #ff5a5a; } #ctl.skin-moderno [data-b="Y"] { --c: #4aa8ff; } #ctl.skin-moderno [data-b="X"] { --c: #ffd24a; }
+#ctl.skin-moderno .shoulder, #ctl.skin-moderno .pill, #ctl.skin-moderno .menu, #ctl.skin-moderno .rew, #ctl.skin-moderno .turbo { color: #e8ebf5; background: linear-gradient(#3a3f52, #232736); border: 1px solid #ffffff33; box-shadow: inset 0 1px 0 #ffffff33, 0 4px 7px #000a; }
+#ctl.skin-moderno .shoulder { border-radius: 40% 40% 14% 14% / 70% 70% 20% 20%; }
+
+/* 3. Minimalista: só contorno e brilho fraco, pra cobrir pouco o jogo */
+#ctl.skin-minimo { --ctl-fundo: transparent; --opa: .62; }
+#ctl.skin-minimo .cb { color: #fff; background: #ffffff12; border: 2px solid #ffffffb8; box-shadow: inset 0 0 10px #ffffff22, 0 0 8px #0006; text-shadow: 0 1px 3px #000c; }
+#ctl.skin-minimo .dpad { background: none; border: 0; box-shadow: none; --dph: #ffffff14; --dpv: #ffffff14; --dpb: 2px solid #ffffffb8; --seta: #ffffffcc; --on: #ffffff55; --covinha: none; --covinha-sombra: none; }
+#ctl.skin-minimo .shoulder { border-radius: 40% 40% 14% 14% / 70% 70% 20% 20%; }
+#ctl.skin-minimo .face { --fs: 8; }
+
+/* 4. Arcade: botões convexos e brilhantes, joystick com bola vermelha */
+#ctl.skin-arcade { --ctl-fundo: repeating-linear-gradient(45deg, #ffffff08 0 2px, #0000 2px 12px), linear-gradient(#2d1738, #170c20); }
+#ctl.skin-arcade .dpad { background: radial-gradient(circle at 50% 36%, #46345a, #1e1229 75%); border: 3px solid #5b447a; box-shadow: inset 0 0 14px #000c, 0 6px 10px #000a; filter: none; }
+#ctl.skin-arcade .dpad i, #ctl.skin-arcade .dpad::after { display: none; }
+#ctl.skin-arcade .dpad .k { display: block; position: absolute; width: 54%; height: 54%; border-radius: 50%; left: calc(23% + var(--kx, 0) * 22%); top: calc(23% + var(--ky, 0) * 22%); background: radial-gradient(circle at 34% 28%, #ffd0d0, #e02424 48%, #7a0b0b); box-shadow: 0 8px 9px #000b, inset 0 -4px 6px #0005; }
+#ctl.skin-arcade .face { --fs: 8.5; color: #fff; border: 3px solid color-mix(in srgb, var(--c) 45%, #000); background: radial-gradient(circle at 34% 26%, #fffb 0, #fff0 38%), radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--c) 75%, #fff), var(--c) 60%, color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 5px 0 color-mix(in srgb, var(--c) 45%, #000), 0 9px 10px #000a; }
+#ctl.skin-arcade .face.on { box-shadow: 0 1px 0 color-mix(in srgb, var(--c) 45%, #000), 0 2px 3px #000a !important; transform: translate(-50%, -34%) scale(.97); }
+#ctl.skin-arcade [data-b="Y"] { --x: 61%; --y: 48%; --c: #e8d23a; color: #3b3300; text-shadow: none; } #ctl.skin-arcade [data-b="X"] { --x: 80%; --y: 30%; --c: #3a8be0; }
+#ctl.skin-arcade [data-b="B"] { --x: 67%; --y: 74%; --c: #e0383a; } #ctl.skin-arcade [data-b="A"] { --x: 85%; --y: 62%; --c: #38c060; }
+#ctl.skin-arcade .shoulder, #ctl.skin-arcade .pill, #ctl.skin-arcade .menu, #ctl.skin-arcade .rew, #ctl.skin-arcade .turbo { color: #fff; background: linear-gradient(#5b447a, #34264a); border: 2px solid #7a5ea0; box-shadow: inset 0 1px 0 #ffffff44, 0 4px 6px #000a; }
+#ctl.skin-arcade .shoulder { border-radius: 40% 40% 14% 14% / 70% 70% 20% 20%; }
+
+/* 5. Portátil: corpo oliva, cruz preta, A e B magenta na diagonal, X e Y pequenos  */
+#ctl.skin-portatil { --ctl-fundo: linear-gradient(#c9ccb7, #adb198); }
+#ctl.skin-portatil .dpad { --dph: linear-gradient(#45473d, #22241d 60%, #171912); --dpv: linear-gradient(90deg, #45473d, #22241d 60%, #171912); --dpr: 18%; --seta: #8e917c; --on: #d9e0a8aa; }
+#ctl.skin-portatil .face { color: #f8e3ee; background: radial-gradient(circle at 34% 26%, #fff7 0, #fff0 40%), radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--c) 82%, #fff), var(--c) 58%, color-mix(in srgb, var(--c) 65%, #000)); box-shadow: inset 0 -3px 5px #0004, 0 4px 0 color-mix(in srgb, var(--c) 45%, #000), 0 7px 8px #0006; }
+#ctl.skin-portatil [data-b="B"] { --x: 73%; --y: 74%; --w: calc(var(--u) * 24); --c: #a3245a; } #ctl.skin-portatil [data-b="A"] { --x: 87%; --y: 52%; --w: calc(var(--u) * 24); --c: #a3245a; }
+#ctl.skin-portatil [data-b="Y"] { --x: 62%; --y: 48%; --w: calc(var(--u) * 16); --c: #565a47; --fs: 6.5; } #ctl.skin-portatil [data-b="X"] { --x: 76%; --y: 26%; --w: calc(var(--u) * 16); --c: #565a47; --fs: 6.5; }
+#ctl.skin-portatil .shoulder { color: #e8ecd6; background: linear-gradient(#ffffff2a, #0000 40%), linear-gradient(#5f6350, #444838); box-shadow: 0 3px 0 #2f3226, 0 5px 6px #0005; border-radius: 40% 40% 14% 14% / 70% 70% 20% 20%; }
+#ctl.skin-portatil .pill { color: #e8ecd6; background: linear-gradient(#6a6e58, #484c3b); box-shadow: inset 0 1px 1px #ffffff44, 0 3px 4px #0006; transform: translate(-50%, -50%) rotate(-20deg); }
+#ctl.skin-portatil .pill.on { transform: translate(-50%, -50%) rotate(-20deg) scale(.94); }
+#ctl.skin-portatil .menu, #ctl.skin-portatil .rew, #ctl.skin-portatil .turbo { color: #e8ecd6; background: linear-gradient(#6a6e58, #484c3b); box-shadow: inset 0 1px 1px #ffffff44, 0 3px 4px #0006; }
+
+/* 6. Segue o tema: as mesmas formas, pintadas com as cores do tema escolhido no KOFnes */
+#ctl.skin-tema { --ctl-fundo: linear-gradient(color-mix(in srgb, var(--painel) 90%, #fff), var(--painel)); --txs: none; }
+#ctl.skin-tema .dpad { --dph: linear-gradient(color-mix(in srgb, var(--painel2) 80%, #fff), var(--painel2) 55%, color-mix(in srgb, var(--painel2) 75%, #000)); --dpv: var(--dph); --dpb: 1.5px solid var(--borda); --seta: var(--fraco); --on: color-mix(in srgb, var(--destaque) 70%, transparent); --dpr: calc(var(--raio) * 1.6); }
+#ctl.skin-tema .face { --c: color-mix(in srgb, var(--painel2) 70%, var(--texto)); color: var(--painel); background: radial-gradient(circle at 34% 26%, #fff7 0, #fff0 40%), radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--c) 80%, #fff), var(--c) 56%, color-mix(in srgb, var(--c) 70%, #000)); border: 1.5px solid var(--borda); box-shadow: inset 0 -3px 5px #0003, 0 4px 7px #0005; --rd: calc(var(--raio) * 4); }
+#ctl.skin-tema [data-b="A"], #ctl.skin-tema [data-b="B"] { --c: var(--destaque); }
+#ctl.skin-tema .shoulder, #ctl.skin-tema .pill, #ctl.skin-tema .menu, #ctl.skin-tema .rew, #ctl.skin-tema .turbo { color: var(--texto); background: linear-gradient(color-mix(in srgb, var(--painel2) 80%, #fff), var(--painel2)); border: 1.5px solid var(--borda); box-shadow: inset 0 1px 0 #fff6, 0 3px 5px #0004; }
+#ctl.skin-tema .shoulder { border-radius: 40% 40% 14% 14% / 70% 70% 20% 20%; }
+#ctl.skin-tema .pill { --rd: calc(var(--raio) * 2); }
+
+/* tela Controles: modelos e ajustes */
+.ctl-card svg { display: block; width: 100%; height: auto; border-radius: calc(var(--raio) / 2); }
+.ctl-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin: 8px 0 12px; }
+.ctl-card { padding: 6px; background: var(--painel2); border: 2px solid var(--borda); border-radius: var(--raio); text-align: left; }
+.ctl-card.ativo { border-color: var(--destaque); box-shadow: 0 0 0 2px var(--destaque) inset; }
+.ctl-card b { display: block; font-size: 12px; margin-top: 4px; }
+.ctl-ajustes { display: grid; gap: 10px; text-align: left; }
+.ctl-ajustes label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ctl-ajustes input[type=range] { flex: 1; max-width: 55%; }
+
+/* menu rápido (☰): rola quando a tela é baixa (celular deitado) e tem linhas fáceis de tocar */
+html.celular #rapido { position: fixed !important; top: 6px !important; left: 50% !important; transform: translateX(-50%) !important; max-height: calc(100dvh - 12px); overflow-y: auto; z-index: 40; padding: 12px 14px 8px; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+html.celular #rapido-lista li { min-height: 42px; }
+
+/* Game Boy e NES: só A, B, Start e Select; B embaixo à esquerda e A em cima à direita, como no aparelho */
+html.celular body.so-ab #ctl [data-b="X"], html.celular body.so-ab #ctl [data-b="Y"],
+html.celular body.so-ab:not([data-sis="gba"]) #ctl [data-b="L"], html.celular body.so-ab:not([data-sis="gba"]) #ctl [data-b="R"] { display: none; }   /* o GBA tem L e R */
+html.celular body[data-sis="neogeo"] #ctl [data-b="L"], html.celular body[data-sis="neogeo"] #ctl [data-b="R"] { display: none; }   /* Neo Geo: A B C D, sem L/R */
+html.celular body.so-ab #ctl [data-b="B"] { --x: 66%; --y: 64%; --w: calc(var(--u) * 24); }
+html.celular body.so-ab #ctl [data-b="A"] { --x: 86%; --y: 48%; --w: calc(var(--u) * 24); }
+html.celular body.canhoto.so-ab #ctl [data-b="B"] { --x: 14%; } html.celular body.canhoto.so-ab #ctl [data-b="A"] { --x: 34%; }
+@media (orientation: landscape) {
+  html.celular body.cel-jogo.so-ab #ctl [data-b="B"] { --x: calc(100% - var(--u) * 28); --y: 64%; --w: calc(var(--u) * 17); }
+  html.celular body.cel-jogo.so-ab #ctl [data-b="A"] { --x: calc(100% - var(--u) * 11); --y: 48%; --w: calc(var(--u) * 17); }
+  html.celular body.cel-jogo.canhoto.so-ab #ctl [data-b="B"] { --x: calc(var(--u) * 11); }
+  html.celular body.cel-jogo.canhoto.so-ab #ctl [data-b="A"] { --x: calc(var(--u) * 28); }
+}
+
+/* Mega Drive: duas fileiras de 3 como no controle de 6 botões (embaixo A B C, em cima X Y Z); L e R viram botões redondos */
+html.celular body[data-sis="md"] #ctl [data-b="L"], html.celular body[data-sis="md"] #ctl [data-b="R"] {
+  --h: var(--w); border-radius: 50%; transform: translate(-50%, -50%); }
+html.celular body[data-sis="md"] #ctl [data-b="Y"], html.celular body[data-sis="md"] #ctl [data-b="B"], html.celular body[data-sis="md"] #ctl [data-b="A"],
+html.celular body[data-sis="md"] #ctl [data-b="L"], html.celular body[data-sis="md"] #ctl [data-b="X"], html.celular body[data-sis="md"] #ctl [data-b="R"] { --w: calc(var(--u) * 15); }
+html.celular body[data-sis="md"] #ctl [data-b="Y"] { --x: 62%; --y: 70%; } html.celular body[data-sis="md"] #ctl [data-b="B"] { --x: 75%; --y: 70%; } html.celular body[data-sis="md"] #ctl [data-b="A"] { --x: 88%; --y: 70%; }
+html.celular body[data-sis="md"] #ctl [data-b="L"] { --x: 62%; --y: 46%; } html.celular body[data-sis="md"] #ctl [data-b="X"] { --x: 75%; --y: 46%; } html.celular body[data-sis="md"] #ctl [data-b="R"] { --x: 88%; --y: 46%; }
+html.celular body.canhoto[data-sis="md"] #ctl [data-b="Y"], html.celular body.canhoto[data-sis="md"] #ctl [data-b="L"] { --x: 12%; }
+html.celular body.canhoto[data-sis="md"] #ctl [data-b="B"], html.celular body.canhoto[data-sis="md"] #ctl [data-b="X"] { --x: 25%; }
+html.celular body.canhoto[data-sis="md"] #ctl [data-b="A"], html.celular body.canhoto[data-sis="md"] #ctl [data-b="R"] { --x: 38%; }
+@media (orientation: landscape) {
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="Y"], html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="B"], html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="A"],
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="L"], html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="X"], html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="R"] { --w: calc(var(--u) * 11); }
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="Y"] { --x: calc(100% - var(--u) * 32); --y: 62%; }
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="B"] { --x: calc(100% - var(--u) * 20); --y: 62%; }
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="A"] { --x: calc(100% - var(--u) * 8); --y: 62%; }
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="L"] { --x: calc(100% - var(--u) * 32); --y: 44%; }
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="X"] { --x: calc(100% - var(--u) * 20); --y: 44%; }
+  html.celular body.cel-jogo[data-sis="md"] #ctl [data-b="R"] { --x: calc(100% - var(--u) * 8); --y: 44%; }
+  html.celular body.cel-jogo.canhoto[data-sis="md"] #ctl [data-b="Y"], html.celular body.cel-jogo.canhoto[data-sis="md"] #ctl [data-b="L"] { --x: calc(var(--u) * 8); }
+  html.celular body.cel-jogo.canhoto[data-sis="md"] #ctl [data-b="B"], html.celular body.cel-jogo.canhoto[data-sis="md"] #ctl [data-b="X"] { --x: calc(var(--u) * 20); }
+  html.celular body.cel-jogo.canhoto[data-sis="md"] #ctl [data-b="A"], html.celular body.cel-jogo.canhoto[data-sis="md"] #ctl [data-b="R"] { --x: calc(var(--u) * 32); }
+}
+/* Master System e Game Gear não têm Select */
+html.celular body[data-sis="sms"] #ctl [data-b="Select"], html.celular body[data-sis="gg"] #ctl [data-b="Select"] { display: none; }
+
+/* PlayStation: L2 e R2 (gatilhos de trás) logo abaixo do L1/R1; nos outros consoles não aparecem */
+#ctl [data-b="L2"], #ctl [data-b="R2"] { display: none; --w: calc(var(--u) * 24); --h: calc(var(--u) * 10); --y: 23.5%; }
+html.celular body[data-sis="ps1"] #ctl [data-b="L2"], html.celular body[data-sis="ps1"] #ctl [data-b="R2"],
+html.celular body[data-sis="ps2"] #ctl [data-b="L2"], html.celular body[data-sis="ps2"] #ctl [data-b="R2"],
+html.celular body[data-sis="n64"] #ctl [data-b="L2"], html.celular body[data-sis="n64"] #ctl [data-b="R2"] { display: grid; }
+#ctl [data-b="L2"] { --x: 13%; } #ctl [data-b="R2"] { --x: 87%; }
+body.canhoto #ctl [data-b="L2"] { --x: 87%; } body.canhoto #ctl [data-b="R2"] { --x: 13%; }
+@media (orientation: landscape) {   /* deitado: L1 e L2 lado a lado no canto (embaixo ficam ⏪ ☰ ⏩) */
+  html.celular body.cel-jogo:is([data-sis="ps1"], [data-sis="n64"]) #ctl .shoulder { --w: calc(var(--u) * 18); --h: calc(var(--u) * 12); --y: 9%; }
+  html.celular body.cel-jogo:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="L"] { --x: calc(var(--u) * 10); } html.celular body.cel-jogo:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="L2"] { --x: calc(var(--u) * 30); }
+  html.celular body.cel-jogo:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="R"] { --x: calc(100% - var(--u) * 10); } html.celular body.cel-jogo:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="R2"] { --x: calc(100% - var(--u) * 30); }
+  html.celular body.cel-jogo.canhoto:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="L"] { --x: calc(100% - var(--u) * 10); } html.celular body.cel-jogo.canhoto:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="L2"] { --x: calc(100% - var(--u) * 30); }
+  html.celular body.cel-jogo.canhoto:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="R"] { --x: calc(var(--u) * 10); } html.celular body.cel-jogo.canhoto:is([data-sis="ps1"], [data-sis="n64"]) #ctl [data-b="R2"] { --x: calc(var(--u) * 30); }
+}
+
+/* PlayStation: sem rebobinar (o estado é grande demais); no nativo também sem turbo */
+html.celular body[data-sis="ps1"] #ctl .rew, html.celular body[data-sis="n64"] #ctl .rew, html.celular body.nativo #ctl .turbo { display: none; }
+
+/* consoles com analógico (N64, PS1...): o direcional vira um analógico redondo; a bolinha segue o dedo (--kx/--ky do android.js) */
+body.analogico #ctl .dpad i { display: none; }
+body.analogico #ctl .dpad { border-radius: 50%; background: radial-gradient(circle, #0000 30%, #0003 31%, #0000 33%), var(--dp, #333);
+  box-shadow: inset 0 3px 8px #0009, 0 1px 0 #fff2; }
+body.analogico #ctl .dpad::after { left: 28%; top: 28%; width: 44%; height: 44%; background: radial-gradient(circle at 50% 35%, #fff4, #0000 60%), var(--dph, var(--dp, #555));
+  box-shadow: 0 4px 8px #000a, inset 0 -3px 5px #0006; transform: translate(calc(var(--kx, 0) * 70%), calc(var(--ky, 0) * 70%)); }
+
+/* ---------- biblioteca no celular: tela cheia, capinha em cada jogo, filtros numa faixa de lado e a ficha do jogo
+   subindo de baixo (capa, gênero/ano/empresa, Jogar); tocar no jogo de novo também joga ---------- */
+html.celular #biblioteca {
+  inset: 0; width: auto; height: auto; max-width: none; max-height: none; border: 0; border-radius: 0; box-shadow: none;
+  padding: 0 12px; overflow: hidden;
+}
+html.celular #biblioteca .titulo-j { margin: 0 -12px; padding: 12px 16px 10px; font-size: 18px; align-items: center; border-bottom: 0; }
+html.celular #biblioteca .bib { display: block; position: relative; flex: 1; min-height: 0; }
+html.celular #biblioteca .bib-esq { height: 100%; }
+html.celular #filtro { font-size: 16px; padding: 11px 16px; border-radius: 999px; background: var(--painel); }
+html.celular #bib-filtros { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 10px -12px 2px; padding: 0 12px 4px; }
+html.celular #bib-filtros::-webkit-scrollbar { display: none; }
+html.celular .chip { flex: none; font-size: 13px; padding: 7px 13px; min-height: 0; }
+html.celular #info-meta .chip { padding: 5px 11px; }
+html.celular #bib-pop { position: fixed; left: 10px !important; right: 10px; width: auto; top: auto !important; bottom: 74px; max-height: 58dvh; z-index: 30; border-radius: 16px; padding: 8px; }
+html.celular #bib-pop .pop-busca { font-size: 16px; padding: 9px 12px; }
+html.celular #bib-pop .pop-lista button { font-size: 15px; padding: 11px 12px; }
+html.celular #bib-estado { margin: 4px 4px 0; }
+html.celular #roms { margin-top: 6px; padding-bottom: 12px; }
+html.celular #biblioteca.ficha #roms { padding-bottom: 300px; }   /* dá pra rolar o jogo escolhido pra cima da ficha */
+html.celular #roms li {
+  display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 12px; row-gap: 2px;
+  align-items: center; padding: 7px 8px; border-radius: 12px; white-space: normal;
+}
+html.celular #roms li .mini {
+  grid-row: 1 / 3; width: 48px; height: 48px; border-radius: 9px; overflow: hidden; display: grid; place-items: center;
+  background: var(--painel); border: 1px solid var(--borda); font-size: 10px; font-weight: 800; color: var(--fraco); letter-spacing: .03em;
+}
+html.celular #roms li .mini img { width: 100%; height: 100%; object-fit: cover; }
+html.celular #roms li > span { grid-column: 2; grid-row: 1; align-self: end; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.celular #roms li .li-sub { grid-column: 2; grid-row: 2; align-self: start; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.celular #roms li .sis-tag { grid-column: 3; grid-row: 1 / 3; margin: 0; }
+html.celular #roms li .li-ext { display: none; }
+html.celular #roms li.sel { outline: 0; box-shadow: inset 0 0 0 1px var(--destaque); }
+/* rodapé: uma fileira que rola de lado (estatísticas e jukebox já estão na barra de baixo) */
+html.celular .bib-rodape { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 8px; margin: 0 -12px; padding: 8px 12px; border-top: 1px solid var(--borda); }
+html.celular .bib-rodape::-webkit-scrollbar { display: none; }
+html.celular .bib-rodape button { flex: none; white-space: nowrap; border-radius: 999px; padding: 8px 14px; }
+html.celular .bib-rodape [data-acao="estatisticas"], html.celular .bib-rodape [data-acao="jukebox"] { display: none; }
+/* a ficha do jogo */
+html.celular #biblioteca .bib-dir {
+  display: grid; grid-template-columns: 104px minmax(0, 1fr); column-gap: 14px; align-items: start; text-align: left;
+  position: absolute; left: -12px; right: -12px; bottom: 0; z-index: 20; max-height: 78%; overflow-y: auto; padding: 22px 16px 14px;
+  background: var(--painel2); border-top: 1px solid var(--destaque); border-radius: 20px 20px 0 0; box-shadow: 0 -12px 32px #000a;
+  transform: translateY(105%); transition: transform .22s ease; visibility: hidden;
+}
+html.celular #biblioteca.ficha .bib-dir { transform: none; visibility: visible; }
+html.celular #biblioteca .bib-dir::before {   /* a alcinha de puxar */
+  content: ""; position: absolute; top: 8px; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 4px; background: var(--borda);
+}
+html.celular .bib-fechar-ficha { position: absolute; top: 8px; right: 10px; font-size: 22px; min-height: 0; }
+html.celular #biblioteca .capa { grid-row: 1 / 4; width: 104px; height: 104px; border-radius: 12px; overflow: hidden; }
+html.celular #biblioteca .capa img { object-fit: cover; }
+html.celular #parou-img { display: none; }
+html.celular #biblioteca .bib-dir h2 { grid-column: 2; margin: 2px 26px 4px 0; font-size: 17px; line-height: 1.25; }
+html.celular #info-det { grid-column: 2; margin: 0; font-size: 12px; }
+html.celular #info-meta { grid-column: 1 / 3; margin: 12px 0 2px; }
+html.celular #biblioteca .bib-botoes { grid-column: 1 / 3; display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-top: 10px; }
+html.celular #biblioteca .bib-botoes .grande { margin: 0; padding: 12px 8px; }
+html.celular #biblioteca .bib-botoes .grande.sec { font-size: 14px; }
+html.celular #biblioteca .bib-botoes [data-acao="do-zero"]:not([hidden]) { grid-column: 1 / 3; order: 3; }
+
+/* o celular como controle do PC: no lugar do jogo, uma "telinha" com o console e o jogo que o PC abriu; o endereço e a
+   senha só na primeira vez (ou no ⓘ) */
+#modo-controle { position: fixed; left: 0; right: 0; top: 0; height: 42%; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 52px 16px 16px; text-align: center; color: var(--texto);
+  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--destaque) 14%, var(--fundo)), var(--fundo) 70%); }
+#modo-controle button { background: none; color: var(--texto); border: 0; font: inherit; }
+.mc-barra { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; max-width: calc(100% - 20px);
+  padding: 5px 6px 5px 14px; border-radius: 999px; background: color-mix(in srgb, var(--painel) 85%, transparent); border: 1px solid var(--borda);
+  box-shadow: 0 4px 14px rgb(0 0 0 / .25); font-size: 13px; white-space: nowrap; }
+.mc-luz { width: 9px; height: 9px; border-radius: 50%; background: #e0a030; box-shadow: 0 0 8px #e0a030; animation: mc-pisca 1.2s ease-in-out infinite; flex: none; }
+#modo-controle.ligado .mc-luz { background: #3ccf6a; box-shadow: 0 0 8px #3ccf6a; animation: none; }
+@keyframes mc-pisca { 50% { opacity: .3; } }
+.mc-status { overflow: hidden; text-overflow: ellipsis; color: var(--fraco); }
+#modo-controle.ligado .mc-status { color: var(--texto); font-weight: 600; }
+#modo-controle .mc-barra button { width: 30px; height: 30px; border-radius: 50%; font-size: 15px; line-height: 1; flex: none; }
+#modo-controle .mc-barra button:active { background: var(--sel); }
+/* a telinha: parece a tela de um console desligada, com o nome do jogo aceso */
+.mc-tela { display: flex; flex-direction: column; justify-content: center; gap: 6px; width: min(100%, 420px); min-height: 104px; padding: 18px 22px; border-radius: 18px;
+  background: linear-gradient(160deg, #1b1e24, #0d0f13); color: #f2f2f2; border: 1px solid rgb(255 255 255 / .08);
+  box-shadow: inset 0 0 0 3px rgb(0 0 0 / .45), inset 0 0 40px color-mix(in srgb, var(--destaque) 22%, transparent), 0 8px 26px rgb(0 0 0 / .35);
+  background-image: repeating-linear-gradient(0deg, rgb(255 255 255 / .025) 0 1px, transparent 1px 3px), linear-gradient(160deg, #1b1e24, #0d0f13); }
+.mc-sis { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: color-mix(in srgb, var(--destaque) 70%, #fff); }
+.mc-jogo { font-size: 22px; font-weight: 800; line-height: 1.2; text-shadow: 0 0 12px color-mix(in srgb, var(--destaque) 45%, transparent);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mc-troca { animation: mc-troca .45s cubic-bezier(.2, .8, .2, 1); }
+@keyframes mc-troca { from { opacity: 0; transform: scale(.94) translateY(6px); filter: brightness(2.2); } }
+/* parear (1ª vez ou ⓘ): o endereço e a senha no lugar da telinha */
+.mc-parear { display: none; flex-direction: column; align-items: center; gap: 8px; }
+#modo-controle.pareando .mc-parear { display: flex; } #modo-controle.pareando .mc-tela { display: none; }
+.mc-parear > b { font-size: 19px; }
+.mc-parear span, .mc-parear small { color: var(--fraco); font-size: 13px; }
+.mc-parear code { font-size: 28px; font-weight: 800; letter-spacing: 1px; color: var(--destaque); background: var(--painel); border: 1px solid var(--borda); border-radius: 12px; padding: 8px 16px; }
+.mc-parear em { color: var(--fraco); font-size: 12px; font-style: normal; padding: 0 12px; }
+body.modo-controle #tela, body.modo-controle #moldura { visibility: hidden; }
+@media (orientation: landscape) { #modo-controle { height: auto; top: 0; bottom: 0; left: 24%; right: 24%; background: transparent; padding-top: 56px; } .mc-jogo { font-size: 20px; } }
+/* cores dos botões como no controle de cada console (só no modelo clássico, que é o "como o original") */
+html.celular body[data-sis="ps1"] #ctl.skin-classico :is([data-b="A"], [data-b="B"], [data-b="X"], [data-b="Y"]) { --c: #2b2d33; --fs: 10; }
+html.celular body[data-sis="ps1"] #ctl.skin-classico [data-b="X"] { color: #38d39f; } html.celular body[data-sis="ps1"] #ctl.skin-classico [data-b="A"] { color: #ff5a64; }
+html.celular body[data-sis="ps1"] #ctl.skin-classico [data-b="B"] { color: #7fa6ff; } html.celular body[data-sis="ps1"] #ctl.skin-classico [data-b="Y"] { color: #f08ad0; }
+html.celular body[data-sis="md"] #ctl.skin-classico :is([data-b="A"], [data-b="B"], [data-b="X"], [data-b="Y"], [data-b="L"], [data-b="R"]) { --c: #1d1d22; color: #eaeaea; }
+html.celular body[data-sis="md"] #ctl.skin-classico :is([data-b="L"], [data-b="R"]) { background: radial-gradient(circle at 34% 26%, #fffa 0, #fff0 40%), radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--c) 80%, #fff), var(--c) 56%, color-mix(in srgb, var(--c) 62%, #000));
+  box-shadow: inset 0 -4px 6px #0004, inset 0 2px 3px #fff8, 0 4px 7px #0007, 0 0 0 3px color-mix(in srgb, var(--c) 40%, #2a2a30); }   /* X e Z: redondos e pretos como os outros 4 */
+html.celular body[data-sis="neogeo"] #ctl.skin-classico [data-b="B"] { --c: #d93b3d; } html.celular body[data-sis="neogeo"] #ctl.skin-classico [data-b="A"] { --c: #eab824; }
+html.celular body[data-sis="neogeo"] #ctl.skin-classico [data-b="Y"] { --c: #2fa55d; } html.celular body[data-sis="neogeo"] #ctl.skin-classico [data-b="X"] { --c: #2e6fd8; }
+html.celular body[data-sis="n64"] #ctl.skin-classico [data-b="B"] { --c: #2e6fd8; } html.celular body[data-sis="n64"] #ctl.skin-classico [data-b="Y"] { --c: #2fa55d; }
+html.celular body[data-sis="n64"] #ctl.skin-classico :is([data-b="X"], [data-b="A"]) { --c: #eab824; color: #3b2f00; text-shadow: none; }
+html.celular body[data-sis="nes"] #ctl.skin-classico :is([data-b="A"], [data-b="B"]) { --c: #c8202c; }
+html.celular body:is([data-sis="gb"], [data-sis="gba"]) #ctl.skin-classico :is([data-b="A"], [data-b="B"]) { --c: #8e2a63; }
+body.modo-controle #ctl [data-b="turbo"], body.modo-controle #ctl [data-b="rew"] { display: none; }   /* sem jogo aqui: turbo e rebobinar não servem; o ☰ abre o menu do PC */
+/* modo de jogo: Raiz não rebobina; Hardcore não rebobina nem acelera */
+body[data-modo="raiz"] #ctl [data-b="rew"], body[data-modo="hardcore"] #ctl [data-b="rew"], body[data-modo="hardcore"] #ctl [data-b="turbo"] { visibility: hidden; }
+
+/* 🖥 Jogar no PC: a imagem que o PC transmite no lugar da telinha */
+#modo-controle .mc-video { display: none; }
+#modo-controle.remoto { padding: 0; }
+#modo-controle.remoto .mc-tela, #modo-controle.remoto .mc-parear, #modo-controle.remoto .mc-info { display: none; }
+#modo-controle.remoto .mc-video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; image-rendering: pixelated; }
+#modo-controle.remoto .mc-barra { z-index: 2; opacity: .85; }
+#modo-controle .mc-ping { position: absolute; right: 10px; bottom: 6px; z-index: 2; font-size: 11px; color: #fff; text-shadow: 0 0 4px #000; }
+#modo-controle .mc-menu { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: rgb(0 0 0 / .72); }
+#modo-controle .mc-menu[hidden] { display: none; }
+/* atalhos do controle do PC: ⏪ (segurar) 💾 📂 🏠 ☰ */
+#modo-controle .mc-atalhos { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 2; display: flex; gap: 8px;
+  padding: 4px 8px; border-radius: 999px; background: color-mix(in srgb, var(--painel) 80%, transparent); border: 1px solid var(--borda); }
+#modo-controle .mc-atalhos button { width: 40px; height: 36px; border-radius: 18px; font-size: 18px; touch-action: none; user-select: none; }
+#modo-controle .mc-atalhos button:active, #modo-controle .mc-atalhos button.on { background: var(--sel); }
+#modo-controle.remoto .mc-ping { bottom: 54px; }
+#modo-controle .mc-menu { position: fixed; overflow-y: auto; justify-content: flex-start; padding: 24px 0; }
+#modo-controle .mc-menu-pc { display: contents; }
+#modo-controle .mc-item { display: flex; gap: 6px; width: min(90%, 360px); }
+#modo-controle .mc-item button { flex: 1; width: auto; padding: 10px; border-radius: 10px; background: var(--painel); border: 1px solid var(--borda); font-size: 15px; }
+#modo-controle .mc-item button.mc-aj { flex: none; width: 44px; }
+#modo-controle.remoto .mc-atalhos [data-at="home"] { display: none; }   /* jogando no celular, o Início do PC ninguém vê */
+/* 🖥 Jogar no PC deitado = Switch portátil: o jogo na tela inteira e os botões dos lados, por cima da imagem */
+@media (orientation: landscape) {
+  #modo-controle.remoto { inset: 0; left: 0; right: 0; height: auto; z-index: 4; background: #000; padding: 0; }
+  #modo-controle.remoto .mc-barra { top: 6px; }
+  #modo-controle.remoto .mc-atalhos { bottom: 6px; }
+  body.modo-controle.cel-jogo:has(#modo-controle.remoto) #ctl { --ctl-fundo: transparent; }
+  body.modo-controle:has(#modo-controle.remoto) #ctl .bt, body.modo-controle:has(#modo-controle.remoto) #ctl [data-b] { opacity: .78; }
+}
+#modo-controle.menu-aberto { z-index: 40; }
+/* 🎛 filtro do celular no Jogar no PC: o vídeo some (continua tocando, pro som e pra ler os quadros) e aparece a tela do jogo */
+#modo-controle.remoto.filtrado { background: transparent; pointer-events: none; }
+#modo-controle.remoto.filtrado .mc-barra, #modo-controle.remoto.filtrado .mc-atalhos, #modo-controle.remoto.filtrado .mc-menu { pointer-events: auto; }
+#modo-controle.remoto.filtrado .mc-video { opacity: 0; pointer-events: none; }
+body.modo-controle.remoto-filtro #tela, body.modo-controle.remoto-filtro #moldura { visibility: visible; }
+/* celular como controle pela rede: a cor do jogador na luz */
+#modo-controle.pela-rede.ligado .mc-luz { background: var(--jog-cor, #3ccf6a); box-shadow: 0 0 8px var(--jog-cor, #3ccf6a); }
+#modo-controle.pela-rede .mc-info { display: none; }

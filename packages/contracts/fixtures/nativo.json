@@ -31,6 +31,18 @@
       "taxa": 44100,
       "taxaSaida": 48000
     },
+    {
+      "tipo": "pronto",
+      "nucleo": "LRPS2",
+      "versao": "38d3a83f",
+      "largura": 640,
+      "altura": 448,
+      "proporcao": 1.3333334,
+      "fps": 59.94,
+      "taxa": 48000,
+      "taxaSaida": 48000,
+      "placa": "AMD Radeon Graphics · AMD · OpenGL 4.6 (Core Profile) Mesa 25.0"
+    },
     { "tipo": "geometria", "largura": 640, "altura": 480, "proporcao": 1.3333334 },
     { "tipo": "desempenho", "quadros": 600, "amostras": 441000, "atrasoMs": 61.5, "faltas": 0 },
     {

@@ -61,6 +61,9 @@ pub enum Aviso {
         /// taxa em que a placa de som toca (0 = sem placa: o relógio do sistema dita o ritmo)
         #[serde(rename = "taxaSaida")]
         taxa_saida: u32,
+        /// a placa de vídeo e o driver, quando o núcleo desenha nela (diagnóstico)
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        placa: Option<String>,
     },
     Geometria {
         largura: u32,

@@ -116,6 +116,7 @@ test('modos: pergunta ao abrir, Hardcore sem estados, opções de emulação e n
   await page.keyboard.press('F2');
   await page.click('#menu >> text=Emulação');
   await page.click('#menu [data-acao="emu-opcoes"]');
+  await page.click('#emu-abas [data-sis="geral"]'); // com jogo aberto, a tela abre no console dele
   await expect(page.locator('#emu-modo')).toHaveValue('hardcore');
   await page.selectOption('#emu-modo', 'alegria');
   await page.selectOption('#emu-modoPerguntar', '0');

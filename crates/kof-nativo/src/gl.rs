@@ -138,6 +138,7 @@ pub fn criar(major: u32, minor: u32, core: bool) -> Result<(), String> {
         client_wait_sync: carregar("glClientWaitSync")?,
         delete_sync: carregar("glDeleteSync")?,
     };
+    anotar_placa();
     *estado() = Some(Estado {
         plataforma: p,
         gl,
@@ -152,6 +153,38 @@ pub fn criar(major: u32, minor: u32, core: bool) -> Result<(), String> {
 
 pub fn existe() -> bool {
     estado().is_some()
+}
+
+static PLACA: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+
+/// A placa de vídeo e o driver (`GL_RENDERER` · `GL_VERSION`), pro diagnóstico; None = o núcleo não usa a placa.
+pub fn placa() -> Option<String> {
+    PLACA.get().cloned()
+}
+
+/// Lê o nome da placa e a versão do driver com o contexto já corrente (vai pro log e pro aviso `pronto`).
+fn anotar_placa() {
+    const GL_VENDOR: u32 = 0x1F00;
+    const GL_RENDERER: u32 = 0x1F01;
+    const GL_VERSION: u32 = 0x1F02;
+    let Ok(get_string) = carregar::<unsafe extern "system" fn(u32) -> *const u8>("glGetString") else {
+        return;
+    };
+    let ler = |n: u32| {
+        // SAFETY: glGetString devolve um texto do driver terminado em zero (ou nulo), válido enquanto o contexto viver
+        let p = unsafe { get_string(n) };
+        if p.is_null() {
+            String::new()
+        } else {
+            // SAFETY: não nulo e terminado em zero (contrato do glGetString)
+            unsafe { CStr::from_ptr(p as *const c_char) }
+                .to_string_lossy()
+                .into_owned()
+        }
+    };
+    let t = format!("{} · {} · OpenGL {}", ler(GL_RENDERER), ler(GL_VENDOR), ler(GL_VERSION));
+    tracing::info!(target: "nucleo", "placa de vídeo: {t}");
+    let _ = PLACA.set(t); // um contexto por processo: se já tinha, é a mesma placa
 }
 
 /// (Re)cria o framebuffer do núcleo no tamanho máximo da imagem, com profundidade/estêncil se ele pediu.

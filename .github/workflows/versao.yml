@@ -52,6 +52,12 @@ jobs:
           sh tools/pacote-linux.sh target/pacote/linux-x64/KOFstation target/saida
           sh tools/pacote-windows.sh target/pacote/windows-x64/KOFstation target/saida
           ls -l target/saida
+      - name: APK do celular (casca do antigo + app novo; as .so vêm do APK do antigo)
+        run: |
+          sudo apt-get install -y -q aapt apksigner zipalign libandroid-23-java dalvik-exchange android-sdk-platform-23 libandroid-json-org-java
+          git clone -q --depth 1 https://github.com/Marcelao98/kofstation-old /tmp/kofstation-old
+          KOF_APK_ANTIGO=/tmp/kofstation-old/android/apk/KOFstation.apk android/construir-apk.sh target/saida/KOFstation-novo.apk
+          cat target/saida/android-versao.txt
       - name: Manifesto assinado e Release
         env:
           GH_TOKEN: ${{ github.token }}

@@ -235,8 +235,8 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - A imagem vai pra página como a do PS1 nativo (filtros e molduras iguais). Na resolução nativa (640×448) são ~70 MB/s
   dentro do PC. Se o Marcelo precisar de resolução aumentada ou os números mostrarem gargalo na cópia, entra o "modo
   direto" (janela nativa sem cópia, P.7).
-- Opções iniciais como o antigo: renderer OpenGL e `pcsx2_ee_cycle_skip = Mild Underclock` (60 fps no Shadow of the
-  Colossus no Ryzen 5 4600H). Pra comparar com o PCSX2 sozinho, ele pode desligar pela opção do núcleo.
+- Opções iniciais como o antigo: renderer OpenGL e `pcsx2_ee_cycle_skip = Mild Underclock` (60 fps no jogo
+  pesado A no Ryzen 5 4600H). Pra comparar com o PCSX2 sozinho, ele pode desligar pela opção do núcleo.
 
 ## D37. Medir antes de otimizar: medidor por quadro, modo diagnóstico e opções de emulação no meio da migração — **aceita** (Marcelo, 08/11)
 - Depois do primeiro teste do PS2 ("relativamente bem, umas engasgadas"), o Marcelo pôs o M16 antes do M14: medição
@@ -246,3 +246,18 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   linha, intervalo de 0,5–1 s) mais o que eles não têm (percentis, cada engasgo com momento e culpado, arquivo).
 - Estatística pura no `domain` (testável sem emulador); medição no processo/Worker; gravação pelo Rust com comandos
   com nome (`diag.*`); nada de ROM nem caminho completo no relatório.
+
+## D38. O novo substitui o antigo — **aceita** (Marcelo, 17/11)
+- "O KOFstation novo está melhor que o antigo, podemos descartar o antigo." O novo passa a ser **o produto**; o antigo
+  vira arquivo (só leitura) e deixa de ser usado no dia a dia.
+- **Paridade deixa de travar**: o comportamento do antigo foi a especificação da migração; daqui pra frente o novo pode
+  melhorar e mudar. Os testes que já comparam com o antigo (CI) continuam como proteção contra regressão, mas um item
+  novo não precisa existir no antigo.
+- **O repositório `kofstation-old` não pode ser apagado nem esvaziado**: o novo ainda baixa dele os núcleos
+  (`pnpm nucleos`, `third_party/cores/manifest.json`, Releases), as `.so` do celular (`android/construir-apk.sh` lê o APK
+  antigo) e o CI usa o commit fixado pra rede e paridade. E os atualizadores do antigo instalados por aí apontam pra
+  ele (e pro nome `KOFSnes`, que continua proibido de existir). Trazer esses arquivos pra Releases do repositório novo
+  é um passo à parte, se ele quiser.
+- **T.2** (a última versão do antigo avisando e levando pro novo) continua sendo decisão dele: é o que tira quem ainda
+  usa o antigo de lá.
+

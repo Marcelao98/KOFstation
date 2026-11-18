@@ -23,7 +23,9 @@ import { acao } from '../../app/acoes';
 import { usarAvisos } from '../../stores/avisos';
 import { config } from '../../stores/config';
 import { sisAtual, usarEntrada } from '../../stores/entrada';
+import { emModoCelular } from '../../app/celular';
 import { usarJogo } from '../../stores/jogo';
+import { ControlesDeToque } from './ControlesDeToque';
 
 const ler = (k: string) => config().ler(k);
 const curto = (s: string) => SISTEMAS.find((x) => x.id === s)?.curto ?? s;
@@ -96,6 +98,7 @@ export function Teclas() {
   const bot = mapaDe(ler, 'botoes', aba, jogoDaTela);
   const camT = lerCamada(ler, chaveCamada('teclas', aba, jogoDaTela));
   const camB = lerCamada(ler, chaveCamada('botoes', aba, jogoDaTela));
+  if (emModoCelular()) return <ControlesDeToque />; // no celular a janela de teclas vira a galeria do controle de toque
   const rot = NOMES_BOTAO[aba] ?? {};
   const acoes = aba === 'geral' ? BOTOES_SNES.map(([x]) => x) : acoesDe(aba);
   return (

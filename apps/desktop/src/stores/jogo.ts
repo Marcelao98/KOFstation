@@ -24,6 +24,7 @@ import { chaveSramDe, fatosDe, sistemaDoArquivo, SISTEMAS, type RegistroJogo } f
 import {
   Jogo,
   JogoNativo,
+  JogoNativoAndroid,
   NUCLEOS,
   type EventosDoJogo,
   type InfoDoJogo,
@@ -33,6 +34,7 @@ import {
   type SituacaoRebob,
 } from '@kof/engine';
 import { create } from 'zustand';
+import { ambienteDoApk, consoleNativoDoApk, marcaNativa, nativosDoApk } from '../platform/android-nativo';
 import { usarAvisos } from './avisos';
 import { aoTrazerSaves } from './backup';
 import { guardarBateria, saveDoJogo } from './bateria';
@@ -78,6 +80,12 @@ export function trocarOpcoesDoNucleo(f: typeof opcoesDoNucleo) {
   opcoesDoNucleo = f;
 }
 
+/** Opções de emulação do jogador (perfis, console, jogo: M16.4), por sistema e por jogo (id do registro). */
+let opcoesDeEmulacao: (sistema: string, jogoId?: string) => Record<string, string> = () => ({});
+export function trocarOpcoesDeEmulacao(f: typeof opcoesDeEmulacao) {
+  opcoesDeEmulacao = f;
+}
+
 /** Erro no núcleo (o caçador de bugs oferece reportar). */
 export const aoErroDoEmulador = new Set<(m: string) => void>();
 
@@ -96,6 +104,8 @@ export interface Origem {
   arquivoDeFora?: File;
   /** os outros arquivos escolhidos junto (os .bin do .cue): vão pra mesma pasta da Kof Games */
   soltos?: File[];
+  /** APK: o jogo roda no PS1/N64 nativo da casca (o CD nunca passa pela página; `aberto.rom` é só uma marca) */
+  nativoAndroid?: 'ps1' | 'n64';
 }
 
 /** Sistemas com núcleo nativo neste executável (perguntado uma vez). */
@@ -111,6 +121,7 @@ function nativos(): Promise<string[]> {
 /** O núcleo nativo desse sistema está ligado (Opções de emulação) e existe neste executável? */
 export async function nativoLigado(sistema: string): Promise<boolean> {
   if (sistema === 'ps2') return (await nativos()).includes('ps2'); // o PS2 só existe nativo
+  if (sistema === 'n64') return (await nativos()).includes('n64'); // só o APK tem N64 nativo
   if (sistema !== 'ps1' || config().ler('nucleoPs1') === 'wasm') return false;
   return (await nativos()).includes(sistema);
 }
@@ -131,8 +142,23 @@ async function jogoInteiro(aberto: JogoAberto, path: string | undefined): Promis
 const MAX_RESERVA_WASM = 100 << 20;
 const mb = (n: number) => Math.round(n / (1 << 20));
 
+/** As opções de emulação que o núcleo do sistema recebe (as fixas do núcleo + as do jogador). */
+export const opcoesEmUso = (sistema: string, jogoId?: string): Record<string, string> => ({
+  ...NUCLEOS[sistema as keyof typeof NUCLEOS]?.opcoes,
+  ...opcoesDoNucleo(sistema),
+  ...opcoesDeEmulacao(sistema, jogoId),
+});
+
+/** O núcleo do jogo aberto (nome, versão, se é nativo e a placa de vídeo dele), pro diagnóstico. */
+export function sobreONucleo(): { nome: string; versao: string; nativo: boolean; placa?: string } {
+  const j = usarJogo.getState();
+  if (j.jogo instanceof JogoNativo) return { ...j.jogo.sobreNucleo, nativo: true };
+  const sis = j.info?.sistema;
+  return { nome: (sis && NUCLEOS[sis]?.nucleo) || '?', versao: 'WebAssembly', nativo: false };
+}
+
 /** Últimas linhas do log do processo nativo (vazio se não tem). */
-async function logDoNativo(): Promise<string[]> {
+export async function logDoNativo(): Promise<string[]> {
   try {
     const l = await servicos().backend.chamar<{ vivo: boolean; saida: string | null; linhas: string[] }>('nativo.log');
     return [`processo ${l.vivo ? 'vivo' : `fechou (${l.saida ?? '?'})`}`, ...l.linhas.slice(-15)];
@@ -197,6 +223,24 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
   abrirArquivo: async (arquivo, soltos = []) => {
     const av = usarAvisos.getState();
     try {
+      // APK: PS1 e N64 vão pro núcleo nativo da casca (as `.so` do antigo); o CD nunca passa pela página
+      const nat = await consoleNativoDoApk(arquivo, config().ler('nucleoPs1') === 'wasm');
+      if (nat) {
+        const nomeLimpo = arquivo.name.replace(/\.[^.]+$/, '');
+        await get().abrirJogo(
+          {
+            nome: nomeLimpo,
+            arquivo: arquivo.name,
+            sistema: nat,
+            rom: marcaNativa(nat, arquivo.name),
+            parcial: true,
+            tamanho: arquivo.size,
+            pesoCd: arquivo.size,
+          },
+          { nativoAndroid: nat, arquivoDeFora: arquivo, soltos },
+        );
+        return;
+      }
       if (await abrirCdDeFora(arquivo, soltos)) return;
       const outros = await Promise.all(
         soltos.map(async (s) => ({ nome: s.name, bytes: new Uint8Array(await s.arrayBuffer()) })),
@@ -214,6 +258,29 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
     set({ abrindo: true });
     try {
       const { armazem } = servicos();
+      // APK, jogo da pasta de ROMs (SAF): PS1/N64 vão pro núcleo nativo; a casca copia o CD direto da pasta
+      if (!origem.nativoAndroid && origem.path) {
+        const doApk = nativosDoApk();
+        const nat =
+          aberto.sistema === 'n64' && doApk.includes('n64')
+            ? 'n64'
+            : aberto.sistema === 'ps1' && doApk.includes('ps1') && config().ler('nucleoPs1') !== 'wasm'
+              ? 'ps1'
+              : null;
+        if (nat) {
+          await servicos().backend.chamar('pasta.preparar', { path: origem.path });
+          origem = { ...origem, nativoAndroid: nat };
+          aberto = {
+            nome: aberto.nome,
+            arquivo: aberto.arquivo,
+            sistema: nat,
+            rom: marcaNativa(nat, aberto.arquivo),
+            parcial: true,
+            tamanho: tamanhoDoJogo(aberto),
+            pesoCd: aberto.pesoCd ?? tamanhoDoJogo(aberto),
+          };
+        }
+      }
       const nativo = await querNativo(aberto.sistema, origem.path);
       if (aberto.sistema === 'ps2' && !nativo) {
         av.avisarErro(
@@ -232,7 +299,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         return false;
       }
       // nativo: o processo lê o CD direto da Kof Games (o CD e os .bin do .cue não passam pela página)
-      if (!nativo) {
+      if (!nativo && !origem.nativoAndroid) {
         aberto = await jogoInteiro(aberto, origem.path);
         aberto = await completarJogo(aberto, (nome) => acharNaKofGames(nome, origem.path));
       }
@@ -245,7 +312,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
       const ident = identidade(aberto.sistema, aberto.rom, aberto.nome, tamanho);
       const chaveSram = chaveSramDe(ident.titulo || aberto.nome, tamanho);
       const sram = await saveDoJogo(chaveSram);
-      const opcoes = opcoesDoNucleo(aberto.sistema);
+      const opcoes = { ...opcoesDoNucleo(aberto.sistema), ...opcoesDeEmulacao(aberto.sistema, ident.id) };
       const med = new MedidorDaSessao();
       const eventos: EventosDoJogo = {
         quadro: (pixels, largura, altura) => {
@@ -265,13 +332,23 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         },
       };
       let jogo: SessaoDeJogo | null = null;
-      if (nativo && origem.path)
+      if (origem.nativoAndroid) {
+        const amb = ambienteDoApk();
+        if (!amb) throw new Error('a casca do Android não está presente (PS1/N64 nativos só existem no APK)');
+        jogo = await JogoNativoAndroid.abrir(amb, {
+          sistema: origem.nativoAndroid,
+          nome: origem.arquivoDeFora?.name ?? aberto.arquivo,
+          volume: volume / 100,
+          mudo,
+        });
+      }
+      if (!jogo && nativo && origem.path)
         try {
           const r = await servicos().backend.chamar<{ porta: number; token: string }>('nativo.abrir', {
             sistema: aberto.sistema,
             path: origem.path,
             bios: bios.map((b) => b.nome),
-            opcoes: { ...NUCLEOS[aberto.sistema]?.opcoes, ...opcoes, pcsx_rearmed_drc: 'enabled' },
+            opcoes: { pcsx_rearmed_drc: 'enabled', ...NUCLEOS[aberto.sistema]?.opcoes, ...opcoes },
             ...(NUCLEOS[aberto.sistema]?.dispositivo ? { dispositivo: NUCLEOS[aberto.sistema]?.dispositivo } : {}),
           });
           jogo = await JogoNativo.abrir(
@@ -499,7 +576,7 @@ async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<
   const { backend, armazem } = servicos();
   let path = origem.path;
   const f = origem.arquivoDeFora;
-  if (!path && f) {
+  if (!path && f && !origem.nativoAndroid) {
     try {
       const fato = await fatosDe(f.name, f.size, async (o, n) => new Uint8Array(await f.slice(o, o + n).arrayBuffer()));
       // arquivo grande (CD): aos pedaços, sem ler inteiro de novo
@@ -523,7 +600,7 @@ async function guardarNaBiblioteca(aberto: JogoAberto, origem: Origem): Promise<
     }
   }
   try {
-    return await registrarJogo(armazem, aberto, path ? { path } : {});
+    return await registrarJogo(armazem, aberto, path ? { path } : { semCopia: !!origem.nativoAndroid }); // nativo do APK: a `rom` é uma marca, não vira cópia
   } catch (e) {
     registrar('error', 'biblioteca', `não registrei ${aberto.nome}: ${textoDoErro(e)}`);
     return null;

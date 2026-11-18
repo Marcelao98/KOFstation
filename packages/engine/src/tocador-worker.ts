@@ -1,6 +1,6 @@
 // Worker do tocador da jukebox: uma instância do núcleo só pra música (o jogo aberto continua no Worker dele). Mantém
 // ~100 ms de som no anel do AudioWorklet, aplica o fade do fim da faixa e manda as ondas pra tela ~30 vezes por segundo.
-import { criarAnel, escrever, ocupacao, type Anel } from './anel';
+import { criarAnel, criarAnelLocal, drenar, escrever, ocupacao, type Anel } from './anel';
 import type { FabricaDeNucleo } from './libretro';
 import type { DoTocador, ParaTocador } from './mensagens';
 import { ganhoDoFade, Musica, MusicaFm, type FonteDeMusica, type ModuloSomFm } from './musica';
@@ -16,6 +16,11 @@ const eu = self as unknown as {
 
 let musica: FonteDeMusica | null = null;
 let anel: Anel | null = null;
+/** sem SharedArrayBuffer: o anel é só do Worker; o som vai por mensagem e o quanto "já tocou" vem de um relógio virtual */
+let pcmPorMensagem = false;
+let produzidas = 0;
+let tempoTocadoMs = 0;
+let ultimoPasso = 0;
 let ream: Reamostrador | null = null;
 let taxaSaida = 48000;
 let tocando = false;
@@ -53,10 +58,23 @@ function umQuadro(m: FonteDeMusica) {
     v[i + 1] = (a[i + 1] ?? 0) * k;
   }
   if (anel && ream) escrever(anel, ream.converter(v));
+  if (pcmPorMensagem && anel) {
+    const d = drenar(anel);
+    if (d) {
+      produzidas += d.length / 2;
+      enviar({ tipo: 'pcm', dados: d }, [d.buffer]);
+    }
+  }
   if (seg && m.amostras / m.taxa > seg + cfg.fadeMs / 1000 && !fimAvisado) {
     fimAvisado = true;
     enviar({ tipo: 'fim' });
   }
+}
+
+/** Quanto som está esperando pra tocar (quadros estéreo): o anel de verdade, ou o relógio virtual sem memória compartilhada. */
+function fila(): number {
+  if (!anel) return 0;
+  return pcmPorMensagem ? Math.max(0, produzidas - (tempoTocadoMs / 1000) * taxaSaida) : ocupacao(anel);
 }
 
 function passo() {
@@ -64,15 +82,17 @@ function passo() {
   setTimeout(passo, 8);
   const m = musica;
   if (!m || !anel) return;
-  if (tocando && !fimAvisado) {
-    for (let k = 0; ocupacao(anel) < taxaSaida * 0.1 && k < 8; k++) umQuadro(m);
-  }
   const agora = performance.now();
+  if (tocando) tempoTocadoMs += agora - (ultimoPasso || agora);
+  ultimoPasso = agora;
+  if (tocando && !fimAvisado) {
+    for (let k = 0; fila() < taxaSaida * 0.1 && k < 8; k++) umQuadro(m);
+  }
   if (agora - ultimaOnda >= 33) {
     ultimaOnda = agora;
     const ondas = m.ondas();
     const niveis = tocando ? m.niveis(ondas) : new Float32Array(m.canais);
-    enviar({ tipo: 'ondas', amostras: m.amostras, filaMs: (ocupacao(anel) * 1000) / taxaSaida, ondas, niveis }, [
+    enviar({ tipo: 'ondas', amostras: m.amostras, filaMs: (fila() * 1000) / taxaSaida, ondas, niveis }, [
       ondas.buffer,
       niveis.buffer,
     ]);
@@ -96,7 +116,12 @@ eu.onmessage = async ({ data: d }) => {
         Object.assign(cfg, { segundos: d.segundos, fadeMs: d.fadeMs, repetir: d.repetir });
         musica = m;
         taxaSaida = d.taxaSaida;
-        anel = d.sab ? criarAnel((d.sab.byteLength - 16) / 8, d.sab) : null;
+        pcmPorMensagem = !d.sab && !!d.pcm;
+        anel = d.sab
+          ? criarAnel((d.sab.byteLength - 16) / 8, d.sab)
+          : pcmPorMensagem
+            ? criarAnelLocal(Math.round(taxaSaida * 0.5))
+            : null;
         ream = new Reamostrador(m.taxa, taxaSaida);
         enviar({
           tipo: 'pronto',

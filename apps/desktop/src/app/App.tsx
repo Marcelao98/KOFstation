@@ -4,6 +4,8 @@ import { EXTENSOES, ehPacote, principal as principalDoCd } from '@kof/domain';
 import { useEffect, useRef } from 'react';
 import { Aviso } from '../components/Aviso';
 import { Desempenho } from '../components/Desempenho';
+import { ControleDeToque } from '../components/ControleDeToque';
+import { ModoControle } from '../components/ModoControle';
 import { Lateral } from '../components/Lateral';
 import { Menu } from '../components/Menu';
 import { MenuRapido, teclaDoRapido } from '../components/MenuRapido';
@@ -26,8 +28,11 @@ import { Jukebox } from '../screens/Jukebox/Jukebox';
 import { Abertura } from '../screens/Abertura/Abertura';
 import { Estatisticas } from '../screens/Estatisticas/Estatisticas';
 import { Bug } from '../screens/Bug/Bug';
+import { Diagnostico } from '../screens/Diagnostico/Diagnostico';
 import { BiosTela } from '../screens/Bios/BiosTela';
+import { Emulacao } from '../screens/Emulacao/Emulacao';
 import { usarBug } from '../stores/bug';
+import { usarDiagnostico } from '../stores/diagnostico';
 import '../stores/estatisticas';
 import { abrirPatch } from '../stores/traducao';
 import { primeiraVez, usarAbertura } from '../stores/abertura';
@@ -65,6 +70,7 @@ const PRONTAS: string[] = [
   'jukebox',
   'estatisticas',
   'bios-tela',
+  'emulacao',
 ];
 
 const SETAS: Record<string, [number, number]> = {
@@ -107,6 +113,10 @@ function teclaGlobal(e: KeyboardEvent) {
   if (usarBug.getState().aberto) {
     if (e.code === 'Escape') usarBug.getState().fechar();
     return; // escrevendo a descrição do bug
+  }
+  if (usarDiagnostico.getState().aberto) {
+    if (e.code === 'Escape') usarDiagnostico.getState().fechar();
+    return; // a janela do diagnóstico está por cima
   }
   if (usarAbertura.getState().aberta) {
     if (e.code === 'Escape') usarAbertura.getState().fechar(true);
@@ -239,6 +249,8 @@ export function App({ backend }: { backend: Backend }) {
   return (
     <>
       <Menu />
+      <ControleDeToque />
+      <ModoControle />
       <Lateral />
       <main id="palco">
         {atual === 'home' && <Inicio />}
@@ -251,6 +263,7 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'jukebox' && <Jukebox />}
         {atual === 'estatisticas' && <Estatisticas />}
         {atual === 'bios-tela' && <BiosTela />}
+        {atual === 'emulacao' && <Emulacao />}
         {!PRONTAS.includes(atual) && <Pendente tela={atual as TelaId} />}
         <div id="moldura" hidden={atual !== 'jogo'}>
           <canvas id="tela" ref={canvas} width={256} height={224} onDoubleClick={() => acao('cheia')}></canvas>
@@ -262,6 +275,7 @@ export function App({ backend }: { backend: Backend }) {
         <PedirPasta />
         <Backup />
         <Bug />
+        <Diagnostico />
         <PlanoDeOrganizacao />
         <Ampulheta />
         <MenuRapido />

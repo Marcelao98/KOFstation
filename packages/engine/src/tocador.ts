@@ -1,6 +1,6 @@
 // O tocador da jukebox, do lado da página: cria o Worker da música e o som (AudioWorklet próprio), e entrega as ondas
 // pra tela desenhar. Uma faixa por vez; trocar de faixa = fechar este e abrir outro.
-import { CODIGO_WORKLET } from './anel';
+import { CODIGO_WORKLET, CODIGO_WORKLET_PCM } from './anel';
 import type { DoTocador, FaixaNoWorker, ParaTocador } from './mensagens';
 import { NUCLEOS } from './nucleos';
 
@@ -62,6 +62,7 @@ export class Tocador {
   private worker = criarWorker();
   private ctx: AudioContext | null = null;
   private ganho: GainNode | null = null;
+  private saidaSom: AudioWorkletNode | null = null;
   private acordar = () => void this.ctx?.resume();
 
   private constructor() {}
@@ -69,13 +70,14 @@ export class Tocador {
   static async abrir(o: OpcoesDoTocador): Promise<Tocador> {
     const t = new Tocador();
     try {
-      const sab = await t.ligarSom(o.volume, o.mudo);
+      const { sab, pcm } = await t.ligarSom(o.volume, o.mudo);
       const pronto = esperarPronto(t.worker);
       t.mandar({
         tipo: 'iniciar',
         faixa: o.faixa,
         urlNucleo: urlDoNucleo(o.faixa, o.baseNucleos),
         sab,
+        pcm,
         taxaSaida: t.ctx?.sampleRate ?? 48000,
         segundos: o.segundos,
         fadeMs: o.fadeMs,
@@ -91,16 +93,24 @@ export class Tocador {
     return t;
   }
 
-  private async ligarSom(volume: number, mudo: boolean): Promise<SharedArrayBuffer> {
-    if (typeof AudioWorkletNode !== 'function' || typeof SharedArrayBuffer !== 'function' || !self.crossOriginIsolated)
-      throw new Error('o navegador não liberou o som pra jukebox');
+  /** Com isolamento: anel compartilhado. Sem ele (WebView do Android): o som vai por mensagem (`pcm`, ver anel.ts). */
+  private async ligarSom(volume: number, mudo: boolean): Promise<{ sab: SharedArrayBuffer | null; pcm: boolean }> {
+    if (typeof AudioWorkletNode !== 'function') throw new Error('o navegador não liberou o som pra jukebox');
+    const isolado = typeof SharedArrayBuffer === 'function' && !!self.crossOriginIsolated;
     const ctx = new AudioContext({ latencyHint: 'playback' });
-    const url = URL.createObjectURL(new Blob([CODIGO_WORKLET], { type: 'text/javascript' }));
+    const url = URL.createObjectURL(
+      new Blob([isolado ? CODIGO_WORKLET : CODIGO_WORKLET_PCM], { type: 'text/javascript' }),
+    );
     await ctx.audioWorklet.addModule(url);
     URL.revokeObjectURL(url);
-    const cap = Math.round(ctx.sampleRate * 0.5);
-    const sab = new SharedArrayBuffer(16 + cap * 8);
-    const no = new AudioWorkletNode(ctx, 'kof-som', { outputChannelCount: [2], processorOptions: { sab } });
+    let sab: SharedArrayBuffer | null = null;
+    let no: AudioWorkletNode;
+    if (isolado) {
+      const cap = Math.round(ctx.sampleRate * 0.5);
+      sab = new SharedArrayBuffer(16 + cap * 8);
+      no = new AudioWorkletNode(ctx, 'kof-som', { outputChannelCount: [2], processorOptions: { sab } });
+    } else no = new AudioWorkletNode(ctx, 'kof-som-pcm', { outputChannelCount: [2] });
+    this.saidaSom = no;
     this.ganho = ctx.createGain();
     no.connect(this.ganho).connect(ctx.destination);
     this.ctx = ctx;
@@ -110,11 +120,12 @@ export class Tocador {
       addEventListener('pointerdown', this.acordar, true);
       addEventListener('keydown', this.acordar, true);
     }
-    return sab;
+    return { sab, pcm: !isolado };
   }
 
   private receber(d: DoTocador) {
-    if (d.tipo === 'ondas') {
+    if (d.tipo === 'pcm') this.saidaSom?.port.postMessage(d.dados, [d.dados.buffer]);
+    else if (d.tipo === 'ondas') {
       const lat = this.ctx ? (this.ctx.outputLatency || 0) + (this.ctx.baseLatency || 0) : 0;
       this.ultimo = {
         amostras: d.amostras,

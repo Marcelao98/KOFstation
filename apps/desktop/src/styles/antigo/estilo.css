@@ -513,6 +513,11 @@ body:not([data-moldura="nenhuma"]) #tela { box-shadow: none; border: 0; }
 
 /* Caçador de bugs */
 #bug { width: min(560px, 94vw); text-align: left; z-index: 11; }
+/* M16.3: janela do modo diagnóstico */
+#diagnostico { width: min(620px, 94vw); text-align: left; z-index: 11; }
+#diag-lista { max-height: 40vh; overflow: auto; margin: 8px 0; display: flex; flex-direction: column; gap: 6px; }
+#diagnostico .diag-sessao { display: block; padding: 6px 8px; background: var(--painel); border: 1px solid var(--borda); border-radius: var(--raio); cursor: pointer; }
+#diagnostico .diag-resumo { display: block; white-space: pre-wrap; font-size: 12px; opacity: .8; margin-top: 2px; }
 #bug-erro { background: var(--painel); border: 1px solid var(--destaque); border-radius: var(--raio); padding: 8px 10px; font-family: monospace; font-size: 12px; white-space: pre-wrap; word-break: break-word; max-height: 120px; overflow: auto; }
 #bug-desc { width: 100%; margin: 6px 0 10px; padding: 8px 10px; font: inherit; color: var(--texto); background: var(--painel); border: 1px solid var(--borda); border-radius: var(--raio); resize: vertical; user-select: text; }
 #bug-desc:focus { outline: none; border-color: var(--destaque); }

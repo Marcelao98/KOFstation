@@ -57,3 +57,115 @@
   gap: 18px;
   margin: 10px 0;
 }
+
+/* atalhos da rede no Início e no 📡 Aparelhos (o outro aparelho conectado) */
+.hm-rede {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  background: var(--painel);
+  border: 1px solid var(--borda);
+  border-left: 4px solid var(--destaque);
+  border-radius: var(--raio);
+}
+.hm-rede-botoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 8px;
+}
+.hm-rede-botoes .grande {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  text-align: left;
+}
+.hm-rede-botoes small {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Opções de emulação (tarefa E): ⚠ nas que podem quebrar o jogo, marca do nome original do núcleo */
+.emu-op .emu-aviso {
+  color: #f2b544;
+  font-weight: 600;
+}
+.emu-op .emu-original {
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
+/* ⚙ Opções de emulação (tarefa E): tela grande, como a dos Controles, que rola inteira (a aba antiga cortava embaixo) */
+#emulacao {
+  width: min(980px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  text-align: left;
+}
+#emulacao #emu-opcoes,
+#emulacao #emu-console {
+  display: grid;
+  gap: 10px;
+}
+#emulacao .emu-perfis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+#emulacao .emu-perfis > span {
+  margin-right: 4px;
+  font-weight: 600;
+}
+#emulacao .emu-perfis button {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--borda);
+  background: var(--painel2);
+  color: var(--texto);
+  cursor: pointer;
+  font: inherit;
+}
+#emulacao .emu-perfis button.ativo {
+  background: var(--destaque);
+  color: var(--fundo);
+  border-color: var(--destaque);
+}
+#emulacao #emu-busca {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: var(--painel);
+  color: var(--texto);
+  font: inherit;
+}
+#emulacao #emu-secoes small {
+  opacity: 0.6;
+}
+#emulacao .emu-grupo {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 10px;
+}
+#emulacao .emu-mais {
+  margin: 10px 0 2px;
+  opacity: 0.75;
+  font-size: 0.95em;
+}
+#emulacao .emu-op.mudada {
+  border-color: var(--destaque);
+}
+/* a lista escondida do perfil (teclado, leitor de tela e testes): fora da vista, mas no lugar */
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

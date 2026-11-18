@@ -30,6 +30,8 @@ export type AvisoNativo =
       taxa: number;
       /** taxa da placa de som (0 = sem placa) */
       taxaSaida: number;
+      /** placa de vídeo e driver (GL_RENDERER · GL_VENDOR · GL_VERSION), quando o núcleo desenha nela */
+      placa?: string;
     }
   | { tipo: 'geometria'; largura: number; altura: number; proporcao: number }
   | {

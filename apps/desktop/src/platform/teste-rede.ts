@@ -10,6 +10,8 @@ export interface RedeTeste {
   /** um aparelho manda uma mensagem pela rede */
   mensagem(de: string, canal: string, dados: string): void;
   ligar(id: string, online: boolean): void;
+  /** um aparelho já pareado (de qualquer tipo): o celular do teste enxerga o PC como `pc`. Devolve o id */
+  adicionar(tipo: 'pc' | 'celular', nome: string, ip?: string): string;
 }
 
 export function criarRedeTeste(): () => Promise<CanalRede> {
@@ -37,6 +39,12 @@ export function criarRedeTeste(): () => Promise<CanalRede> {
       emitir({ t: 'pareado', aparelho: { id, nome, tipo: 'celular' } });
       lista();
       return true;
+    },
+    adicionar(tipo, nome, ip = '') {
+      const id = `${tipo.slice(0, 3)}${String(++n).padStart(13, '0')}`;
+      aparelhos.push({ id, nome, tipo, online: true, visto: Math.floor(Date.now() / 1000), ip });
+      lista();
+      return id;
     },
     mensagem: (de, canal, dados) => emitir({ t: 'msg', de, canal, dados }),
     ligar(id, online) {

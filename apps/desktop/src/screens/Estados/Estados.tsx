@@ -1,9 +1,8 @@
 // 💾 Estados salvos (#estados do antigo): escolher o jogo, a grade com o print de cada estado (clicar carrega, 🗑 apaga),
-// o automático como primeiro cartão e a aba ⚙ Opções de emulação.
+// o automático como primeiro cartão. O botão ⚙ Opções de emulação abre a tela própria delas (screens/Emulacao).
 import { quando } from '@kof/domain';
 import { acao } from '../../app/acoes';
 import { usarEstados } from '../../stores/estados';
-import { OpcoesEmu } from './OpcoesEmu';
 import { CartaoAuto } from './CartaoAuto';
 
 export function Estados() {
@@ -31,53 +30,45 @@ export function Estados() {
         </button>
       </div>
       <div className="abas-estados">
-        <button
-          data-acao="aba-estados"
-          className={e.aba === 'estados' ? 'ativo' : ''}
-          onClick={() => e.mudarAba('estados')}
-        >
+        <button data-acao="aba-estados" className="ativo">
           💾 Estados
         </button>
-        <button data-acao="aba-emu" className={e.aba === 'emu' ? 'ativo' : ''} onClick={() => e.mudarAba('emu')}>
+        <button data-acao="aba-emu" onClick={() => acao('emu-opcoes')}>
           ⚙ Opções de emulação
         </button>
       </div>
-      {e.aba === 'emu' ? (
-        <OpcoesEmu />
-      ) : (
-        <div id="estados-conteudo">
-          <div id="grade-estados">
-            {temAuto && e.registroDaTela && <CartaoAuto j={e.registroDaTela} />}
-            {e.lista.map((x) => (
-              <div className="cartao" key={x.key} onClick={() => void e.carregar(x)}>
-                <img src={x.capa || undefined} alt="" />
-                <div className="cartao-rot">
-                  {quando(x.quando)}
-                  <button
-                    className="x"
-                    title="apagar"
-                    onClick={(ev) => {
-                      ev.stopPropagation();
-                      void e.apagar(x);
-                    }}
-                  >
-                    🗑
-                  </button>
-                </div>
+      <div id="estados-conteudo">
+        <div id="grade-estados">
+          {temAuto && e.registroDaTela && <CartaoAuto j={e.registroDaTela} />}
+          {e.lista.map((x) => (
+            <div className="cartao" key={x.key} onClick={() => void e.carregar(x)}>
+              <img src={x.capa || undefined} alt="" />
+              <div className="cartao-rot">
+                {quando(x.quando)}
+                <button
+                  className="x"
+                  title="apagar"
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    void e.apagar(x);
+                  }}
+                >
+                  🗑
+                </button>
               </div>
-            ))}
-          </div>
-          <p id="estados-vazio" className="dica" hidden={e.lista.length > 0 || temAuto}>
-            Nenhum estado salvo deste jogo.{' '}
-            <span className="so-pc">
-              Aperte <b>F5</b> durante o jogo.
-            </span>
-          </p>
-          <button className="grande" data-acao="salvar-estado" onClick={() => acao('salvar-estado')}>
-            Salvar estado agora<span className="so-pc"> (F5)</span>
-          </button>
+            </div>
+          ))}
         </div>
-      )}
+        <p id="estados-vazio" className="dica" hidden={e.lista.length > 0 || temAuto}>
+          Nenhum estado salvo deste jogo.{' '}
+          <span className="so-pc">
+            Aperte <b>F5</b> durante o jogo.
+          </span>
+        </p>
+        <button className="grande" data-acao="salvar-estado" onClick={() => acao('salvar-estado')}>
+          Salvar estado agora<span className="so-pc"> (F5)</span>
+        </button>
+      </div>
     </section>
   );
 }

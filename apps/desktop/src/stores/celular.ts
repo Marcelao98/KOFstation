@@ -202,6 +202,9 @@ export function padDaTransmissao(ativa: boolean, pad?: PadCelular) {
   transmissao.pad = pad ?? { b: 0, e: [0, 0, 0, 0] };
 }
 
+/** Pros testes: os botões que o celular está mandando agora pelo Jogar no PC. */
+export const padDaTransmissaoAgora = (): PadCelular => transmissao.pad;
+
 // ---------------------------------------------------------------- pros jogadores
 /** Os celulares ligados agora, como aparelhos de controle (o celular sem mandar nada por 5 s sai). */
 export function aparelhosCelular(agora = performance.now()): Aparelho[] {

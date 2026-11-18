@@ -11,12 +11,16 @@ import { usarJogo } from '../stores/jogo';
 import { usarTelas, type TelaId } from '../stores/telas';
 import { usarVisual } from '../stores/visual';
 import { usarPainel } from '../stores/painel';
+import { usarEmulacao } from '../stores/emulacao'; // também registra as opções de emulação no jogo
 import { usarMoldura } from '../stores/moldura';
 import { usarJukebox } from '../stores/jukebox';
 import { usarAbertura } from '../stores/abertura';
 import { usarBug } from '../stores/bug';
+import { usarDiagnostico } from '../stores/diagnostico';
 import { usarBios } from '../stores/bios';
 import { menuControleCelular } from '../stores/celular';
+import { emModoCelular } from './celular';
+import { entrarModoControle } from '../stores/modoControle';
 import { procurar as procurarAtualizacao } from '../stores/atualizacao';
 
 /** Telas que já existem como lugar no app (algumas ainda vazias, mostrando a etapa em que chegam). */
@@ -63,7 +67,9 @@ export function acao(nome: string, valor?: string): boolean {
   const j = usarJogo.getState();
   switch (nome) {
     case 'controle-celular':
-      menuControleCelular();
+      if (emModoCelular())
+        entrarModoControle(); // no celular: ESTE aparelho vira o controle do PC
+      else menuControleCelular(); // no PC: conectar a um celular pelo endereço e a senha
       return true;
     case 'atualizacao':
       void procurarAtualizacao(true);
@@ -84,12 +90,11 @@ export function acao(nome: string, valor?: string): boolean {
       j.reiniciar();
       return true;
     case 'rapido':
-      if (!j.jogo) return semJogo();
+      // as mesmas mensagens do antigo (paridade): sem jogo, e com jogo mas em outra tela
       if (j.rapidoAberto) j.fecharRapido();
-      else {
-        telas.abrir('jogo');
-        j.abrirRapido();
-      }
+      else if (!j.jogo) usarAvisos.getState().avisar('abra um jogo primeiro');
+      else if (telas.atual !== 'jogo') usarAvisos.getState().avisar('o menu rápido é só durante o jogo');
+      else j.abrirRapido();
       return true;
     case 'mudo':
       j.alternarMudo();
@@ -132,19 +137,21 @@ export function acao(nome: string, valor?: string): boolean {
       void usarEstados.getState().carregarUltimo();
       return true;
     case 'estados':
-      void usarEstados.getState().mostrar(null, 'estados');
+      void usarEstados.getState().mostrar(null);
       return true;
     case 'estados-do-sel': {
       const b = usarBiblioteca.getState();
       const r = b.visiveis[b.selecionada];
-      void usarEstados.getState().mostrar(r?.jogo?.id ?? null, 'estados');
+      void usarEstados.getState().mostrar(r?.jogo?.id ?? null);
       return true;
     }
     case 'auto-toggle':
       void import('../stores/auto').then((m) => m.alternarAuto());
       return true;
     case 'emu-opcoes':
-      void usarEstados.getState().mostrar(null, 'emu');
+    case 'emu-geral': // o Modo de jogo e as opções do app ficam na aba Geral
+      usarEmulacao.setState({ abaInicial: nome === 'emu-geral' ? 'geral' : null });
+      usarTelas.getState().abrir('emulacao');
       return true;
     case 'pausa-auto': {
       const liga = config().ler('pausaAuto') === '0';
@@ -219,6 +226,12 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     case 'bug-fechar':
       usarBug.getState().fechar();
+      return true;
+    case 'diagnostico':
+      usarDiagnostico.getState().abrir();
+      return true;
+    case 'diagnostico-fechar':
+      usarDiagnostico.getState().fechar();
       return true;
     case 'cacador-toggle':
       usarBug.getState().alternarCacador();

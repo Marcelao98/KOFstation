@@ -44,13 +44,11 @@ export interface Estados {
   jogosComEstados: { id: string; nome: string }[];
   /** registro do jogo mostrado (o automático aparece como o 1º cartão: M5.3) */
   registroDaTela: RegistroJogo | null;
-  aba: 'estados' | 'emu';
   salvar: () => Promise<void>;
   carregarUltimo: () => Promise<void>;
   carregar: (e: EstadoSalvo) => Promise<void>;
   apagar: (e: EstadoSalvo) => Promise<void>;
-  mostrar: (jogo?: string | null, aba?: 'estados' | 'emu') => Promise<void>;
-  mudarAba: (a: 'estados' | 'emu') => void;
+  mostrar: (jogo?: string | null) => Promise<void>;
 }
 
 /** Abre o jogo do registro (pela Kof Games ou pela cópia guardada). */
@@ -78,7 +76,6 @@ export const usarEstados = create<Estados>()((set, get) => ({
   lista: [],
   jogosComEstados: [],
   registroDaTela: null,
-  aba: 'estados',
 
   salvar: async () => {
     const j = usarJogo.getState();
@@ -149,7 +146,7 @@ export const usarEstados = create<Estados>()((set, get) => ({
     await get().mostrar(get().jogoDaTela);
   },
 
-  mostrar: async (jogo, aba) => {
+  mostrar: async (jogo) => {
     const { armazem } = servicos();
     const todos = await estadosDe(armazem);
     const atual = jogo ?? usarJogo.getState().registro?.id ?? todos[0]?.jogo ?? null;
@@ -164,9 +161,7 @@ export const usarEstados = create<Estados>()((set, get) => ({
       registroDaTela: reg,
       lista: todos.filter((e) => e.jogo === atual),
       jogosComEstados: ids.map((id) => ({ id, nome: nomes.get(id) ?? id.split('|')[0] ?? id })),
-      ...(aba ? { aba } : {}),
     });
     usarTelas.getState().abrir('estados');
   },
-  mudarAba: (aba) => set({ aba }),
 }));

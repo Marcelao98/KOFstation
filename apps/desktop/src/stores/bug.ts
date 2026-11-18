@@ -8,6 +8,7 @@ import { fotoDoQuadro } from '../app/foto';
 import { usarApp } from './app';
 import { usarAvisos } from './avisos';
 import { config } from './config';
+import { usarDiagnostico } from './diagnostico';
 import { aoErroDoEmulador, jogoAbertoAgora, usarJogo } from './jogo';
 import { usarPrefs } from './prefs';
 
@@ -107,6 +108,14 @@ export const usarBug = create<Bug>()((set, get) => ({
     } catch (e) {
       registrar('warn', 'bug', `pacote do bug: ${textoDoErro(e)}`);
     }
+    // modo diagnóstico ligado: o relatório da sessão vai junto (M16.3)
+    let diagnostico: string | null = null;
+    if (comPacote)
+      try {
+        diagnostico = await usarDiagnostico.getState().exportarPraBug();
+      } catch (e) {
+        registrar('warn', 'bug', `diagnóstico no pacote do bug: ${textoDoErro(e)}`);
+      }
     const L: string[] = ['### O que aconteceu', '', desc, ''];
     if (jogo)
       L.push(
@@ -126,6 +135,13 @@ export const usarBug = create<Bug>()((set, get) => ({
         '',
         `📎 **Arraste aqui o arquivo \`${arquivo}\`**, que o KOFstation acabou de baixar (pasta Downloads).`,
         'Ele tem o savestate de alguns segundos antes e os botões apertados, pra reproduzir o bug quadro a quadro (`pnpm bug <pacote> <rom>`). A ROM **não** vai junto.',
+        '',
+      );
+    if (diagnostico)
+      L.push(
+        '### Diagnóstico de desempenho',
+        '',
+        `📎 Arraste também o \`${diagnostico}\` (quadro a quadro, engasgos, máquina e opções de emulação).`,
         '',
       );
     L.push('---', '_Reportado pelo modo caçador de bugs do KOFstation_');

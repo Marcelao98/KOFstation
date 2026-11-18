@@ -1,4 +1,5 @@
 // ROMs geradas pelos próprios testes (nunca jogo de verdade).
+import { crc32 } from 'node:zlib';
 
 /** Mega Drive que pinta o fundo de vermelho. */
 export function romVermelha(): Buffer {
@@ -179,4 +180,42 @@ export function romN64QueDesenha(): Buffer {
   code.forEach((w, i) => r.writeUInt32BE(w, 0x40 + i * 4));
   if (0x40 + code.length * 4 > 0x1000) throw new Error('o programa não cabe no lugar do IPL3');
   return r;
+}
+
+/** Um .zip guardado (sem compressão) com os arquivos dados: pra testar o "zip com CD/ROM dentro" sem ler o zip inteiro. */
+export function zipGuardado(arquivos: Record<string, Buffer>): Buffer {
+  const locais: Buffer[] = [];
+  const centrais: Buffer[] = [];
+  let ofs = 0;
+  for (const [nome, dados] of Object.entries(arquivos)) {
+    const n = Buffer.from(nome);
+    const crc = crc32(dados) >>> 0;
+    const l = Buffer.alloc(30);
+    l.writeUInt32LE(0x04034b50, 0);
+    l.writeUInt16LE(20, 4);
+    l.writeUInt32LE(crc, 14);
+    l.writeUInt32LE(dados.length, 18);
+    l.writeUInt32LE(dados.length, 22);
+    l.writeUInt16LE(n.length, 26);
+    const c = Buffer.alloc(46);
+    c.writeUInt32LE(0x02014b50, 0);
+    c.writeUInt16LE(20, 4);
+    c.writeUInt16LE(20, 6);
+    c.writeUInt32LE(crc, 16);
+    c.writeUInt32LE(dados.length, 20);
+    c.writeUInt32LE(dados.length, 24);
+    c.writeUInt16LE(n.length, 28);
+    c.writeUInt32LE(ofs, 42);
+    locais.push(l, n, dados);
+    centrais.push(c, n);
+    ofs += 30 + n.length + dados.length;
+  }
+  const dir = Buffer.concat(centrais);
+  const fim = Buffer.alloc(22);
+  fim.writeUInt32LE(0x06054b50, 0);
+  fim.writeUInt16LE(Object.keys(arquivos).length, 8);
+  fim.writeUInt16LE(Object.keys(arquivos).length, 10);
+  fim.writeUInt32LE(dir.length, 12);
+  fim.writeUInt32LE(ofs, 16);
+  return Buffer.concat([...locais, dir, fim]);
 }

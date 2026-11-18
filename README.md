@@ -6,9 +6,10 @@ Central de jogos retrô para **Linux e Windows** (e Android, mais pra frente): b
 jukebox, saves, rebobinar, o celular como controle. Os emuladores são núcleos **libretro** consagrados; o KOFstation é a
 camada de experiência em volta deles.
 
-> **Este repositório é a arquitetura nova, em construção.** O app que funciona hoje, completo, está em
-> [Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old) e continua sendo o produto até a troca.
-> A migração anda em etapas com paridade total: nada do antigo pode se perder ([docs/PARIDADE.md](docs/PARIDADE.md)).
+> **A migração está completa (17/11/2026): este é o KOFstation.** O app antigo
+> ([Marcelao98/kofstation-old](https://github.com/Marcelao98/kofstation-old)) virou arquivo; o novo já faz tudo o que ele
+> fazia ([docs/PARIDADE.md](docs/PARIDADE.md)) e é o produto. Agora a regra é **melhorar o que temos antes de crescer**:
+> [docs/ROADMAP.md](docs/ROADMAP.md).
 
 **Onde estamos:** o retrato pra ler em 5 minutos está em [docs/SITUACAO.md](docs/SITUACAO.md). Resumo (03/11/2026): M11b feito até o N.8 (PS1 nativo padrão, jukebox do SNES com Ondas/Notas, N64
 desenhando), esperando o Marcelo testar; o PS2 nativo (N.9) é o próximo. Antes: M3 a M8 aprovados pelo Marcelo; **M9 a M11 feitos**, esperando ele testar — jukebox
@@ -63,7 +64,7 @@ flowchart TB
     KA["kof-app — servidor local (uma linha por pedido) + api.rs (os comandos) + abre o navegador"]
     KF["kof-files — escopos, Kof Games, varredura, CRC, organizar, lojas, config, capas"]
     KC["kof-core — app.info, erros com código, log em arquivo (inclusive o da tela)"]
-    KN["kof-nativo — núcleo libretro nativo num processo filho (kofstation --nativo): som pela placa, OpenGL sem janela pro PS2, imagem e botões por WebSocket local com token"]
+    KN["kof-nativo — núcleo libretro nativo num processo filho (kofstation --nativo): som pela placa, OpenGL sem janela pro PS2, imagem e botões por WebSocket local com token; medidor quadro a quadro e CPU por linha (M16)"]
     KU["kof-atualiza — atualizador: manifesto assinado (Ed25519), baixa só o que mudou, troca na próxima abertura"]
     KR["kof-net — rede entre aparelhos: kofrede.c do antigo (FFI) + o serviço do kofservico em Rust (UDP/TCP 8650), mesmo protocolo do APK; WebSocket da página com token"]
   end
@@ -141,7 +142,9 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | PS2 nativo (LRPS2 do antigo, OpenGL sem janela no processo do jogo, DVD lido do disco) | ⏸ M12/N.9 (falta o Marcelo jogar) |
 | Atualizador assinado (liga com a chave), pacote do Linux (`--instalar`), instalador do Windows, lado a lado com o antigo | ⏸ M15 (falta a chave e o Marcelo instalar) |
 | Rede entre aparelhos (📡 Aparelhos, QR e código, pareia com o APK atual), celular como controle (rede e servidor do APK), 🖥 Jogar no PC (WebRTC), Levar pro celular | ⏸ M13 (falta o Marcelo testar com o celular) |
-| Android (o APK servindo o app novo) | ⬜ M14 |
+| Desempenho quadro a quadro (p50/p95/p99, engasgos e o culpado, CPU por linha), F3 com gráfico, 🩺 modo diagnóstico (grava a sessão e exporta `.zip`, junto do F9) | 🟨 M16.1–M16.3 feitos; pacote Linux com ritmo nativo corrigido em `teste-binarios` (`65bdcf0`), falta o Marcelo testar; M16.4–M16.5 a fazer |
+| Opções de emulação por console (perfis ⚡/⚖/🎯, Avançado, por jogo; PS1, PS2, N64 e os WebAssembly conferidos contra os núcleos) | ⏸ M16.4 feito, falta o teu teste |
+| Android: APK com o app novo dentro (ponte `KofAndroid`, controle de toque com 6 modelos); ver [docs/ANDROID.md](docs/ANDROID.md) | 🟨 M14.1–M14.2 feitos (⏸ instalar); M14.3 pasta de ROMs, M14.4 PS1/N64 nativos, M14.5 atualizador ⬜ |
 
 ---
 

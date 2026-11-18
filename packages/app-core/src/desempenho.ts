@@ -19,6 +19,8 @@ export interface LeituraDeDesempenho {
   resumo: Resumo;
   fpsSuave: number;
   cpu: CpuLinha[];
+  /** o último quadro do bloco anterior (o intervalo do primeiro quadro deste sai dele) */
+  anterior?: RegistroQuadro;
 }
 
 /** Desenhos guardados à espera do bloco do segundo: mais que isso é quadro que nunca vai ter par (descarta). */
@@ -72,6 +74,6 @@ export class MedidorDaSessao {
     this.historico.anotar(quadros);
     const resumo = resumir(quadros, this.periodoMs, continua);
     this.fps = suavizarFps(this.fps, resumo.fps);
-    return { quadros, resumo, fpsSuave: this.fps, cpu: m.cpu ?? [] };
+    return { quadros, resumo, fpsSuave: this.fps, cpu: m.cpu ?? [], ...(continua ? { anterior: continua } : {}) };
   }
 }

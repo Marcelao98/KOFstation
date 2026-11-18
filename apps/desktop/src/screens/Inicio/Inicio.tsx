@@ -12,6 +12,7 @@ import { usarAvisos } from '../../stores/avisos';
 import { usarBiblioteca } from '../../stores/biblioteca';
 import { usarBios } from '../../stores/bios';
 import { usarRede } from '../../stores/rede';
+import { AtalhosDaRede } from '../../components/AtalhosDaRede';
 import { servicos } from '../../stores/servicos';
 import { INICIO, usarJukebox } from '../../stores/jukebox';
 import { srcCapa } from '../Biblioteca/Capas';
@@ -139,6 +140,7 @@ export function Inicio() {
           {FRASES[tema] ?? 'Bora jogar?'}
         </p>
       </header>
+      <AtalhosDaRede onde="inicio" />
       <div className="hm-corpo">
         <article className="hm-destaque" id="hm-destaque">
           {jogo ? (

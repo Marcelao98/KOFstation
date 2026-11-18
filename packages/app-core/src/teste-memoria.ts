@@ -11,7 +11,11 @@ export function armazemDeMemoria(): Armazem {
         .map(([x, [meta, b]]) => ({ key: x.slice(l.length + 1), meta: structuredClone(meta) as M, size: b.length })),
     pegar: async (l, c) => m.get(k(l, c))?.[1].slice() ?? null,
     meta: async <M>(l: Loja, c: string) => (m.has(k(l, c)) ? (structuredClone(m.get(k(l, c))?.[0]) as M) : null),
-    por: async (l, c, meta, d) => void m.set(k(l, c), [structuredClone(meta), d?.slice() ?? new Uint8Array(0)]),
+    por: async (l, c, meta, d) =>
+      void m.set(k(l, c), [
+        structuredClone(meta),
+        d instanceof Blob ? new Uint8Array(await d.arrayBuffer()) : (d?.slice() ?? new Uint8Array(0)),
+      ]),
     apagar: async (l, c) => void m.delete(k(l, c)),
   };
 }

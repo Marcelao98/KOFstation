@@ -107,6 +107,11 @@ impl Servidor {
         })
     }
 
+    /// Quem fecha o jogo nativo antes do programa sair (a janela fechou ou parou de dar sinal de vida).
+    pub fn fechador_do_jogo(&self) -> crate::nativo::Fechador {
+        self.estado.nativos.fechador()
+    }
+
     /// Abre a rede entre aparelhos numa linha separada (porta ocupada só fica no log; a tela Aparelhos explica).
     pub fn abrir_rede(&self) {
         let (pasta, origem) = (

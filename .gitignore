@@ -30,3 +30,6 @@ third_party/cores/*.dll
 third_party/cores/nativos/
 third_party/cores/wasm/
 apps/desktop/public/nucleos/
+
+# pedido que o tools/agente.sh deixa na pasta do agente
+.pedido-do-agente.txt

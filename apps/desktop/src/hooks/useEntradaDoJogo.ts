@@ -11,6 +11,7 @@ import { usarJogo } from '../stores/jogo';
 import { usarModo } from '../stores/modo';
 import { conferirRebobinar, usarRebob } from '../stores/rebob';
 import { usarTelas } from '../stores/telas';
+import { toque } from '../stores/toque';
 
 let apertadasAgora: Set<string> = new Set();
 
@@ -74,7 +75,14 @@ export function useEntradaDoJogo() {
       const analog = ANALOGICO[sis];
       let teclado = 0;
       for (const k of apertadas) teclado |= teclas[k] ?? 0;
-      const eixos = eixosDoTeclado(apertadas, teclasEixo); // analógico no teclado (PS1/PS2/N64)
+      teclado |= toque.bits; // o controle de toque do celular (stores/toque) é o teclado do J1
+      let eixos = eixosDoTeclado(apertadas, teclasEixo); // analógico no teclado (PS1/PS2/N64)
+      if (toque.eixos[0] || toque.eixos[1]) {
+        // o direcional de toque vira o analógico esquerdo (-1..1 → ±32767)
+        eixos = eixos ?? [0, 0, 0, 0];
+        eixos[0] = Math.round((toque.eixos[0] ?? 0) * 32767);
+        eixos[1] = Math.round((toque.eixos[1] ?? 0) * 32767);
+      }
       // cada aparelho vai pro seu jogador (o teclado é o J1); o que vale pros atalhos é tudo junto
       const aparelhos = aparelhosDeControle(
         { b: tecladoBits(teclado, eixos, analog), e: eixos },
