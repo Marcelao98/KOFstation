@@ -251,6 +251,35 @@ soltar.
    No-Intro/Redump), os que ele não tem em cinza, com sinopse, nota, ano e gênero (base com API a escolher). Jogo em
    cinza **nunca** tem link ou dica de onde baixar.
 
+### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11)
+
+**O pedido:** no menu, uma configuração **multiaparelho** fácil de trocar, como o Switch (encaixa na TV, tira e vira
+portátil): quem **processa** o jogo (este PC, o celular), onde fica a **tela** (PC, TV, celular) e quem **controla**
+(teclado, controle, um ou vários celulares), mostrando o que cada aparelho tem (processador, memória, tela, controles).
+**No futuro, não só na rede de casa: pela internet.**
+
+**Onde a conectividade mora hoje (já é separada):**
+
+| Camada | Arquivos | O quê |
+|---|---|---|
+| Rust: protocolo e cifra | `crates/kof-net` (`ffi.rs` + o `kofrede.c` do antigo, `servico.rs`, `pagina.rs`) | parear, achar aparelhos, canais cifrados (`pad`, `jogo`…) |
+| Rust: serviço no app | `crates/kof-app/src/rede.rs` | liga o `kof-net` ao app (porta 8650) |
+| Regras sem tela | `packages/app-core/src/rede.ts` | pedidos e eventos da rede, testados |
+| Estado das telas | `apps/desktop/src/stores/{rede,modoControle,transmissao,celular}.ts` | Aparelhos, celular como controle, "jogar no PC" (vídeo e som por WebRTC) |
+| Celular | `android/…/Rede.java` (o do antigo) | a mesma rede no APK |
+
+O que amarra tudo à rede de casa: achar aparelhos por difusão na rede local e conectar direto pelo IP. O vídeo do
+"jogar no PC" já é WebRTC, que funciona pela internet; falta o caminho pra combinar a conexão (sinalização) e um
+retransmissor quando a ligação direta não passa (TURN).
+
+| # | Passo | Entregável | Checkpoint | Estado |
+|---|---|---|---|---|
+| C.1 | **Transporte separado** | uma interface "transporte" (`app-core`): o de hoje vira o **local**; os canais (`pad`, `jogo`, sinalização do WebRTC) não sabem por onde passam. Desenho em `docs/CONECTIVIDADE.md` | testes do `app-core` com um transporte falso; nada muda pro usuário | ⬜ |
+| C.2 | **Ficha de cada aparelho** | cada aparelho conta pros outros o que tem: processador, memória, placa/tela, controles ligados, quais consoles roda (o PS2 só no PC) | a tela Aparelhos mostra a ficha de cada um | ⬜ |
+| C.3 | **Cenários no menu** | tipo no `domain`: cenário = {quem processa, onde a tela, quem controla}. Prontos: 🖥 PC sozinho · 📺 PC na TV + celular controle · 📱 Portátil (o PC processa, tela e controle no celular) · 📱 Celular sozinho · 🎉 Festa (o PC na TV + vários celulares). Trocar com um toque no menu, no ☰ do meio e pelo controle (o "Levar pro celular / Voltar pra TV" de hoje vira um caso disso); o app sugere pela ficha (ex.: PS2 → o PC processa) | ⏸ ele troca de cenário no meio de um jogo, sem perder nada | ⬜ |
+| C.4 | Lembrar o cenário | por aparelho, console ou jogo (as camadas que já existem) | abre o jogo já no cenário certo | ⬜ |
+| C.5 | **Pela internet** (futuro) | um transporte **internet**: sinalização + retransmissor. *Decisão dele antes:* servidor próprio (custo e manutenção) × serviço pronto; como parear à distância; a cifra de hoje continua ponta a ponta | ⏸ jogar no PC de casa pelo celular na rua | ⬜ |
+
 **Rebobinar no PS2: fica pra depois**, quando o Marcelo estudar mais ou trouxer alguém de programação de baixo nível
 (18/11). Por quê: a foto tem 48 MB e leva 35–42 ms pra sair (um quadro tem 16 ms); comparar e guardar isso disputa o
 processador com o jogo e a memória de um PC com 7 GB. Um caminho possível, se um dia for: uma foto por segundo, tirada
