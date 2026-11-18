@@ -4,6 +4,7 @@ pub mod biblioteca;
 pub mod capas;
 pub mod config;
 pub mod escopo;
+pub mod gravacoes;
 pub mod loja;
 pub mod organizar;
 pub mod raiz;

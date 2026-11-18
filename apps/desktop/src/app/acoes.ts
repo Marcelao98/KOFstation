@@ -8,6 +8,7 @@ import { usarCapas } from '../stores/capas';
 import { config } from '../stores/config';
 import { usarEstados } from '../stores/estados';
 import { usarJogo } from '../stores/jogo';
+import { usarGravacao } from '../stores/gravacao';
 import { usarTelas, type TelaId } from '../stores/telas';
 import { usarVisual } from '../stores/visual';
 import { usarPainel } from '../stores/painel';
@@ -282,6 +283,9 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     case 'voltar':
       telas.voltar();
+      return true;
+    case 'gravar':
+      void usarGravacao.getState().alternar();
       return true;
     case 'cheia':
       telaCheia();

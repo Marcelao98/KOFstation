@@ -19,6 +19,7 @@ import { ATALHOS_DO_CELULAR, usarComoControle, verJogoDoPc } from './AtalhosDaRe
 import { PROPORCOES, usarJogo } from '../stores/jogo';
 import { usarPrefs } from '../stores/prefs';
 import { usarModo } from '../stores/modo';
+import { usarGravacao } from '../stores/gravacao';
 import { usarEmulacao } from '../stores/emulacao';
 import { MOLDURAS, usarMoldura } from '../stores/moldura';
 import { FILTROS, usarVisual } from '../stores/visual';
@@ -107,6 +108,11 @@ function itens(): Item[] {
     { t: '⚙ Opções de emulação…', so: () => !!sisComOpcoes(), f: depois(() => acao('emu-opcoes')) },
     { t: '💾 Salvar estado', f: depois(() => acao('salvar-estado')) },
     { t: '⟲ Carregar último estado', f: depois(() => acao('carregar-ultimo')) },
+    {
+      t: '⏺ Gravar o jogo',
+      v: () => (usarGravacao.getState().gravando ? 'gravando · Enter para' : 'F10'),
+      f: depois(() => void usarGravacao.getState().alternar()),
+    },
     { t: '🎵 Guardar esta música', f: depois(() => acao('guardar-musica')) },
     { t: '🐞 Reportar bug', f: depois(() => acao('bug')) },
     { t: '🗂 Estados salvos', f: depois(() => acao('estados')) },

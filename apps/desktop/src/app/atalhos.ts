@@ -18,6 +18,7 @@ export const ATALHOS: readonly Atalho[] = [
   { tecla: 'F7', acao: 'guardar-musica', descricao: 'Guardar a música (jukebox)' },
   { tecla: 'F8', acao: 'carregar-ultimo', descricao: 'Carregar o último estado' },
   { tecla: 'F9', acao: 'bug', descricao: 'Reportar bug' },
+  { tecla: 'F10', acao: 'gravar', descricao: 'Gravar o jogo (liga/desliga)' },
   { tecla: 'F11', acao: 'cheia', descricao: 'Tela cheia' },
   { tecla: 'KeyO', ctrl: true, acao: 'abrir', descricao: 'Abrir arquivo' },
   { tecla: 'KeyL', ctrl: true, acao: 'biblioteca', descricao: 'Biblioteca' },

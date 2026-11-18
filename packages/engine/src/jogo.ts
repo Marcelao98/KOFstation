@@ -317,6 +317,27 @@ export class Jogo {
     };
   }
 
+  /**
+   * ⏺ Gravar (G.1): o som do jogo num MediaStream, sem mexer no que toca no PC. Sai antes do volume, então a gravação
+   * tem o som cheio mesmo com o PC no mudo. null sem som (o jogo roda mudo).
+   */
+  somPraGravar(): { stream: MediaStream; desfazer: () => void } | null {
+    const { ctx, saidaSom } = this;
+    if (!ctx || !saidaSom) return null;
+    const destino = ctx.createMediaStreamDestination();
+    saidaSom.connect(destino);
+    return {
+      stream: destino.stream,
+      desfazer: () => {
+        try {
+          saidaSom.disconnect(destino);
+        } catch {
+          // já desligado (o jogo fechou)
+        }
+      },
+    };
+  }
+
   fechar() {
     for (const p of this.esperando.values()) p.falhou(new Error('o jogo fechou'));
     this.esperando.clear();

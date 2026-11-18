@@ -26,3 +26,4 @@ export * from './diagnostico';
 export * from './opcoes-nucleo';
 export * from './opcoes-camadas';
 export * from './som-rebobinar';
+export * from './gravacao';

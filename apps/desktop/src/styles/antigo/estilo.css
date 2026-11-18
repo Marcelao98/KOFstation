@@ -1656,3 +1656,13 @@ html.celular body.com-visual #palco { padding-right: 0; padding-bottom: 58vh; }
 #jog-lista .jog-bts { display: flex; gap: 6px; }
 #jog-lista .jog-bts button { width: 44px; padding: 6px 0; border-radius: 8px; border: 2px solid var(--borda); background: var(--painel); font-weight: 700; }
 #jog-lista .jog-bts button.ativo { border-color: var(--cor); background: color-mix(in srgb, var(--cor) 35%, var(--painel)); }
+
+/* ⏺ Gravando (G.1): selo no canto do palco, piscando devagar; clicar para */
+#gravando {
+  position: absolute; top: 14px; right: 14px; z-index: 55; padding: 4px 12px; font: inherit; font-size: 14px;
+  font-variant-numeric: tabular-nums; color: #fff; background: rgba(170, 20, 20, 0.85); border: 1px solid #ff6b6b;
+  border-radius: 999px; cursor: pointer; animation: gravando-pisca 2s ease-in-out infinite;
+}
+#gravando:disabled { cursor: default; animation: none; background: var(--painel2); color: var(--texto); }
+@keyframes gravando-pisca { 50% { opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { #gravando { animation: none; } }

@@ -220,6 +220,27 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       t.arquivos.set(p, dados.slice());
       return { stored: p };
     },
+    'gravacao.parte': (a, dados) => {
+      precisaRaiz();
+      const p = `Gravações/${String(a.nome)}.kofparcial`;
+      const offset = Number(a.offset ?? 0);
+      const antes = offset === 0 ? new Uint8Array(0) : (t.arquivos.get(p) ?? new Uint8Array(0));
+      if (antes.length !== offset) throw erro('CONFLICT', `${String(a.nome)}: pedaço fora de ordem`);
+      const junto = new Uint8Array(offset + dados.length);
+      junto.set(antes);
+      junto.set(dados, offset);
+      t.arquivos.set(p, junto);
+      return { tem: junto.length };
+    },
+    'gravacao.fim': (a) => {
+      precisaRaiz();
+      const p = `Gravações/${String(a.nome)}`;
+      const d = t.arquivos.get(p + '.kofparcial');
+      if (!d) throw erro('NOT_FOUND', p);
+      t.arquivos.delete(p + '.kofparcial');
+      t.arquivos.set(p, d);
+      return { path: p };
+    },
     'library.import.parte': (a, dados) => {
       precisaRaiz();
       const p = `Games/${String(a.pasta)}/${String(a.nome)}`;

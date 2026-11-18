@@ -55,6 +55,7 @@ import { config } from '../stores/config';
 import { usarShowcase } from '../stores/showcase';
 import { usarTelas, type TelaId } from '../stores/telas';
 import { acao } from './acoes';
+import { Gravando } from '../components/Gravando';
 import { atalhoDe } from './atalhos';
 
 /** Telas que já existem no app novo (as outras mostram em que etapa chegam). */
@@ -297,6 +298,7 @@ export function App({ backend }: { backend: Backend }) {
         <PlanoDeOrganizacao />
         <Ampulheta />
         <MenuRapido />
+        <Gravando />
         <Aviso />
         <BarraShowcase />
       </main>

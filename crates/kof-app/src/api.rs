@@ -72,6 +72,14 @@ struct ArgsParte {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
+struct ArgsGravacao {
+    nome: String,
+    #[serde(default)]
+    offset: u64,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ArgsLoja {
     store: String,
     #[serde(default)]
@@ -258,6 +266,16 @@ impl Estado {
                 let r =
                     kof_files::organizar::guardar_parte(&self.raiz()?, &a.pasta, &a.nome, a.offset, a.total, &corpo)?;
                 json(serde_json::to_value(r).expect("json"))
+            }
+            // ⏺ gravar o jogo (G.1): o vídeo chega em pedaços e vai pra <Kof Games>/Gravações
+            "gravacao.parte" => {
+                let a: ArgsGravacao = args(a)?;
+                let tem = kof_files::gravacoes::anexar(&self.raiz()?, &a.nome, a.offset, &corpo)?;
+                json(serde_json::json!({ "tem": tem }))
+            }
+            "gravacao.fim" => {
+                let a: ArgsGravacao = args(a)?;
+                json(serde_json::json!({ "path": kof_files::gravacoes::fechar(&self.raiz()?, &a.nome)? }))
             }
             "library.import" => {
                 let a: ArgsGuardar = args(a)?;

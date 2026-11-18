@@ -36,6 +36,7 @@ export const MENUS: Menu[] = [
       { a: 'salvar-estado', t: 'Salvar estado', k: 'F5' },
       { a: 'carregar-ultimo', t: 'Carregar último estado', k: 'F8' },
       { a: 'estados', t: 'Estados salvos…', k: 'F6' },
+      { a: 'gravar', t: '⏺ Gravar o jogo (liga/desliga)', k: 'F10' },
       { a: 'auto-toggle', t: 'Salvar automático: ligado' },
       { a: 'emu-opcoes', t: '⚙ Opções de emulação (perfis, gráficos, modo de jogo)…' },
       'hr',
