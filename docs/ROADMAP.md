@@ -83,6 +83,10 @@ branch**, não em paralelo.
 > (anotado, não esquecido): só volta se ele sentir engasgo, quiser o jogo pesado B, ou trocar de PC. O foco passa pra
 > fase 0 (conferir no uso), 8 (casa própria) e, quando ele quiser, 6 e 7.
 
+> **18/11 (Marcelo):** "já testei tudo, exceto o Windows; pode juntar tudo". A branch de trabalho vai pra `main` (8.1)
+> e o próximo passo é **funcionalidade nova** (ver "Próximas funcionalidades" no fim), com a regra de sempre: medir, uma
+> coisa por vez, sem quebrar o que já roda liso.
+
 ## Fase 0 · Conferir no uso (os ⏸ que sobraram da migração)
 
 O passo a passo de cada um está em "Pra você testar" do [SITUACAO.md](SITUACAO.md). Bug achado aqui entra como passo
@@ -90,10 +94,10 @@ na fase que cuida do assunto (ou na hora, se for grave).
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| 0.1 | Rede, atalhos no Início e no ☰, "jogar no PC" | atalhos (feito 16/11) | ele usa e opina | O | ⏸ |
-| 0.2 | APK: PS1/N64 nativos, pasta de ROMs, controle por console, atualizador | APK da `teste-binarios` | ele usa no celular | O | ⏸ |
-| 0.3 | Neo Geo, N64, jukebox, estatísticas, tradução, caçador de bugs | pacote atual | ele usa | O | ⏸ |
-| 0.4 | Instalar no Windows | `KOFstation-instalar.exe` | alguém com Windows instala e abre | O | ⏸ |
+| 0.1 | Rede, atalhos no Início e no ☰, "jogar no PC" | atalhos (feito 16/11) | ele usa e opina | O | ✅ testado pelo Marcelo (18/11) |
+| 0.2 | APK: PS1/N64 nativos, pasta de ROMs, controle por console, atualizador | APK da `teste-binarios` | ele usa no celular | O | ✅ testado pelo Marcelo (18/11) |
+| 0.3 | Neo Geo, N64, jukebox, estatísticas, tradução, caçador de bugs | pacote atual | ele usa | O | ✅ testado pelo Marcelo (18/11) |
+| 0.4 | Instalar no Windows | `KOFstation-instalar.exe` | alguém com Windows instala e abre | O | ⏸ ele vai pedir pra alguém com Windows |
 
 ## Fase 1 · A régua de medição
 
@@ -164,7 +168,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| 8.1 | Juntar na `main` | PR da branch de trabalho | ele pede e aprova | O | ⬜ |
+| 8.1 | Juntar na `main` | PR da branch de trabalho | ele pede e aprova | O | 🟨 pedido em 18/11 |
 | 8.2 | Chave do atualizador | cada envio na `main` vira versão e o app se atualiza sozinho | ⏸ ele cria a chave ("Pra você fazer" no SITUACAO) | O | ⏸ |
 | 8.3 | Releases próprias | núcleos e `.so` no repositório novo; o novo para de baixar do antigo | CI sem o antigo | O | ⬜ |
 | 8.4 | T.2 | a última versão do antigo avisa e leva pro novo | ele decide quando | O | ⬜ |
@@ -205,3 +209,9 @@ E no Claude Code:
 > engasga: (caminho). Estado no menu de salvar: (caminho, se tiver). Nunca escreva nome de jogo no repositório. Me
 > mostre os números a cada achado e me chame pra jogar quando achar que melhorou. Antes de fazer a janela própria, me
 > mostre o desenho.
+
+## Próximas funcionalidades (a escolher com o Marcelo, 18/11)
+
+A migração acabou e o que temos está liso: agora pode crescer. Cada item vira uma fase com entregável e checkpoint
+quando ele escolher. Emulador novo continua sendo a fase 9 (ele escolhe a ordem).
+
