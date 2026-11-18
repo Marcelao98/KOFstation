@@ -96,7 +96,7 @@ flowchart LR
 | **M3 Biblioteca** | Pasta Kof Games, organizar (mostra antes), busca com facetas, base de jogos, capas oficiais, modo sofá |
 | **M4 Dados** | Configurações em arquivo (geral → console → jogo), backup `.kofsave` que abre nos dois apps |
 | **M5 Saves** | Bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos alegria/normal/raiz/hardcore |
-| **M6 Rebobinar** | Igual ao antigo (preto e branco, ampulheta) |
+| **M6 Rebobinar** | Igual ao antigo (preto e branco, ampulheta); desde a fase R (18/11) também PS1 e N64, e a música volta de trás pra frente (📼/🔇 nas Opções gerais) |
 | **M7 Imagem** | Painel de filtros (os mesmos pixels do antigo), NTSC, Scale4x, bloom, molduras, paletas |
 | **M8 Controles** | Teclas e botões por console e por jogo, analógico no teclado, jogadores 2 a 4 |
 | **M13.1 Rede** | O protocolo de rede do antigo (o mesmo do APK), provado contra os testes do antigo |

@@ -21,6 +21,20 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-18 · Tarefa R terminada (R.4 e R.5, docs e testes)
+
+**Pedido:** continuar a tarefa R até o fim ("só me chama quando tiver tudo pronto").
+**Feito:** R.4 `d75eb75`: o N64 (no PC roda no Worker) rebobina, com uma foto a cada 6 quadros e 64 MB (`fotoCada`/`rebobMb`
+em `nucleos.ts`). A imagem volta no mesmo ritmo de 2× e o som junto. A medição do F3 leva `fotoMs`. R.5 já tinha saído
+junto com o R.3 (o som no `rebobinar.rs`, mesmos vetores). Diário em `docs/REBOBINAR.md`; ROADMAP, README e SITUACAO
+atualizados.
+**Medido:** foto do N64 a cada 2 quadros custava 13–24 ms (pico 36); a cada 6 fica ~12 ms (pico 15), ~2 ms/quadro na
+média (e2e `rebob-n64.spec.ts`, headless). `pnpm check` ok; `pnpm e2e` 71 ok; `cargo test --workspace` ok.
+**Deu errado / aprendido:** o teste `opengl` (leitura assíncrona) falhou com a máquina carregada, e falhava igual no
+`f9ec97f` (de antes da tarefa). Com a máquina mais livre, passou: é instável por carga, não da tarefa R.
+**Onde parou:** ⏸ o Marcelo ouve no SNES e no Mega Drive e rebobina num jogo de PS1 e de N64. Sem jogo de PS1/N64 nesta
+máquina, falta saber quantos segundos cabem num jogo de verdade (docs/REBOBINAR.md, "Números"). Sem push.
+
 ## 2026-11-18 · Tarefa R: R.1 a R.3 (som ao rebobinar e PS1 nativo rebobinando)
 
 **Pedido:** "pode continuar, só me chama quando tiver tudo pronto" (tarefa R, branch `agente-r/rebobinar`).

@@ -132,7 +132,7 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Biblioteca (busca, facetas, base de jogos, capas, sofá) e pasta Kof Games (organizar com plano) | ✅ M3 |
 | Configurações em arquivo (camadas geral → console → jogo) e backup `.kofsave` (abre nos dois apps) | ✅ M4 |
 | Save de bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos de jogo | ✅ M5 |
-| Rebobinar (no Worker, igual ao antigo) | ✅ M6 |
+| Rebobinar (no Worker; PS1 nativo dentro do processo do jogo; N64 incluído) com a música voltando junto ([docs/REBOBINAR.md](docs/REBOBINAR.md)) | ✅ M6 + fase R |
 | Painel de imagem (os mesmos pixels do antigo), passadas, molduras, paletas | ✅ M7 |
 | Controles e teclas por console/jogo, analógico no teclado, jogadores 2–4 | ✅ M8 |
 | Jukebox e música (trilha FM, violino, .spc, .wav), abertura, música do Início | ⏸ M9 (falta o Marcelo testar) |
