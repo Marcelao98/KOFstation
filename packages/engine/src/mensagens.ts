@@ -70,6 +70,8 @@ export interface Medicao {
   /** cada quadro do último segundo (M16): 6 números por quadro, em µs, [t, núcleo, leitura, envio, som na fila,
    *  faltas] (lerPorQuadro do domain/desempenho.ts). `t` conta do começo do Worker/processo. */
   porQuadro?: number[];
+  /** rebobinar: ms por foto do estado no último segundo (média e a maior) */
+  fotoMs?: { media: number; maior: number };
   /** núcleo nativo: % de um núcleo do processador por linha (thread) do processo do jogo */
   cpu?: { linha: string; pct: number }[];
 }

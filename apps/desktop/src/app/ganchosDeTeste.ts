@@ -13,6 +13,7 @@ export function ligarGanchosDeTeste() {
   const t = (globalThis as { __kofTeste?: Record<string, unknown> }).__kofTeste;
   if (!t) return;
   t.somTocado = () => (usarJogo.getState().jogo as { amostrasTocadas?: number } | null)?.amostrasTocadas ?? -1;
+  t.medicao = () => usarJogo.getState().medicao; // F3 e a medição do rebobinar (fotoMs)
   t.padDoCelular = padDaTransmissaoAgora;
   t.redeOk = () => usarRede.getState().ok && usarRede.getState().aparelhos.some((a) => a.online);
   t.toque = toque; // o que os dedos seguram no controle de toque (e2e do celular)

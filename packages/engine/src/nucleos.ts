@@ -17,8 +17,12 @@ export interface ConfigNucleo {
   opcoes?: Readonly<Record<string, string>>;
   /** extensão usada no nome que o núcleo recebe */
   ext: string;
-  /** sem rebobinar (estado grande demais: PS1/PS2) */
+  /** sem rebobinar (estado grande demais: PS2) */
   semRebob?: boolean;
+  /** rebobinar: uma foto a cada quantos quadros (padrão 2). Estado grande pesa: N64 = 6 (fase R.4, docs/REBOBINAR.md) */
+  fotoCada?: number;
+  /** rebobinar: memória das fotos em MB (padrão 48) */
+  rebobMb?: number;
   /** o núcleo só abre o jogo por arquivo (FBNeo, PCSX): vai pro disco virtual /jogos */
   caminho?: boolean;
   /** tipo de controle libretro (PS1: 517 = DualShock) */
@@ -63,15 +67,16 @@ export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
     opcoes: { pcsx_rearmed_frameskip_type: 'auto', pcsx_rearmed_frameskip_interval: '3' },
     ext: 'cue',
   },
-  // Nintendo 64 (Mupen64Plus-Next): GLideN64 em WebGL2; a ponte lê a imagem de volta. Estado grande: sem rebobinar
+  // Nintendo 64 (Mupen64Plus-Next): GLideN64 em WebGL2; a ponte lê a imagem de volta. Estado de ~16 MB: rebobina (fase R.4)
   n64: {
     nucleo: 'mupen64',
     largura: 320,
     altura: 240,
     dinamico: true,
     tv43: true,
-    semRebob: true,
     gl: true,
+    fotoCada: 6,
+    rebobMb: 64,
     opcoes: {
       'mupen64plus-rdp-plugin': 'gliden64',
       'mupen64plus-cpucore': 'cached_interpreter',

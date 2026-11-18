@@ -30,7 +30,7 @@ let turbo = false;
 let somTocando = false;
 let ultimoPasso = 0;
 let parado = false;
-const med = { quadros: 0, nucleo: 0, atrasos: 0, desde: 0, faltasAntes: 0 };
+const med = { quadros: 0, nucleo: 0, atrasos: 0, desde: 0, faltasAntes: 0, fotos: 0, fotoMs: 0, fotoMaior: 0 };
 /** cada quadro do segundo (M16), no formato do domain/desempenho.ts: [t, núcleo, leitura, envio, som na fila, faltas]
  *  em µs. Zera a cada segundo (no máximo uns 6 × 240 números com turbo). */
 let porQuadro: number[] = [];
@@ -93,9 +93,15 @@ const rb = {
   avisado: '',
   som: 'fita' as 'fita' | 'mudo',
 };
+/** fotos a cada quantos quadros (2 = 30 por segundo; o N64, com estado de 16 MB, 6) */
+const fotoCada = () => sessao?.config.fotoCada ?? 2;
 function novoRebob(s: SessaoLibretro | null) {
-  // ~30 fotos por segundo, no máximo 48 MB (PS1 fica sem: o estado tem ~4 MB)
-  rb.r = rb.ligado && rb.limite > 0 && s && !s.config.semRebob ? new Rebobinador(s, 48 << 20, rb.limite * 30) : null;
+  // ~30 fotos por segundo (N64: 10), no máximo 48 MB (N64: 64)
+  const cada = s?.config.fotoCada ?? 2;
+  rb.r =
+    rb.ligado && rb.limite > 0 && s && !s.config.semRebob
+      ? new Rebobinador(s, (s.config.rebobMb ?? 48) << 20, Math.round((rb.limite * 60) / cada))
+      : null;
   rb.desdeFoto = 0;
   rb.recarga = 0;
   rb.rebobinou = 0;
@@ -107,7 +113,7 @@ function avisarRebob(forcar = false) {
   const r = {
     ligado: !!rb.r,
     rebobinando: rb.rebobinou > 0,
-    segundos: rb.r ? Math.round((rb.r.quantas / 30) * 10) / 10 : 0,
+    segundos: rb.r ? Math.round(((rb.r.quantas * fotoCada()) / 60) * 10) / 10 : 0,
     limite: rb.limite,
     recarga: rb.recarga,
     recargaTotal: rb.recargaTotal,
@@ -144,8 +150,13 @@ function passoPraTras(s: SessaoLibretro): boolean {
 }
 function depoisDeRodar(vezes: number) {
   rb.desdeFoto += vezes;
-  if (rb.r && rb.desdeFoto >= 2) {
+  if (rb.r && rb.desdeFoto >= fotoCada()) {
+    const t0 = performance.now();
     if (rb.r.gravar() || rb.r.quantas === 0) somRb?.fotoGravada(rb.r.quantas);
+    const ms = performance.now() - t0;
+    med.fotos++;
+    med.fotoMs += ms;
+    med.fotoMaior = Math.max(med.fotoMaior, ms);
     rb.desdeFoto = 0;
   }
   if (rb.recarga > 0) {
@@ -277,8 +288,10 @@ function passoSemErro() {
   if (!s || pausado) return;
   if (rb.querendo && rb.r && (rb.rebobinou || prontoPraVoltar())) {
     rb.acumulado += dt;
-    for (let k = 0; rb.acumulado >= 1000 / 60 && k < 4; k++) {
-      rb.acumulado -= 1000 / 60;
+    // cada foto volta `fotoCada` quadros: no ritmo em que a imagem volta a 2× (30 fotos/s com 2; 10 com 6)
+    const intervalo = ((1000 / 60) * fotoCada()) / 2;
+    for (let k = 0; rb.acumulado >= intervalo && k < 4; k++) {
+      rb.acumulado -= intervalo;
       if (!passoPraTras(s)) {
         terminarRebobinar();
         rb.querendo = false; // acabou o tempo: só volta a rebobinar soltando e apertando de novo
@@ -317,10 +330,22 @@ function passoSemErro() {
         faltasDeSom: faltas - med.faltasAntes,
         somNaFilaMs: anel ? Math.round((ocupacao(anel) * 1000) / taxaSaida) : 0,
         porQuadro,
+        ...(med.fotos
+          ? { fotoMs: { media: +(med.fotoMs / med.fotos).toFixed(2), maior: +med.fotoMaior.toFixed(2) } }
+          : {}),
       },
     });
     porQuadro = [];
-    Object.assign(med, { quadros: 0, nucleo: 0, atrasos: 0, desde: agora, faltasAntes: faltas });
+    Object.assign(med, {
+      quadros: 0,
+      nucleo: 0,
+      atrasos: 0,
+      desde: agora,
+      faltasAntes: faltas,
+      fotos: 0,
+      fotoMs: 0,
+      fotoMaior: 0,
+    });
   }
 }
 
