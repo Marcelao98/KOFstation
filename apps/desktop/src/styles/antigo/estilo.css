@@ -251,6 +251,7 @@ body.cheia.mostrar-menu #menu { display: flex; position: fixed; top: 0; left: 0;
 body.cheia #palco { background: #000; }
 body.cheia #tela { border: 0; border-radius: 0; box-shadow: none; }
 body.cheia.cursor-oculto, body.cheia.cursor-oculto * { cursor: none; }
+body.cursor-parado #palco, body.cursor-parado #palco * { cursor: none; }
 
 /* Menu Som: − 100% + */
 .sub .volume { display: flex; align-items: center; gap: 4px; padding: 4px 10px; }

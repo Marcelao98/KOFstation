@@ -184,6 +184,24 @@ export function App({ backend }: { backend: Backend }) {
   }, [temJogo]);
 
   useEffect(() => {
+    // com jogo aberto, o cursor some depois de 2 s parado e volta quando o mouse mexe
+    if (!temJogo) return;
+    let espera: ReturnType<typeof setTimeout> | undefined;
+    const mexeu = () => {
+      document.body.classList.remove('cursor-parado');
+      clearTimeout(espera);
+      espera = setTimeout(() => document.body.classList.add('cursor-parado'), 2000);
+    };
+    mexeu();
+    addEventListener('mousemove', mexeu);
+    return () => {
+      clearTimeout(espera);
+      removeEventListener('mousemove', mexeu);
+      document.body.classList.remove('cursor-parado');
+    };
+  }, [temJogo]);
+
+  useEffect(() => {
     addEventListener('keydown', teclaGlobal);
     const direito = (e: MouseEvent) => {
       if ((e.target as Element | null)?.closest?.('input, textarea')) return; // nas caixas de texto, o menu de colar
