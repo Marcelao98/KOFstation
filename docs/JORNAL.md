@@ -21,6 +21,21 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-18 · Tarefa R: R.1 a R.3 (som ao rebobinar e PS1 nativo rebobinando)
+
+**Pedido:** "pode continuar, só me chama quando tiver tudo pronto" (tarefa R, branch `agente-r/rebobinar`).
+**Feito:** R.1 `82020f3` (contas do som no domain + fixture); R.2 `4ccf8c8` (Worker: som invertido a 2× com fita,
+fade e crossfade; opção "Som ao rebobinar 📼/🔇" nas Opções gerais; e2e `rebob-som.spec.ts`); R.3 `85ebed7`
+(`crates/kof-nativo/src/rebobinar.rs`: fotos e som dentro do processo; comandos `rebobinar`/`voltar`, aviso `rebob`;
+`nativo.ts` liga; PS1 sem `semRebob`, também no wasm).
+**Medido:** foto do PS1 nativo ~1,1 ms (release, EXE de teste: salvar 0,6 + comparar 0,5), a cada 2 quadros; o mesmo
+som nos dois lados (fixture conferido por TS e Rust); voltar dá o estado gravado e o jogo anda igual depois.
+**Aprendido:** no PC o N64 roda no wasm (nativo só no APK): o R.4 é tirar o `semRebob` do N64 no Worker e medir a
+foto de 16 MB (espaçar as fotos se pesar). Não há jogo de PS1/N64 nesta máquina pra medir de verdade. Rust local
+precisa de `PKG_CONFIG_PATH=$HOME/.local/kof-alsa/usr/lib64/pkgconfig`.
+**Onde parou:** falta R.4 (N64), `docs/REBOBINAR.md`, fase R no ROADMAP, `pnpm e2e` inteiro e `cargo test --workspace`;
+depois o Marcelo ouve no SNES/Mega Drive e rebobina num jogo de PS1. Sem push.
+
 ## 2026-11-18 · Revisão e junção da tarefa F (PS2 liso) e o roadmap depois dela
 
 **Pedido:** "verifica tudo que foi feito: o Claude local fez muita coisa, o PS2 está rodando liso liso". Depois: "o que
