@@ -38,7 +38,7 @@ inteiro** nem medi o custo de gravar num jogo pesado: o app estava aberto pra el
 `target/` (de antes da tarefa R); `cargo clean -p kof-nativo` resolveu. O `opengl` (leitura assíncrona) falhou de novo
 com a carga em 6,7; o `kof-nativo` nem depende dos crates mexidos. O nome do arquivo usa o nome da biblioteca, não o
 título de dentro da ROM (que saía "KOFSOM").
-**Onde parou:** ⏸ ele grava um jogo (F10, joga, F10) e assiste o arquivo em `Kof Games/Gravações`. Falta, quando ele
+**Onde parou:** ✅ ele gravou e funcionou (18/11). Falta, quando ele
 liberar a máquina: `pnpm e2e` inteiro e medir com o F3 com × sem gravar. Próximo: G.2 (som do PS1/PS2 nativos). Sem
 push da branch `gravar`.
 

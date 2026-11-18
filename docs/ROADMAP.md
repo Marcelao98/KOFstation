@@ -246,7 +246,7 @@ senão WebM) e vai em pedaços de 1 s direto pro disco, em `<Kof Games>/Gravaç�
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| G.1 | Gravar liga/desliga | F10, menu rápido e menu Emulação; selo ⏺ com o relógio (clicar para); `domain/gravacao.ts` (formato, nome, tamanho até 1080p), `engine/gravador.ts`, `app-core/gravacao.ts` (pedaços em ordem), `gravacao.parte`/`gravacao.fim` no Rust (`kof-files/gravacoes.rs`); som dos consoles da página (antes do volume: grava cheio mesmo no mudo); jogo fechou = salva | e2e `gravar.spec.ts` (vídeo abre, 1080p, com som; sem pasta = erro e para); ⏸ ele grava um jogo e assiste | local | ✅ `2635305`; ⏸ ele grava |
+| G.1 | Gravar liga/desliga | F10, menu rápido e menu Emulação; selo ⏺ com o relógio (clicar para); `domain/gravacao.ts` (formato, nome, tamanho até 1080p), `engine/gravador.ts`, `app-core/gravacao.ts` (pedaços em ordem), `gravacao.parte`/`gravacao.fim` no Rust (`kof-files/gravacoes.rs`); som dos consoles da página (antes do volume: grava cheio mesmo no mudo); jogo fechou = salva | e2e `gravar.spec.ts` (vídeo abre, 1080p, com som; sem pasta = erro e para); ⏸ ele grava um jogo e assiste | local | ✅ `2635305`; aprovado por ele (18/11, gravou e funcionou) |
 | G.2 | Som do PS1/PS2 nativos na gravação | o som que o processo do jogo toca vai também pra página (pelo canal que já leva a imagem) e entra no vídeo | e2e com o PS1 de teste; ⏸ ele grava um jogo de PS1 | local | ⬜ |
 | G.3 | "Salvar os últimos 30 s" | o app guarda sempre o último trecho (memória limitada) e um atalho salva o que já passou | medir o custo de gravar sempre (F3) antes de ligar por padrão | local | ⬜ (opcional, ele escolhe) |
 
