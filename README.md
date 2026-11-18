@@ -134,6 +134,7 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Save de bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos de jogo | ✅ M5 |
 | Rebobinar (no Worker; PS1 nativo dentro do processo do jogo; N64 incluído) com a música voltando junto ([docs/REBOBINAR.md](docs/REBOBINAR.md)) | ✅ M6 + fase R |
 | Painel de imagem (os mesmos pixels do antigo), passadas, molduras, paletas | ✅ M7 |
+| Gravar o jogo (F10): vídeo como você vê (moldura + filtro), com som, em `Kof Games/Gravações` | ✅ G.1 (PS1/PS2 nativos ainda sem som: G.2) |
 | Controles e teclas por console/jogo, analógico no teclado, jogadores 2–4 | ✅ M8 |
 | Jukebox e música (trilha FM, violino, .spc, .wav), abertura, música do Início | ⏸ M9 (falta o Marcelo testar) |
 | Estatísticas, espaço usado, traduções, caçador de bugs (F9) e replay | ⏸ M10 |

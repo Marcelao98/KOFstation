@@ -21,6 +21,29 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-18 · G.1 · Gravar o jogo (F10)
+
+**Pedido:** push da tarefa R (feito, ele testou e funcionou) e "uma funcionalidade pra gravar o jogo, no menu". Ele
+escolheu: grava **como ele vê** (moldura + filtro) e **liga/desliga** primeiro.
+**Feito:** `2635305`. F10, menu rápido ("⏺ Gravar o jogo") e menu Emulação. `domain/gravacao.ts` (formato MP4→WebM,
+nome "Jogo AAAA-MM-DD HH-MM-SS.mp4", cena até 1080p, bits), `engine/gravador.ts` (canvas que junta a moldura e a tela
+do jogo a cada quadro + MediaRecorder, pedaços de 1 s), `Jogo.somPraGravar()` (som antes do volume),
+`app-core/gravacao.ts` (pedaços em ordem, para no primeiro erro), `kof-files/gravacoes.rs` + `gravacao.parte`/
+`gravacao.fim` no `api.rs`, store `gravacao.ts` e selo `#gravando` com o relógio. Fase G no ROADMAP; contratos,
+README e SITUACAO atualizados.
+**Medido:** `pnpm check` ok; `gravar.spec.ts` 2/2 (MP4 1080p que abre num `<video>`, com trilha de som; sem pasta Kof
+Games = erro e para); Rust: `gravacoes` 2/2, `check:rust` ok tirando o `opengl` (ver abaixo). **Não rodei o `pnpm e2e`
+inteiro** nem medi o custo de gravar num jogo pesado: o app estava aberto pra ele jogar (regra de não pesar a máquina).
+**Deu errado / aprendido:** o `check:rust` reclamou que `kof_nativo::rebobinar` não existia: era cache velho do
+`target/` (de antes da tarefa R); `cargo clean -p kof-nativo` resolveu. O `opengl` (leitura assíncrona) falhou de novo
+com a carga em 6,7; o `kof-nativo` nem depende dos crates mexidos. O nome do arquivo usa o nome da biblioteca, não o
+título de dentro da ROM (que saía "KOFSOM").
+**Onde parou:** ⏸ ele grava um jogo (F10, joga, F10) e assiste o arquivo em `Kof Games/Gravações`. Falta, quando ele
+liberar a máquina: `pnpm e2e` inteiro e medir com o F3 com × sem gravar. Próximo: G.2 (som do PS1/PS2 nativos). Sem
+push da branch `gravar`.
+
+---
+
 ## 2026-11-18 · Tarefa R terminada (R.4 e R.5, docs e testes)
 
 **Pedido:** continuar a tarefa R até o fim ("só me chama quando tiver tudo pronto").

@@ -97,6 +97,7 @@ flowchart LR
 | **M4 Dados** | Configurações em arquivo (geral → console → jogo), backup `.kofsave` que abre nos dois apps |
 | **M5 Saves** | Bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos alegria/normal/raiz/hardcore |
 | **M6 Rebobinar** | Igual ao antigo (preto e branco, ampulheta); desde a fase R (18/11) também PS1 e N64, e a música volta de trás pra frente (📼/🔇 nas Opções gerais) |
+| **G.1 Gravar** (18/11) | F10 (ou menu rápido / Emulação) grava o jogo como você vê, com moldura, filtro e som, em MP4 na pasta `Kof Games/Gravações`; PS1/PS2 nativos gravam sem som por enquanto |
 | **M7 Imagem** | Painel de filtros (os mesmos pixels do antigo), NTSC, Scale4x, bloom, molduras, paletas |
 | **M8 Controles** | Teclas e botões por console e por jogo, analógico no teclado, jogadores 2 a 4 |
 | **M13.1 Rede** | O protocolo de rede do antigo (o mesmo do APK), provado contra os testes do antigo |
