@@ -21,6 +21,22 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-18 · Revisão e junção da tarefa F (PS2 liso) e o roadmap depois dela
+
+**Pedido:** "verifica tudo que foi feito: o Claude local fez muita coisa, o PS2 está rodando liso liso". Depois: "o que
+falta? pra mim está bem otimizado; não preciso me preocupar com mais gráficos".
+**Revisado:** os 15 commits da `agente-d/ps2-liso` (nenhum nome de jogo nos commits nem nos arquivos; o diário
+`docs/PS2-LISO.md` e o guia `docs/NUCLEO-NATIVO-PESADO.md` estão bons). O que deixou liso: estado de 48 MB montado na
+página (base64 + JSON + gzip, até 2 s parada) passou pra base64 nativo e Worker (parada isolada 1,6 s → 33 ms;
+engasgos/min ~110 → 15–33); cartão do PS2 perdia o save porque o app saía sem fechar o jogo (agora fecha e espera,
+`nativo::Fechador`); o "pra baixo" era o direcional no T F G H (controles ficaram como estavam); 82 opções do PS2 em
+português, tela própria de opções, ✨ Bonito (engasga: anisotrópico 8× ou MTVU, a medir).
+**Conferido:** junção direta (fast-forward) na `claude/busy-ritchie-wrvk8h`; `pnpm check` ok; Rust ok menos o `pcsx`
+(SIGILL do container, sabido); e2e 68 ok. O CI de `d45e6f0` caiu no e2e do F4 (navegador fechou a sessão; instável
+conhecido, commit só de docs).
+**Decidido:** o resto das fases 1, 3, 4 e 5 fica sem pressa; foco em conferir no uso (fase 0) e casa própria (fase 8).
+**Onde parou:** o Marcelo confere o cartão (formatar, salvar, fechar, reabrir, carregar) e decide a fase 8.
+
 ## 2026-11-17 · Roadmap com entregáveis e tarefas; tarefa F (jogo A liso hoje)
 
 **Pedido:** o roadmap novo no mesmo formato do da migração (entregável e divisão de tarefas) e a instrução pro Claude
