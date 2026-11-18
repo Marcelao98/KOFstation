@@ -168,7 +168,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| 8.1 | Juntar na `main` | PR da branch de trabalho | ele pede e aprova | O | 🟨 pedido em 18/11 |
+| 8.1 | Juntar na `main` | PR da branch de trabalho | ele pede e aprova | O | ✅ PR Marcelao98/KOFstation#3 (18/11) |
 | 8.2 | Chave do atualizador | cada envio na `main` vira versão e o app se atualiza sozinho | ⏸ ele cria a chave ("Pra você fazer" no SITUACAO) | O | ⏸ |
 | 8.3 | Releases próprias | núcleos e `.so` no repositório novo; o novo para de baixar do antigo | CI sem o antigo | O | ⬜ |
 | 8.4 | T.2 | a última versão do antigo avisa e leva pro novo | ele decide quando | O | ⬜ |
