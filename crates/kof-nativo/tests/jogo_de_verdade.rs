@@ -102,3 +102,97 @@ fn estado_com_jogo_de_verdade() {
         }
     }
 }
+
+/// Fase R (rebobinar liso no PS1): grava como o app (uma foto a cada 2 quadros) e volta como o `filho.rs` (cada passo:
+/// carrega a foto e roda), contando os passos em que a imagem NÃO muda (o tranco que o olho vê) e o tempo de cada passo.
+/// `KOF_ESTADO=<estado .bin cru>` começa dali (o meio de uma fase); `KOF_VOLTAR_ATE=<n>` roda até `n` quadros por passo
+/// até sair imagem nova (1 = como era).
+#[test]
+#[ignore = "precisa de KOF_JOGO (um jogo de verdade, só na máquina de quem testa)"]
+fn rebobinar_liso_com_jogo_de_verdade() {
+    use kof_nativo::rebobinar::{ModoDoSom, Voltar};
+    let jogo = PathBuf::from(std::env::var("KOF_JOGO").expect("KOF_JOGO"));
+    let dir = tempfile::tempdir().unwrap();
+    let a = Abertura {
+        nucleo: nucleo_pcsx(),
+        jogo: Some(jogo),
+        sistema: dir.path().into(),
+        saves: dir.path().into(),
+        variaveis: Default::default(),
+        dispositivo: None,
+    };
+    let mut n = Nucleo::carregar(&a).expect("abriu");
+    let mut som = Vec::new();
+    for _ in 0..120 {
+        som.clear();
+        n.rodar(&mut som);
+    }
+    if let Ok(p) = std::env::var("KOF_ESTADO") {
+        let e = std::fs::read(p).expect("estado");
+        match n.carregar_estado(&e) {
+            Ok(()) => println!("começou do estado ({} KB)", e.len() / 1024),
+            Err(e) => println!("o estado não carregou ({e}): começa da abertura"),
+        }
+    }
+    let ate: usize = std::env::var("KOF_VOLTAR_ATE")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(1);
+    let mut rb = Voltar::new(n.av.timing.sample_rate, 96 << 20);
+    rb.configurar(true, 5, 0, ModoDoSom::Fita);
+    // ~5 s jogando (o jogo parado ainda anima: personagem, água, fundo)
+    let mut novos = 0;
+    for _ in 0..300 {
+        som.clear();
+        if n.rodar(&mut som) {
+            novos += 1;
+        }
+        rb.som.saiu(&mut som, true);
+        if rb.hora_da_foto(1) {
+            n.salvar_estado_em(&mut rb.buf).expect("estado");
+            rb.gravar();
+        }
+    }
+    println!("jogando: {novos} de 300 quadros com imagem nova");
+    let mut anterior = n.quadro().rgba;
+    let (mut passos, mut parados, mut sem_novo, mut extras) = (0, 0, 0, 0);
+    let mut tempos = Vec::new();
+    while passos < 140 {
+        let t = std::time::Instant::now();
+        let Some(e) = rb.voltar().map(<[u8]>::to_vec) else {
+            break;
+        };
+        n.voltar_estado(&e).expect("carregou");
+        let mut veio = false;
+        for k in 0..ate {
+            som.clear();
+            veio = n.rodar(&mut som);
+            if k > 0 {
+                extras += 1;
+            }
+            if veio {
+                break;
+            }
+        }
+        tempos.push(t.elapsed().as_secs_f64() * 1000.0);
+        if !veio {
+            sem_novo += 1;
+        }
+        let q = n.quadro().rgba;
+        if q == anterior {
+            parados += 1;
+        }
+        anterior = q;
+        passos += 1;
+    }
+    tempos.sort_by(f64::total_cmp);
+    let p = |x: f64| tempos[((tempos.len() - 1) as f64 * x) as usize];
+    println!(
+        "voltando (até {ate} quadro/passo): {passos} passos; sem imagem nova {sem_novo}; imagem igual à do passo \
+         anterior {parados} ({:.0}%); quadros extras {extras}; passo p50 {:.2} ms, p95 {:.2} ms, máx {:.2} ms",
+        parados as f64 * 100.0 / passos.max(1) as f64,
+        p(0.5),
+        p(0.95),
+        p(1.0)
+    );
+}
