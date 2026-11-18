@@ -60,7 +60,6 @@ export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
     tv43: true,
     caminho: true,
     dispositivo: 517,
-    semRebob: true,
     opcoes: { pcsx_rearmed_frameskip_type: 'auto', pcsx_rearmed_frameskip_interval: '3' },
     ext: 'cue',
   },

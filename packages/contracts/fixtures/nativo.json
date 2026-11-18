@@ -17,7 +17,9 @@
     { "cmd": "turbo", "fator": 4 },
     { "cmd": "variavel", "chave": "pcsx_rearmed_drc", "valor": "enabled" },
     { "cmd": "salvarEstado", "pedido": 1 },
-    { "cmd": "lerBateria", "pedido": 2 }
+    { "cmd": "lerBateria", "pedido": 2 },
+    { "cmd": "rebobinar", "ligado": true, "limite": 5, "recargaX": 6, "som": "fita" },
+    { "cmd": "voltar", "sim": true }
   ],
   "avisos": [
     {
@@ -62,6 +64,15 @@
     },
     { "tipo": "ok", "pedido": 3 },
     { "tipo": "erro", "pedido": 3, "codigo": "CORE_FAILED", "mensagem": "o núcleo recusou o estado" },
-    { "tipo": "fim", "motivo": "a página pediu" }
+    { "tipo": "fim", "motivo": "a página pediu" },
+    {
+      "tipo": "rebob",
+      "ligado": true,
+      "rebobinando": true,
+      "segundos": 2.5,
+      "limite": 5,
+      "recarga": 0,
+      "recargaTotal": 1800
+    }
   ]
 }

@@ -681,6 +681,33 @@ impl Nucleo {
         }
     }
 
+    /// Estado salvo direto em `buf` (o rebobinar grava ~30 por segundo: sem alocar a cada vez).
+    pub fn salvar_estado_em(&mut self, buf: &mut Vec<u8>) -> Result<(), KofError> {
+        // SAFETY: buffer do tamanho que o núcleo pediu
+        unsafe {
+            let n = (self.f.serialize_size)();
+            if n == 0 {
+                return Err(erro("o núcleo não salva estado"));
+            }
+            buf.resize(n, 0);
+            if !(self.f.serialize)(buf.as_mut_ptr() as *mut c_void, n) {
+                return Err(erro("o núcleo não conseguiu salvar o estado"));
+            }
+        }
+        Ok(())
+    }
+
+    /// Carrega um estado do próprio jogo que está rodando (rebobinar): sem o reset que o `carregar_estado` do PCSX faz
+    /// (aquele é pro estado que chega de fora, com o jogo recém-aberto).
+    pub fn voltar_estado(&mut self, dados: &[u8]) -> Result<(), KofError> {
+        // SAFETY: o núcleo só lê `dados.len()` bytes
+        if unsafe { (self.f.unserialize)(dados.as_ptr() as *const c_void, dados.len()) } {
+            Ok(())
+        } else {
+            Err(erro("o núcleo recusou o estado"))
+        }
+    }
+
     pub fn carregar_estado(&mut self, dados: &[u8]) -> Result<(), KofError> {
         // SAFETY: o núcleo só lê `dados.len()` bytes
         let ok = unsafe {

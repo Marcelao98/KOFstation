@@ -37,6 +37,7 @@ function carregar(): Record<string, Velho> {
 
 /** Diferenças de propósito: sistema → campo → motivo. */
 const DIFERENTES: Record<string, Record<string, string>> = {
+  ps1: { semRebob: 'fase R: o novo rebobina o PS1 (no nativo, dentro do processo do jogo)' },
   ps2: {
     nucleo: 'o novo roda o PCSX2 (LRPS2) nativo; o antigo, o Play! em WebAssembly',
     opcoes: 'só existem no núcleo nativo novo',

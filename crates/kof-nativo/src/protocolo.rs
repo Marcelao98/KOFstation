@@ -44,6 +44,18 @@ pub enum Comando {
     LerBateria {
         pedido: u32,
     },
+    /// regras do rebobinar do modo de jogo e o som ao voltar (`fita` ou `mudo`)
+    Rebobinar {
+        ligado: bool,
+        limite: u32,
+        #[serde(rename = "recargaX")]
+        recarga_x: u32,
+        som: String,
+    },
+    /// segurando (ou soltou) o botão de voltar no tempo
+    Voltar {
+        sim: bool,
+    },
 }
 
 /// Aviso do processo (texto JSON).
@@ -103,6 +115,16 @@ pub enum Aviso {
     },
     Fim {
         motivo: String,
+    },
+    /// como está o rebobinar (a ampulheta e o preto e branco da página), só quando muda
+    Rebob {
+        ligado: bool,
+        rebobinando: bool,
+        segundos: f64,
+        limite: u32,
+        recarga: u32,
+        #[serde(rename = "recargaTotal")]
+        recarga_total: u32,
     },
 }
 

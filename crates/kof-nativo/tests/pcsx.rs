@@ -125,4 +125,72 @@ fn pcsx_nativo_desenha_o_exe() {
         let q2 = n.quadro();
         assert_eq!(q2.rgba, q.rgba, "a mesma imagem depois de carregar o estado");
     }
+    rebobina(&mut n);
+}
+
+/// Fase R.3: o rebobinar dentro do processo. Grava fotos a cada 2 quadros, volta 10 e confere que cada foto voltou
+/// exatamente o estado gravado e que, carregado, o jogo anda igual (2 quadros depois = a foto seguinte).
+/// (Um núcleo por processo: roda no fim do teste de cima, com o mesmo núcleo aberto.)
+fn rebobina(n: &mut Nucleo) {
+    use kof_nativo::rebobinar::{ModoDoSom, Voltar};
+    use std::time::{Duration, Instant};
+    let mut som = Vec::new();
+    for _ in 0..30 {
+        som.clear();
+        n.rodar(&mut som);
+    }
+    let mut rb = Voltar::new(n.av.timing.sample_rate, 96 << 20);
+    rb.configurar(true, 5, 6, ModoDoSom::Fita);
+    let mut fotos = Vec::new();
+    let (mut t_quadros, mut t_salvar, mut t_gravar) = (Duration::ZERO, Duration::ZERO, Duration::ZERO);
+    for _ in 0..120 {
+        som.clear();
+        let t = Instant::now();
+        n.rodar(&mut som);
+        t_quadros += t.elapsed();
+        rb.som.saiu(&mut som, true);
+        if rb.hora_da_foto(1) {
+            let t = Instant::now();
+            n.salvar_estado_em(&mut rb.buf).expect("estado");
+            t_salvar += t.elapsed();
+            fotos.push(rb.buf.clone());
+            let t = Instant::now();
+            rb.gravar();
+            t_gravar += t.elapsed();
+        }
+    }
+    eprintln!(
+        "120 quadros: núcleo {:?}/quadro; por foto: salvar {:?}, comparar e guardar {:?}; {} fotos, {} KB guardados, estado de {} KB",
+        t_quadros / 120,
+        t_salvar / 60,
+        t_gravar / 60,
+        rb.r.as_ref().unwrap().quantas(),
+        rb.r.as_ref().unwrap().ocupado() / 1024,
+        fotos[0].len() / 1024
+    );
+    assert_eq!(fotos.len(), 60);
+    assert_eq!(rb.r.as_ref().unwrap().quantas(), 59, "a 1ª foto vira só a cabeça");
+    let q_antes = n.quadro();
+    for k in 0..10 {
+        let e = rb.voltar().expect("ainda tem foto").to_vec();
+        assert!(e == fotos[fotos.len() - 2 - k], "a foto {k} voltou o estado gravado");
+        n.voltar_estado(&e).expect("carregou");
+        som.clear();
+        n.rodar(&mut som);
+    }
+    assert_eq!(n.quadro().rgba, q_antes.rgba, "a imagem depois de voltar");
+    // carregado, anda igual: a foto i + 2 quadros = a foto i+1
+    let i = fotos.len() - 12;
+    n.voltar_estado(&fotos[i]).unwrap();
+    for _ in 0..2 {
+        som.clear();
+        n.rodar(&mut som);
+    }
+    let mut depois = Vec::new();
+    n.salvar_estado_em(&mut depois).unwrap();
+    let diferentes = depois.iter().zip(&fotos[i + 1]).filter(|(x, y)| x != y).count();
+    assert_eq!(
+        diferentes, 0,
+        "2 quadros depois de voltar, o estado é o da foto seguinte"
+    );
 }

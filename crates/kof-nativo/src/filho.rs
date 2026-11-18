@@ -4,6 +4,7 @@
 use crate::canal::{Canal, Pedido};
 use crate::nucleo::{Abertura, Nucleo};
 use crate::protocolo::{self, Aviso, Comando};
+use crate::rebobinar::{ModoDoSom, Voltar};
 use crate::som::{Placa, Relogio, Saida};
 use kof_core::KofError;
 use serde::{Deserialize, Serialize};
@@ -37,6 +38,20 @@ pub struct Config {
 
 /// Som guardado que o laço mantém (o mesmo alvo do Worker do wasm).
 const ALVO_MS: f64 = 60.0;
+
+/// Memória das fotos do rebobinar (o wasm usa 48 MB; aqui o estado é maior e o processo é só do jogo).
+const REBOB_BYTES: usize = 96 << 20;
+
+fn aviso_rebob(s: crate::rebobinar::Situacao) -> Aviso {
+    Aviso::Rebob {
+        ligado: s.ligado,
+        rebobinando: s.rebobinando,
+        segundos: s.segundos,
+        limite: s.limite,
+        recarga: s.recarga,
+        recarga_total: s.recarga_total,
+    }
+}
 
 /// Só pros testes (`sem_som` + `KOF_NATIVO_SOM_BLOCO_MS`): um relógio que só "enxerga" o consumo a cada bloco de tempo,
 /// como a placa de som de verdade (ela consome em blocos). Aí o laço roda 2–3 quadros de uma vez, igual no uso real.
@@ -223,6 +238,9 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
     let mut med = crate::medidor::Medidor::new();
     let mut cpu = crate::cpu::Cpu::new();
     let leitura_agora = || crate::gl::LEITURA_US.swap(0, std::sync::atomic::Ordering::Relaxed);
+    // voltar no tempo (fase R): as fotos e o som ficam aqui dentro; a página só manda segura/solta
+    let mut rb = Voltar::new(n.av.timing.sample_rate, REBOB_BYTES);
+    let mut som_volta = Vec::<i16>::with_capacity(8192);
     loop {
         loop {
             let p = match rx.try_recv() {
@@ -234,10 +252,13 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
                 Pedido::Conectou => canal.avisar(&pronto(n, saida.taxa())),
                 Pedido::AppFechou => return "o app fechou".into(),
                 Pedido::Entrada(j, e) => n.entrada(j, e),
-                Pedido::CarregarEstado(pedido, d) => canal.avisar(&match n.carregar_estado(&d) {
-                    Ok(()) => Aviso::Ok { pedido },
-                    Err(e) => erro_de(pedido, &e),
-                }),
+                Pedido::CarregarEstado(pedido, d) => {
+                    rb.zerar(); // voltou pra outro momento: as fotos de antes não levam mais até aqui
+                    canal.avisar(&match n.carregar_estado(&d) {
+                        Ok(()) => Aviso::Ok { pedido },
+                        Err(e) => erro_de(pedido, &e),
+                    })
+                }
                 Pedido::GravarBateria(pedido, d) => canal.avisar(&match n.gravar_bateria(&d) {
                     Ok(()) => Aviso::Ok { pedido },
                     Err(e) => erro_de(pedido, &e),
@@ -252,7 +273,17 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
                         pausado = false;
                         saida.pausar(false);
                     }
-                    Comando::Reiniciar => n.reiniciar(),
+                    Comando::Reiniciar => {
+                        n.reiniciar();
+                        rb.zerar();
+                    }
+                    Comando::Rebobinar {
+                        ligado,
+                        limite,
+                        recarga_x,
+                        som,
+                    } => rb.configurar(ligado, limite, recarga_x, ModoDoSom::de(&som)),
+                    Comando::Voltar { sim } => rb.querendo = sim,
                     Comando::Volume { valor } => saida.volume(valor),
                     Comando::Turbo { fator } => turbo = fator.clamp(1, 8),
                     Comando::Variavel { chave, valor } => {
@@ -289,7 +320,39 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
         let taxa = n.av.timing.sample_rate;
         let fps = if n.av.timing.fps > 0.0 { n.av.timing.fps } else { 60.0 };
         let mut rodou = 0;
-        while saida.guardado_ms() < ALVO_MS && rodou < 8 {
+        if rb.quer_voltar() {
+            // voltando: uma foto por vez, no ritmo do som (cada foto = 2 quadros de jogo e ~1 quadro de som: 2×)
+            while saida.guardado_ms() < ALVO_MS && rodou < 8 {
+                let voltou = match rb.voltar() {
+                    Some(e) => n.voltar_estado(e).is_ok(),
+                    None => false,
+                };
+                if !voltou {
+                    rb.terminar();
+                    rb.querendo = false; // acabou o tempo: só volta a rebobinar soltando e apertando de novo
+                    break;
+                }
+                som.clear();
+                // um quadro pra ter a imagem daquele momento (o som dele não sai: sai o que tocou, invertido)
+                if n.rodar(&mut som) {
+                    numero = numero.wrapping_add(1);
+                    if let Some(()) = n.com_quadro(|q| protocolo::quadro(q, numero, &mut buf)) {
+                        canal.publicar_quadro(std::mem::take(&mut buf));
+                    }
+                }
+                rb.som.passo(&mut som_volta);
+                if som_volta.is_empty() {
+                    som_volta.resize(((taxa / fps).round() as usize).max(1) * 2, 0);
+                    // 🔇: silêncio no ritmo
+                }
+                amostras += (som_volta.len() / 2) as u64;
+                saida.tocar(&som_volta, taxa);
+                rodou += 1;
+            }
+        } else if rb.rebobinando() {
+            rb.terminar(); // soltou: a cauda do som invertido faz o crossfade com o som normal a seguir
+        }
+        while !rb.rebobinando() && saida.guardado_ms() < ALVO_MS && rodou < 8 {
             for i in 0..turbo {
                 som.clear();
                 let t = Instant::now();
@@ -313,9 +376,23 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
                 // núcleo mudo: um quadro de silêncio, pra o ritmo continuar certo
                 som.resize(((taxa / fps).round() as usize).max(1) * 2, 0);
             }
+            rb.som.saiu(&mut som, rb.guardando());
             amostras += (som.len() / 2) as u64;
             saida.tocar(&som, taxa);
             rodou += 1;
+            if rb.hora_da_foto(turbo) {
+                match n.salvar_estado_em(&mut rb.buf) {
+                    Ok(()) => rb.gravar(),
+                    Err(e) => {
+                        tracing::warn!("rebobinar desligado: {e}");
+                        rb.ligado = false;
+                        rb.zerar();
+                    }
+                }
+            }
+        }
+        if let Some(s) = rb.mudou() {
+            canal.avisar(&aviso_rebob(s));
         }
         let g = n.av.geometry;
         if g.base_width != geo.base_width || g.base_height != geo.base_height || g.aspect_ratio != geo.aspect_ratio {

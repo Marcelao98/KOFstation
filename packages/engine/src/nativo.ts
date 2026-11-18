@@ -10,7 +10,7 @@ import {
   type AvisoNativo,
   type ComandoNativo,
 } from '@kof/contracts';
-import type { SistemaId } from '@kof/domain';
+import type { SistemaId, SomAoRebobinar } from '@kof/domain';
 import { FilaDeQuadros } from './fila-de-quadros';
 import type { EventosDoJogo } from './jogo';
 import type { InfoDoJogo } from './libretro';
@@ -174,7 +174,10 @@ export class JogoNativo {
       const a = lerAviso(d);
       if (!a) return;
       if (a.tipo === 'desempenho') this.medir(a);
-      else if (a.tipo === 'ok') this.responder(a.pedido, null);
+      else if (a.tipo === 'rebob') {
+        const { ligado, rebobinando, segundos, limite, recarga, recargaTotal } = a;
+        this.eventos.rebob?.({ ligado, rebobinando, segundos, limite, recarga, recargaTotal });
+      } else if (a.tipo === 'ok') this.responder(a.pedido, null);
       else if (a.tipo === 'erro') {
         if (a.pedido !== null && this.esperando.has(a.pedido)) this.recusar(a.pedido, a.mensagem);
         else this.eventos.erro?.(a.mensagem, []);
@@ -280,12 +283,12 @@ export class JogoNativo {
     for (const [chave, valor] of Object.entries(opcoes)) this.enviar({ cmd: 'variavel', chave, valor });
   }
 
-  /** O nativo não rebobina (o PS1 também não rebobina no wasm: estado de ~4 MB). */
-  configurarRebobinar(): void {
-    // nada: sem rebobinar no nativo
+  /** O rebobinar fica dentro do processo do jogo (fase R.3): aqui só as regras e o segura/solta. */
+  configurarRebobinar(ligado: boolean, limite: number, recargaX: number, som: SomAoRebobinar = 'fita'): void {
+    this.enviar({ cmd: 'rebobinar', ligado, limite, recargaX, som });
   }
-  rebobinar(): void {
-    // nada: sem rebobinar no nativo
+  rebobinar(sim: boolean): void {
+    this.enviar({ cmd: 'voltar', sim });
   }
   /** O caçador de bugs fica no wasm; no nativo o pacote leva o log do processo (pela tela do bug). */
   cacador(): void {

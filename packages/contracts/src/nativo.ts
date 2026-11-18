@@ -16,7 +16,11 @@ export type ComandoNativo =
   | { cmd: 'volume'; valor: number }
   | { cmd: 'turbo'; fator: number }
   | { cmd: 'variavel'; chave: string; valor: string }
-  | { cmd: 'salvarEstado' | 'lerBateria'; pedido: number };
+  | { cmd: 'salvarEstado' | 'lerBateria'; pedido: number }
+  /** regras do rebobinar do modo e o som ao voltar (fase R: o rebobinar nativo fica dentro do processo do jogo) */
+  | { cmd: 'rebobinar'; ligado: boolean; limite: number; recargaX: number; som: 'fita' | 'mudo' }
+  /** segurando (ou soltou) o botão de voltar no tempo */
+  | { cmd: 'voltar'; sim: boolean };
 
 export type AvisoNativo =
   | {
@@ -52,7 +56,17 @@ export type AvisoNativo =
     }
   | { tipo: 'ok'; pedido: number }
   | { tipo: 'erro'; pedido: number | null; codigo: string; mensagem: string }
-  | { tipo: 'fim'; motivo: string };
+  | { tipo: 'fim'; motivo: string }
+  /** como está o rebobinar (ampulheta, preto e branco); só quando muda */
+  | {
+      tipo: 'rebob';
+      ligado: boolean;
+      rebobinando: boolean;
+      segundos: number;
+      limite: number;
+      recarga: number;
+      recargaTotal: number;
+    };
 
 export interface QuadroNativo {
   largura: number;
@@ -65,7 +79,7 @@ export interface QuadroNativo {
 export type BinarioNativo =
   ({ tipo: 'quadro' } & QuadroNativo) | { tipo: 'estado' | 'bateria'; pedido: number; dados: Uint8Array };
 
-const TIPOS_AVISO = ['pronto', 'geometria', 'desempenho', 'ok', 'erro', 'fim'];
+const TIPOS_AVISO = ['pronto', 'geometria', 'desempenho', 'ok', 'erro', 'fim', 'rebob'];
 
 /** Confere um aviso vindo do processo (dado de fora: só a forma básica). */
 export function lerAviso(texto: string): AvisoNativo | null {
