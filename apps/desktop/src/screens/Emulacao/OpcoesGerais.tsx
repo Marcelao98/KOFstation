@@ -9,6 +9,7 @@ import {
   PERFIS,
   REBOB_SEG,
   rebobNormalDe,
+  somRebobDe,
   type ModoId,
   type Perfil,
 } from '@kof/domain';
@@ -19,6 +20,7 @@ import { maxEstados } from '../../stores/estados';
 import { usarEmulacao } from '../../stores/emulacao';
 import { usarJogo } from '../../stores/jogo';
 import { usarModo } from '../../stores/modo';
+import { configurarRebobinar } from '../../stores/rebob';
 
 type Op = [string, string, [string, string][], () => string, (v: string) => void, () => string];
 
@@ -57,6 +59,20 @@ function opcoes(): Op[] {
         const s = rebobNormalDe(config().ler('rebobLimite'));
         return `segura Backspace ou Select+Y; recarrega depois de jogar ${s * 6} s. No Só alegria são 30 s sem esperar. Quanto mais tempo, mais memória`;
       },
+    ],
+    [
+      'Som ao rebobinar',
+      'somRebob',
+      [
+        ['fita', '📼 fita (ao contrário)'],
+        ['mudo', '🔇 mudo'],
+      ],
+      () => somRebobDe(config().ler('somRebob')),
+      (v) => {
+        config().guardar('somRebob', v);
+        configurarRebobinar();
+      },
+      () => 'a música volta de trás pra frente junto com a imagem e, ao soltar, continua de onde parou',
     ],
     [
       'Estados salvos por jogo',

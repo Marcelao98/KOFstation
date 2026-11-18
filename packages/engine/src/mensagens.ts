@@ -1,5 +1,5 @@
 // Mensagens entre a página (Jogo) e o Worker do núcleo.
-import type { SistemaId } from '@kof/domain';
+import type { SistemaId, SomAoRebobinar } from '@kof/domain';
 import type { ExtrasDoJogo, InfoDoJogo } from './libretro';
 
 export type ParaWorker =
@@ -22,7 +22,7 @@ export type ParaWorker =
   | { tipo: 'sram-escrever'; bytes: Uint8Array }
   | { tipo: 'opcoes'; opcoes: Record<string, string> }
   /** regras do rebobinar do modo de jogo (desligado: ligado=false) */
-  | { tipo: 'rebob-config'; ligado: boolean; limite: number; recargaX: number }
+  | { tipo: 'rebob-config'; ligado: boolean; limite: number; recargaX: number; som?: SomAoRebobinar | undefined }
   /** segurando o botão de voltar no tempo */
   | { tipo: 'rebobinar'; sim: boolean }
   /** recomeçou (estado carregado, outro modo): o rebobinar zera */

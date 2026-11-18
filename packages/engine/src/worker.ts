@@ -7,6 +7,7 @@ import { assinaturaDoQuadro } from './bug';
 import type { DoWorker, ParaWorker, ReplayDoBug } from './mensagens';
 import { Reamostrador } from './reamostrador';
 import { Rebobinador } from './rebobinador';
+import { SomDoRebobinar } from './som-rebob';
 import { criarRelogio, MAX_QUADROS_POR_PASSO, type Relogio } from './tempo';
 
 const eu = self as unknown as {
@@ -20,6 +21,8 @@ let anel: Anel | null = null;
 /** sem SharedArrayBuffer: o anel é só do Worker e o som vai pra página por mensagem (anel.ts `drenar`) */
 let pcmPorMensagem = false;
 let reamostrador: Reamostrador | null = null;
+/** o som que volta junto ao rebobinar (R.2) */
+let somRb: SomDoRebobinar | null = null;
 let relogio: Relogio | null = null;
 let taxaSaida = 48000;
 let pausado = false;
@@ -88,6 +91,7 @@ const rb = {
   desdeFoto: 0,
   acumulado: 0,
   avisado: '',
+  som: 'fita' as 'fita' | 'mudo',
 };
 function novoRebob(s: SessaoLibretro | null) {
   // ~30 fotos por segundo, no máximo 48 MB (PS1 fica sem: o estado tem ~4 MB)
@@ -95,6 +99,7 @@ function novoRebob(s: SessaoLibretro | null) {
   rb.desdeFoto = 0;
   rb.recarga = 0;
   rb.rebobinou = 0;
+  somRb?.limpar();
   avisarRebob(true);
 }
 const prontoPraVoltar = () => !!rb.r && rb.recarga <= 0 && rb.r.quantas > 0;
@@ -114,8 +119,10 @@ function avisarRebob(forcar = false) {
 }
 function terminarRebobinar() {
   novoMarco(sessao, true); // voltou no tempo: os botões gravados não levam mais até aqui
+  somRb?.soltar(); // a cauda do som invertido, pra o crossfade com o som normal que vem agora
   if (rb.rebobinou && rb.r && rb.recargaX) {
     rb.r.limpar(); // usou: zera e recarrega (Só alegria: continua)
+    somRb?.limpar();
     rb.recargaTotal = rb.recarga = rb.limite * rb.recargaX * 60;
   }
   rb.rebobinou = 0;
@@ -128,7 +135,9 @@ function passoPraTras(s: SessaoLibretro): boolean {
   if (!rb.r?.voltar()) return false;
   rb.rebobinou++;
   s.pad[0] = 0;
-  s.rodar(); // um quadro pra ter a imagem daquele momento (o som desse quadro não sai)
+  s.rodar(); // um quadro pra ter a imagem daquele momento (o som desse quadro não sai: sai o que tocou, invertido)
+  const som = somRb?.passo();
+  if (som) sairSom(som);
   mandarQuadro(s);
   avisarRebob();
   return true;
@@ -136,7 +145,7 @@ function passoPraTras(s: SessaoLibretro): boolean {
 function depoisDeRodar(vezes: number) {
   rb.desdeFoto += vezes;
   if (rb.r && rb.desdeFoto >= 2) {
-    rb.r.gravar();
+    if (rb.r.gravar() || rb.r.quantas === 0) somRb?.fotoGravada(rb.r.quantas);
     rb.desdeFoto = 0;
   }
   if (rb.recarga > 0) {
@@ -210,6 +219,16 @@ function mandarQuadro(s: SessaoLibretro) {
   if (porQuadro.length >= 6) porQuadro[porQuadro.length - 3] = Math.max(1, Math.round((performance.now() - t0) * 1000));
 }
 
+/** Manda som pra placa: pelo anel e, sem memória compartilhada, já tira dele e manda por mensagem. */
+function sairSom(estereo: Float32Array) {
+  if (!anel) return;
+  escrever(anel, estereo);
+  if (pcmPorMensagem) {
+    const d = drenar(anel);
+    if (d) enviar({ tipo: 'pcm', dados: d }, [d.buffer]);
+  }
+}
+
 function umQuadro(s: SessaoLibretro, comSom: boolean) {
   const t0 = performance.now();
   const { audio } = s.rodar();
@@ -217,7 +236,11 @@ function umQuadro(s: SessaoLibretro, comSom: boolean) {
   med.nucleo += t1 - t0;
   med.quadros++;
   anotarQuadro(s);
-  if (comSom && anel && reamostrador) escrever(anel, reamostrador.converter(audio));
+  if (comSom && anel && reamostrador) {
+    const som = reamostrador.converter(audio);
+    somRb?.saiu(som, !!rb.r);
+    escrever(anel, som);
+  }
   if (pcmPorMensagem && anel) {
     const d = drenar(anel);
     if (d) enviar({ tipo: 'pcm', dados: d }, [d.buffer]);
@@ -324,6 +347,8 @@ eu.onmessage = async ({ data: m }) => {
             ? criarAnelLocal(Math.round(taxaSaida * 0.5))
             : null;
         reamostrador = new Reamostrador(info.taxaAudio, taxaSaida);
+        somRb = new SomDoRebobinar(taxaSaida);
+        somRb.modo = rb.som;
         relogio = criarRelogio(info.fps);
         ultimoPasso = med.desde = performance.now();
         porQuadro = [];
@@ -363,10 +388,13 @@ eu.onmessage = async ({ data: m }) => {
     case 'opcoes':
       sessao?.mudarOpcoes(m.opcoes);
       break;
-    case 'rebob-config':
-      Object.assign(rb, { ligado: m.ligado, limite: m.limite, recargaX: m.recargaX });
-      novoRebob(sessao);
+    case 'rebob-config': {
+      const mesmo = rb.ligado === m.ligado && rb.limite === m.limite && rb.recargaX === m.recargaX;
+      Object.assign(rb, { ligado: m.ligado, limite: m.limite, recargaX: m.recargaX, som: m.som ?? rb.som });
+      if (somRb) somRb.modo = rb.som;
+      if (!mesmo) novoRebob(sessao); // só o som mudou: o que já está guardado continua
       break;
+    }
     case 'rebob-zerar':
       novoRebob(sessao);
       break;

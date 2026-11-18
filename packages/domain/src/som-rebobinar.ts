@@ -8,6 +8,9 @@
 
 export type SomAoRebobinar = 'fita' | 'mudo';
 
+/** A opção guardada na configuração (chave `somRebob`): sem nada ou outra coisa = 📼 fita. */
+export const somRebobDe = (v: string | null | undefined): SomAoRebobinar => (v === 'mudo' ? 'mudo' : 'fita');
+
 export const SOM_REBOBINAR = {
   /** duração do fade de entrada, em ms */
   entradaMs: 80,

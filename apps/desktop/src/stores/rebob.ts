@@ -1,9 +1,10 @@
 // Rebobinar na tela (app.js 1845–1875 do antigo): segurar Backspace (ou Select+Y no controle) volta no tempo em preto e
 // branco; a ampulheta mostra os segundos voltando e, depois, a recarga. Quem guarda e volta é o Worker (engine).
-import { nomeModo } from '@kof/domain';
+import { nomeModo, somRebobDe } from '@kof/domain';
 import type { SituacaoRebob } from '@kof/engine';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
+import { config } from './config';
 import { aoMudarRebob, depoisDeAbrirJogo, usarJogo } from './jogo';
 import { usarModo } from './modo';
 
@@ -17,10 +18,17 @@ export interface EstadoRebob {
 
 export const usarRebob = create<EstadoRebob>()(() => ({ r: null, tecla: false, pad: false }));
 
-/** O jogo recebe as regras do modo atual. */
+/** O jogo recebe as regras do modo atual e o som ao rebobinar (📼 fita ou 🔇 mudo, das Opções gerais). */
 export function configurarRebobinar() {
   const { regras } = usarModo.getState();
-  usarJogo.getState().jogo?.configurarRebobinar(regras.rebobinar, regras.rebobLimite, regras.recargaX);
+  usarJogo
+    .getState()
+    .jogo?.configurarRebobinar(
+      regras.rebobinar,
+      regras.rebobLimite,
+      regras.recargaX,
+      somRebobDe(config().ler('somRebob')),
+    );
 }
 
 /** Texto e quanto a ampulheta está cheia. */

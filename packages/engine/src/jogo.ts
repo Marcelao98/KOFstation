@@ -1,6 +1,6 @@
 // O jogo rodando, do lado da página: cria o Worker do núcleo e o som (AudioWorklet), manda os botões e recebe os quadros.
 // Sem React: a tela do jogo só recebe callbacks (o laço não passa pelo render).
-import type { SistemaId } from '@kof/domain';
+import type { SistemaId, SomAoRebobinar } from '@kof/domain';
 import { CODIGO_WORKLET, CODIGO_WORKLET_PCM } from './anel';
 import { FilaDeQuadros } from './fila-de-quadros';
 import type { ExtrasDoJogo, InfoDoJogo } from './libretro';
@@ -225,8 +225,8 @@ export class Jogo {
     this.mandar({ tipo: 'opcoes', opcoes });
   }
 
-  configurarRebobinar(ligado: boolean, limite: number, recargaX: number) {
-    this.mandar({ tipo: 'rebob-config', ligado, limite, recargaX });
+  configurarRebobinar(ligado: boolean, limite: number, recargaX: number, som?: SomAoRebobinar) {
+    this.mandar({ tipo: 'rebob-config', ligado, limite, recargaX, som });
   }
 
   rebobinar(sim: boolean) {

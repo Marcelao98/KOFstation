@@ -28,14 +28,15 @@ export class Rebobinador {
     return this.bytes;
   }
 
-  gravar(): void {
+  /** Grava uma foto; true = entrou uma foto nova (false: sem estado agora ou foi a 1ª, que só vira a cabeça). */
+  gravar(): boolean {
     const w = this.s.estadoVivo();
-    if (!w) return;
+    if (!w) return false;
     if (!this.cabeca || this.cabeca.length !== w.length) {
       this.cabeca = w.slice();
       this.fotos = [];
       this.bytes = 0;
-      return;
+      return false;
     }
     const h = this.cabeca;
     const pedacos: (number | Int32Array)[] = [];
@@ -53,6 +54,7 @@ export class Rebobinador {
     this.bytes += tam;
     while ((this.bytes > this.limiteBytes || this.fotos.length > (this.maxFotos || Infinity)) && this.fotos.length > 1)
       this.bytes -= this.fotos.shift()?.tam ?? 0;
+    return true;
   }
 
   /** Volta uma foto; false = acabou (já carregou a mais velha). */
