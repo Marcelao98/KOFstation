@@ -25,3 +25,4 @@ export * from './desempenho';
 export * from './diagnostico';
 export * from './opcoes-nucleo';
 export * from './opcoes-camadas';
+export * from './som-rebobinar';
