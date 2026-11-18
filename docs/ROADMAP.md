@@ -215,3 +215,24 @@ E no Claude Code:
 A migração acabou e o que temos está liso: agora pode crescer. Cada item vira uma fase com entregável e checkpoint
 quando ele escolher. Emulador novo continua sendo a fase 9 (ele escolhe a ordem).
 
+Escolhidas em 18/11, nesta ordem (as fases com entregáveis entram quando ele responder as perguntas abertas):
+
+1. **Rebobinar no PS1 nativo.** Dentro do processo do jogo, em Rust (`kof-nativo/src/rebobinar.rs`, o mesmo algoritmo
+   do `engine/rebobinador.ts`: estado inteiro mais novo + só os pedaços de 16 KB que mudaram). O estado nunca passa
+   pela página. Medido com `tools/medir-ps2.mjs` (com × sem gravar) antes de ligar por padrão. Risco: a foto com as
+   linhas de vídeo e som do PCSX paradas. *Aberto: o N64 (estado ~16 MB) entra junto?*
+2. **Rebobinar com a música voltando junto.** Anel com os últimos segundos de som, marcado por quadro; ao rebobinar,
+   toca ao contrário sincronizado com a imagem, com efeito de fita, fade ao começar e crossfade ao soltar. A música
+   continua exatamente de onde parou porque o chip de som volta junto no estado. Contas do som em funções puras no
+   `domain`, com os mesmos vetores de teste no `worker.ts` (consoles da página) e no `rebobinar.rs` (PS1). Opção
+   "Som ao rebobinar: 📼 fita / 🔇 mudo". *Aberto: fita a 2× ou velocidade normal invertida (ou as duas)?*
+3. **Biblioteca com cara de console.** Jogo (a obra) separado dos arquivos (versões: região, revisão, tradução, hack):
+   um zip com várias traduções vira um jogo só, com "qual versão?" ao clicar. Catálogo completo por console (bases
+   No-Intro/Redump), os que ele não tem em cinza, com sinopse, nota, ano e gênero (base com API a escolher). Jogo em
+   cinza **nunca** tem link ou dica de onde baixar.
+
+**Rebobinar no PS2: fica pra depois**, quando o Marcelo estudar mais ou trouxer alguém de programação de baixo nível
+(18/11). Por quê: a foto tem 48 MB e leva 35–42 ms pra sair (um quadro tem 16 ms); comparar e guardar isso disputa o
+processador com o jogo e a memória de um PC com 7 GB. Um caminho possível, se um dia for: uma foto por segundo, tirada
+e comprimida numa linha separada, voltando aos saltos com uma transição, medido pra não trazer os engasgos de volta.
+
