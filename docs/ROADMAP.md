@@ -217,6 +217,25 @@ quando ele escolher. Emulador novo continua sendo a fase 9 (ele escolhe a ordem)
 
 Escolhidas em 18/11, nesta ordem (as fases com entregáveis entram quando ele responder as perguntas abertas):
 
+### Fase R · Rebobinar no PS1 e no N64, com a música voltando junto (decidido 18/11)
+
+Decidido: **a música volta invertida ao rebobinar, com efeito de transição**; **o N64 entra junto com o PS1**. O som
+vale pra **todo console que rebobina** (o anel grava o som que saiu, seja qual for o chip): NES, SNES, Game Boy/Color,
+GBA, Mega Drive, Master System, Game Gear, Neo Geo, e o PS1/N64 quando ganharem rebobinar. Só o PS2 fica de fora (não
+rebobina). O que já existe por aí: o RetroArch inverte o som do quadro que roda depois de cada estado carregado
+(`audio/audio_driver.c`, `state_manager_frame_is_reversed`), sem transição, e com buraco entre as fotos; o Mesen
+(NES) toca imagem e som ao contrário desde a 0.9; o BizHawk não faz e o som fica bagunçado (issue
+TASEmulators/BizHawk#3201). O nosso: o som **que realmente saiu**, contínuo, com fade, efeito de fita e crossfade ao
+soltar.
+
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| R.1 | Contas do som | funções puras no `domain` (inverter por quadro, curva de fade, crossfade, filtro de "fita"), vetores de teste em fixture | testes amostra a amostra | nuvem | ⬜ |
+| R.2 | Som ao rebobinar nos consoles da página | anel com os últimos segundos de som no `worker.ts`, tocado ao contrário em sincronia com a imagem (2× como a imagem), fade ao começar, crossfade ao soltar; opção "Som ao rebobinar: 📼 fita / 🔇 mudo" | e2e: sai som rebobinando; ao soltar, o som é idêntico ao de quem carregou aquele estado; ⏸ ele ouve no SNES | nuvem | ⬜ |
+| R.3 | Rebobinar no PS1 nativo | `kof-nativo/src/rebobinar.rs` (o algoritmo do `rebobinador.ts` em Rust, dentro do processo do jogo; o estado nunca passa pela página), comando liga/segura/solta | teste Rust (voltar N quadros e rodar de novo dá a mesma imagem) + medido com × sem gravar | local | ⬜ |
+| R.4 | Rebobinar no N64 | o mesmo, com o estado de ~16 MB (fotos mais espaçadas se a medição pedir) | idem | local | ⬜ |
+| R.5 | Som ao rebobinar no PS1/N64 | o anel e as contas do R.1 no `rebobinar.rs` (mesmos vetores de teste) | ⏸ ele ouve no PS1 e no N64 | local | ⬜ |
+
 1. **Rebobinar no PS1 nativo.** Dentro do processo do jogo, em Rust (`kof-nativo/src/rebobinar.rs`, o mesmo algoritmo
    do `engine/rebobinador.ts`: estado inteiro mais novo + só os pedaços de 16 KB que mudaram). O estado nunca passa
    pela página. Medido com `tools/medir-ps2.mjs` (com × sem gravar) antes de ligar por padrão. Risco: a foto com as
