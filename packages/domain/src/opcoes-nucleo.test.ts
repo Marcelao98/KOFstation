@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { OPCOES_LRPS2 } from './opcoes-lrps2';
+import { OPCOES_PS1_DECLARADAS } from './opcoes-ps1-declaradas';
+import { TRADUCAO_PCSX } from './opcoes-pcsx-pt';
 import { TRADUCAO_LRPS2 } from './opcoes-lrps2-pt';
 import {
   conferirOpcoes,
@@ -83,6 +85,28 @@ describe('catálogo de opções de emulação', () => {
         ).toBe(true);
       }
     }
+  });
+
+  describe('PS1: tudo o que o PCSX declara (nada escondido, 4.2)', () => {
+    const ps1 = OPCOES_DE_NUCLEO.ps1 ?? [];
+    it('cada opção declarada está no catálogo, menos as fixas pelo app, e em português', () => {
+      for (const d of OPCOES_PS1_DECLARADAS) {
+        const o = ps1.find((x) => x.chave === d.chave);
+        expect(!!o, d.chave).toBe(!FIXAS_PELO_APP[d.chave]);
+        if (o) expect(o.original, d.chave).toBeFalsy(); // tem tradução
+      }
+      expect(OPCOES_PS1_DECLARADAS.length).toBe(53);
+    });
+    it('toda tradução aponta pra uma opção que o núcleo declara', () => {
+      const declaradas = new Set(OPCOES_PS1_DECLARADAS.map((d) => d.chave));
+      for (const k of Object.keys(TRADUCAO_PCSX)) expect(declaradas.has(k), k).toBe(true);
+    });
+    it('as de fora do curado vão pro Avançado, no grupo delas, com o padrão do núcleo em todo perfil', () => {
+      const v = ps1.find((o) => o.chave === 'pcsx_rearmed_vibration');
+      expect(v).toMatchObject({ avancada: true, grupo: 'controle', nome: 'Vibração' });
+      for (const p of PERFIS) expect(v?.perfis[p]).toBe(v?.padrao);
+      expect(ps1.find((o) => o.chave === 'pcsx_rearmed_memcard2')?.grupo).toBe('cartao');
+    });
   });
 
   describe('PS2: tudo o que o núcleo declara (nada escondido)', () => {

@@ -9,6 +9,8 @@
 import { OPCOES_LRPS2, type OpcaoDeclarada } from './opcoes-lrps2';
 import { TRADUCAO_LRPS2, type TraducaoDeOpcao } from './opcoes-lrps2-pt';
 import { GB, GBA, GENPLUS, N64, NES, SNES } from './opcoes-nucleo-wasm';
+import { OPCOES_PS1_DECLARADAS } from './opcoes-ps1-declaradas';
+import { TRADUCAO_PCSX } from './opcoes-pcsx-pt';
 import type { SistemaId } from './sistemas';
 
 export type Perfil = 'rapido' | 'equilibrado' | 'fiel' | 'bonito';
@@ -381,7 +383,7 @@ const PS2_CURADO: OpcaoDeNucleo[] = [
 // PS1 · PCSX-ReARMed (commit c8816799). O Equilibrado é o que o app usa hoje: frameskip 'auto', intervalo 3
 // (e o recompilador ligado no nativo).
 
-const PS1: OpcaoDeNucleo[] = [
+const PS1_CURADO: OpcaoDeNucleo[] = [
   {
     chave: 'pcsx_rearmed_drc',
     nome: 'Recompilador (dynarec)',
@@ -577,6 +579,14 @@ export const FIXAS_PELO_APP: Readonly<Record<string, { nome: string; motivo: str
     nome: 'Renderizador',
     motivo: 'o app desenha com OpenGL (o único que funciona com a imagem levada pra janela do app)',
   },
+  pcsx_rearmed_bios: {
+    nome: 'BIOS',
+    motivo: 'o app usa a BIOS que você guardou em Sistema → BIOS (sem ela, a do PCSX)',
+  },
+  pcsx_rearmed_memcard1: {
+    nome: 'Cartão de memória 1',
+    motivo: 'é o cartão que o app guarda como o save do jogo (e leva no backup .kofsave)',
+  },
 };
 
 const SIM_NAO: Record<string, string> = { enabled: 'Ligado', disabled: 'Desligado' };
@@ -619,6 +629,14 @@ export function opcaoDeclarada(
     ...(t ? {} : { original: true }),
   };
 }
+
+/** O PS1: o curado + tudo o que o PCSX declara de verdade (4.2), no Avançado, em português, cada uma no grupo dela. */
+const PS1: OpcaoDeNucleo[] = [
+  ...PS1_CURADO,
+  ...OPCOES_PS1_DECLARADAS.filter(
+    (d) => !FIXAS_PELO_APP[d.chave] && d.valores.length && !PS1_CURADO.some((c) => c.chave === d.chave),
+  ).map((d) => opcaoDeclarada(d, TRADUCAO_PCSX[d.chave]?.grupo, TRADUCAO_PCSX)),
+];
 
 const PS2: OpcaoDeNucleo[] = [
   ...PS2_CURADO,
