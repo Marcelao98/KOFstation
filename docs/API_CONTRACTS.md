@@ -101,10 +101,10 @@ A página conecta em `ws://127.0.0.1:<porta>/?t=<token>` (sem token, token errad
 
 | Direção | Mensagem |
 |---|---|
-| página → | texto `{cmd: pausar\|continuar\|reiniciar\|fechar}`, `{cmd: volume, valor 0–1}`, `{cmd: turbo, fator 1–8}`, `{cmd: variavel, chave, valor}`, `{cmd: salvarEstado\|lerBateria, pedido}` |
+| página → | texto `{cmd: pausar\|continuar\|reiniciar\|fechar}`, `{cmd: volume, valor 0–1}`, `{cmd: turbo, fator 1–8}`, `{cmd: variavel, chave, valor}`, `{cmd: salvarEstado\|lerBateria, pedido}`, `{cmd: rebobinar, ligado, limite, recargaX, som}`, `{cmd: voltar, sim}` (fase R), `{cmd: somPraPagina, sim}` (⏺ gravar, G.2: liga/desliga a cópia do som) |
 | página → | binário `[2, jogador, botões u16, eixos 4×i16]` (máscara do libretro); `[4\|6, 0,0,0, pedido u32, tamanho u32] + bytes` (carregar estado / gravar bateria) |
 | → página | texto `{tipo: pronto, nucleo, versao, largura, altura, proporcao, fps, taxa, taxaSaida}`, `geometria`, `desempenho {quadros, amostras, atrasoMs, faltas}` (1/s), `ok {pedido}`, `erro {pedido, codigo, mensagem}`, `fim {motivo}` |
-| → página | binário `[1, 0,0,0, largura u16, altura u16, número u32] + RGBA` (só o mais novo); `[3\|5, 0,0,0, pedido u32, tamanho u32] + bytes` (estado / bateria) |
+| → página | binário `[1, 0,0,0, largura u16, altura u16, número u32] + RGBA` (só o mais novo); `[3\|5, 0,0,0, pedido u32, tamanho u32] + bytes` (estado / bateria); `[7, 0,0,0, taxa u32, quadros u32] + i16 estéreo intercalado` (`SOM`: cópia do som que saiu na placa, antes do volume, só depois de `somPraPagina` ligado) |
 
 Números em little-endian. Exemplos testados dos dois lados: `packages/contracts/fixtures/nativo.json`.
 

@@ -11,6 +11,7 @@ import {
   type ComandoNativo,
 } from '@kof/contracts';
 import type { SistemaId, SomAoRebobinar } from '@kof/domain';
+import { CODIGO_WORKLET_PCM } from './anel';
 import { FilaDeQuadros } from './fila-de-quadros';
 import type { EventosDoJogo } from './jogo';
 import type { InfoDoJogo } from './libretro';
@@ -61,6 +62,8 @@ export class JogoNativo {
   private mudo: boolean;
   /** quadros que o processo mandou e ainda não foram pra tela: saem um por vsync (como no wasm) */
   private fila = new FilaDeQuadros();
+  /** ⏺ gravar (G.2): onde a cópia do som que chega do processo toca (só pro gravador, não sai no alto-falante) */
+  private somGravando: AudioWorkletNode | null = null;
   private pedidoDoLaco = 0;
   /** quadros que ficaram pra trás na fila (a página engasgou) e foram jogados fora */
   get descartados(): number {
@@ -194,6 +197,14 @@ export class JogoNativo {
       this.eventos.erro?.(`mensagem estranha do núcleo nativo: ${(e as Error).message}`, []);
       return;
     }
+    if (b.tipo === 'som') {
+      const no = this.somGravando;
+      if (!no) return; // a gravação acabou e ainda vinha som no caminho
+      const f = new Float32Array(b.amostras.length);
+      for (let i = 0; i < f.length; i++) f[i] = (b.amostras[i] ?? 0) / 32768;
+      no.port.postMessage(f, [f.buffer]);
+      return;
+    }
     if (b.tipo === 'quadro') {
       // o RGBA começa no byte 12 (múltiplo de 4): vira Uint32Array sem cópia
       const px = new Uint32Array(b.rgba.buffer, b.rgba.byteOffset, b.largura * b.altura);
@@ -281,6 +292,40 @@ export class JogoNativo {
 
   mudarOpcoes(opcoes: Record<string, string>) {
     for (const [chave, valor] of Object.entries(opcoes)) this.enviar({ cmd: 'variavel', chave, valor });
+  }
+
+  /**
+   * ⏺ Gravar (G.2): o som do jogo num MediaStream. O som do nativo toca no processo dele (na placa); aqui o processo
+   * passa a mandar uma cópia (mensagens `SOM`, antes do volume: grava cheio mesmo no mudo), que toca num AudioContext
+   * na taxa do núcleo ligado só ao gravador. null sem som no processo (roda mudo).
+   */
+  async somPraGravar(): Promise<{ stream: MediaStream; desfazer: () => void } | null> {
+    if (!this.comSom || typeof AudioWorkletNode !== 'function') return null;
+    const ctx = new AudioContext({ sampleRate: this.info.taxaAudio || 44100 });
+    const url = URL.createObjectURL(new Blob([CODIGO_WORKLET_PCM], { type: 'text/javascript' }));
+    try {
+      await ctx.audioWorklet.addModule(url);
+    } catch (e) {
+      void ctx.close().catch(() => undefined);
+      throw e;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+    const no = new AudioWorkletNode(ctx, 'kof-som-pcm', { outputChannelCount: [2] });
+    const destino = ctx.createMediaStreamDestination();
+    no.connect(destino);
+    void ctx.resume().catch(() => undefined); // começou num F10 (gesto): já pode tocar
+    this.somGravando = no;
+    this.enviar({ cmd: 'somPraPagina', sim: true });
+    return {
+      stream: destino.stream,
+      desfazer: () => {
+        this.enviar({ cmd: 'somPraPagina', sim: false });
+        this.somGravando = null;
+        no.disconnect();
+        void ctx.close().catch(() => undefined);
+      },
+    };
   }
 
   /** O rebobinar fica dentro do processo do jogo (fase R.3): aqui só as regras e o segura/solta. */

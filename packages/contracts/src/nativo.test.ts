@@ -6,6 +6,7 @@ interface Fixture {
   botoes: { jogador: number; botoes: number; eixos: number[]; hex: string };
   quadro: { largura: number; altura: number; numero: number; rgba: number[]; hex: string };
   bloco: { tipo: 4; pedido: number; dados: number[]; hex: string };
+  som: { taxa: number; amostras: number[]; hex: string };
   comandos: unknown[];
   avisos: unknown[];
 }
@@ -36,6 +37,15 @@ describe('protocolo do núcleo nativo (mesmas fixtures do Rust)', () => {
     const b = lerBinario(volta);
     expect(b.tipo === 'estado' && b.pedido === 7 && Array.from(b.dados)).toEqual([1, 2, 3]);
     expect(() => lerBinario(new Uint8Array(12).fill(9))).toThrow();
+  });
+  it('som (G.2: a cópia do som pra gravar)', () => {
+    const b = lerBinario(deHex(f.som.hex));
+    expect(b.tipo).toBe('som');
+    if (b.tipo === 'som') {
+      expect(b.taxa).toBe(f.som.taxa);
+      expect(Array.from(b.amostras)).toEqual(f.som.amostras);
+    }
+    expect(() => lerBinario(deHex(f.som.hex).subarray(0, 14))).toThrow();
   });
   it('avisos', () => {
     for (const a of f.avisos) expect(lerAviso(JSON.stringify(a))).toEqual(a);

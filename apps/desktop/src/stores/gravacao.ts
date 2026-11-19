@@ -1,9 +1,10 @@
-// ⏺ Gravar o jogo (G.1): liga/desliga (F10, menu rápido, menu Emulação). Grava como o jogador vê (moldura + tela com o
-// filtro do F4) e o som dos consoles da página; o arquivo vai pra <Kof Games>/Gravações. O PS1/PS2 nativos gravam a
-// imagem, mudos (o som deles toca no processo do jogo: G.2).
+// ⏺ Gravar o jogo (G.1/G.2): liga/desliga (F10, menu rápido, menu Emulação). Grava como o jogador vê (moldura + tela
+// com o filtro do F4) e o som: o dos consoles da página direto do AudioContext do jogo; o do PS1/PS2 nativos, que toca
+// no processo do jogo, por uma cópia que o processo manda enquanto grava (`somPraPagina`). O arquivo vai pra
+// <Kof Games>/Gravações.
 import { cenaDaGravacao, formatoDeGravacao, nomeDaGravacao } from '@kof/domain';
 import { EscritorDeGravacao, registrar } from '@kof/app-core';
-import { Gravador, Jogo } from '@kof/engine';
+import { Gravador, Jogo, JogoNativo } from '@kof/engine';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { usarJogo } from './jogo';
@@ -68,7 +69,14 @@ async function comecar(set: (p: Partial<Gravacao>) => void) {
 
   const nomeJogo = registro?.nome || registro?.titulo || info?.sistema || 'Gravação';
   const nome = nomeDaGravacao(nomeJogo, new Date(), formato.ext);
-  const som = jogo instanceof Jogo ? jogo.somPraGravar() : null;
+  let som: { stream: MediaStream; desfazer: () => void } | null = null;
+  try {
+    if (jogo instanceof Jogo) som = jogo.somPraGravar();
+    else if (jogo instanceof JogoNativo) som = await jogo.somPraGravar();
+  } catch (e) {
+    // sem o som o vídeo ainda vale: grava mudo e diz por quê
+    registrar('warn', 'gravacao', `o som não entrou na gravação: ${motivo(e)}`);
+  }
   let gravador: Gravador;
   const escritor = new EscritorDeGravacao(servicos().backend, nome, (e) => {
     avisos.avisarErro(`⏺ A gravação parou: não consegui salvar (${motivo(e)})`);
@@ -97,10 +105,7 @@ async function comecar(set: (p: Partial<Gravacao>) => void) {
   sessao = { gravador, escritor, desfazerSom: som?.desfazer ?? null };
   set({ gravando: true, desde: performance.now() });
   registrar('info', 'gravacao', `gravando ${nome} (${formato.mime}, ${cena.largura}×${cena.altura})`);
-  avisos.avisar(
-    som ? '⏺ Gravando (F10 para)' : '⏺ Gravando sem som (o som deste console ainda não grava) · F10 para',
-    3000,
-  );
+  avisos.avisar(som ? '⏺ Gravando (F10 para)' : '⏺ Gravando sem som (este jogo está rodando mudo) · F10 para', 3000);
 }
 
 export const usarGravacao = create<Gravacao>()((set, get) => ({

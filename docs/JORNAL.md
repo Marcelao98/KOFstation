@@ -21,6 +21,29 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 · G.2 · Som do PS1/PS2 nativos na gravação (código escrito, sem compilar)
+
+**Pedido:** "faz o som" (do PS1/PS2 na gravação), deixar tudo salvo e documentado e ver o que falta da próxima etapa.
+Ele estava jogando: pela regra dele, **nada de build, teste ou janela** nesta parte.
+**Feito:** protocolo nativo com o comando `somPraPagina {sim}` e a mensagem binária `SOM` (`[7,0,0,0, taxa u32,
+quadros u32] + i16 estéreo`), no Rust (`protocolo.rs`), no TS (`contracts/nativo.ts`) e na fixture compartilhada
+(`fixtures/nativo.json`, com o exemplo nos dois testes de contrato). `filho.rs`: com `somPraPagina` ligado, cada trecho
+que vai pra placa (jogando e rebobinando) também vai pra página, antes do volume. `JogoNativo.somPraGravar()`: liga a
+cópia e toca o que chega num AudioContext na taxa do núcleo (o worklet `kof-som-pcm`, que já existia), ligado só ao
+`MediaStreamDestination` do gravador; desfazer desliga a cópia e fecha o contexto. `stores/gravacao.ts` usa o som do
+nativo; se ele falhar, grava mudo e anota no log. Contratos, ROADMAP (G.2 🟨), README e SITUACAO atualizados.
+**Medido:** nada ainda (não compilei). Falta, quando ele liberar a máquina: `pnpm check`, `pnpm check:rust` (o
+`contrato.rs` confere o `SOM`), `pnpm e2e` inteiro (inclui o `gravar.spec.ts` e o que ficou pendente da G.1) e uma
+gravação de PS1 com som conferida com `ffprobe` (deve ter trilha de áudio).
+**Riscos anotados:** a fila de mensagens de texto do canal (`mandar`, teto 64) agora divide espaço com o som (~60/s);
+se a página ficar muito lenta, os mais velhos saem. Se o núcleo mudar a taxa de som no meio do jogo, o contexto fica
+na taxa do `pronto` (o tom mudaria). Página reconectando no meio da gravação: o processo continua mandando, a página
+nova ignora (não grava).
+**Onde parou:** ⏸ ele liberar a máquina pros testes acima; depois ⏸ ele grava um jogo de PS1 e um de PS2 e ouve.
+Próxima funcionalidade escolhida (ROADMAP, "Próximas funcionalidades" item 3): **biblioteca com cara de console**.
+
+---
+
 ## 2026-11-19 · Rebobinar do PS1 "aos trancos": medido, sem defeito achado
 
 **Pedido:** ele achou o rebobinar do PS1 (jogo de plataforma, 30 quadros/s) sem fluidez; pediu pra medir com o jogo

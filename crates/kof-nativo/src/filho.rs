@@ -241,6 +241,11 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
     // voltar no tempo (fase R): as fotos e o som ficam aqui dentro; a página só manda segura/solta
     let mut rb = Voltar::new(n.av.timing.sample_rate, REBOB_BYTES);
     let mut som_volta = Vec::<i16>::with_capacity(8192);
+    // ⏺ gravar (G.2): a página pediu uma cópia do som que sai na placa (o som do vídeo)
+    let mut som_pra_pagina = false;
+    let copiar = |s: &[i16], taxa: f64| {
+        canal.mandar(tungstenite::Message::binary(protocolo::som(s, taxa.round() as u32)));
+    };
     loop {
         loop {
             let p = match rx.try_recv() {
@@ -284,6 +289,7 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
                         som,
                     } => rb.configurar(ligado, limite, recarga_x, ModoDoSom::de(&som)),
                     Comando::Voltar { sim } => rb.querendo = sim,
+                    Comando::SomPraPagina { sim } => som_pra_pagina = sim,
                     Comando::Volume { valor } => saida.volume(valor),
                     Comando::Turbo { fator } => turbo = fator.clamp(1, 8),
                     Comando::Variavel { chave, valor } => {
@@ -347,6 +353,9 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
                 }
                 amostras += (som_volta.len() / 2) as u64;
                 saida.tocar(&som_volta, taxa);
+                if som_pra_pagina {
+                    copiar(&som_volta, taxa);
+                }
                 rodou += 1;
             }
         } else if rb.rebobinando() {
@@ -379,6 +388,9 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
             rb.som.saiu(&mut som, rb.guardando());
             amostras += (som.len() / 2) as u64;
             saida.tocar(&som, taxa);
+            if som_pra_pagina {
+                copiar(&som, taxa);
+            }
             rodou += 1;
             if rb.hora_da_foto(turbo) {
                 match n.salvar_estado_em(&mut rb.buf) {

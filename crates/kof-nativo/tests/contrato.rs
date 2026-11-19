@@ -60,6 +60,13 @@ fn mesmas_fixtures_do_typescript() {
     );
     assert_eq!(hex(&feito), bl["hex"]);
 
+    let s = &f["som"];
+    let amostras: Vec<i16> = serde_json::from_value(s["amostras"].clone()).unwrap();
+    assert_eq!(
+        hex(&protocolo::som(&amostras, s["taxa"].as_u64().unwrap() as u32)),
+        s["hex"]
+    );
+
     for c in f["comandos"].as_array().unwrap() {
         let cmd: Comando = serde_json::from_value(c.clone()).unwrap_or_else(|e| panic!("{c}: {e}"));
         assert_eq!(&serde_json::to_value(&cmd).unwrap(), c);

@@ -8,6 +8,8 @@ export const NATIVO = {
   CARREGAR_ESTADO: 4,
   BATERIA: 5,
   GRAVAR_BATERIA: 6,
+  /** processo → página: uma cópia do som que saiu, só enquanto a página pede (⏺ gravar, G.2) */
+  SOM: 7,
   CABECALHO: 12,
 } as const;
 
@@ -20,7 +22,9 @@ export type ComandoNativo =
   /** regras do rebobinar do modo e o som ao voltar (fase R: o rebobinar nativo fica dentro do processo do jogo) */
   | { cmd: 'rebobinar'; ligado: boolean; limite: number; recargaX: number; som: 'fita' | 'mudo' }
   /** segurando (ou soltou) o botão de voltar no tempo */
-  | { cmd: 'voltar'; sim: boolean };
+  | { cmd: 'voltar'; sim: boolean }
+  /** ⏺ gravar (G.2): manda (ou para de mandar) uma cópia do som que sai na placa, em mensagens `SOM` */
+  | { cmd: 'somPraPagina'; sim: boolean };
 
 export type AvisoNativo =
   | {
@@ -77,7 +81,10 @@ export interface QuadroNativo {
 }
 
 export type BinarioNativo =
-  ({ tipo: 'quadro' } & QuadroNativo) | { tipo: 'estado' | 'bateria'; pedido: number; dados: Uint8Array };
+  | ({ tipo: 'quadro' } & QuadroNativo)
+  | { tipo: 'estado' | 'bateria'; pedido: number; dados: Uint8Array }
+  /** estéreo intercalado (esquerda, direita, ...), na taxa do núcleo */
+  | { tipo: 'som'; taxa: number; amostras: Int16Array };
 
 const TIPOS_AVISO = ['pronto', 'geometria', 'desempenho', 'ok', 'erro', 'fim', 'rebob'];
 
@@ -115,6 +122,15 @@ export function lerBinario(b: ArrayBuffer | Uint8Array): BinarioNativo {
       pedido: d.getUint32(4, true),
       dados: u.subarray(NATIVO.CABECALHO, NATIVO.CABECALHO + n),
     };
+  }
+  if (tipo === NATIVO.SOM) {
+    const quadros = d.getUint32(8, true);
+    const fim = NATIVO.CABECALHO + quadros * 4;
+    if (u.length < fim) throw new Error(`som com ${quadros} quadros e ${u.length - NATIVO.CABECALHO} bytes`);
+    // copia (pequeno, ~3 KB): o Int16Array precisa começar em byte par e o número vem em little-endian
+    const amostras = new Int16Array(quadros * 2);
+    for (let i = 0; i < amostras.length; i++) amostras[i] = d.getInt16(NATIVO.CABECALHO + i * 2, true);
+    return { tipo: 'som', taxa: d.getUint32(4, true), amostras };
   }
   throw new Error(`tipo de mensagem desconhecido: ${tipo}`);
 }

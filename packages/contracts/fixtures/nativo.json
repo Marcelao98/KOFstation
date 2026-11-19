@@ -8,6 +8,7 @@
     "hex": "010000000200010002010000"
   },
   "bloco": { "tipo": 4, "pedido": 7, "dados": [1, 2, 3], "hex": "040000000700000003000000010203" },
+  "som": { "taxa": 44100, "amostras": [1, -1, 32767, -32768], "hex": "0700000044ac0000020000000100ffffff7f0080" },
   "comandos": [
     { "cmd": "pausar" },
     { "cmd": "continuar" },
@@ -19,7 +20,8 @@
     { "cmd": "salvarEstado", "pedido": 1 },
     { "cmd": "lerBateria", "pedido": 2 },
     { "cmd": "rebobinar", "ligado": true, "limite": 5, "recargaX": 6, "som": "fita" },
-    { "cmd": "voltar", "sim": true }
+    { "cmd": "voltar", "sim": true },
+    { "cmd": "somPraPagina", "sim": true }
   ],
   "avisos": [
     {

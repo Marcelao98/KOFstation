@@ -2,6 +2,7 @@
 //!
 //! Binário (números em little-endian; cabeçalho de 12 bytes, o 1º byte diz o tipo):
 //! - processo → página: `QUADRO` `[1, 0, 0, 0, largura u16, altura u16, número u32]` + RGBA;
+//!   `SOM` `[7, 0, 0, 0, taxa u32, quadros u32]` + i16 estéreo intercalado (só depois do `somPraPagina`: ⏺ gravar);
 //!   `ESTADO`/`BATERIA` `[3|5, 0, 0, 0, pedido u32, tamanho u32]` + bytes.
 //! - página → processo: `BOTOES` `[2, jogador, botões u16, eixos 4×i16]` (12 bytes);
 //!   `CARREGAR_ESTADO`/`GRAVAR_BATERIA` `[4|6, 0, 0, 0, pedido u32, tamanho u32]` + bytes.
@@ -16,6 +17,7 @@ pub const ESTADO: u8 = 3;
 pub const CARREGAR_ESTADO: u8 = 4;
 pub const BATERIA: u8 = 5;
 pub const GRAVAR_BATERIA: u8 = 6;
+pub const SOM: u8 = 7;
 pub const CABECALHO: usize = 12;
 
 /// Comando da página (texto JSON).
@@ -54,6 +56,10 @@ pub enum Comando {
     },
     /// segurando (ou soltou) o botão de voltar no tempo
     Voltar {
+        sim: bool,
+    },
+    /// ⏺ gravar (G.2): manda pra página uma cópia do som que sai na placa (mensagens `SOM`), ou para
+    SomPraPagina {
         sim: bool,
     },
 }
@@ -187,6 +193,18 @@ pub fn quadro(q: &Quadro, numero: u32, saida: &mut Vec<u8>) {
     saida.extend_from_slice(&(q.altura as u16).to_le_bytes());
     saida.extend_from_slice(&numero.to_le_bytes());
     saida.extend_from_slice(&q.rgba);
+}
+
+/// `SOM`: o som que saiu (estéreo intercalado), na taxa do núcleo.
+pub fn som(amostras: &[i16], taxa: u32) -> Vec<u8> {
+    let mut v = Vec::with_capacity(CABECALHO + amostras.len() * 2);
+    v.extend_from_slice(&[SOM, 0, 0, 0]);
+    v.extend_from_slice(&taxa.to_le_bytes());
+    v.extend_from_slice(&((amostras.len() / 2) as u32).to_le_bytes());
+    for a in amostras {
+        v.extend_from_slice(&a.to_le_bytes());
+    }
+    v
 }
 
 /// `ESTADO`, `BATERIA`, `CARREGAR_ESTADO` ou `GRAVAR_BATERIA`: cabeçalho com pedido e tamanho, depois os bytes.
