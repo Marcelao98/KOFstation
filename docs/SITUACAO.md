@@ -1,4 +1,4 @@
-# Onde está o KOFstation novo (07/11/2026)
+# Onde está o KOFstation (19/11/2026)
 
 Um retrato, pra gente ler: o que já funciona, como o app funciona por dentro, como o trabalho anda, o que está
 esperando teste e o que falta, na ordem combinada. O detalhe técnico de cada coisa está nos outros documentos (lista no
@@ -7,6 +7,13 @@ fim). Este aqui é atualizado quando a situação muda de verdade (etapa aprovad
 ---
 
 ## Em uma frase
+
+> **19/11/2026:** a migração terminou (17/11) e o novo é o produto. Desde então: o **PS2 roda liso** (no jogo pesado A,
+> nas palavras dele, "liso liso liso"), o **rebobinar devolve a música de trás pra frente** (fase R), dá pra **gravar o
+> jogo** com F10 (fase G) e a **biblioteca tem cara de console**, com as versões de cada jogo, o catálogo em cinza e
+> sinopse/nota (fase B). Isso está na branch `gravar` (ainda não na `main`). O que espera você está em "Pra você
+> testar" logo abaixo; a próxima funcionalidade é a fase C (conectividade em cenários, tipo Switch). Os blocos mais
+> abaixo, com datas de 07–14/11, são o retrato da migração.
 
 > **17/11/2026: a migração está completa.** O novo é o produto (D38) e o plano agora é o [ROADMAP.md](ROADMAP.md) novo:
 > melhorar o que temos antes de crescer (PS2 sem defeito e liso como o PCSX2, todas as opções no menu com o perfil
@@ -99,7 +106,7 @@ flowchart LR
 | **M6 Rebobinar** | Igual ao antigo (preto e branco, ampulheta); desde a fase R (18/11) também PS1 e N64, e a música volta de trás pra frente (📼/🔇 nas Opções gerais) |
 | **PS2 mais leve** (19/11) | Sem o chiado e os engasgos (o rebobinar do PS1/PS2 desligado), o Chrome do app ~500 MB mais leve, F5/F8 3× mais rápidos, o erro de memória do jogo pesado B corrigido, ✨ Bonito sem engasgar e a tela larga funcionando |
 | **Fase B Biblioteca** (19/11) | Cada jogo aparece uma vez, com as versões dentro (região, tradução, as ROMs de um zip): "qual versão?" ao jogar, e ele lembra. 📖 Catálogo mostra em cinza os jogos que faltam (sem link nenhum). A ficha tem sinopse em português e a nota da crítica (Wikipédia/Wikidata) |
-| **G.1 Gravar** (18/11) | F10 (ou menu rápido / Emulação) grava o jogo como você vê, com moldura, filtro e som, em MP4 na pasta `Kof Games/Gravações`; PS1/PS2 nativos: o som entra na G.2 (escrita em 19/11, falta testar) |
+| **G.1 Gravar** (18/11) | F10 (ou menu rápido / Emulação) grava o jogo como você vê, com moldura, filtro e som, em MP4 na pasta `Kof Games/Gravações`; PS1/PS2 nativos: o som também (G.2, testada em 19/11) |
 | **M7 Imagem** | Painel de filtros (os mesmos pixels do antigo), NTSC, Scale4x, bloom, molduras, paletas |
 | **M8 Controles** | Teclas e botões por console e por jogo, analógico no teclado, jogadores 2 a 4 |
 | **M13.1 Rede** | O protocolo de rede do antigo (o mesmo do APK), provado contra os testes do antigo |
@@ -125,7 +132,19 @@ Isso cria a chave **privada** em `~/kofstation-chave.pem` (guarde; não mande pr
 
 A partir daí, cada envio na `main` publica uma versão (workflow "Versão") e o app instalado se atualiza sozinho.
 
-## Pra você testar 🧪 (a lista única, 14/11)
+## Pra você testar 🧪 (a lista única; atualizada 19/11)
+
+### Novos (18–19/11)
+
+1. **Rebobinar com a música (fase R):** num jogo de SNES e num de Mega Drive, segure **Backspace** (ou Select+Y): a
+   música volta de trás pra frente com efeito de fita e, ao soltar, continua de onde parou. Teste também no N64. Se
+   preferir o rebobinar mudo: Opções gerais → "Som ao rebobinar: 🔇". (No PS1 está desligado, a seu pedido.)
+2. **Gravar PS1 e PS2 com som (G.2):** abra um jogo de cada, **F10** pra começar e parar, e assista o vídeo em
+   `Kof Games/Gravações`: tem que ter som.
+3. **Jogo pesado B por 10 minutos (2.3):** o erro de memória foi achado e corrigido; falta você jogar.
+4. **✨ Bonito no jogo pesado A (4.3):** F6 → ⚙ Opções de emulação → perfil ✨ Bonito; joga uns minutos.
+5. **Decidir:** instalar o PCSX2 no teu PC, pra medir lado a lado (1.4/3.3)? Juntar a branch `gravar` na `main`?
+
 
 > Tudo que depende de você, num lugar só, cada teste com o passo a passo. Eu vou marcando ⏸ no ROADMAP e botando aqui.
 > A seção "Esperando você testar" mais abaixo é o histórico das etapas antigas (M9–M13, M15, PS2); os passos delas

@@ -32,10 +32,18 @@ flowchart LR
   F7["7 · Celular afinado"]
   F8["8 · Casa própria<br/>(main, atualizador, T.2)"]
   F9["9 · Só então: emuladores novos"]
+  FR["R · Rebobinar com a música"]
+  FG["G · Gravar o jogo"]
+  FB["B · Biblioteca de console"]
+  FC["C · Conectividade em cenários"]
   F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> F7 --> F9
   F0 -.-> F6
   F8 -.-> F9
+  FR --> FG --> FB --> FC
 ```
+
+As fases com letra (R, G, B, C) são as **funcionalidades novas** pedidas depois da migração (ver "Próximas
+funcionalidades" no fim); as numeradas são as de refinar o que já existia.
 
 A fase 0 corre em paralelo (é o Marcelo usando no dia a dia). A fase 8 pode andar a qualquer momento: só depende de
 decisões dele.
@@ -68,14 +76,15 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 | **F** | [Jogo pesado A liso hoje](agentes/F-ps2-liso-hoje.md): experimentos curtos que apontam o culpado dos engasgos + cartão de memória | local | `agente-d/ps2-liso` | — | 2, 3 (atalho) | ✅ junta em 18/11 (`d2b1d8d`): "liso liso" |
 | **D** | [PS2 liso como o PCSX2](agentes/D-ps2-liso.md): régua de medição, tabela de diferenças, um passo por vez | local | `agente-d/ps2-liso` | F | 1, 3 | sem pressa (o PS2 já está liso pro Marcelo) |
 | **E** | [Cartão, opções completas e gráficos](agentes/E-ps2-cartao-e-opcoes.md) | local | `agente-d/ps2-liso` | F (parte 1), D (perfis) | 2, 4, 5 | partes 1–2 feitas na F; parte 3 (gráficos) adiada |
-| **R** | [Rebobinar no PS1 e N64 com a música voltando junto](agentes/R-rebobinar.md) (fase R inteira) | local | `agente-r/rebobinar` | — | R | ⏸ feita, esperando ele ouvir/jogar |
-| **G** | Todos os consoles lisos (o método das fases 1–3 no PS1, N64 e WebAssembly) | local + nuvem | a definir | D | 6 | a escrever |
+| **R** | [Rebobinar no PS1 e N64 com a música voltando junto](agentes/R-rebobinar.md) (fase R inteira) | local | `agente-r/rebobinar` | — | R | ✅ feita 18/11 (o PS1 nativo ficou desligado a pedido dele, 19/11); ⏸ ele ouve |
+| **—** | Fases G (gravar), B (biblioteca) e o resto das fases 2–6 do PS2, feitas direto pelo Claude local sem arquivo de tarefa | local | `gravar` | — | G, B, 2–6 | ✅/⏸ ver cada fase |
+| **L** | Todos os consoles lisos (o método das fases 1–3 no PS1, N64 e WebAssembly) | local + nuvem | a definir | D | 6 | a escrever (a 6.3 já andou) |
 | **H** | Celular afinado | local (aparelho) | a definir | 0.2 | 7 | a escrever |
 | **O** | Orquestrador: revisar e juntar, pacotes, docs, fase 8 | nuvem | `claude/busy-ritchie-wrvk8h` | — | 0, 8 | contínua |
 
 Arquivos quentes (uma tarefa por vez): `crates/kof-nativo/src/{nucleo,filho,canal}.rs`, `packages/engine/src/nativo.ts`,
-`apps/desktop/src/stores/jogo.ts`, `packages/contracts/*`. F, D e E mexem neles: por isso rodam **em sequência, na mesma
-branch**, não em paralelo.
+`apps/desktop/src/stores/jogo.ts`, `packages/contracts/*`. F, D, E, R e as fases G/B mexeram neles: por isso rodaram **em
+sequência**, não em paralelo.
 
 ---
 
@@ -126,7 +135,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 | 3.3 | Diferenças do PCSX2 | tabela "PCSX2 × nós" com o custo de cada diferença | tabela no diário | D | ⏸ idem 1.4 (PCSX2) |
 | 3.4 | Janela própria pro PS2 | o jogo desenha direto na placa (opção experimental primeiro), X11 e Wayland, F3/menu/print funcionando | desenho aprovado antes; p99 igual ao PCSX2 | F/D | ❌ descartada 19/11: não dá pra ficar igual (menu, F3, avisos, ⏺ e molduras animadas são página; Wayland não posiciona janela), e ele só queria se ficasse igual |
 | 3.5 | Ritmo e linhas | laço pelo relógio, MTVU, prioridade, se a medição pedir | número antes × depois | D | ✅ 19/11 não precisou: a medição não pede (jogo A 60 fps, p99 24,5 ms, 0 faltas de som; jogo B 59,9 fps, 4,5 engasgos/min); o MTVU não muda nada no Bonito (4.3) |
-| 3.6 | **Liso como o PCSX2** | os dois jogos pesados, 10 min cada, sem engasgo | ⏸ ele joga e concorda | F/D | ⬜ |
+| 3.6 | **Liso como o PCSX2** | os dois jogos pesados, 10 min cada, sem engasgo | ⏸ ele joga e concorda | F/D | 🟨 jogo A: "liso liso liso" pra ele (18–19/11); ⏸ falta o jogo B 10 min (2.3) |
 
 ## Fase 4 · Opções completas
 
@@ -137,13 +146,13 @@ na fase que cuida do assunto (ou na hora, se for grave).
 | 4.3 | Perfil ✨ Bonito | o 4º perfil + os valores de todos os perfis decididos com a régua | tabela no diário | E | ✅ 19/11: medido peça por peça no jogo pesado A (PS2-LISO.md); o culpado era a transparência Alta junto da 2x: no Bonito vira Básica (133 → 39–60 engasgos/min, 60 fps, 0 falta de som); ⏸ ele joga no Bonito |
 | 4.4 | Renderer do PS2 | OpenGL/Vulkan escolhível | medido antes de virar padrão | E | ⬜ |
 | 4.5 | Tela larga e 60 fps | desligados por padrão, botão por jogo | um jogo com tela larga | E | ✅ 19/11: "Aviso de tela larga" (e as melhorias do jogo) por jogo no ⚙ Opções de emulação, desligados por padrão; a tela agora segue a proporção que o núcleo diz quando ela é larga (antes forçava 4:3) e o aviso `geometria` do nativo chega na página; jogo pesado A em 16:9 conferido por print |
-| 4.6 | Os outros consoles | o mesmo menu com o que cada núcleo declarar | print de cada um | E/G | 🟨 o curado já existe (N64 12, SNES 5, GB 6, NES 5, Mega Drive 5, GBA 6); faltam as declaradas (65/43/17/47/62/17): o `opcoes-wasm.mjs` acha as descrições, mas na tabela errada (SNES em turco) ou vazias; sem o texto original não dá pra traduzir com segurança (19/11) |
+| 4.6 | Os outros consoles | o mesmo menu com o que cada núcleo declarar | print de cada um | E/L | 🟨 o curado já existe (N64 12, SNES 5, GB 6, NES 5, Mega Drive 5, GBA 6); faltam as declaradas (65/43/17/47/62/17): o `opcoes-wasm.mjs` acha as descrições, mas na tabela errada (SNES em turco) ou vazias; sem o texto original não dá pra traduzir com segurança (19/11) |
 
 ## Fase 5 · Gráficos melhores (adiada pelo Marcelo, 18/11)
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| 5.1 | PS2 no núcleo | correções de resolução alta, nitidez (CAS), FXAA, ajuste de cor, texturas HD se houver | print antes × depois + custo em fps | E | ❌ 19/11: o LRPS2 não declara CAS, FXAA nem cor (só resolução e anisotrópico, que já estão no menu) e o núcleo não é modificado aqui (D1); vai pelos filtros da tela (5.2) |
+| 5.1 | PS2 no núcleo | correções de resolução alta, nitidez (CAS), FXAA, ajuste de cor, texturas HD se houver | print antes × depois + custo em fps | E | ❌ 19/11: o LRPS2 não declara CAS, FXAA nem cor (só resolução e anisotrópico, que já estão no menu) e o núcleo é o já compilado do antigo, sem modificar (D36); vai pelos filtros da tela (5.2) |
 | 5.2 | Filtros da tela (F4) | nitidez, ampliação estilo FSR/xBR, bloom melhor, pra todos os consoles | teste de pixels + print | E | ⬜ |
 | 5.3 | ✨ Bonito revisto | o perfil com o que entrou | ⏸ ele aprova o visual | E | ⬜ |
 
@@ -151,11 +160,11 @@ na fase que cuida do assunto (ou na hora, se for grave).
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| 6.1 | PS1 nativo no PC | engasgos, memória e latência medidos e corrigidos | números + ele joga | G | ⬜ |
-| 6.2 | N64 | idem | idem | G | ⬜ |
-| 6.3 | WebAssembly (SNES, Mega Drive, GBA, Neo Geo…) | ritmo, abertura, memória da página | números | G | 🟨 ritmo ✅ 19/11 (`medir-ritmo.mjs`, 3×20 s: ~3.580 novos/min, 16–19 repetidos, 0–6 pulados, p50/p95/p99 16,67 ms); falta abertura e memória |
-| 6.4 | Latência de entrada | do botão à tela, comparada com o RetroArch | tabela | G | ⬜ |
-| 6.5 | Abertura | tempo até jogar (app e biblioteca grande) | número antes × depois | G | ⬜ |
+| 6.1 | PS1 nativo no PC | engasgos, memória e latência medidos e corrigidos | números + ele joga | L | ⬜ |
+| 6.2 | N64 | idem | idem | L | ⬜ |
+| 6.3 | WebAssembly (SNES, Mega Drive, GBA, Neo Geo…) | ritmo, abertura, memória da página | números | L | 🟨 ritmo ✅ 19/11 (`medir-ritmo.mjs`, 3×20 s: ~3.580 novos/min, 16–19 repetidos, 0–6 pulados, p50/p95/p99 16,67 ms); falta abertura e memória |
+| 6.4 | Latência de entrada | do botão à tela, comparada com o RetroArch | tabela | L | ⬜ |
+| 6.5 | Abertura | tempo até jogar (app e biblioteca grande) | número antes × depois | L | ⬜ |
 
 ## Fase 7 · Celular afinado
 
@@ -186,37 +195,21 @@ Nada decidido; cada um entra pelo mesmo caminho (manifesto com SHA-256, Linux e 
 
 ---
 
-## Onde parou (17/11, fim da tarefa F)
+## Onde parou (19/11)
 
-O Marcelo joga o jogo pesado A liso, com resolução maior, e **não quer mais otimização agora** ("rodando de boa, não
-precisa otimizar tanto"). Tudo o que foi feito e o que falta está em [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md)
-(guia pro próximo núcleo pesado, ex.: GameCube/Wii) e o diário em [PS2-LISO.md](PS2-LISO.md). Fica anotado, sem
-pressa, nesta ordem: ✨ Bonito peça por peça (4.3) → o "A" e o estado fora da página (3.2) → jogo pesado B (2.3) →
-opções do PS1 e dos outros (4.1/4.6) → 4.4/4.5 → fase 5 → janela própria (3.4, desenho aprovado antes).
-
-## Instrução pro Claude Code local (tarefa F, já feita)
-
-Na pasta do repositório, no PC do Marcelo:
-
-```bash
-git fetch origin && git checkout claude/busy-ritchie-wrvk8h && git pull && git checkout -B agente-d/ps2-liso
-```
-
-E no Claude Code:
-
-> Leia `AGENTS.md`, `docs/agentes/LEIA-ME.md`, a seção "Regras desta tarefa" de `docs/agentes/D-ps2-liso.md` e
-> `docs/agentes/F-ps2-liso-hoje.md`, e faça a tarefa F (estamos na branch `agente-d/ps2-liso`). Objetivo: eu jogar o
-> jogo pesado A liso hoje e conseguir salvar no cartão. BIOS: (caminho). Jogo pesado A: (caminho). Estado no trecho que
-> engasga: (caminho). Estado no menu de salvar: (caminho, se tiver). Nunca escreva nome de jogo no repositório. Me
-> mostre os números a cada achado e me chame pra jogar quando achar que melhorou. Antes de fazer a janela própria, me
-> mostre o desenho.
+O PS2 está "liso liso liso" pra ele no jogo pesado A; feitas as fases R (rebobinar com a música), G.1–G.2 (gravar) e
+B.1–B.4 (biblioteca com cara de console), e da parte do PS2: 2.3 (erro de memória do jogo B), 3.2 (menos RAM), 4.3
+(✨ Bonito), 4.5 (tela larga) e as opções do PS1. **Tudo isso está na branch `gravar`, ainda não na `main`.** O que
+espera ele está no "Pra você testar" do [SITUACAO.md](SITUACAO.md). A próxima funcionalidade escolhida é a **fase C**
+(conectividade em cenários). O guia do que o PS2 ensinou: [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md); o
+diário: [PS2-LISO.md](PS2-LISO.md); o rebobinar: [REBOBINAR.md](REBOBINAR.md).
 
 ## Próximas funcionalidades (a escolher com o Marcelo, 18/11)
 
 A migração acabou e o que temos está liso: agora pode crescer. Cada item vira uma fase com entregável e checkpoint
 quando ele escolher. Emulador novo continua sendo a fase 9 (ele escolhe a ordem).
 
-Escolhidas em 18/11, nesta ordem (as fases com entregáveis entram quando ele responder as perguntas abertas):
+Escolhidas em 18–19/11 (R, G e B feitas; C a fazer):
 
 ### Fase R · Rebobinar no PS1 e no N64, com a música voltando junto (decidido 18/11)
 
@@ -231,11 +224,11 @@ soltar.
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| R.1 | Contas do som | funções puras no `domain` (inverter por quadro, curva de fade, crossfade, filtro de "fita"), vetores de teste em fixture | testes amostra a amostra | nuvem | ✅ `82020f3` |
-| R.2 | Som ao rebobinar nos consoles da página | anel com os últimos segundos de som no `worker.ts`, tocado ao contrário em sincronia com a imagem (2× como a imagem), fade ao começar, crossfade ao soltar; opção "Som ao rebobinar: 📼 fita / 🔇 mudo" | e2e: sai som rebobinando; ao soltar, o som é idêntico ao de quem carregou aquele estado; ⏸ ele ouve no SNES | nuvem | ✅ `4ccf8c8`; ⏸ ele ouve |
-| R.3 | Rebobinar no PS1 nativo (**desligado por enquanto**, pedido dele 19/11; o PS2 nunca deveria ter ligado: ver JORNAL 19/11) | `kof-nativo/src/rebobinar.rs` (o algoritmo do `rebobinador.ts` em Rust, dentro do processo do jogo; o estado nunca passa pela página), comando liga/segura/solta | teste Rust (voltar N quadros e rodar de novo dá a mesma imagem) + medido com × sem gravar | local | ✅ `85ebed7` (foto ~1,1 ms); ⏸ ele rebobina |
+| R.1 | Contas do som | funções puras no `domain` (inverter por quadro, curva de fade, crossfade, filtro de "fita"), vetores de teste em fixture | testes amostra a amostra | local | ✅ `82020f3` |
+| R.2 | Som ao rebobinar nos consoles da página | anel com os últimos segundos de som no `worker.ts`, tocado ao contrário em sincronia com a imagem (2× como a imagem), fade ao começar, crossfade ao soltar; opção "Som ao rebobinar: 📼 fita / 🔇 mudo" | e2e: sai som rebobinando; ao soltar, o som é idêntico ao de quem carregou aquele estado; ⏸ ele ouve no SNES | local | ✅ `4ccf8c8`; ⏸ ele ouve |
+| R.3 | Rebobinar no PS1 nativo (**desligado por enquanto**, pedido dele 19/11; o PS2 nunca deveria ter ligado: ver JORNAL 19/11) | `kof-nativo/src/rebobinar.rs` (o algoritmo do `rebobinador.ts` em Rust, dentro do processo do jogo; o estado nunca passa pela página), comando liga/segura/solta | teste Rust (voltar N quadros e rodar de novo dá a mesma imagem) + medido com × sem gravar | local | ✅ `85ebed7` (foto ~1,1 ms); **desligado** desde 19/11 (`SEM_REBOBINAR` em `engine/nativo.ts`) até ele pedir de volta |
 | R.4 | Rebobinar no N64 | o mesmo, com o estado de ~16 MB (fotos mais espaçadas se a medição pedir) | idem | local | ✅ no Worker (no PC o N64 é wasm): foto a cada 6 quadros, ~12 ms cada; ⏸ ele joga |
-| R.5 | Som ao rebobinar no PS1/N64 | o anel e as contas do R.1 no `rebobinar.rs` (mesmos vetores de teste) | ⏸ ele ouve no PS1 e no N64 | local | ✅ junto com o R.3 (N64: o do Worker); ⏸ ele ouve |
+| R.5 | Som ao rebobinar no PS1/N64 | o anel e as contas do R.1 no `rebobinar.rs` (mesmos vetores de teste) | ⏸ ele ouve no PS1 e no N64 | local | ✅ junto com o R.3 (no PS1 desligado com ele; N64: o do Worker); ⏸ ele ouve no N64 |
 
 ### Fase G · Gravar o jogo (pedido 18/11)
 
@@ -247,21 +240,12 @@ senão WebM) e vai em pedaços de 1 s direto pro disco, em `<Kof Games>/Gravaç�
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
 | G.1 | Gravar liga/desliga | F10, menu rápido e menu Emulação; selo ⏺ com o relógio (clicar para); `domain/gravacao.ts` (formato, nome, tamanho até 1080p), `engine/gravador.ts`, `app-core/gravacao.ts` (pedaços em ordem), `gravacao.parte`/`gravacao.fim` no Rust (`kof-files/gravacoes.rs`); som dos consoles da página (antes do volume: grava cheio mesmo no mudo); jogo fechou = salva | e2e `gravar.spec.ts` (vídeo abre, 1080p, com som; sem pasta = erro e para); ⏸ ele grava um jogo e assiste | local | ✅ `2635305`; aprovado por ele (18/11, gravou e funcionou) |
-| G.2 | Som do PS1/PS2 nativos na gravação | comando `somPraPagina` e mensagem `SOM` no protocolo nativo (fixture dos dois lados); o `filho.rs` manda uma cópia do que toca na placa (antes do volume) só enquanto grava; `JogoNativo.somPraGravar()` toca num AudioContext na taxa do núcleo ligado só ao gravador | `pnpm check`, `check:rust` (contrato), e2e `gravar.spec.ts`; ⏸ ele grava um jogo de PS1 e um de PS2 | local | 🟨 código escrito 19/11 **sem compilar nem testar** (ele estava jogando): falta rodar os testes e ele gravar |
+| G.2 | Som do PS1/PS2 nativos na gravação | comando `somPraPagina` e mensagem `SOM` no protocolo nativo (fixture dos dois lados); o `filho.rs` manda uma cópia do que toca na placa (antes do volume) só enquanto grava; `JogoNativo.somPraGravar()` toca num AudioContext na taxa do núcleo ligado só ao gravador | `pnpm check`, `check:rust` (contrato), e2e `gravar.spec.ts`; ⏸ ele grava um jogo de PS1 e um de PS2 | local | ✅ testada 19/11 (`b0eb032`: `processo.rs` recebe o `SOM` de verdade, e2e da G.1 em dia); ⏸ ele grava um jogo de PS1 e um de PS2 |
 | G.3 | "Salvar os últimos 30 s" | o app guarda sempre o último trecho (memória limitada) e um atalho salva o que já passou | medir o custo de gravar sempre (F3) antes de ligar por padrão | local | ⬜ (opcional, ele escolhe) |
 
 Em aberto: o custo de gravar num jogo pesado (montar 1080p a cada quadro + codificar) não foi medido num jogo de
 verdade; medir com o F3 no G.1 (com × sem gravar) quando ele liberar a máquina. A moldura animada sai parada no vídeo.
 
-1. **Rebobinar no PS1 nativo.** Dentro do processo do jogo, em Rust (`kof-nativo/src/rebobinar.rs`, o mesmo algoritmo
-   do `engine/rebobinador.ts`: estado inteiro mais novo + só os pedaços de 16 KB que mudaram). O estado nunca passa
-   pela página. Medido com `tools/medir-ps2.mjs` (com × sem gravar) antes de ligar por padrão. Risco: a foto com as
-   linhas de vídeo e som do PCSX paradas. *Aberto: o N64 (estado ~16 MB) entra junto?*
-2. **Rebobinar com a música voltando junto.** Anel com os últimos segundos de som, marcado por quadro; ao rebobinar,
-   toca ao contrário sincronizado com a imagem, com efeito de fita, fade ao começar e crossfade ao soltar. A música
-   continua exatamente de onde parou porque o chip de som volta junto no estado. Contas do som em funções puras no
-   `domain`, com os mesmos vetores de teste no `worker.ts` (consoles da página) e no `rebobinar.rs` (PS1). Opção
-   "Som ao rebobinar: 📼 fita / 🔇 mudo". *Aberto: fita a 2× ou velocidade normal invertida (ou as duas)?*
 ### Fase B · Biblioteca com cara de console (19/11; fonte da sinopse escolhida pelo Claude, D39)
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
@@ -270,11 +254,6 @@ verdade; medir com o F3 no G.1 (com × sem gravar) quando ele liberar a máquina
 | B.2 | Catálogo | "📖 Catálogo" mostra em cinza os jogos da base (libretro-database, ~19 mil) que ele não tem, com ano/gênero/empresa na busca e nas facetas; sem Jogar, **sem link nem dica de onde baixar** | unit + e2e | local | ✅ `70a8ba3`; aprovado (19/11) |
 | B.3 | Ficha com sinopse e nota | `jogo.sobre` no Rust (Wikidata + Wikipédia pt/en, cache, D39); a ficha mostra a nota (média 0–100 das críticas do Wikidata), a sinopse e a fonte com o link do artigo; "sem internet" e "sem artigo" avisados | unit Rust/TS, teste pela internet (ignorado no CI) e e2e com resposta falsa | local | ✅ `7935438`; aprovado (19/11) |
 | B.4 | Capas no catálogo e por obra | a capa oficial (libretro-thumbnails) também pros jogos do catálogo (as regiões USA, World, USA+Europe, Europe, Japan tentadas primeiro) e, dos que ele tem, pela região da versão principal | unit | local | ✅ 19/11 |
-
-3. **Biblioteca com cara de console.** Jogo (a obra) separado dos arquivos (versões: região, revisão, tradução, hack):
-   um zip com várias traduções vira um jogo só, com "qual versão?" ao clicar. Catálogo completo por console (bases
-   No-Intro/Redump), os que ele não tem em cinza, com sinopse, nota, ano e gênero (base com API a escolher). Jogo em
-   cinza **nunca** tem link ou dica de onde baixar.
 
 ### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11)
 

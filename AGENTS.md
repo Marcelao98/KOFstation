@@ -4,8 +4,6 @@ Você está no **KOFstation**: o app reconstruído em React + TypeScript + Rust 
 **A migração está completa (17/11/2026)** e o novo é o produto; o plano agora é melhorar o que temos antes de crescer
 ([docs/ROADMAP.md](docs/ROADMAP.md); a migração está em [docs/ROADMAP-MIGRACAO.md](docs/ROADMAP-MIGRACAO.md)).
 
-> **Continuando a sessão de 08/11 à noite?** Comece por [docs/agentes/CONTINUAR.md](docs/agentes/CONTINUAR.md).
->
 > **Recebeu uma tarefa de [docs/agentes/](docs/agentes/LEIA-ME.md)?** Então você não é o orquestrador: leia este
 > arquivo (as regras valem pra todos), o [LEIA-ME de lá](docs/agentes/LEIA-ME.md) e **só a sua tarefa**. A lista
 > abaixo é pro orquestrador.

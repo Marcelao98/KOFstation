@@ -133,9 +133,9 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Biblioteca com cara de console: uma linha por jogo com as versões dentro ("qual versão?"), 📖 catálogo do que falta em cinza, sinopse e nota (Wikipédia/Wikidata) | ✅ fase B (B.1–B.3) |
 | Configurações em arquivo (camadas geral → console → jogo) e backup `.kofsave` (abre nos dois apps) | ✅ M4 |
 | Save de bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos de jogo | ✅ M5 |
-| Rebobinar (no Worker; PS1 nativo dentro do processo do jogo; N64 incluído) com a música voltando junto ([docs/REBOBINAR.md](docs/REBOBINAR.md)) | ✅ M6 + fase R |
+| Rebobinar (no Worker; PS1 nativo dentro do processo do jogo, desligado a pedido dele em 19/11; N64 incluído) com a música voltando junto ([docs/REBOBINAR.md](docs/REBOBINAR.md)) | ✅ M6 + fase R |
 | Painel de imagem (os mesmos pixels do antigo), passadas, molduras, paletas | ✅ M7 |
-| Gravar o jogo (F10): vídeo como você vê (moldura + filtro), com som, em `Kof Games/Gravações` | ✅ G.1 · 🟨 G.2 (som do PS1/PS2 nativos: escrito, falta testar) |
+| Gravar o jogo (F10): vídeo como você vê (moldura + filtro), com som, em `Kof Games/Gravações` | ✅ G.1 · ✅ G.2 (som do PS1/PS2 nativos; ⏸ ele grava um) |
 | Controles e teclas por console/jogo, analógico no teclado, jogadores 2–4 | ✅ M8 |
 | Jukebox e música (trilha FM, violino, .spc, .wav), abertura, música do Início | ⏸ M9 (falta o Marcelo testar) |
 | Estatísticas, espaço usado, traduções, caçador de bugs (F9) e replay | ⏸ M10 |

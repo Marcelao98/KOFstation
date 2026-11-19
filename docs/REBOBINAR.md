@@ -5,6 +5,11 @@ de trás pra frente, com efeito de fita, e ao soltar continua de onde parou. Val
 página (NES, SNES, GB/GBC, GBA, Mega Drive, Master System, Game Gear, Neo Geo, N64 e o PS1 em WebAssembly) e o **PS1
 nativo**. O PS2 não rebobina (fica pra depois).
 
+> **19/11: o rebobinar do PS1 nativo está desligado** a pedido do Marcelo (`SEM_REBOBINAR` em
+> `packages/engine/src/nativo.ts`), depois que o processo nativo ligou o rebobinar também no PS2 e trouxe chiado e
+> engasgos (JORNAL de 19/11). O código e os testes continuam; o processo recusa sozinho estado maior que 24 MB
+> (`FOTO_MAXIMA` em `filho.rs`). Religar é tirar o PS1 do `SEM_REBOBINAR` e medir com o `tools/medir-rebob.mjs`.
+
 ```mermaid
 flowchart LR
   subgraph jogando

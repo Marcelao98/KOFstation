@@ -48,5 +48,5 @@ A divisão de tarefas de agora está no [ROADMAP](../ROADMAP.md) ("Divisão de t
 | C · Ritmo dos quadros do PS2/PS1 nativo (PS2 liso) | [C-ritmo-nativo.md](C-ritmo-nativo.md) | `agente-c/ritmo-nativo` | ✅ junta em 09/11 (`d7e57d3`) |
 | D · PS2 liso como o PCSX2 (M16.5; roda no PC do Marcelo, mede sozinho) | [D-ps2-liso.md](D-ps2-liso.md) | `agente-d/ps2-liso` | aberta (17/11) |
 | F · Jogo pesado A liso hoje (o atalho de D e E: engasgos e cartão) | [F-ps2-liso-hoje.md](F-ps2-liso-hoje.md) | `agente-d/ps2-liso` | ✅ junta em 18/11 |
-| R · Rebobinar no PS1 e no N64, com a música voltando junto (fase R) | [R-rebobinar.md](R-rebobinar.md) | `agente-r/rebobinar` | **agora** (18/11) |
+| R · Rebobinar no PS1 e no N64, com a música voltando junto (fase R) | [R-rebobinar.md](R-rebobinar.md) | `agente-r/rebobinar` | ✅ feita 18/11 (na branch `gravar`) |
 | E · PS2: cartão de memória, menu de salvar e o pacote completo de opções (PS2 e PS1) | [E-ps2-cartao-e-opcoes.md](E-ps2-cartao-e-opcoes.md) | `agente-d/ps2-liso` (junto com a D) | aberta (17/11) |

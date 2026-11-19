@@ -21,6 +21,26 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 · Revisão do que o Claude local fez (fases R, G, B e o resto do PS2) e da documentação
+
+**Pedido:** "foi feito muita coisa; passa pela documentação e vê inconsistências, e dá uma olhada no que o Claude
+local fez".
+**Revisado:** os 32 commits da `gravar` (que já contém a `agente-r/rebobinar`): fase R (rebobinar com a música; o PS1
+nativo desligado depois do chiado no PS2), G.1–G.2 (gravar), B.1–B.4 (biblioteca com cara de console, D39), 2.3,
+3.2, 4.3, 4.5 e as opções do PS1. O código do rebobinar nativo está certo: o processo começa desligado, a página
+não liga no PS1/PS2 (`SEM_REBOBINAR`) e estado maior que 24 MB é recusado (`FOTO_MAXIMA`).
+**Corrigido na documentação:** um nome de jogo no JORNAL (numa fala dele) virou "jogo pesado A"; no ROADMAP, o
+diagrama ganhou as fases R, G, B e C, a tarefa G (consoles lisos) virou **L** (a letra G já era a fase Gravar), a G.2
+aparecia "sem compilar" mas foi testada (`b0eb032`), a R.3 dizia "⏸ ele rebobina" mas está desligada, R.1/R.2 foram
+feitas no local (não na nuvem), a 5.1 citava a D1 (que é "sem RetroArch") em vez da D36, a 3.6 não dizia que o jogo A
+já está liso, e saíram as sobras velhas ("Onde parou 17/11", a instrução da tarefa F e as listas 1–3 já viradas nas
+fases R e B). O REBOBINAR.md e o README dizem que o PS1 está desligado; o SITUACAO ganhou o retrato de 19/11 e a lista
+nova do "Pra você testar"; o AGENTS.md perdeu o ponteiro velho pro CONTINUAR.md (08/11). A fase C do roadmap (feita na
+nuvem em 18/11) foi juntada.
+**Conferido:** `pnpm check` ok; Rust ok menos o `pcsx` (SIGILL deste servidor, sabido); e2e 68 ok.
+**Onde parou:** tudo na `claude/busy-ritchie-wrvk8h` (= `gravar` + a fase C + esta revisão). ⏸ ele: os testes novos
+do "Pra você testar" e dizer se junta na `main` (PR).
+
 ## 2026-11-19 (manhã) · Fase 3 do PS2 com a máquina livre: −500 MB, F5/F8 3× mais rápidos, o erro de memória do B, Bonito e tela larga
 
 **Pedido:** "pode continuar agora, a máquina tá livre, faz tudo que precisa e deixa salvo"; "não há estado salvo do
@@ -46,7 +66,7 @@ som (G.2); PR da `gravar` pra `main`. Sobra no roadmap: 1.2 (gráfico), 1.3, 4.4
 
 ## 2026-11-19 (madrugada) · B.4, opções do PS1 completas, 6.3 ritmo; 3.2 pausada
 
-**Pedido:** "o chiado foi só no PS2"; "e o Tauri? e o Electron?"; "abre e testa o Shadow of the Colossus"; "continua no
+**Pedido:** "o chiado foi só no PS2"; "e o Tauri? e o Electron?"; "abre e testa o jogo pesado A"; "continua no
 roadmap só com coisas leves até fechar, não precisa perguntar, vou dormir".
 **Feito:** B.4 `a42bb7b` (capa do catálogo: as regiões primeiro); 4.1/4.2 PS1 `9f899ec` (as 53 opções que o PCSX
 declara, 36 novas no Avançado em português, BIOS e cartão 1 fixos); D2 reavaliado (Tauri/Electron não); 6.3 ritmo.
