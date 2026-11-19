@@ -134,7 +134,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 |---|---|---|---|---|---|
 | 4.1 | Lista do núcleo | comando que leva tudo o que o núcleo declara até a tela (Rust → contrato → `app-core`) | teste Rust + unit | E | ✅ PS2 (82, do cabeçalho) · ✅ PS1 (53, do PCSX rodando: `opcoes-ps1-declaradas.ts`, 19/11) |
 | 4.2 | **Toda opção no menu** | grupos como no PCSX2 (Gráficos, Emulação, Som, Cartão, Correções, Sistema), Avançado, ⚠ nas perigosas, ⚡/↻ conferidos, "voltar ao perfil" | print com PS2 e PS1 | E | ✅ PS2 (tela própria ⚙ Opções de emulação) · ✅ PS1 (19/11: as 36 que faltavam no Avançado, em português e no grupo certo; BIOS e cartão 1 fixos pelo app) |
-| 4.3 | Perfil ✨ Bonito | o 4º perfil + os valores de todos os perfis decididos com a régua | tabela no diário | E | 🟨 existe; engasga no jogo pesado A: a 2x sozinha roda bem, medir o anisotrópico 8x e o MTVU |
+| 4.3 | Perfil ✨ Bonito | o 4º perfil + os valores de todos os perfis decididos com a régua | tabela no diário | E | ✅ 19/11: medido peça por peça no jogo pesado A (PS2-LISO.md); o culpado era a transparência Alta junto da 2x: no Bonito vira Básica (133 → 39–60 engasgos/min, 60 fps, 0 falta de som); ⏸ ele joga no Bonito |
 | 4.4 | Renderer do PS2 | OpenGL/Vulkan escolhível | medido antes de virar padrão | E | ⬜ |
 | 4.5 | Tela larga e 60 fps | desligados por padrão, botão por jogo | um jogo com tela larga | E | ⬜ |
 | 4.6 | Os outros consoles | o mesmo menu com o que cada núcleo declarar | print de cada um | E/G | 🟨 o curado já existe (N64 12, SNES 5, GB 6, NES 5, Mega Drive 5, GBA 6); faltam as declaradas (65/43/17/47/62/17): o `opcoes-wasm.mjs` acha as descrições, mas na tabela errada (SNES em turco) ou vazias; sem o texto original não dá pra traduzir com segurança (19/11) |

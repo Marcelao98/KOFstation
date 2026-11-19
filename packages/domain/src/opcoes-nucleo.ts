@@ -206,7 +206,9 @@ const PS2_CURADO: OpcaoDeNucleo[] = [
     ],
     padrao: 'Basic',
     naHora: true,
-    perfis: perfis('Minimum', 'Basic', 'High'),
+    // ✨ Bonito em Básica (4.3, 19/11): a Alta junto com a resolução 2x engasgava (jogo pesado A: 133 → 39–60
+    // engasgos/min trocando só ela; o MTVU e o anisotrópico quase não mudavam). O Fiel continua Alta (o 1x aguenta)
+    perfis: perfis('Minimum', 'Basic', 'High', 'Basic'),
   },
   {
     chave: 'pcsx2_dithering',

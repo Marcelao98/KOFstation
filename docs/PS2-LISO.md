@@ -148,3 +148,19 @@ Atualização (17/11, à noite): o Marcelo aumentou só a **resolução interna*
   mostrou o `fetch` copiando os 21 MB na linha da página (o caminho antigo mandava um Blob); com o Blob, F5 300–317 ms,
   F8 283–300 ms, sem quadro novo 383–400 ms (era 905–941), Chrome com F5 1.445 MB (era 1.891–1.988). O pacote do
   Rust (gzip rápido) tem 21 MB; o da página tinha 18.
+
+## 19/11 · 4.3 O ✨ Bonito peça por peça (jogo pesado A, 60 s andando, 1 rodada cada salvo onde diz)
+
+| Bonito com... | engasgos/min | p99 | faltas |
+|---|---|---|---|
+| tudo (2x, aniso 8x, MTVU, transparência Alta, sem underclock) | 133 | 27,1 ms | 0 |
+| sem o anisotrópico | 95 | 26,5 | 0 |
+| sem o MTVU | 88 | 26,1 | 0 |
+| underclock leve | 88 | 26,2 | 8 |
+| **transparência Básica** | **45** | 25,2 | 0 |
+| underclock leve + Básica | 59 | 25,6 | 0 |
+| Básica, MTVU ligado (2 rodadas) | 54 · 39 | 25,4 · 25,1 | 0 |
+| Básica, MTVU desligado (2 rodadas) | 58 · 60 | 25,5 · 25,4 | 0 |
+
+O Equilibrado no mesmo trecho: 8–17 engasgos/min, p99 24,5 ms. Decidido: o Bonito fica com a transparência **Básica**
+(o resto igual). O MTVU não muda nada com a Básica; fica ligado como estava.
