@@ -21,6 +21,25 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 · Rebobinar do PS1 "aos trancos": medido, sem defeito achado
+
+**Pedido:** ele achou o rebobinar do PS1 (jogo de plataforma, 30 quadros/s) sem fluidez; pediu pra medir com o jogo
+em movimento, só no PS1.
+**Feito:** `tools/medir-rebob.mjs` (abre o app de verdade com os dados de quem roda, joga com ↑ e Z, segura o
+Backspace; a cada vsync diz se a imagem é nova, onde foi a maior parada e quando cada quadro chega pelo canal) e o
+teste ignorado `rebobinar_liso_com_jogo_de_verdade` (`KOF_JOGO`, `KOF_ESTADO`, `KOF_VARS`, `KOF_VOLTAR_ATE`).
+**Medido:** no processo, cada passo pra trás leva 3–4 ms e toca 16,7 ms de som (60 imagens/s); o canal não cai. No app,
+as paradas de 0,6–1 s no começo do rebobinar eram **a tela preta do próprio jogo** (o script corre às cegas e o
+personagem morre): o jogo ficou 92–96 quadros sem desenhar antes do Backspace (print confirmou), e o rebobinar volta
+por ela. Rodada sem morte: 56 imagens novas/s, maior parada 50 ms. O efeito preto e branco não muda nada (medido com
+e sem). "Rodar até 3 quadros por passo até sair imagem" foi testado e saiu (sem número que mostre melhora).
+**Deu errado / aprendido:** matar o `kofstation` com `pkill -f` pega o próprio shell; a 1ª tentativa reabriu na janela
+dele e derrubou o núcleo do jogo dele (ele avisou). Com uma janela do app aberta, o Chrome do app novo entra nela e
+ignora a porta de depuração: fechar a janela antes.
+**Onde parou:** ⏸ ele dizer em que momento do jogo sentiu o tranco (correndo? depois de morrer? logo ao apertar?) pra
+medir naquele trecho. Depois: G.2 (som do PS1/PS2 nativo na gravação), ainda não começada.
+---
+
 ## 2026-11-18 · G.1 · Gravar o jogo (F10)
 
 **Pedido:** push da tarefa R (feito, ele testou e funcionou) e "uma funcionalidade pra gravar o jogo, no menu". Ele

@@ -118,7 +118,12 @@ fn rebobinar_liso_com_jogo_de_verdade() {
         jogo: Some(jogo),
         sistema: dir.path().into(),
         saves: dir.path().into(),
-        variaveis: Default::default(),
+        // KOF_VARS="chave=valor,chave=valor": as opções do perfil (ex.: pcsx_rearmed_frameskip_type=auto)
+        variaveis: std::env::var("KOF_VARS")
+            .unwrap_or_default()
+            .split(',')
+            .filter_map(|kv| kv.split_once('=').map(|(k, v)| (k.to_string(), v.to_string())))
+            .collect(),
         dispositivo: None,
     };
     let mut n = Nucleo::carregar(&a).expect("abriu");
@@ -157,6 +162,7 @@ fn rebobinar_liso_com_jogo_de_verdade() {
     let mut anterior = n.quadro().rgba;
     let (mut passos, mut parados, mut sem_novo, mut extras) = (0, 0, 0, 0);
     let mut tempos = Vec::new();
+    let (mut som_volta, mut som_ms) = (Vec::new(), Vec::<f64>::new());
     while passos < 140 {
         let t = std::time::Instant::now();
         let Some(e) = rb.voltar().map(<[u8]>::to_vec) else {
@@ -175,6 +181,8 @@ fn rebobinar_liso_com_jogo_de_verdade() {
             }
         }
         tempos.push(t.elapsed().as_secs_f64() * 1000.0);
+        rb.som.passo(&mut som_volta);
+        som_ms.push(som_volta.len() as f64 / 2.0 * 1000.0 / n.av.timing.sample_rate);
         if !veio {
             sem_novo += 1;
         }
@@ -194,5 +202,18 @@ fn rebobinar_liso_com_jogo_de_verdade() {
         p(0.5),
         p(0.95),
         p(1.0)
+    );
+    let total: f64 = som_ms.iter().sum();
+    println!(
+        "som por passo: média {:.1} ms (o ritmo: {:.0} imagens/s), mín {:.1}, máx {:.1}; primeiros {:?}",
+        total / som_ms.len().max(1) as f64,
+        som_ms.len() as f64 * 1000.0 / total.max(1.0),
+        som_ms.iter().cloned().fold(f64::MAX, f64::min),
+        som_ms.iter().cloned().fold(0.0, f64::max),
+        som_ms
+            .iter()
+            .take(8)
+            .map(|x| (x * 10.0).round() / 10.0)
+            .collect::<Vec<_>>()
     );
 }
