@@ -21,6 +21,25 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 (madrugada) · B.4, opções do PS1 completas, 6.3 ritmo; 3.2 pausada
+
+**Pedido:** "o chiado foi só no PS2"; "e o Tauri? e o Electron?"; "abre e testa o Shadow of the Colossus"; "continua no
+roadmap só com coisas leves até fechar, não precisa perguntar, vou dormir".
+**Feito:** B.4 `a42bb7b` (capa do catálogo: as regiões primeiro); 4.1/4.2 PS1 `9f899ec` (as 53 opções que o PCSX
+declara, 36 novas no Avançado em português, BIOS e cartão 1 fixos); D2 reavaliado (Tauri/Electron não); 6.3 ritmo.
+**Medido:** jogo pesado A (2 min, andando, F5/F8): 59,5 fps, p99 25,7 ms; com a RAM cheia (187 MB livres, jogo com
+263 MB na swap) voltaram 112 faltas de som e 61 engasgos/min, e F5/F8 pararam a tela 1,1–2,3 s (era ~0,6 s em 17/11
+com a máquina mais folgada). Ritmo do WebAssembly: ~3.580 novos/min, p99 16,67 ms. Memória da página do PS2:
+756→570 MB sem estado (o JS é só 60–170 MB; o resto é o Chrome: renderer, GPU e o processo principal).
+**Deu errado / aprendido:** a sonda de memória abriu o PS2 pesado com os dados dele e a máquina travou (ele avisou):
+medir o PS2 só com a máquina livre, e nunca com os dados de verdade dele. A 4.6 parou: as descrições das opções dos
+núcleos WebAssembly saem da tabela errada (turco no SNES) ou vazias; tentativa desfeita.
+**Onde parou:** o que sobra no roadmap precisa da máquina livre (PS2: 1.2–1.4, 2.3, 3.2, 3.3, 3.5, 3.6, 4.3–4.5, 5.1),
+de aparelho (fase 7: celular), de decisão dele (0.x, 8.x) ou é grande e visual (5.2 filtros novos, 9 emuladores
+novos). ⏸ ele: gravar um PS1/PS2 com som (G.2) e dizer se quer o PR da `gravar` pra `main`.
+
+---
+
 ## 2026-11-19 · Regressão da fase R no PS2 (chiado e engasgos); rebobinar desligado no PS1/PS2; 3.4 descartada
 
 **Pedido:** voltar à fase 3 (menos RAM, janela própria do PS2 "só se der pra ficar igualzinho com todos os efeitos"),

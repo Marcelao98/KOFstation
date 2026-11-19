@@ -122,7 +122,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
 | 3.1 | Os engasgos esporádicos | cada suspeito (salvar automático, bateria a cada 1 s, lixo de quadros, shader na 1ª vez, swap) medido e corrigido ou descartado | números antes × depois | **F** | ✅ 17/11 (F5/F8 de ~2,2 s → ~0,6 s; o Marcelo jogou liso) |
-| 3.2 | Menos RAM | filas menores, quadro no tamanho da tela, estado e bateria pelo Rust, Chromium enxuto | memória total antes × depois | F → D | ⬜ próximo: o "A" (quadro reduzido na placa + YUV 4:2:0) e o estado salvo sem passar pela página |
+| 3.2 | Menos RAM | filas menores, quadro no tamanho da tela, estado e bateria pelo Rust, Chromium enxuto | memória total antes × depois | F → D | ⏸ pausada 19/11: medir o PS2 pesado trava a máquina dele quando ela está em uso (7 GB, Firefox aberto); só com a máquina livre. Medido: página 756→570 MB sem estado, 866–949 com estado; JS ~60–170 MB, renderer ~100–130, GPU ~40, processo principal do Chrome ~130–186 MB |
 | 3.3 | Diferenças do PCSX2 | tabela "PCSX2 × nós" com o custo de cada diferença | tabela no diário | D | ⬜ |
 | 3.4 | Janela própria pro PS2 | o jogo desenha direto na placa (opção experimental primeiro), X11 e Wayland, F3/menu/print funcionando | desenho aprovado antes; p99 igual ao PCSX2 | F/D | ❌ descartada 19/11: não dá pra ficar igual (menu, F3, avisos, ⏺ e molduras animadas são página; Wayland não posiciona janela), e ele só queria se ficasse igual |
 | 3.5 | Ritmo e linhas | laço pelo relógio, MTVU, prioridade, se a medição pedir | número antes × depois | D | ⬜ |
@@ -137,7 +137,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 | 4.3 | Perfil ✨ Bonito | o 4º perfil + os valores de todos os perfis decididos com a régua | tabela no diário | E | 🟨 existe; engasga no jogo pesado A: a 2x sozinha roda bem, medir o anisotrópico 8x e o MTVU |
 | 4.4 | Renderer do PS2 | OpenGL/Vulkan escolhível | medido antes de virar padrão | E | ⬜ |
 | 4.5 | Tela larga e 60 fps | desligados por padrão, botão por jogo | um jogo com tela larga | E | ⬜ |
-| 4.6 | Os outros consoles | o mesmo menu com o que cada núcleo declarar | print de cada um | E/G | ⬜ |
+| 4.6 | Os outros consoles | o mesmo menu com o que cada núcleo declarar | print de cada um | E/G | 🟨 o curado já existe (N64 12, SNES 5, GB 6, NES 5, Mega Drive 5, GBA 6); faltam as declaradas (65/43/17/47/62/17): o `opcoes-wasm.mjs` acha as descrições, mas na tabela errada (SNES em turco) ou vazias; sem o texto original não dá pra traduzir com segurança (19/11) |
 
 ## Fase 5 · Gráficos melhores (adiada pelo Marcelo, 18/11)
 
@@ -153,7 +153,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 |---|---|---|---|---|---|
 | 6.1 | PS1 nativo no PC | engasgos, memória e latência medidos e corrigidos | números + ele joga | G | ⬜ |
 | 6.2 | N64 | idem | idem | G | ⬜ |
-| 6.3 | WebAssembly (SNES, Mega Drive, GBA, Neo Geo…) | ritmo, abertura, memória da página | números | G | ⬜ |
+| 6.3 | WebAssembly (SNES, Mega Drive, GBA, Neo Geo…) | ritmo, abertura, memória da página | números | G | 🟨 ritmo ✅ 19/11 (`medir-ritmo.mjs`, 3×20 s: ~3.580 novos/min, 16–19 repetidos, 0–6 pulados, p50/p95/p99 16,67 ms); falta abertura e memória |
 | 6.4 | Latência de entrada | do botão à tela, comparada com o RetroArch | tabela | G | ⬜ |
 | 6.5 | Abertura | tempo até jogar (app e biblioteca grande) | número antes × depois | G | ⬜ |
 

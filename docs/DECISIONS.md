@@ -41,6 +41,9 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   ferramentas; o que ele tiraria no Linux (WebRTC e isolamento) não tem conserto.
 - **Alternativas:** Tauri só no Windows (duas cascas pra manter); Electron (leva o Chromium junto, +~100 MB, sem
   dependência do navegador instalado; reavaliar se algum usuário não tiver Chromium).
+- **Reavaliado (19/11, pergunta do Marcelo "e o Tauri? e o Electron?" pensando em memória):** continua. O Tauri no
+  Linux tiraria o WebRTC (jogar no PC), a memória compartilhada (som e emulação no Worker) e provavelmente a gravação;
+  o Electron é o mesmo Chromium (mesma RAM, +~100 MB pra baixar). Ele concordou: "tá funcionando, pra que mexer".
 
 ## D3. Emulação no frontend (wasm em Worker); nativo só onde já é nativo — **aceita**
 - Núcleos wasm rodam num Web Worker com áudio por AudioWorklet; o PS2 continua nativo (kofnativo), supervisionado pelo
