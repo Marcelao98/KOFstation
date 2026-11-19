@@ -70,5 +70,16 @@ export function acervoDoItem(r: ItemBiblioteca): { acervo: string; sis: string }
   return { acervo: ACERVO[sis] ?? (ACERVO.snes as string), sis };
 }
 
-export const nomesDaCapa = (r: ItemBiblioteca): string[] =>
-  acervoDoItem(r).sis === 'neogeo' ? nomesCapaNeoGeo(r.nome) : nomesCapa(r.nome);
+export function nomesDaCapa(r: ItemBiblioteca): string[] {
+  if (acervoDoItem(r).sis === 'neogeo') return nomesCapaNeoGeo(r.nome);
+  const n = nomesCapa(r.nome);
+  // B.4: o jogo do catálogo vem da base sem a região ("Chrono Trigger"); o acervo tem "Chrono Trigger (USA)"
+  if (r.catalogo && !/\(/.test(r.nome)) {
+    const t = n[0] ?? r.nome;
+    return [...new Set([...REGIOES_DO_CATALOGO.map((g) => `${t} (${g})`), ...n])];
+  }
+  return n;
+}
+
+/** As regiões a tentar pra capa de um jogo do catálogo, na ordem (o Rust tenta uma por uma e lembra a falha). */
+const REGIOES_DO_CATALOGO = ['USA', 'World', 'USA, Europe', 'Europe', 'Japan'];

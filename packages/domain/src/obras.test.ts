@@ -140,3 +140,20 @@ describe('catálogo do que falta (B.2)', () => {
     expect(l.every((r) => !r.pasta && !r.jogo)).toBe(true);
   });
 });
+
+describe('capa do catálogo (B.4)', () => {
+  it('tenta as regiões, na ordem, antes do nome puro', async () => {
+    const { nomesDaCapa } = await import('./capas');
+    const l = nomesDaCapa({ nome: 'Chrono Trigger', chave: 'c', catalogo: 'snes' });
+    expect(l.slice(0, 5)).toEqual([
+      'Chrono Trigger (USA)',
+      'Chrono Trigger (World)',
+      'Chrono Trigger (USA, Europe)',
+      'Chrono Trigger (Europe)',
+      'Chrono Trigger (Japan)',
+    ]);
+    expect(l).toContain('Chrono Trigger');
+    // o que a pessoa tem continua pelo nome do arquivo (a região da versão principal)
+    expect(nomesDaCapa(pasta('Chrono Trigger (USA)'))[0]).toBe('Chrono Trigger (USA)');
+  });
+});
