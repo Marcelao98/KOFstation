@@ -46,7 +46,7 @@ de cada pedido. O GET do SPARQL pelo ureq ficava sem resposta até o prazo (pelo
 resolveu. Metade dos códigos de console que eu lembrava "de cabeça" pareciam errados por causa do serviço de nomes;
 conferidos um a um pelo `wbsearchentities`. No e2e, clicar numa linha já selecionada joga (e a lista se refaz quando
 a base carrega): o teste tenta a seleção até pegar.
-**Onde parou:** ⏸ ele olhar a biblioteca dele (B.1–B.3) e gravar um jogo de PS1/PS2 com som (G.2). Próximo possível:
+**Onde parou:** ✅ ele aprovou a fase B ("era isso mesmo que eu queria"). ⏸ falta ele gravar um jogo de PS1/PS2 com som (G.2). Próximo possível:
 B.4 (capas no catálogo e por região), se ele quiser.
 
 ---
