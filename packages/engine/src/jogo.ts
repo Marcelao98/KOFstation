@@ -14,6 +14,8 @@ export interface EventosDoJogo {
   /** situação do rebobinar (ampulheta, preto e branco) */
   rebob?: (r: SituacaoRebob) => void;
   medicao?: (m: Medicao) => void;
+  /** 4.5: o núcleo mudou a geometria (ex.: o PS2 com a tela larga ligada passa a 16:9) */
+  geometria?: (info: InfoDoJogo) => void;
   erro?: (mensagem: string, log: string[]) => void;
 }
 

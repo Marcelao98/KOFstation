@@ -181,7 +181,11 @@ export class JogoNativo {
       const a = lerAviso(d);
       if (!a) return;
       if (a.tipo === 'desempenho') this.medir(a);
-      else if (a.tipo === 'rebob') {
+      else if (a.tipo === 'geometria') {
+        // 4.5: a tela larga (e qualquer troca de proporção do núcleo) chega na tela
+        this.info = { ...this.info, largura: a.largura, altura: a.altura, proporcao: a.proporcao };
+        this.eventos.geometria?.(this.info);
+      } else if (a.tipo === 'rebob') {
         const { ligado, rebobinando, segundos, limite, recarga, recargaTotal } = a;
         this.eventos.rebob?.({ ligado, rebobinando, segundos, limite, recarga, recargaTotal });
       } else if (a.tipo === 'ok') this.responder(a.pedido, null);

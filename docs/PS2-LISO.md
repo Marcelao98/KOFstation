@@ -176,3 +176,11 @@ O Equilibrado no mesmo trecho: 8–17 engasgos/min, p99 24,5 ms. Decidido: o Bon
   `tirar`, que roda no `requestAnimationFrame`; com a janela escondida ou coberta o Chrome para o rAF e os quadros
   (~1 MB cada) se acumulavam. Corrigido: o `empurrar` também corta em `MAX_NA_FILA` (vale pro wasm também).
 - **Depois:** renderer 232–309 MB e o Chrome todo ~1.420–1.500 MB, estáveis nos 5 min.
+
+## 19/11 · 4.5 Tela larga, e um bug da 3.2 achado no caminho
+
+- A tela forçava 4:3 em console de TV e o `JogoNativo` ignorava o aviso `geometria`: com o "Aviso de tela larga" o jogo
+  saía espremido. Agora a geometria chega na página e a tela usa a proporção do núcleo quando ela é ≥ 1,5.
+- O teste pegou um bug do estado pelo Rust: o salvar automático (loja `autos`, sem gzip) do PS2 tem ~67 MB e o padrão do
+  tungstenite recusa mensagem acima de 64 MB ("Message too long"), derrubando a conexão no "Continuar". O teto da
+  conexão local foi pra 256 MB (`MAX_MENSAGEM`), com teste de 70 MB no `processo.rs`.

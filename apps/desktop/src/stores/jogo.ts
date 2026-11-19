@@ -323,6 +323,7 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         medicao: (medicao) => set({ medicao, leitura: med.medicao(medicao) ?? get().leitura }),
         sram: (bytes) => guardarBateria(chaveSram, bytes, aberto.nome, ident.id),
         rebob: (r) => aoMudarRebob.forEach((f) => f(r)),
+        geometria: (info) => set({ info }),
         erro: (m, log) => {
           set({ pausaManual: true });
           if (log.length) registrar('error', 'nucleo', `${m} · o núcleo disse: ${log.slice(-8).join(' | ')}`);

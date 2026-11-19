@@ -52,7 +52,9 @@ export function useTelaDoJogo(canvas: React.RefObject<HTMLCanvasElement | null>)
       const folga = cheia ? 0 : 16;
       const largura = ultimoQuadro.largura || info?.largura || t.telaL;
       const altura = ultimoQuadro.altura || info?.altura || t.telaA;
-      const naTv = !info || ehDeTv(info.sistema);
+      // console de TV: 4:3, a não ser que o núcleo diga que a imagem é larga (4.5: o PS2 com a tela larga ligada)
+      const larga = !!info && info.proporcao >= 1.5;
+      const naTv = !info || (ehDeTv(info.sistema) && !larga);
       const razao = naTv ? 4 / 3 : info.proporcao;
       const r = proporcao === '87' ? largura / altura : razao;
       const comMoldura = moldura !== 'nenhuma' && (moldura !== 'propria' || !!propria);

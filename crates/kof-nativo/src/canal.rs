@@ -26,6 +26,8 @@ pub enum Pedido {
 /// Quadros publicados que a conexão ainda não mandou. Passou disso, a página está lenta: os mais velhos saem
 /// (mostrar atrasado é pior que pular).
 const MAX_NA_FILA: usize = 6;
+/// A maior mensagem que a página pode mandar (um estado do PS2 sem gzip passa de 64 MB).
+pub const MAX_MENSAGEM: usize = 256 << 20;
 
 #[derive(Default)]
 struct Ultimo {
@@ -144,15 +146,24 @@ impl Canal {
     #[allow(clippy::result_large_err)] // o tipo do erro é o do tungstenite (resposta HTTP)
     fn atender(&self, s: TcpStream, token: &str, origem_ok: Option<&str>, tx: Sender<Pedido>) {
         let _ = s.set_nodelay(true); // sem Nagle é só desempenho; falhar não impede de jogar
-        let ws = tungstenite::accept_hdr(s, |req: &Request, resp: Response| {
-            let origem = req.headers().get("origin").and_then(|o| o.to_str().ok());
-            if autorizado(req.uri().query(), origem, token, origem_ok) {
-                Ok(resp)
-            } else {
-                tracing::warn!(?origem, "conexão recusada: token ou origem inválidos");
-                Err(recusar())
-            }
-        });
+                                     // o estado do PS2 no formato da loja `autos` (sem gzip) tem ~67 MB: o padrão do tungstenite (64 MB) derrubava a
+                                     // conexão no "Continuar" (3.2). A conexão é local e com token: o teto só protege de mensagem absurda
+        let cfg = tungstenite::protocol::WebSocketConfig::default()
+            .max_message_size(Some(MAX_MENSAGEM))
+            .max_frame_size(Some(MAX_MENSAGEM));
+        let ws = tungstenite::accept_hdr_with_config(
+            s,
+            |req: &Request, resp: Response| {
+                let origem = req.headers().get("origin").and_then(|o| o.to_str().ok());
+                if autorizado(req.uri().query(), origem, token, origem_ok) {
+                    Ok(resp)
+                } else {
+                    tracing::warn!(?origem, "conexão recusada: token ou origem inválidos");
+                    Err(recusar())
+                }
+            },
+            Some(cfg),
+        );
         let mut ws = match ws {
             Ok(w) => w,
             Err(e) => {

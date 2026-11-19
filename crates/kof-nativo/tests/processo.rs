@@ -148,6 +148,22 @@ fn quadro_som_botoes_e_token() {
     assert!(pq.chunks(6).any(|q| q[3] > 0), "algum quadro foi mandado pra página");
     assert!(cpu.is_some());
 
+    // 3.2: mensagem maior que os 64 MB padrão do tungstenite (o estado do PS2 sem gzip, ~67 MB) não derruba a
+    // conexão: chega, o canal tenta desempacotar e responde o erro do pacote estragado com o mesmo pedido
+    let grande = vec![b'x'; 70 << 20];
+    let mut msg = protocolo::bloco(protocolo::CARREGAR_PACOTE, 77, &grande);
+    msg[1] = 0; // sem gzip
+    ws.send(Message::binary(msg)).unwrap();
+    let e = esperar(&mut ws, |m| match aviso(m) {
+        Some(Aviso::Erro {
+            pedido: Some(77),
+            mensagem,
+            ..
+        }) => Some(mensagem),
+        _ => None,
+    });
+    assert!(e.contains("campo d"), "{e}");
+
     // ⏺ gravar (G.2): com `somPraPagina`, o som que sai na placa chega também aqui (735 quadros estéreo, 44100 Hz);
     // desligado, para de vir
     let tem_som = |m: &Message| match m {
