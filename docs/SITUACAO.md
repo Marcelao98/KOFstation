@@ -97,6 +97,7 @@ flowchart LR
 | **M4 Dados** | Configurações em arquivo (geral → console → jogo), backup `.kofsave` que abre nos dois apps |
 | **M5 Saves** | Bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos alegria/normal/raiz/hardcore |
 | **M6 Rebobinar** | Igual ao antigo (preto e branco, ampulheta); desde a fase R (18/11) também PS1 e N64, e a música volta de trás pra frente (📼/🔇 nas Opções gerais) |
+| **PS2 mais leve** (19/11) | Sem o chiado e os engasgos (o rebobinar do PS1/PS2 desligado), o Chrome do app ~500 MB mais leve, F5/F8 3× mais rápidos, o erro de memória do jogo pesado B corrigido, ✨ Bonito sem engasgar e a tela larga funcionando |
 | **Fase B Biblioteca** (19/11) | Cada jogo aparece uma vez, com as versões dentro (região, tradução, as ROMs de um zip): "qual versão?" ao jogar, e ele lembra. 📖 Catálogo mostra em cinza os jogos que faltam (sem link nenhum). A ficha tem sinopse em português e a nota da crítica (Wikipédia/Wikidata) |
 | **G.1 Gravar** (18/11) | F10 (ou menu rápido / Emulação) grava o jogo como você vê, com moldura, filtro e som, em MP4 na pasta `Kof Games/Gravações`; PS1/PS2 nativos: o som entra na G.2 (escrita em 19/11, falta testar) |
 | **M7 Imagem** | Painel de filtros (os mesmos pixels do antigo), NTSC, Scale4x, bloom, molduras, paletas |

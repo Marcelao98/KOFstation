@@ -21,6 +21,29 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 (manhã) · Fase 3 do PS2 com a máquina livre: −500 MB, F5/F8 3× mais rápidos, o erro de memória do B, Bonito e tela larga
+
+**Pedido:** "pode continuar agora, a máquina tá livre, faz tudo que precisa e deixa salvo"; "não há estado salvo do
+jogo B, então joga ele um pouco por conta própria".
+**Feito (cada um medido antes × depois, jogo pesado A/B, detalhes no PS2-LISO.md):**
+- `104b0fe` **Chrome enxuto** (flags no `navegador.rs`): Chrome do app 1.850–1.980 → 1.653–1.724 MB.
+- `119eadb` **Estado pelo Rust** (`kof-nativo/src/pacote.rs`): F5 750 → 300 ms, F8 680 → 290 ms, Chrome com F5
+  1,9–2,0 GB → 1,45 GB. A 1ª tentativa piorou o F5 (2 s): o `fetch` com bytes crus; com Blob resolveu (perfil).
+- `5368a54` **4.3 Bonito**: o culpado era a transparência Alta com a 2x; Básica: 133 → 39–60 engasgos/min.
+- `6f0cb4b` **2.3 erro de memória do B**: reproduzido (OOM do kernel em ~10 min); a fila de quadros não cortava com a
+  janela escondida (renderer 290 → 4.787 MB em 3 min); corrigido (232–309 MB estável). A depuração (CDP) da medição
+  escondia isso e inflava outro processo: `--sem-cdp`.
+- `c37f54f` **4.5 tela larga** (a tela forçava 4:3; o aviso `geometria` não chegava) e um bug meu da 3.2 achado no
+  teste: o automático de 67 MB derrubava a conexão (teto 64 MB do tungstenite → 256 MB, teste de 70 MB).
+- Roadmap: 3.5 não precisou; 5.1 descartado (o núcleo não oferece); 1.4/3.3 esperam o PCSX2 instalado; 1.2 parcial.
+**Aprendido:** medir sem depuração quando o assunto é memória (`--sem-cdp`); toda mudança no caminho do estado tem
+que passar pelo F5, pelo F8 **e** pelo "Continuar" (o automático é sem gzip e maior).
+**Onde parou:** ⏸ ele: jogar o B 10 min e o A no ✨ Bonito; decidir se instala o PCSX2 (1.4/3.3); gravar PS1/PS2 com
+som (G.2); PR da `gravar` pra `main`. Sobra no roadmap: 1.2 (gráfico), 1.3, 4.4 (Vulkan), 4.6, 5.2, 6.1–6.5, fase 7
+(celular), 8.x (decisões dele) e a fase 9.
+
+---
+
 ## 2026-11-19 (madrugada) · B.4, opções do PS1 completas, 6.3 ritmo; 3.2 pausada
 
 **Pedido:** "o chiado foi só no PS2"; "e o Tauri? e o Electron?"; "abre e testa o Shadow of the Colossus"; "continua no

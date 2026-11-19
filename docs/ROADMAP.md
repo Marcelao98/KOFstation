@@ -105,9 +105,9 @@ na fase que cuida do assunto (ou na hora, se for grave).
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
 | 1.1 | Banco automático | `tools/medir-ps2.mjs`: abre o jogo, carrega um estado, aperta uma sequência fixa e imprime fps, p50/p95/p99, engasgos/min, quadros repetidos, CPU por linha, buracos de som | 3 rodadas iguais dão números próximos | D | ✅ 17/11 (`--teclas --mexer --sonda-leve --perfil --opcao --fechar-janela`; falta o vídeo e os buracos de som) |
-| 1.2 | Memória × engasgos | memória por processo (jogo, Chromium, `kofstation`), livre/swap e o momento de cada engasgo, no mesmo gráfico | gráfico do jogo pesado A | F → D | ⬜ |
+| 1.2 | Memória × engasgos | memória por processo (jogo, Chromium, `kofstation`), livre/swap e o momento de cada engasgo, no mesmo gráfico | gráfico do jogo pesado A | D | 🟨 19/11: a série existe (`medir-ps2.mjs --memoria` e `--sem-cdp`: renderer, JS, GPU, principal, Chrome todo e jogo no tempo); falta juntar com os engasgos num gráfico |
 | 1.3 | O que o olho vê | vídeo da janela + contagem de quadros repetidos | o número bate com o que ele sente | D | ⬜ |
-| 1.4 | A régua | tabela PCSX2 · antigo · novo no mesmo trecho, em `docs/PS2-LISO.md` | ele vê a tabela | D | ⬜ |
+| 1.4 | A régua | tabela PCSX2 · antigo · novo no mesmo trecho, em `docs/PS2-LISO.md` | ele vê a tabela | D | ⏸ precisa do PCSX2 instalado nesta máquina (não está; instalar programa no sistema dele fica pra ele decidir) |
 
 ## Fase 2 · PS2 sem defeito
 
@@ -123,9 +123,9 @@ na fase que cuida do assunto (ou na hora, se for grave).
 |---|---|---|---|---|---|
 | 3.1 | Os engasgos esporádicos | cada suspeito (salvar automático, bateria a cada 1 s, lixo de quadros, shader na 1ª vez, swap) medido e corrigido ou descartado | números antes × depois | **F** | ✅ 17/11 (F5/F8 de ~2,2 s → ~0,6 s; o Marcelo jogou liso) |
 | 3.2 | Menos RAM | filas menores, quadro no tamanho da tela, estado e bateria pelo Rust, Chromium enxuto | memória total antes × depois | F → D | 🟨 19/11: ✅ Chrome enxuto (`104b0fe`, Chrome inteiro 1.850–1.980 → 1.653–1.724 MB); ✅ estado pelo Rust (o processo monta o pacote da loja numa linha separada; F5 750→300 ms, F8 680→290 ms, Chrome com F5 1,9–2,0 GB → 1,45 GB). Falta: o quadro menor na placa (a página ainda recebe 1,1 MB por quadro) |
-| 3.3 | Diferenças do PCSX2 | tabela "PCSX2 × nós" com o custo de cada diferença | tabela no diário | D | ⬜ |
+| 3.3 | Diferenças do PCSX2 | tabela "PCSX2 × nós" com o custo de cada diferença | tabela no diário | D | ⏸ idem 1.4 (PCSX2) |
 | 3.4 | Janela própria pro PS2 | o jogo desenha direto na placa (opção experimental primeiro), X11 e Wayland, F3/menu/print funcionando | desenho aprovado antes; p99 igual ao PCSX2 | F/D | ❌ descartada 19/11: não dá pra ficar igual (menu, F3, avisos, ⏺ e molduras animadas são página; Wayland não posiciona janela), e ele só queria se ficasse igual |
-| 3.5 | Ritmo e linhas | laço pelo relógio, MTVU, prioridade, se a medição pedir | número antes × depois | D | ⬜ |
+| 3.5 | Ritmo e linhas | laço pelo relógio, MTVU, prioridade, se a medição pedir | número antes × depois | D | ✅ 19/11 não precisou: a medição não pede (jogo A 60 fps, p99 24,5 ms, 0 faltas de som; jogo B 59,9 fps, 4,5 engasgos/min); o MTVU não muda nada no Bonito (4.3) |
 | 3.6 | **Liso como o PCSX2** | os dois jogos pesados, 10 min cada, sem engasgo | ⏸ ele joga e concorda | F/D | ⬜ |
 
 ## Fase 4 · Opções completas
@@ -143,7 +143,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 
 | # | Passo | Entregável | Checkpoint | Tarefa | Estado |
 |---|---|---|---|---|---|
-| 5.1 | PS2 no núcleo | correções de resolução alta, nitidez (CAS), FXAA, ajuste de cor, texturas HD se houver | print antes × depois + custo em fps | E | ⬜ |
+| 5.1 | PS2 no núcleo | correções de resolução alta, nitidez (CAS), FXAA, ajuste de cor, texturas HD se houver | print antes × depois + custo em fps | E | ❌ 19/11: o LRPS2 não declara CAS, FXAA nem cor (só resolução e anisotrópico, que já estão no menu) e o núcleo não é modificado aqui (D1); vai pelos filtros da tela (5.2) |
 | 5.2 | Filtros da tela (F4) | nitidez, ampliação estilo FSR/xBR, bloom melhor, pra todos os consoles | teste de pixels + print | E | ⬜ |
 | 5.3 | ✨ Bonito revisto | o perfil com o que entrou | ⏸ ele aprova o visual | E | ⬜ |
 
