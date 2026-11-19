@@ -21,6 +21,18 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 (tarde) · O KOFstation fixado no menu do KDE sumia ao fechar
+
+**Pedido:** "fixo o KOFstation no menu do Fedora, fecho e não fica salvo: cria um atalho clicável que fique".
+**Feito:** o `.desktop` do `--instalar` (`instalar.rs`) ganhou `StartupWMClass=chrome-127.0.0.1__-Default`; no PC dele,
+o `kofstation-novo.desktop` foi corrigido à mão e o `kofstation.desktop` do antigo (apontava pra uma pasta que não
+existe mais e reivindicava a mesma janela) foi movido pra `~/.local/share/KOFstation/backup-menu/`.
+**Medido / conferido:** a janela vista pelo KWin (script pelo D-Bus): `chrome-127.0.0.1__-Default`; o Chrome em `--app`
+ignora o `--class=KOFstation`. Teste do `instalar` passa.
+**Aprendido:** quem liga a janela ao atalho fixado é o `StartupWMClass`; dois `.desktop` com o mesmo valor confundem o
+painel.
+**Onde parou:** ⏸ ele fixar de novo e conferir se fica; o resto continua como na entrada de baixo (standby).
+
 ## 2026-11-19 (manhã) · Fase 3 do PS2 com a máquina livre: −500 MB, F5/F8 3× mais rápidos, o erro de memória do B, Bonito e tela larga
 
 **Pedido:** "pode continuar agora, a máquina tá livre, faz tudo que precisa e deixa salvo"; "não há estado salvo do

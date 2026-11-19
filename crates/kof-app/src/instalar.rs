@@ -6,6 +6,11 @@ use std::path::{Path, PathBuf};
 /// O nome do arquivo no menu. Diferente do `kofnes.desktop` do antigo: os dois ficam lado a lado (M15.4).
 pub const ARQUIVO: &str = "kofstation-novo.desktop";
 
+/// O nome que a janela anuncia pro sistema (o `app_id` no Wayland, a classe no X11). O Chrome no modo `--app` ignora o
+/// `--class` e monta o nome a partir do endereço e do perfil: `chrome-<host>__-<perfil>`. Sem o `StartupWMClass` igual a
+/// ele, o painel não liga a janela ao atalho e o KOFstation fixado no menu some ao fechar (conferido no KDE, 19/11).
+pub const CLASSE_DA_JANELA: &str = "chrome-127.0.0.1__-Default";
+
 /// `~/.local/share/applications` (ou `$XDG_DATA_HOME/applications`).
 pub fn pasta_do_menu(var: impl Fn(&str) -> Option<String>) -> Option<PathBuf> {
     if let Some(x) = var("XDG_DATA_HOME").filter(|x| !x.is_empty()) {
@@ -28,7 +33,8 @@ pub fn entrada(exe: &Path, icone: &Path) -> String {
     format!(
         "[Desktop Entry]\nType=Application\nName=KOFstation novo\nGenericName=Emulador de videogame\n\
          Comment=Super Nintendo, NES, Game Boy, GBA, Sega, Neo Geo, N64 e PlayStation (versão nova)\n\
-         Exec=\"{exec}\"\nIcon={}\nTerminal=false\nCategories=Game;Emulator;\nKeywords=snes;nes;gba;emulador;kof;\n",
+         Exec=\"{exec}\"\nIcon={}\nTerminal=false\nCategories=Game;Emulator;\nKeywords=snes;nes;gba;emulador;kof;\n\
+         StartupWMClass={CLASSE_DA_JANELA}\n",
         icone.display()
     )
 }
@@ -110,6 +116,7 @@ mod testes {
             t.path().join("Meus Jogos/KOFstation/icone.png").display()
         )));
         assert!(d.contains("Name=KOFstation novo"));
+        assert!(d.contains("\nStartupWMClass=chrome-127.0.0.1__-Default\n"), "{d}");
         desinstalar(&menu).unwrap();
         assert!(!p.exists());
         desinstalar(&menu).unwrap(); // de novo: não é erro
