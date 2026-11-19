@@ -21,6 +21,22 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 · Próximo emulador: Wii e GameCube (tarefa W preparada)
+
+**Pedido:** "já podemos ir pra novos emuladores, não tem muito mais o que refinar"; "o Dolphin vem primeiro, eu quero
+jogar Wii"; GameCube junto; o primeiro jogo de teste é um de Wii com ponteiro e chacoalhar; "não começa por aqui que
+o contexto está imenso, mas deixa preparado". Perguntou do Yuzu/Switch.
+**Pesquisado:** o núcleo `libretro/dolphin` foi rebaseado no Dolphin atual em out/2025 (OpenGL/Vulkan/D3D11); o "dual
+core" não combina com o libretro (alguns jogos caem, pesa mais na CPU: medir no 1º dia); o ponteiro do Wiimote é opção
+do núcleo (`dolphin_ir_mode`: analógico direito ou mouse), o que deixa o celular-Wiimote simples (W.6). O antigo não
+tem o Dolphin: compilar de um commit fixo no `nucleos.yml` (D40 se o Windows precisar do binário do buildbot).
+Switch: não há núcleo libretro vivo (o do Suyu foi arquivado; Eden/Citron são programas próprios) e é risco jurídico
+pra um repositório público; fica fora do repositório (se um dia, projeto particular dele).
+**Feito:** `docs/agentes/W-wii-gamecube.md` (W.1–W.6, seguindo a seção 6 do `NUCLEO-NATIVO-PESADO.md`), fase W no
+ROADMAP (adianta a fase 9), tarefa W no LEIA-ME dos agentes.
+**Onde parou:** o Marcelo cola a instrução no Claude Code local (branch `agente-w/wii`, a partir da
+`claude/busy-ritchie-wrvk8h`). Junto, ainda ⏸: o PR da `claude/busy-ritchie-wrvk8h` pra `main`.
+
 ## 2026-11-19 · Revisão do que o Claude local fez (fases R, G, B e o resto do PS2) e da documentação
 
 **Pedido:** "foi feito muita coisa; passa pela documentação e vê inconsistências, e dá uma olhada no que o Claude

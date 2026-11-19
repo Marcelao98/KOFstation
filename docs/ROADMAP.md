@@ -39,7 +39,8 @@ flowchart LR
   F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> F7 --> F9
   F0 -.-> F6
   F8 -.-> F9
-  FR --> FG --> FB --> FC
+  FW["W · Wii e GameCube"]
+  FR --> FG --> FB --> FW --> FC
 ```
 
 As fases com letra (R, G, B, C) são as **funcionalidades novas** pedidas depois da migração (ver "Próximas
@@ -78,6 +79,7 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 | **E** | [Cartão, opções completas e gráficos](agentes/E-ps2-cartao-e-opcoes.md) | local | `agente-d/ps2-liso` | F (parte 1), D (perfis) | 2, 4, 5 | partes 1–2 feitas na F; parte 3 (gráficos) adiada |
 | **R** | [Rebobinar no PS1 e N64 com a música voltando junto](agentes/R-rebobinar.md) (fase R inteira) | local | `agente-r/rebobinar` | — | R | ✅ feita 18/11 (o PS1 nativo ficou desligado a pedido dele, 19/11); ⏸ ele ouve |
 | **—** | Fases G (gravar), B (biblioteca) e o resto das fases 2–6 do PS2, feitas direto pelo Claude local sem arquivo de tarefa | local | `gravar` | — | G, B, 2–6 | ✅/⏸ ver cada fase |
+| **W** | [Wii e GameCube (Dolphin)](agentes/W-wii-gamecube.md) | local | `agente-w/wii` | — | W | **próxima** (preparada 19/11) |
 | **L** | Todos os consoles lisos (o método das fases 1–3 no PS1, N64 e WebAssembly) | local + nuvem | a definir | D | 6 | a escrever (a 6.3 já andou) |
 | **H** | Celular afinado | local (aparelho) | a definir | 0.2 | 7 | a escrever |
 | **O** | Orquestrador: revisar e juntar, pacotes, docs, fase 8 | nuvem | `claude/busy-ritchie-wrvk8h` | — | 0, 8 | contínua |
@@ -200,8 +202,8 @@ Nada decidido; cada um entra pelo mesmo caminho (manifesto com SHA-256, Linux e 
 O PS2 está "liso liso liso" pra ele no jogo pesado A; feitas as fases R (rebobinar com a música), G.1–G.2 (gravar) e
 B.1–B.4 (biblioteca com cara de console), e da parte do PS2: 2.3 (erro de memória do jogo B), 3.2 (menos RAM), 4.3
 (✨ Bonito), 4.5 (tela larga) e as opções do PS1. **Tudo isso está na branch `gravar`, ainda não na `main`.** O que
-espera ele está no "Pra você testar" do [SITUACAO.md](SITUACAO.md). A próxima funcionalidade escolhida é a **fase C**
-(conectividade em cenários). O guia do que o PS2 ensinou: [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md); o
+espera ele está no "Pra você testar" do [SITUACAO.md](SITUACAO.md). A próxima é a **fase W** (Wii e GameCube, preparada pro
+Claude local), depois a **fase C** (conectividade em cenários). O guia do que o PS2 ensinou: [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md); o
 diário: [PS2-LISO.md](PS2-LISO.md); o rebobinar: [REBOBINAR.md](REBOBINAR.md).
 
 ## Próximas funcionalidades (a escolher com o Marcelo, 18/11)
@@ -209,7 +211,7 @@ diário: [PS2-LISO.md](PS2-LISO.md); o rebobinar: [REBOBINAR.md](REBOBINAR.md).
 A migração acabou e o que temos está liso: agora pode crescer. Cada item vira uma fase com entregável e checkpoint
 quando ele escolher. Emulador novo continua sendo a fase 9 (ele escolhe a ordem).
 
-Escolhidas em 18–19/11 (R, G e B feitas; C a fazer):
+Escolhidas em 18–19/11 (R, G e B feitas; W preparada; C a fazer):
 
 ### Fase R · Rebobinar no PS1 e no N64, com a música voltando junto (decidido 18/11)
 
@@ -254,6 +256,23 @@ verdade; medir com o F3 no G.1 (com × sem gravar) quando ele liberar a máquina
 | B.2 | Catálogo | "📖 Catálogo" mostra em cinza os jogos da base (libretro-database, ~19 mil) que ele não tem, com ano/gênero/empresa na busca e nas facetas; sem Jogar, **sem link nem dica de onde baixar** | unit + e2e | local | ✅ `70a8ba3`; aprovado (19/11) |
 | B.3 | Ficha com sinopse e nota | `jogo.sobre` no Rust (Wikidata + Wikipédia pt/en, cache, D39); a ficha mostra a nota (média 0–100 das críticas do Wikidata), a sinopse e a fonte com o link do artigo; "sem internet" e "sem artigo" avisados | unit Rust/TS, teste pela internet (ignorado no CI) e e2e com resposta falsa | local | ✅ `7935438`; aprovado (19/11) |
 | B.4 | Capas no catálogo e por obra | a capa oficial (libretro-thumbnails) também pros jogos do catálogo (as regiões USA, World, USA+Europe, Europe, Japan tentadas primeiro) e, dos que ele tem, pela região da versão principal | unit | local | ✅ 19/11 |
+
+### Fase W · Wii e GameCube (Dolphin), decidido 19/11
+
+O Marcelo achou que o refino terminou ("não tem muito mais o que refinar") e escolheu o **Dolphin** como primeiro
+emulador novo (adianta a fase 9), com o **GameCube junto**. Primeiro jogo de teste: um de Wii com ponteiro e
+"chacoalhar" ("jogo de teste Wii A"). Tarefa pro Claude local: [W-wii-gamecube.md](agentes/W-wii-gamecube.md). O
+celular como Wiimote vem depois (W.6). Switch: **fora do repositório** (risco jurídico pra um projeto público; se um
+dia, só como projeto particular dele).
+
+| # | Passo | Entregável | Checkpoint | Estado |
+|---|---|---|---|---|
+| W.1 | Núcleo no manifesto, rodando sem janela | `dolphin_libretro` compilado de um commit fixo no `nucleos.yml` (Windows pelo buildbot copiado, se o mingw não der: D40), SHA-256 no manifesto, teste `dolphin.rs`, `SET_HW_RENDER` conferido com o `gl.rs`, tamanho do estado medido | teste Rust + números | ⬜ |
+| W.2 | GameCube e Wii no app | sistemas `gc`/`wii`, extensões, biblioteca, `Kof Games/Games/{gamecube,wii}`, disco lido pelo processo do jogo | unit + e2e com casca falsa | ⬜ |
+| W.3 | Saves que não se perdem | cartão do GameCube e NAND do Wii gravados ao fechar o app | teste "o arquivo mudou depois de fechar" | ⬜ |
+| W.4 | Controles | GameCube como o console; Wii com o ponteiro no mouse e o chacoalhar num botão, Nunchuk; combinado com ele antes | ⏸ ele aprova o mapeamento | ⬜ |
+| W.5 | Opções e medição | tudo o que o núcleo declara no menu, em português, 4 perfis; `medir-ps2.mjs --sistema`; `docs/WII-LISO.md` | ⏸ ele joga o jogo A 10 min liso | ⬜ |
+| W.6 | Celular como Wiimote | giroscópio = ponteiro, acelerômetro = chacoalhar, pela rede pareada | ⏸ ele joga apontando o celular | ⬜ depois |
 
 ### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11)
 
