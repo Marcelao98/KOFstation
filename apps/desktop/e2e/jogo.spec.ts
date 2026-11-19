@@ -72,8 +72,8 @@ test('Esc pausa, P continua; telas por cima pausam; Início mostra "Jogando agor
 test('menu rápido: F2 e botão direito, volume com ◀▶, Esc fecha', async ({ page }) => {
   await page.keyboard.press('F2');
   await expect(page.locator('#rapido')).toBeVisible();
-  await expect(page.locator('#rapido-lista li')).toHaveCount(21); // + ⚙ Perfil de emulação e ⚙ Opções de emulação
-  for (let i = 0; i < 18; i++) await page.keyboard.press('ArrowDown'); // o Volume vem depois dos 2 itens de emulação
+  await expect(page.locator('#rapido-lista li')).toHaveCount(22); // + ⚙ Perfil/Opções de emulação e ⏺ Gravar o jogo
+  for (let i = 0; i < 19; i++) await page.keyboard.press('ArrowDown'); // o Volume vem depois dos 2 de emulação e do ⏺
   await expect(page.locator('#rapido-lista li.sel')).toContainText('Volume');
   await page.keyboard.press('ArrowLeft');
   await expect(page.locator('#rapido-lista li.sel b')).toHaveText('90%');

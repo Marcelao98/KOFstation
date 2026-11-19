@@ -92,7 +92,8 @@ fn quadro_som_botoes_e_token() {
     );
 
     let mut ws = conectar(porta, &format!("?t={}", p.token), Some(ORIGEM)).expect("conectou com token");
-    let pronto = esperar(&mut ws, aviso);
+    // o "pronto" (o aviso do rebobinar pode chegar antes: ele sai sozinho desde a fase R)
+    let pronto = esperar(&mut ws, |m| aviso(m).filter(|a| matches!(a, Aviso::Pronto { .. })));
     assert!(
         matches!(pronto, Aviso::Pronto { largura: 320, altura: 240, taxa, .. } if taxa == 44100.0),
         "{pronto:?}"
@@ -146,6 +147,29 @@ fn quadro_som_botoes_e_token() {
     assert!(pq.chunks(6).zip(pq.chunks(6).skip(1)).all(|(a, b)| b[0] >= a[0]));
     assert!(pq.chunks(6).any(|q| q[3] > 0), "algum quadro foi mandado pra página");
     assert!(cpu.is_some());
+
+    // ⏺ gravar (G.2): com `somPraPagina`, o som que sai na placa chega também aqui (735 quadros estéreo, 44100 Hz);
+    // desligado, para de vir
+    let tem_som = |m: &Message| match m {
+        Message::Binary(b) if b[0] == protocolo::SOM => Some(b.to_vec()),
+        _ => None,
+    };
+    mandar(&mut ws, &Comando::SomPraPagina { sim: true });
+    let s = esperar(&mut ws, tem_som);
+    assert_eq!(u32::from_le_bytes([s[4], s[5], s[6], s[7]]), 44100);
+    let n = u32::from_le_bytes([s[8], s[9], s[10], s[11]]) as usize;
+    assert!(n > 0 && s.len() == 12 + n * 4, "{n} quadros em {} bytes", s.len());
+    mandar(&mut ws, &Comando::SomPraPagina { sim: false });
+    let fim = Instant::now() + Duration::from_millis(300);
+    while Instant::now() < fim {
+        let _ = ws.read(); // o que já estava no caminho
+    }
+    let fim = Instant::now() + Duration::from_millis(500);
+    while Instant::now() < fim {
+        if let Ok(m) = ws.read() {
+            assert!(tem_som(&m).is_none(), "som depois de desligar");
+        }
+    }
 
     // estado e bateria
     mandar(&mut ws, &Comando::SalvarEstado { pedido: 9 });

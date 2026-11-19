@@ -51,7 +51,7 @@ test('menus completos; o que ainda não existe avisa a etapa', async ({ page }) 
 test('Guia: páginas e tabela de atalhos', async ({ page }) => {
   await page.click('#lateral [data-acao="guia"]');
   await page.click('[data-guia="atalhos"]');
-  await expect(page.locator('#tab-ajuda tr')).toHaveCount(21);
+  await expect(page.locator('#tab-ajuda tr')).toHaveCount(22); // + F10 gravar (G.1)
   await expect(page.locator('[data-pagina="atalhos"]')).toBeVisible();
   await expect(page.locator('[data-pagina="comecar"]')).toBeHidden();
 });
