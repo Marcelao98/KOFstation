@@ -27,6 +27,13 @@ export class FilaDeQuadros {
 
   empurrar(q: QuadroNaFila): void {
     this.fila.push(q);
+    // corta aqui também: com a janela escondida/coberta o navegador para o requestAnimationFrame e ninguém chama o
+    // `tirar`; sem isso a fila crescia sem fim (jogo pesado B: o renderer foi de 290 MB a 4,8 GB em 3 min e a máquina
+    // ficou sem memória, 2.3)
+    while (this.fila.length > MAX_NA_FILA) {
+      this.fila.shift();
+      this.descartados++;
+    }
   }
 
   /** A cada vsync: o quadro a mostrar agora, ou null (fila vazia, ou esperando o próximo pra ter folga). */

@@ -115,7 +115,7 @@ na fase que cuida do assunto (ou na hora, se for grave).
 |---|---|---|---|---|---|
 | 2.1 | Cartão de memória | o jogo salva no cartão, fecha, reabre e carrega; teste automático em `kof-nativo/tests` | ele salva no jogo pesado A | F (E parte 1) | ✅ 17/11 (o app fecha o jogo antes de sair; teste `ps2_de_verdade`) |
 | 2.2 | O "pra baixo" no menu de salvar | D-pad e analógico corretos no PS2 | o menu desce com teclado e controle | F (E parte 1) | ✅ 17/11 (o direcional é T F G H; controles ficam como estão, decisão do Marcelo) |
-| 2.3 | Jogo pesado B sem erro de memória | o motivo achado (log do sistema) e corrigido | ele joga 10 min | D | ⬜ |
+| 2.3 | Jogo pesado B sem erro de memória | o motivo achado (log do sistema) e corrigido | ele joga 10 min | D | ✅ 19/11: reproduzido (OOM do kernel matou o Chrome do app em ~10 min); causa: a fila de quadros da página só cortava no requestAnimationFrame, que o Chrome para com a janela escondida/coberta (renderer 290 → 4.787 MB em 3 min); agora corta ao entrar (232–309 MB estável em 5 min); ⏸ ele joga 10 min |
 
 ## Fase 3 · PS2 liso
 

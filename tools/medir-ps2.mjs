@@ -355,9 +355,71 @@ async function rodada(n) {
       const todos = ps.filter((p) => p.cmd.includes(`--user-data-dir=${dados}`));
       if (todos.length) mem.chrome.push(todos.reduce((a, p) => a + p.rss, 0));
     }, 1000);
+    // --memoria: a cada 5 s, o renderer da página (RAM + swap) e a pilha do JS, pra achar vazamento (2.3)
+    const serie = [];
+    const t0 = Date.now();
+    const sonda = tem('memoria')
+      ? setInterval(() => {
+          const ps = processos().filter((p) => p.cmd.includes(dados));
+          const tot = (l) => l.reduce((a, p) => a + p.rss + p.troca, 0);
+          const pag = ps
+            .filter((p) => p.cmd.includes('--type=renderer'))
+            .sort((a, b) => b.rss + b.troca - (a.rss + a.troca))[0];
+          const gpu = tot(ps.filter((p) => p.cmd.includes('--type=gpu-process')));
+          const princ = tot(ps.filter((p) => !p.cmd.includes('--type=')));
+          const todo = tot(ps);
+          void page
+            .evaluate(() => {
+              const m = performance.memory;
+              return m ? Math.round(m.usedJSHeapSize / 1048576) : -1;
+            })
+            .catch(() => -1)
+            .then((js) =>
+              serie.push({
+                s: Math.round((Date.now() - t0) / 1000),
+                rss: pag?.rss ?? 0,
+                troca: pag?.troca ?? 0,
+                js,
+                gpu,
+                princ,
+                todo,
+              }),
+            );
+        }, 5000)
+      : null;
 
     await dormir(aquecer * 1000);
     await print(`${rotulo}-${qual}-${n}-2-trecho`);
+    const mostrarSerie = () => {
+      if (!sonda) return;
+      clearInterval(sonda);
+      console.log(
+        'memória (s: renderer, JS, GPU, principal, Chrome todo; RAM+swap MB): ' +
+          serie.map((x) => `${x.s}: ${x.rss + x.troca}, ${x.js}, ${x.gpu}, ${x.princ}, ${x.todo}`).join(' · '),
+      );
+    };
+    process.once('exit', mostrarSerie);
+    // --sem-cdp: solta a depuração do Chrome (ela guarda cada mensagem da WebSocket pras ferramentas e o processo
+    // principal cresce ~600 MB/min) e só olha a memória pelo /proc, a cada 10 s; sem sonda, sem teclas (2.3)
+    if (tem('sem-cdp')) {
+      clearInterval(relogio);
+      if (sonda) clearInterval(sonda);
+      await nav.close().catch(() => {});
+      nav = null;
+      const linhas = [];
+      for (let s = 0; s <= segundos; s += 10) {
+        const ps = processos().filter((p) => p.cmd.includes(dados));
+        const tot = (l) => l.reduce((a, p) => a + p.rss + p.troca, 0);
+        const filho = processos().find((p) => p.cmd.startsWith(exe) && p.cmd.includes('--nativo'));
+        linhas.push(
+          `${s}: principal ${tot(ps.filter((p) => !p.cmd.includes('--type=')))}, renderer ${tot(ps.filter((p) => p.cmd.includes('--type=renderer')))}, GPU ${tot(ps.filter((p) => p.cmd.includes('--type=gpu-process')))}, Chrome ${tot(ps)}, jogo ${filho ? filho.rss + filho.troca : 0}`,
+        );
+        if (s < segundos) await dormir(10000);
+      }
+      console.log('sem CDP (RAM+swap MB):\n  ' + linhas.join('\n  '));
+      clearInterval(relogio);
+      return;
+    }
     const inicioTrecho = Date.now() - aberto;
     await page.evaluate(instalarSonda, { segundos, leve: tem('sonda-leve') });
     const teclas = [];
@@ -591,6 +653,7 @@ const res = [];
 for (let n = 1; n <= rodadas; n++) {
   try {
     const r = await rodada(n);
+    if (!r) continue; // --sem-cdp: a série de memória já saiu na tela
     res.push(r);
     console.log(linha(r));
   } catch (e) {

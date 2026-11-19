@@ -164,3 +164,15 @@ Atualização (17/11, à noite): o Marcelo aumentou só a **resolução interna*
 
 O Equilibrado no mesmo trecho: 8–17 engasgos/min, p99 24,5 ms. Decidido: o Bonito fica com a transparência **Básica**
 (o resto igual). O MTVU não muda nada com a Básica; fica ligado como estava.
+
+## 19/11 · 2.3 O erro de memória do jogo pesado B (achado e corrigido)
+
+- **Reproduzido:** 10 min do jogo B (do salvar automático dele, convertido em estado na pasta de medidas): às ~10 min o
+  kernel ficou sem memória (OOM global) e matou um processo do Chrome do app com 453 MB na RAM e **3,2 GB na swap**.
+- **Armadilha da medição:** com o `medir-ps2.mjs` ligado pela depuração (CDP), quem crescia era o processo principal do
+  Chrome (~600 MB/min: a depuração guarda as mensagens da WebSocket) e o renderer ficava parado, porque a sonda mantinha
+  a página acordada. Nova opção `--sem-cdp`: abre o jogo, solta a depuração e só olha o `/proc`.
+- **Causa:** sem depuração, o **renderer** foi de 290 a 4.787 MB em 3 min. A `FilaDeQuadros` (engine) só cortava no
+  `tirar`, que roda no `requestAnimationFrame`; com a janela escondida ou coberta o Chrome para o rAF e os quadros
+  (~1 MB cada) se acumulavam. Corrigido: o `empurrar` também corta em `MAX_NA_FILA` (vale pro wasm também).
+- **Depois:** renderer 232–309 MB e o Chrome todo ~1.420–1.500 MB, estáveis nos 5 min.

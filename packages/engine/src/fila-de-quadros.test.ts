@@ -30,3 +30,15 @@ describe('FilaDeQuadros', () => {
     expect(f.descartados).toBe(2);
   });
 });
+
+describe('fila com a janela escondida (2.3)', () => {
+  it('sem ninguém tirar (o rAF parado), a fila não passa do máximo e os mais velhos saem', () => {
+    const f = new FilaDeQuadros();
+    const px = new Uint32Array(4);
+    for (let i = 0; i < 1000; i++) f.empurrar({ pixels: px, largura: 2, altura: 2, chegou: i });
+    expect(f.tamanho).toBe(MAX_NA_FILA);
+    expect(f.descartados).toBe(1000 - MAX_NA_FILA);
+    // quando a janela volta, sai o mais novo que sobrou primeiro na ordem
+    expect(f.tirar(5000)?.chegou).toBe(1000 - MAX_NA_FILA);
+  });
+});
