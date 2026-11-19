@@ -131,6 +131,8 @@ export async function lerArquivoDeJogo(
   nome: string,
   bytes: Uint8Array,
   soltos: { nome: string; bytes: Uint8Array }[] = [],
+  /** B.1: num zip com várias ROMs, qual abrir (o nome do arquivo de dentro); sem ela, a maior */
+  preferida?: string,
 ): Promise<JogoAberto> {
   if (extensao(nome) === 'zip' || ehZip(bytes)) {
     let lista;
@@ -160,7 +162,7 @@ export async function lerArquivoDeJogo(
       return cdDe(nome, arqs, false);
     }
     const candidatas = lista.filter((e) => roda(sistemaPorExtensao(e.nome))).sort((a, b) => b.tamanho - a.tamanho);
-    const e = candidatas[0];
+    const e = candidatas.find((c) => preferida && soNome(c.nome) === soNome(preferida)) ?? candidatas[0];
     if (!e) {
       const outro = lista.map((x) => sistemaPorExtensao(x.nome)).find((s) => s);
       if (outro) throw naoAinda(outro);

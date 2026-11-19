@@ -5,9 +5,11 @@ import {
   cdPs1,
   crc32,
   crcRom,
+  dadosDaEntrada,
   extensao,
   isoDePs2,
   itensDoZipInteiro,
+  listarZip,
   PASTAS_CONSOLE,
   type SistemaId,
 } from '@kof/domain';
@@ -168,6 +170,15 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
         files.push(f);
       }
       return { root: t.raiz, files };
+    },
+    // B.1: uma ROM de dentro de um zip (o backend de teste só tem zip guardado, sem compressão)
+    'file.zip.read': (a) => {
+      precisaRaiz();
+      const z = pegar(String(a.path));
+      const e = listarZip(z).find((x) => x.nome === String(a.entrada));
+      if (!e) throw erro('NOT_FOUND', `${String(a.path)}: sem ${String(a.entrada)}`);
+      const d = dadosDaEntrada(z, e);
+      return a.length ? d.slice(0, Number(a.length)) : d.slice();
     },
     'library.crc': (a) => {
       precisaRaiz();

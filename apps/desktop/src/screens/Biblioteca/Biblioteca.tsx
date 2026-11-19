@@ -1,17 +1,28 @@
 // ☕ Biblioteca (#biblioteca do antigo, mesma marcação e classes): lista em lotes de 150 (rolar ou andar com as setas
 // carrega mais), ficha do jogo à direita, Jogar/Estados, rodapé com a pasta Kof Games. Digitar já procura.
-import { curtoDoSistema, nomeDoSistema, quando, sistemaDoItem, type ItemBiblioteca } from '@kof/domain';
+import { curtoDoSistema, nomeDoSistema, quando, sistemaDoItem, sobreAVersao, type ItemBiblioteca } from '@kof/domain';
 import { useEffect, useRef, useState } from 'react';
 import { acao } from '../../app/acoes';
 import { usarBiblioteca } from '../../stores/biblioteca';
 import { usarTelas } from '../../stores/telas';
 import { FiltrosDaBiblioteca, MetaDoJogo, popAberto, teclaDoPop } from './Filtros';
+import { VersoesDaObra } from './Dialogos';
 import { Capa, Mini, srcCapa } from './Capas';
 import { usarCapas } from '../../stores/capas';
 
 const LOTE = 150;
 
+/** O nome na lista: o da obra (sem os rótulos) quando ela tem várias versões. */
+const nomeNaLista = (r: ItemBiblioteca): string => r.obra?.titulo ?? r.nome;
+
 function detalhe(r: ItemBiblioteca, n: number): string {
+  const versoes = r.obra
+    ? `${r.obra.versoes.length} versões (Enter escolhe) · principal: ${sobreAVersao(r.nome).rotulo} · `
+    : '';
+  return versoes + detalheDaVersao(r, n);
+}
+
+function detalheDaVersao(r: ItemBiblioteca, n: number): string {
   if (!r.jogo) return 'na pasta Kof Games · ainda não jogado';
   const j = r.jogo;
   let t = `${nomeDoSistema(sistemaDoItem(r))} · jogado ${quando(j.ultimo)} · ${n} ${n === 1 ? 'estado salvo' : 'estados salvos'} · ${(j.tamanho / 1048576).toFixed(1)} MB`;
@@ -63,6 +74,17 @@ export function Biblioteca() {
       if (usarBiblioteca.getState().plano) return;
       if (popAberto()) return void teclaDoPop(e);
       const s = usarBiblioteca.getState();
+      if (s.escolhendo) {
+        // o "qual versão?" aberto: ↑↓ escolhe, Enter joga, Esc fecha (e não deixa o Esc fechar a biblioteca)
+        const k = { ArrowDown: 1, ArrowUp: -1 }[e.code];
+        if (k) s.moverVersao(k);
+        else if (e.code === 'Enter') void s.escolherVersao();
+        else if (e.code === 'Escape') s.fecharVersoes();
+        else return;
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       const naBusca = e.target === filtro.current;
       const passo = {
         ArrowDown: colunas(),
@@ -155,10 +177,18 @@ export function Biblioteca() {
                   onClick={() => (i === b.selecionada ? void b.jogar() : b.selecionar(i))}
                 >
                   {sofa && <Mini item={r} texto="☕" />}
-                  <span>{r.nome}</span>
+                  <span>{nomeNaLista(r)}</span>
+                  {r.obra && (
+                    <small
+                      className="sis-tag"
+                      title={r.obra.versoes.map((v) => sobreAVersao(v.nome).rotulo).join('\n')}
+                    >
+                      {r.obra.versoes.length} versões
+                    </small>
+                  )}
                   {sis !== 'snes' && <small className="sis-tag">{curtoDoSistema(sis)}</small>}
-                  {r.jogo?.traducao && (
-                    <small className="sis-tag" title={'traduzido: ' + r.jogo.traducao}>
+                  {(r.jogo?.traducao || sobreAVersao(r.nome).pt) && (
+                    <small className="sis-tag" title={'traduzido' + (r.jogo?.traducao ? ': ' + r.jogo.traducao : '')}>
                       🇧🇷
                     </small>
                   )}
@@ -187,7 +217,7 @@ export function Biblioteca() {
               ☕
             </span>
           </div>
-          <h2 id="info-nome">{sel ? sel.nome : 'KOFstation'}</h2>
+          <h2 id="info-nome">{sel ? nomeNaLista(sel) : 'KOFstation'}</h2>
           <p id="info-det" className="dica">
             {sel
               ? detalhe(sel, sel.jogo ? (b.contagem[sel.jogo.id] ?? 0) : 0)
@@ -207,6 +237,7 @@ export function Biblioteca() {
           </div>
         </div>
       </div>
+      <VersoesDaObra />
       <div className="bib-rodape">
         <button className="sec" data-acao="pasta" onClick={() => acao('pasta')}>
           📁 Pasta Kof Games

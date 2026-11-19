@@ -17,6 +17,8 @@ import {
 } from '@kof/app-core';
 import { carregarBaseDeJogos } from '@kof/app-core';
 import {
+  agruparEmObras,
+  chaveDaVersao,
   consulta,
   juntarItens,
   ordenar,
@@ -73,6 +75,13 @@ export interface Biblioteca {
   aplicarOrganizacao: () => Promise<void>;
   cancelarOrganizacao: () => void;
   montarLista: () => void;
+  /** B.1: a obra com várias versões esperando o "qual versão?" (null = fechado) */
+  escolhendo: ItemBiblioteca | null;
+  versaoSel: number;
+  doZero: boolean;
+  moverVersao: (d: number) => void;
+  escolherVersao: (i?: number) => Promise<void>;
+  fecharVersoes: () => void;
 }
 
 let organizado = false;
@@ -117,10 +126,29 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
       }
       return true;
     });
-    ordenar(visiveis, ordem);
-    const selecionada = Math.max(0, Math.min(get().selecionada, visiveis.length - 1));
-    set({ visiveis, escondidas, selecionada });
+    // B.1: as versões de cada obra viram uma linha só (a principal: a escolhida da última vez, a jogada, a melhor)
+    const obras = agruparEmObras(visiveis, (k) => lerConfig('versao.' + k));
+    ordenar(obras, ordem);
+    const selecionada = Math.max(0, Math.min(get().selecionada, obras.length - 1));
+    set({ visiveis: obras, escondidas, selecionada });
   },
+
+  escolhendo: null,
+  versaoSel: 0,
+  doZero: false,
+  moverVersao: (d) => {
+    const n = get().escolhendo?.obra?.versoes.length ?? 0;
+    if (n) set({ versaoSel: (get().versaoSel + d + n) % n });
+  },
+  escolherVersao: async (i) => {
+    const r = get().escolhendo;
+    const v = r?.obra?.versoes[i ?? get().versaoSel];
+    if (!r?.obra || !v) return;
+    guardarConfig('versao.' + r.obra.chave, chaveDaVersao(v));
+    set({ escolhendo: null });
+    await get().jogar(get().doZero, v);
+  },
+  fecharVersoes: () => set({ escolhendo: null }),
 
   mostrar: async (relerPasta = false) => {
     const { armazem, backend } = servicos();
@@ -191,6 +219,8 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
   jogar: async (doZero = false, item) => {
     const r = item ?? get().visiveis[get().selecionada];
     if (!r) return;
+    // B.1: obra com várias versões: "qual versão?" (a da última vez já marcada; Enter confirma)
+    if (r.obra) return void set({ escolhendo: r, versaoSel: 0, doZero });
     const { backend, armazem } = servicos();
     try {
       const { autoLigado, continuar } = await import('./auto');

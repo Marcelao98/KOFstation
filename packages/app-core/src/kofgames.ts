@@ -9,7 +9,9 @@ import {
   pastaDoArquivo,
   planejarOrganizacao,
   sistemaDoArquivo,
+  sistemaPorExtensao,
   VARIANTE,
+  zipTemCd,
   type FatoDeArquivo,
   type ItemDoInventario,
   type ItemDoZip,
@@ -50,6 +52,21 @@ export interface ArquivoKof {
   /** .bin que é faixa de um CD (não aparece como jogo) */
   faixa: boolean;
   zip?: ItemDoZip[];
+  /** B.1: a ROM de dentro do zip (um zip com várias ROMs vira um item por ROM) */
+  entrada?: string;
+}
+
+/**
+ * B.1: as ROMs de cartucho de um zip, quando são mais de uma (um zip com o jogo e as traduções). CD e Neo Geo (o zip
+ * inteiro é o jogo) ficam como estão.
+ */
+export function romsDoZip(itens: readonly ItemDoZip[] | undefined): ItemDoZip[] {
+  if (!itens || zipTemCd(itens)) return [];
+  const roms = itens.filter((i) => {
+    const s = sistemaPorExtensao(i.nome);
+    return !!s && s !== 'neogeo' && s !== 'ps1' && s !== 'ps2';
+  });
+  return roms.length > 1 ? roms : [];
 }
 
 export const obterRaiz = (b: Backend) => b.chamar<InfoRaiz>('library.root.get');
@@ -70,7 +87,7 @@ export function montarArquivos(files: readonly ArquivoDoRust[]): ArquivoKof[] {
         .replace(/\.cue$/i, '')
         .toLowerCase(),
     );
-  return files.map((f) => {
+  return files.flatMap((f) => {
     const arquivo = base(f.path);
     const nome = arquivo.replace(/\.[^.]+$/, '');
     const fato: FatoDeArquivo = { nome: arquivo, tamanho: f.size };
@@ -91,7 +108,24 @@ export function montarArquivos(files: readonly ArquivoDoRust[]): ArquivoKof[] {
       faixa,
     };
     if (f.zip) a.zip = f.zip;
-    return a;
+    const roms = romsDoZip(f.zip);
+    if (!roms.length) return [a];
+    return roms.map((e): ArquivoKof => {
+      const arq = e.nome.split('/').pop() ?? e.nome;
+      const n = arq.replace(/\.[^.]+$/, '');
+      return {
+        ...a,
+        nome: n,
+        arquivo: arq,
+        ext: extensao(arq).toUpperCase(),
+        tamanho: e.tamanho,
+        sistema: sistemaPorExtensao(arq),
+        chave: normal(n),
+        variante: VARIANTE.test(n),
+        faixa: false,
+        entrada: e.nome,
+      };
+    });
   });
 }
 

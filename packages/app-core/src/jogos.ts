@@ -204,7 +204,8 @@ export async function bytesDoJogo(b: Backend, arm: Armazem, j: RegistroJogo, com
         if (c) return c;
       }
       const bytes = await lerDaKofGames(b, j.path);
-      return await lerArquivoDeJogo(j.path.split('/').pop() ?? j.arquivo, bytes);
+      // num zip com várias ROMs, a mesma que foi jogada (o `arquivo` é o nome da de dentro)
+      return await lerArquivoDeJogo(j.path.split('/').pop() ?? j.arquivo, bytes, [], j.arquivo);
     } catch (e) {
       if (!(await arm.meta('roms', j.id))) throw e;
       // o arquivo saiu da Kof Games: cai pra cópia guardada
@@ -220,6 +221,11 @@ export async function bytesDaPasta(b: Backend, a: ArquivoDaPasta, como: ComoLer 
   if (como.soCabeca) {
     const c = await cabecaDoCd(b, a.path, a.tamanho);
     if (c) return c;
+  }
+  if (a.entrada) {
+    // B.1: uma ROM de dentro de um zip com várias: o Rust descompacta só ela
+    const rom = await b.lerBinario('file.zip.read', { scope: 'kof-games', path: a.path, entrada: a.entrada });
+    return lerArquivoDeJogo(a.arquivo, rom);
   }
   return lerArquivoDeJogo(a.arquivo, await lerDaKofGames(b, a.path));
 }

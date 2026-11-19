@@ -1,5 +1,6 @@
 // Janelas da pasta Kof Games: escolher a pasta (no navegador em modo app não tem diálogo de pasta com caminho: a
 // pessoa cola/digita, com a sugestão já preenchida) e o plano de organização (o que vai mudar de lugar, antes de mudar).
+import { chaveDaVersao, quando, sobreAVersao } from '@kof/domain';
 import { useEffect, useState } from 'react';
 import { usarBiblioteca } from '../../stores/biblioteca';
 
@@ -89,6 +90,52 @@ export function PlanoDeOrganizacao() {
           Agora não
         </button>
       </div>
+    </section>
+  );
+}
+
+/** B.1: "qual versão?" de uma obra com várias (região, revisão, tradução, hack, as ROMs de um zip). ↑↓ Enter Esc. */
+export function VersoesDaObra() {
+  const { escolhendo, versaoSel, doZero } = usarBiblioteca();
+  if (!escolhendo?.obra) return null;
+  const b = usarBiblioteca.getState();
+  const { titulo, versoes } = escolhendo.obra;
+  return (
+    <section id="versoes" className="janela" role="dialog" aria-label={`Versões de ${titulo}`}>
+      <div className="titulo-j">
+        <span>🎮 {titulo}: qual versão?</span>
+        <button className="x" title="fechar (Esc)" onClick={() => b.fecharVersoes()}>
+          ×
+        </button>
+      </div>
+      <ul className="versoes-lista">
+        {versoes.map((v, i) => {
+          const s = sobreAVersao(v.nome);
+          return (
+            <li key={chaveDaVersao(v)}>
+              <button
+                className={i === versaoSel ? 'sel' : undefined}
+                data-versao={i}
+                onClick={() => void b.escolherVersao(i)}
+                onMouseEnter={() => usarBiblioteca.setState({ versaoSel: i })}
+              >
+                <span className="versao-rotulo">
+                  {s.pt ? '🇧🇷 ' : ''}
+                  {s.rotulo}
+                </span>
+                <small className="dica">
+                  {i === 0 && (v.jogo ? 'da última vez · ' : 'recomendada · ')}
+                  {v.jogo ? `jogado ${quando(v.jogo.ultimo)}` : 'ainda não jogado'}
+                  {v.pasta?.entrada ? ' · dentro de um zip' : ''}
+                </small>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="dica">
+        ↑↓ escolhe · Enter {doZero ? 'joga do zero' : 'joga'} · Esc fecha. A escolha fica lembrada pra próxima vez.
+      </p>
     </section>
   );
 }

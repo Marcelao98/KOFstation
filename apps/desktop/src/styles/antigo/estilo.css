@@ -1666,3 +1666,13 @@ html.celular body.com-visual #palco { padding-right: 0; padding-bottom: 58vh; }
 #gravando:disabled { cursor: default; animation: none; background: var(--painel2); color: var(--texto); }
 @keyframes gravando-pisca { 50% { opacity: 0.6; } }
 @media (prefers-reduced-motion: reduce) { #gravando { animation: none; } }
+
+/* B.1: "qual versão?" de uma obra com várias versões */
+#versoes { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 40;
+  width: min(560px, 94vw); max-height: 80vh; overflow-y: auto; }
+#versoes .versoes-lista { list-style: none; margin: 8px 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+#versoes .versoes-lista button { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 8px 12px; font: inherit; text-align: left; color: var(--texto); background: var(--painel);
+  border: 1px solid var(--borda); border-radius: var(--raio); cursor: pointer; }
+#versoes .versoes-lista button.sel { border-color: var(--destaque); background: var(--painel2); }
+#versoes .versao-rotulo { font-weight: 600; }

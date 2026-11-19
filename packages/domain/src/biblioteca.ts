@@ -38,6 +38,8 @@ export interface ArquivoDaPasta {
   variante: boolean;
   faixa: boolean;
   tamanho: number;
+  /** B.1: a ROM de dentro do zip (um zip com várias versões vira um item por ROM) */
+  entrada?: string;
 }
 
 export interface ItemBiblioteca {
@@ -50,6 +52,8 @@ export interface ItemBiblioteca {
   meta?: InfoDaBase | null;
   /** texto onde a busca procura */
   busca?: string;
+  /** B.1: este item é a versão principal de uma obra com várias versões (todas aqui, a principal primeiro) */
+  obra?: { chave: string; titulo: string; versoes: ItemBiblioteca[] };
 }
 
 /** O que a base de jogos (libretro-database) sabe de um jogo. */
