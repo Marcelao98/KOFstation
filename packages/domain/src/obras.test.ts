@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { ItemBiblioteca, RegistroJogo } from './biblioteca';
-import { agruparEmObras, chaveDaVersao, rotulosDoNome, sobreAVersao } from './obras';
+import type { BaseDeJogos } from './basejogos';
+import type { InfoDaBase } from './biblioteca';
+import { agruparEmObras, catalogoQueFalta, chaveDaVersao, rotulosDoNome, sobreAVersao } from './obras';
 
 const pasta = (nome: string, ext = 'sfc', entrada?: string): ItemBiblioteca => ({
   nome,
@@ -97,5 +99,44 @@ describe('obra × versões (B.1)', () => {
     const l = agruparEmObras([a, b]);
     expect(l).toHaveLength(1);
     expect(l[0]?.nome).toBe('Jogo (USA) [T+Por]');
+  });
+});
+
+describe('catálogo do que falta (B.2)', () => {
+  const info = (sistema: InfoDaBase['sistema'], titulo: string): InfoDaBase => ({
+    sistema,
+    titulo,
+    ano: 1990,
+    generos: [],
+    publicou: '',
+    desenvolveu: '',
+    serie: '',
+    jogadores: 1,
+  });
+  const base = {
+    todos: () => [
+      info('snes', 'Super Mario World'),
+      info('snes', 'Chrono Trigger'),
+      info('snes', 'Chrono Trigger'), // repetido na base (duas regiões): um só
+      info('gb', 'Pokemon - Edicao Ouro'),
+      info('gb', 'Tetris'),
+      info('snes', 'Legend of Zelda, The - A Link to the Past'),
+    ],
+  } as unknown as BaseDeJogos;
+
+  it('só os que a pessoa não tem, um por título, marcados com o console e sem arquivo', () => {
+    const gbc: ItemBiblioteca = {
+      nome: 'Pokemon - Edicao Ouro (Brazil)',
+      chave: 'x',
+      jogo: { id: 'p', nome: 'Pokemon - Edicao Ouro (Brazil)', arquivo: 'p.gbc', sistema: 'gb' } as RegistroJogo,
+    };
+    const zelda: ItemBiblioteca = {
+      ...pasta('Arquivo Com Outro Nome (USA)'),
+      meta: info('snes', 'Legend of Zelda, The - A Link to the Past'),
+    };
+    const l = catalogoQueFalta(base, [pasta('Super Mario World (USA)'), gbc, zelda]);
+    expect(l.map((r) => r.nome)).toEqual(['Chrono Trigger', 'Tetris']);
+    expect(l[0]).toMatchObject({ catalogo: 'snes' });
+    expect(l.every((r) => !r.pasta && !r.jogo)).toBe(true);
   });
 });

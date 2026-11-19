@@ -1676,3 +1676,7 @@ html.celular body.com-visual #palco { padding-right: 0; padding-bottom: 58vh; }
   border: 1px solid var(--borda); border-radius: var(--raio); cursor: pointer; }
 #versoes .versoes-lista button.sel { border-color: var(--destaque); background: var(--painel2); }
 #versoes .versao-rotulo { font-weight: 600; }
+
+/* B.2: jogos do catálogo (a pessoa não tem): em cinza */
+#roms li.cat { opacity: 0.5; font-style: italic; }
+#roms li.cat.sel { opacity: 0.8; }

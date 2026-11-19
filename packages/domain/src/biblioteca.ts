@@ -52,6 +52,8 @@ export interface ItemBiblioteca {
   meta?: InfoDaBase | null;
   /** texto onde a busca procura */
   busca?: string;
+  /** B.2: um jogo do catálogo que a pessoa NÃO tem (aparece em cinza; nunca tem link nem dica de onde baixar) */
+  catalogo?: SistemaId;
   /** B.1: este item é a versão principal de uma obra com várias versões (todas aqui, a principal primeiro) */
   obra?: { chave: string; titulo: string; versoes: ItemBiblioteca[] };
 }
@@ -84,6 +86,7 @@ export function juntarItens(jogos: readonly RegistroJogo[], pasta: readonly Arqu
 /** O console do item (o `sistemaDoItem` do antigo; pela pasta usa o que a varredura descobriu). */
 export function sistemaDoItem(r: ItemBiblioteca): SistemaId {
   return (
+    r.catalogo ||
     (r.jogo && (r.jogo.sistema || sistemaDoNome(r.jogo.arquivo))) ||
     r.pasta?.sistema ||
     (r.pasta && sistemaDoNome(r.pasta.arquivo)) ||

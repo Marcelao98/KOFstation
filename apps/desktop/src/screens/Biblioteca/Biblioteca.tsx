@@ -23,6 +23,7 @@ function detalhe(r: ItemBiblioteca, n: number): string {
 }
 
 function detalheDaVersao(r: ItemBiblioteca, n: number): string {
+  if (r.catalogo) return `${nomeDoSistema(r.catalogo)} · do catálogo: você não tem este jogo`;
   if (!r.jogo) return 'na pasta Kof Games · ainda não jogado';
   const j = r.jogo;
   let t = `${nomeDoSistema(sistemaDoItem(r))} · jogado ${quando(j.ultimo)} · ${n} ${n === 1 ? 'estado salvo' : 'estados salvos'} · ${(j.tamanho / 1048576).toFixed(1)} MB`;
@@ -115,14 +116,18 @@ export function Biblioteca() {
 
   const n = b.visiveis.length;
   const total = b.itens.length;
+  // B.2: os do catálogo (em cinza) contam à parte
+  const doCatalogo = b.catalogo ? b.visiveis.filter((r) => r.catalogo).length : 0;
+  const tem = n - doCatalogo;
   let estado = b.estado;
   if (!estado && !b.lendo) {
     let s = b.texto.trim()
-      ? `${n.toLocaleString('pt-BR')} ${n === 1 ? 'jogo achado' : 'jogos achados'}`
+      ? `${tem.toLocaleString('pt-BR')} ${tem === 1 ? 'jogo achado' : 'jogos achados'}`
       : `${total.toLocaleString('pt-BR')} jogos`;
+    if (doCatalogo) s += ` · 📖 ${doCatalogo.toLocaleString('pt-BR')} do catálogo em cinza`;
     if (b.escondidas) s += ` · ${b.escondidas.toLocaleString('pt-BR')} hacks/cópias ruins escondidos`;
     if (mostrando < n) s += ` · mostrando ${mostrando.toLocaleString('pt-BR')}, role pra ver mais`;
-    estado = total > 30 || b.escondidas || n < total ? s : '';
+    estado = total > 30 || b.escondidas || n < total || doCatalogo ? s : '';
   }
   const auto = !!sel?.jogo?.temAuto;
   const src = sel ? srcCapa(sel) : null;
@@ -173,7 +178,7 @@ export function Biblioteca() {
                 <li
                   key={(r.jogo?.id ?? '') + (r.pasta?.path ?? '') + i}
                   data-i={i}
-                  className={i === b.selecionada ? 'sel' : undefined}
+                  className={[i === b.selecionada ? 'sel' : '', r.catalogo ? 'cat' : ''].join(' ').trim() || undefined}
                   onClick={() => (i === b.selecionada ? void b.jogar() : b.selecionar(i))}
                 >
                   {sofa && <Mini item={r} texto="☕" />}
@@ -192,7 +197,7 @@ export function Biblioteca() {
                       🇧🇷
                     </small>
                   )}
-                  <small className="li-ext">{r.jogo ? (c ? '💾 ' + c : '★') : r.pasta?.ext}</small>
+                  <small className="li-ext">{r.catalogo ? '📖' : r.jogo ? (c ? '💾 ' + c : '★') : r.pasta?.ext}</small>
                 </li>
               );
             })}
@@ -225,13 +230,23 @@ export function Biblioteca() {
           </p>
           <MetaDoJogo item={sel} />
           <div className="bib-botoes">
-            <button className="grande" data-acao="jogar" onClick={() => void b.jogar()} disabled={!sel}>
+            <button
+              className="grande"
+              data-acao="jogar"
+              onClick={() => void b.jogar()}
+              disabled={!sel || !!sel.catalogo}
+            >
               {auto ? '▶ Continuar' : '▶ Jogar'}
             </button>
             <button className="grande sec" data-acao="do-zero" hidden={!auto} onClick={() => void b.jogar(true)}>
               ↺ Começar do zero
             </button>
-            <button className="grande sec" data-acao="estados-do-sel" onClick={() => acao('estados-do-sel')}>
+            <button
+              className="grande sec"
+              data-acao="estados-do-sel"
+              disabled={!!sel?.catalogo}
+              onClick={() => acao('estados-do-sel')}
+            >
               Estados salvos
             </button>
           </div>
@@ -266,6 +281,14 @@ export function Biblioteca() {
           onClick={() => void b.mostrar(true)}
         >
           🔄 Reler e organizar
+        </button>
+        <button
+          className="sec"
+          data-acao="catalogo"
+          title="mostra em cinza os jogos de cada console que você ainda não tem (com ano, gênero e empresa)"
+          onClick={() => b.alternarCatalogo()}
+        >
+          📖 Catálogo: {b.catalogo ? 'ligado' : 'desligado'}
         </button>
         <button className="sec" data-acao="capas" onClick={() => acao('capas')}>
           🖼 Capas oficiais: {ligadas ? 'ligadas' : 'desligadas'}

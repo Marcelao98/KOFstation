@@ -1,8 +1,10 @@
 // Biblioteca com cara de console (B.1): o jogo (a obra) separado dos arquivos (as versões). "Super Mario World (USA)",
 // "Super Mario World (Europe) (Rev 1)" e "Super Mario World (USA) [T+Por]" são um jogo só com três versões. Puro: entende
 // os rótulos do nome (padrão No-Intro e GoodTools) e escolhe a versão principal.
-import { chaveDoTitulo, tituloDoNome } from './basejogos';
+import { chaveDoTitulo, tituloDoNome, type BaseDeJogos } from './basejogos';
 import type { ItemBiblioteca } from './biblioteca';
+import { normal } from './rom';
+import type { SistemaId } from './sistemas';
 import { sistemaDoItem } from './biblioteca';
 
 const REGIOES: Record<string, [string, number]> = {
@@ -161,6 +163,32 @@ export function agruparEmObras(
     );
     const principal = ordem[0] as ItemBiblioteca;
     fora.push({ ...principal, obra: { chave: k, titulo: tituloDoNome(principal.nome), versoes: ordem } });
+  }
+  return fora;
+}
+
+/** B.2: a chave de um jogo no catálogo (a base junta GB e GBC no "gb"). */
+const chaveDeCatalogo = (sis: string, titulo: string): string =>
+  (sis === 'gbc' ? 'gb' : sis) + ':' + chaveDoTitulo(tituloDoNome(titulo));
+
+/**
+ * B.2: o catálogo do que falta: os jogos da base que não estão entre os que a pessoa tem (comparando pela obra), um por
+ * título. Só o nome e o que a base sabe: nada de arquivo, link ou dica de onde baixar.
+ */
+export function catalogoQueFalta(base: BaseDeJogos, tem: readonly ItemBiblioteca[]): ItemBiblioteca[] {
+  const ja = new Set<string>();
+  for (const r of tem) {
+    ja.add(chaveDeCatalogo(sistemaDoItem(r), r.nome));
+    // o que a base reconheceu (pelo CRC ou pelo título) também conta: o nome do arquivo pode ser outro
+    if (r.meta) ja.add(chaveDeCatalogo(r.meta.sistema, r.meta.titulo));
+  }
+  const fora: ItemBiblioteca[] = [];
+  for (const m of base.todos()) {
+    const k = chaveDeCatalogo(m.sistema, m.titulo);
+    if (ja.has(k) || !m.titulo) continue;
+    ja.add(k);
+    // sem `meta`: a busca (metaDe) acha de novo pelo título e monta o texto onde procurar
+    fora.push({ nome: m.titulo, chave: normal(m.titulo), catalogo: m.sistema as SistemaId });
   }
   return fora;
 }

@@ -18,6 +18,7 @@ import {
 import { carregarBaseDeJogos } from '@kof/app-core';
 import {
   agruparEmObras,
+  catalogoQueFalta,
   chaveDaVersao,
   consulta,
   juntarItens,
@@ -75,6 +76,9 @@ export interface Biblioteca {
   aplicarOrganizacao: () => Promise<void>;
   cancelarOrganizacao: () => void;
   montarLista: () => void;
+  /** B.2: mostra também (em cinza) os jogos da base que a pessoa não tem */
+  catalogo: boolean;
+  alternarCatalogo: () => void;
   /** B.1: a obra com várias versões esperando o "qual versão?" (null = fechado) */
   escolhendo: ItemBiblioteca | null;
   versaoSel: number;
@@ -85,6 +89,8 @@ export interface Biblioteca {
 }
 
 let organizado = false;
+/** B.2: o catálogo do que falta, montado uma vez por lista de itens e base */
+let catalogoFeito: { itens: ItemBiblioteca[]; base: BaseDeJogos; lista: ItemBiblioteca[] } | null = null;
 let lendoPasta: Promise<void> | null = null;
 
 export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
@@ -128,11 +134,24 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
     });
     // B.1: as versões de cada obra viram uma linha só (a principal: a escolhida da última vez, a jogada, a melhor)
     const obras = agruparEmObras(visiveis, (k) => lerConfig('versao.' + k));
+    // B.2: o catálogo em cinza depois dos que a pessoa tem (o filtro acima já calculou o `meta` de todos os itens)
+    if (get().catalogo && base) {
+      if (catalogoFeito?.itens !== itens || catalogoFeito.base !== base)
+        catalogoFeito = { itens, base, lista: catalogoQueFalta(base, itens) };
+      for (const r of catalogoFeito.lista) if (passa(r, q, filtros, base)) obras.push(r);
+    }
     ordenar(obras, ordem);
     const selecionada = Math.max(0, Math.min(get().selecionada, obras.length - 1));
     set({ visiveis: obras, escondidas, selecionada });
   },
 
+  catalogo: lerConfig('bibCatalogo') === '1',
+  alternarCatalogo: () => {
+    const catalogo = !get().catalogo;
+    guardarConfig('bibCatalogo', catalogo ? '1' : '0');
+    set({ catalogo });
+    get().montarLista();
+  },
   escolhendo: null,
   versaoSel: 0,
   doZero: false,
@@ -219,6 +238,8 @@ export const usarBiblioteca = create<Biblioteca>()((set, get) => ({
   jogar: async (doZero = false, item) => {
     const r = item ?? get().visiveis[get().selecionada];
     if (!r) return;
+    // B.2: do catálogo: a pessoa não tem esse jogo (e o app nunca diz onde achar)
+    if (r.catalogo) return void usarAvisos.getState().avisar('📖 Esse jogo está no catálogo: você não tem ele', 2500);
     // B.1: obra com várias versões: "qual versão?" (a da última vez já marcada; Enter confirma)
     if (r.obra) return void set({ escolhendo: r, versaoSel: 0, doZero });
     const { backend, armazem } = servicos();

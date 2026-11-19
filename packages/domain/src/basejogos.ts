@@ -19,6 +19,8 @@ export interface DadosDaBase {
 export interface BaseDeJogos {
   info(sis: SistemaId | 'gbc' | null, nome: string, crc?: string): InfoDaBase | null;
   generos(): string[];
+  /** B.2: todos os jogos da base (o catálogo de cada console) */
+  todos(): InfoDaBase[];
 }
 
 const ARTIGO = /^(.*?), (The|A|An|Le|La|Les|Die|Der|Das|El|Los|Las)\b(.*)$/;
@@ -91,5 +93,6 @@ export function criarBaseDeJogos(db: DadosDaBase): BaseDeJogos {
       return null;
     },
     generos: () => db.t.g.slice(),
+    todos: () => Object.entries(db.j).flatMap(([sis, l]) => l.map((_, i) => montar(sis, i))),
   };
 }
