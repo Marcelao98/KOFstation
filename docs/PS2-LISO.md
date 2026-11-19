@@ -136,3 +136,15 @@ Atualização (17/11, à noite): o Marcelo aumentou só a **resolução interna*
 "de boa". Então a 2x sozinha cabe; a suspeita do engasgo do Bonito passa pro **anisotrópico 8x** ou o **MTVU**
 (a medir). O resumo de tudo pra quem for fazer o próximo núcleo pesado está em
 [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md).
+
+## 19/11 · 3.2 Menos RAM (máquina livre, jogo pesado A, estado salvo, andando)
+
+- **Regressão da fase R** (achada aqui): o processo ligava o rebobinar no PS2 (foto de 48 MB a cada 2 quadros). Fora:
+  fps 50,6–56,7 → 60, engasgos 810–1030 → 8–9/min, faltas de som 457–976 → 0 (era o chiado), CPU 103–119% → 47%.
+- **Chrome enxuto** (`navegador.rs`, flags sem extensões, rede em segundo plano, renderer de reserva...): o Chrome do
+  app inteiro (soma dos processos, `medir-ps2.mjs` agora mostra) 1.850–1.980 → 1.653–1.724 MB no pico; fps igual.
+- **Estado pelo Rust** (`kof-nativo/src/pacote.rs`, `salvarEstadoPacote`/`CARREGAR_PACOTE`): o base64 + gzip (64 MB de
+  texto) saiu da página e foi pra uma linha separada do processo. 1ª tentativa piorou o F5 (750 → 2.000 ms): o perfil
+  mostrou o `fetch` copiando os 21 MB na linha da página (o caminho antigo mandava um Blob); com o Blob, F5 300–317 ms,
+  F8 283–300 ms, sem quadro novo 383–400 ms (era 905–941), Chrome com F5 1.445 MB (era 1.891–1.988). O pacote do
+  Rust (gzip rápido) tem 21 MB; o da página tinha 18.

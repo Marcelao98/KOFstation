@@ -584,8 +584,10 @@ dependencies = [
 name = "kof-nativo"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "cc",
  "cpal",
+ "flate2",
  "getrandom 0.3.4",
  "kof-core",
  "libloading",

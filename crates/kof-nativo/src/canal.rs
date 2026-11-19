@@ -203,6 +203,22 @@ impl Canal {
                         Ok(Binario::GravarBateria { pedido, dados }) => {
                             Some(Pedido::GravarBateria(pedido, dados.to_vec()))
                         }
+                        // 3.2: desempacota aqui (na linha da conexão), não na do jogo
+                        Ok(Binario::CarregarPacote {
+                            pedido,
+                            comprimido,
+                            dados,
+                        }) => match crate::pacote::desempacotar(dados, comprimido) {
+                            Ok(e) => Some(Pedido::CarregarEstado(pedido, e)),
+                            Err(m) => {
+                                self.avisar(&Aviso::Erro {
+                                    pedido: Some(pedido),
+                                    codigo: "INVALID_ARGS".into(),
+                                    mensagem: m,
+                                });
+                                None
+                            }
+                        },
                         Err(e) => {
                             self.avisar(&Aviso::Erro {
                                 pedido: None,

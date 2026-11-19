@@ -18,6 +18,8 @@ pub const CARREGAR_ESTADO: u8 = 4;
 pub const BATERIA: u8 = 5;
 pub const GRAVAR_BATERIA: u8 = 6;
 pub const SOM: u8 = 7;
+/// página → processo: um estado no formato da loja (`[8, comprimido, 0, 0, pedido u32, tamanho u32]` + bytes): 3.2
+pub const CARREGAR_PACOTE: u8 = 8;
 pub const CABECALHO: usize = 12;
 
 /// Comando da página (texto JSON).
@@ -61,6 +63,13 @@ pub enum Comando {
     /// ⏺ gravar (G.2): manda pra página uma cópia do som que sai na placa (mensagens `SOM`), ou para
     SomPraPagina {
         sim: bool,
+    },
+    /// 3.2: salva o estado já no formato da loja (texto com base64, em gzip quando `comprimir`), montado numa linha
+    /// separada; chega como `ESTADO` com o mesmo `pedido`
+    SalvarEstadoPacote {
+        pedido: u32,
+        nucleo: String,
+        comprimir: bool,
     },
 }
 
@@ -137,9 +146,24 @@ pub enum Aviso {
 /// Mensagem binária da página já entendida.
 #[derive(Debug, PartialEq)]
 pub enum Binario<'a> {
-    Botoes { jogador: usize, entrada: Entrada },
-    CarregarEstado { pedido: u32, dados: &'a [u8] },
-    GravarBateria { pedido: u32, dados: &'a [u8] },
+    Botoes {
+        jogador: usize,
+        entrada: Entrada,
+    },
+    CarregarEstado {
+        pedido: u32,
+        dados: &'a [u8],
+    },
+    GravarBateria {
+        pedido: u32,
+        dados: &'a [u8],
+    },
+    /// 3.2: um estado no formato da loja (o canal desempacota antes de entregar ao núcleo)
+    CarregarPacote {
+        pedido: u32,
+        comprimido: bool,
+        dados: &'a [u8],
+    },
 }
 
 fn u32le(b: &[u8], i: usize) -> u32 {
@@ -171,6 +195,18 @@ pub fn ler_binario(b: &[u8]) -> Result<Binario<'_>, String> {
                 Binario::CarregarEstado { pedido, dados }
             } else {
                 Binario::GravarBateria { pedido, dados }
+            })
+        }
+        CARREGAR_PACOTE => {
+            let pedido = u32le(b, 4);
+            let n = u32le(b, 8) as usize;
+            let dados = b
+                .get(CABECALHO..CABECALHO + n)
+                .ok_or_else(|| format!("faltam bytes: diz {n}, veio {}", b.len() - CABECALHO))?;
+            Ok(Binario::CarregarPacote {
+                pedido,
+                comprimido: b[1] == 1,
+                dados,
             })
         }
         t => Err(format!("tipo de mensagem desconhecido: {t}")),

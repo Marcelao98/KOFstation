@@ -39,9 +39,11 @@ export async function guardarEstado(
   arm: Armazem,
   meta: MetaEstado,
   nucleo: string,
-  estado: Uint8Array,
+  /** o estado cru, ou (3.2) o pacote da loja já pronto, montado pelo processo nativo */
+  estado: Uint8Array | { pacote: Uint8Array },
 ): Promise<string> {
-  const dados = await empacotar(nucleo, estado, true);
+  // o pacote vai como Blob: o navegador manda direto (com os bytes crus o fetch copiava 21 MB na linha da página: ~0,55 s)
+  const dados = 'pacote' in estado ? paraBlob(estado.pacote) : await empacotar(nucleo, estado, true);
   const k = chaveDoEstado(meta.jogo, meta.quando);
   await arm.por('estados', k, meta, dados);
   return k;
@@ -80,11 +82,17 @@ export async function guardarAuto(
   arm: Armazem,
   jogo: string,
   nucleo: string,
-  estado: Uint8Array,
+  /** o estado cru, ou (3.2) o pacote da loja já pronto (sem gzip na `autos`) */
+  estado: Uint8Array | { pacote: Uint8Array },
   capa: string,
 ): Promise<number> {
   const quando = Date.now();
-  await arm.por('autos', jogo, { quando }, await empacotar(nucleo, estado, false));
+  await arm.por(
+    'autos',
+    jogo,
+    { quando },
+    'pacote' in estado ? paraBlob(estado.pacote) : await empacotar(nucleo, estado, false),
+  );
   await mudarJogo(arm, jogo, (j) => ({
     ...j,
     temAuto: true,
@@ -100,3 +108,10 @@ export async function lerAuto(arm: Armazem, jogo: string): Promise<EstadoDoNucle
   const b = await arm.pegar('autos', jogo);
   return b ? desempacotar(b, false) : null;
 }
+
+/** 3.2: os bytes da loja como estão (o nativo desempacota no processo dele). null = não tem. */
+export async function lerPacote(arm: Armazem, loja: 'estados' | 'autos', key: string): Promise<Uint8Array | null> {
+  return (await arm.pegar(loja, key)) ?? null;
+}
+
+const paraBlob = (u8: Uint8Array): Blob => new Blob([u8 as Uint8Array<ArrayBuffer>]);

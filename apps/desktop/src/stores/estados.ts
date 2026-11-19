@@ -1,11 +1,13 @@
 // Savestates do jogo (F5 salva, F8 carrega o último, F6 abre a tela), com o print do momento e o limite por jogo.
 import {
+  lerPacote,
   bytesDaPasta,
   bytesDoCapturado,
   bytesDoJogo,
   estadosDe,
   guardarEstado,
   LIMITES_ESTADOS,
+  lerAuto,
   lerEstado,
   limitarEstados,
   mudarJogo,
@@ -15,7 +17,7 @@ import {
   type EstadoSalvo,
 } from '@kof/app-core';
 import { quando as quandoTexto, type RegistroJogo } from '@kof/domain';
-import { NUCLEOS } from '@kof/engine';
+import { JogoNativo, NUCLEOS } from '@kof/engine';
 import { create } from 'zustand';
 import { fotoDoQuadro } from '../app/foto';
 import { usarAvisos } from './avisos';
@@ -68,6 +70,25 @@ export async function restaurar(o: EstadoDoNucleo): Promise<void> {
   await j.jogo.carregarEstado(bytesDoCapturado(o, nucleo));
   aoCarregarEstado.forEach((f) => f());
 }
+/**
+ * Carrega um estado da loja. No nativo (3.2) os bytes vão como estão e o processo desempacota (no PS2 o base64 de 64 MB
+ * não passa mais pela página); nos outros, como sempre.
+ */
+export async function restaurarDaLoja(loja: 'estados' | 'autos', key: string): Promise<void> {
+  const { armazem } = servicos();
+  const jogo = usarJogo.getState().jogo;
+  if (jogo instanceof JogoNativo) {
+    const b = await lerPacote(armazem, loja, key);
+    if (!b) throw new Error('esse estado não existe mais');
+    await jogo.carregarPacote(b, loja === 'estados');
+    aoCarregarEstado.forEach((f) => f());
+    return;
+  }
+  if (loja === 'estados') return restaurar(await lerEstado(armazem, key));
+  const auto = await lerAuto(armazem, key);
+  if (auto) await restaurar(auto);
+}
+
 /** Quem quer saber quando um estado foi carregado (o rebobinar zera: M6). */
 export const aoCarregarEstado = new Set<() => void>();
 
@@ -94,7 +115,11 @@ export const usarEstados = create<Estados>()((set, get) => ({
         );
       const nucleo = NUCLEOS[j.info.sistema]?.nucleo ?? '';
       const capa = fotoDoQuadro(256);
-      const estado = await j.jogo.salvarEstado();
+      // 3.2: no nativo o processo já devolve o pacote da loja (base64 + gzip numa linha separada dele)
+      const estado =
+        j.jogo instanceof JogoNativo
+          ? { pacote: await j.jogo.salvarPacote(nucleo, true) }
+          : await j.jogo.salvarEstado();
       await guardarEstado(armazem, { jogo: j.registro.id, nome: j.nome, quando: Date.now(), capa }, nucleo, estado);
       void mudarJogo(armazem, j.registro.id, (r) => ({ ...r, capa, ultimo: Date.now() }));
       const apagados = limitar ? await limitarEstados(armazem, j.registro.id, max) : 0;
@@ -130,7 +155,7 @@ export const usarEstados = create<Estados>()((set, get) => ({
         if (!reg) return usarAvisos.getState().avisar('a ROM desse jogo não está na biblioteca', 4000);
         if (!(await abrirDoRegistro(reg))) return;
       }
-      await restaurar(await lerEstado(armazem, e.key));
+      await restaurarDaLoja('estados', e.key);
       usarTelas.getState().abrir('jogo');
       usarAvisos.getState().avisar('estado de ' + quandoTexto(e.quando) + ' carregado');
     } catch (er) {

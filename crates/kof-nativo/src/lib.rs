@@ -11,6 +11,7 @@ pub mod gl;
 pub mod libretro;
 pub mod medidor;
 pub mod nucleo;
+pub mod pacote;
 pub mod protocolo;
 pub mod rebobinar;
 pub mod som;

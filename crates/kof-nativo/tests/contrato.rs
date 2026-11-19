@@ -67,6 +67,28 @@ fn mesmas_fixtures_do_typescript() {
         s["hex"]
     );
 
+    // 3.2: o pacote da loja feito aqui é o mesmo texto da página, e o gzip dele está na fixture pro TS abrir
+    let pc = &f["pacote"];
+    let est: Vec<u8> = serde_json::from_value(pc["estado"].clone()).unwrap();
+    let nuc = pc["nucleo"].as_str().unwrap();
+    assert_eq!(
+        String::from_utf8(kof_nativo::pacote::empacotar(nuc, &est, false)).unwrap(),
+        pc["texto"]
+    );
+    assert_eq!(hex(&kof_nativo::pacote::empacotar(nuc, &est, true)), pc["gzipHex"]);
+    let carregar = (0..pc["carregarHex"].as_str().unwrap().len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&pc["carregarHex"].as_str().unwrap()[i..i + 2], 16).unwrap())
+        .collect::<Vec<u8>>();
+    assert_eq!(
+        protocolo::ler_binario(&carregar).unwrap(),
+        protocolo::Binario::CarregarPacote {
+            pedido: 9,
+            comprimido: true,
+            dados: &[0xaa, 0xbb, 0xcc]
+        }
+    );
+
     for c in f["comandos"].as_array().unwrap() {
         let cmd: Comando = serde_json::from_value(c.clone()).unwrap_or_else(|e| panic!("{c}: {e}"));
         assert_eq!(&serde_json::to_value(&cmd).unwrap(), c);

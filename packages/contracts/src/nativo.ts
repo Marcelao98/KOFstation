@@ -10,6 +10,8 @@ export const NATIVO = {
   GRAVAR_BATERIA: 6,
   /** processo → página: uma cópia do som que saiu, só enquanto a página pede (⏺ gravar, G.2) */
   SOM: 7,
+  /** página → processo: um estado no formato da loja; o byte 1 diz se está em gzip (3.2) */
+  CARREGAR_PACOTE: 8,
   CABECALHO: 12,
 } as const;
 
@@ -24,7 +26,9 @@ export type ComandoNativo =
   /** segurando (ou soltou) o botão de voltar no tempo */
   | { cmd: 'voltar'; sim: boolean }
   /** ⏺ gravar (G.2): manda (ou para de mandar) uma cópia do som que sai na placa, em mensagens `SOM` */
-  | { cmd: 'somPraPagina'; sim: boolean };
+  | { cmd: 'somPraPagina'; sim: boolean }
+  /** 3.2: o estado já no formato da loja (montado no processo, numa linha separada); volta como `ESTADO` */
+  | { cmd: 'salvarEstadoPacote'; pedido: number; nucleo: string; comprimir: boolean };
 
 export type AvisoNativo =
   | {
@@ -154,5 +158,13 @@ export function blocoNativo(tipo: 4 | 6, pedido: number, dados: Uint8Array): Uin
   d.setUint32(4, pedido, true);
   d.setUint32(8, dados.length, true);
   u.set(dados, NATIVO.CABECALHO);
+  return u;
+}
+
+/** 3.2: `CARREGAR_PACOTE`: um estado no formato da loja (o processo desempacota). */
+export function pacoteNativo(pedido: number, comprimido: boolean, dados: Uint8Array): Uint8Array {
+  const u = blocoNativo(NATIVO.CARREGAR_ESTADO, pedido, dados);
+  u[0] = NATIVO.CARREGAR_PACOTE;
+  u[1] = comprimido ? 1 : 0;
   return u;
 }

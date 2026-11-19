@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::io::{BufRead, Write};
 use std::path::PathBuf;
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc};
 use std::time::{Duration, Instant};
 
 /// O que o supervisor manda pro filho.
@@ -229,7 +229,27 @@ fn erro_de(pedido: u32, e: &KofError) -> Aviso {
     }
 }
 
-fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receiver<Pedido>) -> String {
+fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Arc<Canal>, rx: &mpsc::Receiver<Pedido>) -> String {
+    // 3.2: o estado no formato da loja (base64 + gzip de até ~48 MB) é montado nesta linha, não na do jogo
+    let (pacote_tx, pacote_rx) = mpsc::channel::<(u32, String, bool, Vec<u8>)>();
+    {
+        let c = Arc::clone(canal);
+        let r = std::thread::Builder::new()
+            .name("kofstation_pacote".into())
+            .spawn(move || {
+                for (pedido, nucleo, comprimir, estado) in pacote_rx {
+                    let p = crate::pacote::empacotar(&nucleo, &estado, comprimir);
+                    c.mandar(tungstenite::Message::binary(protocolo::bloco(
+                        protocolo::ESTADO,
+                        pedido,
+                        &p,
+                    )));
+                }
+            });
+        if let Err(e) = r {
+            tracing::error!("sem a linha do pacote do estado: {e}"); // o salvar pelo pacote responde erro
+        }
+    }
     let mut pausado = false;
     let mut turbo = 1u32;
     let mut som = Vec::<i16>::with_capacity(8192);
@@ -306,6 +326,18 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
                             pedido,
                             &d,
                         ))),
+                        Err(e) => canal.avisar(&erro_de(pedido, &e)),
+                    },
+                    Comando::SalvarEstadoPacote {
+                        pedido,
+                        nucleo,
+                        comprimir,
+                    } => match n.salvar_estado() {
+                        Ok(d) => {
+                            if pacote_tx.send((pedido, nucleo, comprimir, d)).is_err() {
+                                canal.avisar(&erro_de(pedido, &KofError::Nucleo("sem a linha do pacote".into())));
+                            }
+                        }
                         Err(e) => canal.avisar(&erro_de(pedido, &e)),
                     },
                     Comando::LerBateria { pedido } => {

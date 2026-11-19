@@ -1,12 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { NATIVO, blocoNativo, botoesNativo, lerAviso, lerBinario } from './nativo';
+import { NATIVO, blocoNativo, botoesNativo, lerAviso, lerBinario, pacoteNativo } from './nativo';
 
 interface Fixture {
   botoes: { jogador: number; botoes: number; eixos: number[]; hex: string };
   quadro: { largura: number; altura: number; numero: number; rgba: number[]; hex: string };
   bloco: { tipo: 4; pedido: number; dados: number[]; hex: string };
   som: { taxa: number; amostras: number[]; hex: string };
+  pacote: { carregarHex: string };
   comandos: unknown[];
   avisos: unknown[];
 }
@@ -46,6 +47,9 @@ describe('protocolo do núcleo nativo (mesmas fixtures do Rust)', () => {
       expect(Array.from(b.amostras)).toEqual(f.som.amostras);
     }
     expect(() => lerBinario(deHex(f.som.hex).subarray(0, 14))).toThrow();
+  });
+  it('carregar pacote (3.2: o estado no formato da loja)', () => {
+    expect(hex(pacoteNativo(9, true, new Uint8Array([0xaa, 0xbb, 0xcc])))).toBe(f.pacote.carregarHex);
   });
   it('avisos', () => {
     for (const a of f.avisos) expect(lerAviso(JSON.stringify(a))).toEqual(a);

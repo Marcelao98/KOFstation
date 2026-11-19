@@ -1,12 +1,12 @@
 // Salvar automático e Continuar (app.js `salvarAuto`/`continuar` do antigo): a cada N segundos de jogo (15/30/60,
 // padrão 30), ao sair da janela, ao fechar e antes de abrir outro jogo; ao jogar de novo, continua de onde parou.
-import { AUTO_SEG, autoSegundos, bytesDoJogo, guardarAuto, lerAuto, registrar, textoDoErro } from '@kof/app-core';
+import { AUTO_SEG, autoSegundos, bytesDoJogo, guardarAuto, registrar, textoDoErro } from '@kof/app-core';
 import { quando, type RegistroJogo } from '@kof/domain';
-import { NUCLEOS } from '@kof/engine';
+import { JogoNativo, NUCLEOS } from '@kof/engine';
 import { fotoDoQuadro } from '../app/foto';
 import { usarAvisos } from './avisos';
 import { config } from './config';
-import { restaurar } from './estados';
+import { restaurarDaLoja } from './estados';
 import { antesDeTrocarJogo, nativoLigado, usarJogo } from './jogo';
 import { servicos } from './servicos';
 
@@ -29,7 +29,9 @@ export function salvarAuto(): Promise<void> {
   const capa = fotoDoQuadro(256);
   salvando = (async () => {
     try {
-      const estado = await jogo.salvarEstado();
+      // 3.2: no nativo o processo já devolve o pacote da loja (sem gzip na `autos`)
+      const estado =
+        jogo instanceof JogoNativo ? { pacote: await jogo.salvarPacote(nucleo, false) } : await jogo.salvarEstado();
       if (usarJogo.getState().registro?.id !== id) return; // trocou de jogo no meio
       const q = await guardarAuto(servicos().armazem, id, nucleo, estado, capa);
       const r = usarJogo.getState().registro;
@@ -48,10 +50,10 @@ export function salvarAuto(): Promise<void> {
 export async function continuar(j: RegistroJogo): Promise<void> {
   const { backend, armazem } = servicos();
   const aberto = await bytesDoJogo(backend, armazem, j, { soCabeca: !!j.path && (await nativoLigado(j.sistema)) });
-  const auto = j.temAuto ? await lerAuto(armazem, j.id) : null;
   if (!(await usarJogo.getState().abrirJogo(aberto, j.path ? { path: j.path } : {}))) return;
-  if (!auto) return;
-  await restaurar(auto);
+  if (!j.temAuto || !(await armazem.meta('autos', j.id))) return;
+  // 3.2: no nativo os bytes vão como estão pro processo (o desempacotar não passa pela página)
+  await restaurarDaLoja('autos', j.id);
   antes = Date.now();
   if (j.autoQuando) usarAvisos.getState().avisar('continuando de ' + quando(j.autoQuando));
 }

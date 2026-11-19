@@ -8,6 +8,13 @@
     "hex": "010000000200010002010000"
   },
   "bloco": { "tipo": 4, "pedido": 7, "dados": [1, 2, 3], "hex": "040000000700000003000000010203" },
+  "pacote": {
+    "nucleo": "pcsx2",
+    "estado": [1, 2, 3, 250, 0, 7],
+    "texto": "{\"lr\":\"pcsx2\",\"d\":\"AQID+gAH\"}",
+    "gzipHex": "1f8b08000000000004ffab56ca2952b2522a482eae3052d2514a01b21d033d5db4d31d3d946a012b3c22871d000000",
+    "carregarHex": "080100000900000003000000aabbcc"
+  },
   "som": { "taxa": 44100, "amostras": [1, -1, 32767, -32768], "hex": "0700000044ac0000020000000100ffffff7f0080" },
   "comandos": [
     { "cmd": "pausar" },
@@ -21,7 +28,8 @@
     { "cmd": "lerBateria", "pedido": 2 },
     { "cmd": "rebobinar", "ligado": true, "limite": 5, "recargaX": 6, "som": "fita" },
     { "cmd": "voltar", "sim": true },
-    { "cmd": "somPraPagina", "sim": true }
+    { "cmd": "somPraPagina", "sim": true },
+    { "cmd": "salvarEstadoPacote", "pedido": 4, "nucleo": "pcsx2", "comprimir": true }
   ],
   "avisos": [
     {

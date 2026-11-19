@@ -5,6 +5,7 @@ import {
   NATIVO,
   blocoNativo,
   botoesNativo,
+  pacoteNativo,
   lerAviso,
   lerBinario,
   type AvisoNativo,
@@ -283,6 +284,19 @@ export class JogoNativo {
 
   async carregarEstado(e: Uint8Array): Promise<void> {
     await this.esperar((pedido) => this.enviar(blocoNativo(NATIVO.CARREGAR_ESTADO, pedido, e)));
+  }
+  /**
+   * 3.2: o estado já no formato da loja (`{lr, d}` em base64, em gzip quando `comprimir`), montado pelo processo numa
+   * linha separada. A página só guarda: no PS2 o base64 + gzip aqui paravam a tela ~0,75 s e pesavam o Chrome.
+   */
+  async salvarPacote(nucleo: string, comprimir: boolean): Promise<Uint8Array> {
+    const b = await this.esperar((pedido) => this.enviar({ cmd: 'salvarEstadoPacote', pedido, nucleo, comprimir }));
+    if (!b) throw new Error('o núcleo não devolveu o estado');
+    return b;
+  }
+  /** 3.2: carrega os bytes da loja como estão (o processo desempacota). */
+  async carregarPacote(dados: Uint8Array, comprimido: boolean): Promise<void> {
+    await this.esperar((pedido) => this.enviar(pacoteNativo(pedido, comprimido, dados)));
   }
 
   lerSram(): Promise<Uint8Array | null> {
