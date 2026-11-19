@@ -24,3 +24,4 @@ export * from './rede';
 export * from './desempenho';
 export * from './diagnostico';
 export * from './gravacao';
+export * from './sobre';

@@ -7,6 +7,7 @@ import { usarBiblioteca } from '../../stores/biblioteca';
 import { usarTelas } from '../../stores/telas';
 import { FiltrosDaBiblioteca, MetaDoJogo, popAberto, teclaDoPop } from './Filtros';
 import { VersoesDaObra } from './Dialogos';
+import { SinopseENota } from './Ficha';
 import { Capa, Mini, srcCapa } from './Capas';
 import { usarCapas } from '../../stores/capas';
 
@@ -229,6 +230,7 @@ export function Biblioteca() {
               : 'Super Nintendo, NES, Game Boy, GBA, Sega, Neo Geo, PlayStation e PS2'}
           </p>
           <MetaDoJogo item={sel} />
+          <SinopseENota item={sel} />
           <div className="bib-botoes">
             <button
               className="grande"

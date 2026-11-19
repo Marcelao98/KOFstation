@@ -1680,3 +1680,10 @@ html.celular body.com-visual #palco { padding-right: 0; padding-bottom: 58vh; }
 /* B.2: jogos do catálogo (a pessoa não tem): em cinza */
 #roms li.cat { opacity: 0.5; font-style: italic; }
 #roms li.cat.sel { opacity: 0.8; }
+
+/* B.3: sinopse e nota na ficha do jogo */
+#info-sinopse { margin: 6px 0; text-align: left; }
+#info-sinopse .ficha-nota { margin: 0 0 4px; }
+#info-sinopse .ficha-sinopse { margin: 0; font-size: 13px; line-height: 1.45; max-height: 9.5em; overflow-y: auto; }
+#info-sinopse .ficha-fonte { margin: 4px 0 0; font-size: 11px; }
+#info-sinopse a { color: var(--destaque); }

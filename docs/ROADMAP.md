@@ -262,6 +262,15 @@ verdade; medir com o F3 no G.1 (com × sem gravar) quando ele liberar a máquina
    continua exatamente de onde parou porque o chip de som volta junto no estado. Contas do som em funções puras no
    `domain`, com os mesmos vetores de teste no `worker.ts` (consoles da página) e no `rebobinar.rs` (PS1). Opção
    "Som ao rebobinar: 📼 fita / 🔇 mudo". *Aberto: fita a 2× ou velocidade normal invertida (ou as duas)?*
+### Fase B · Biblioteca com cara de console (19/11; fonte da sinopse escolhida pelo Claude, D39)
+
+| # | Passo | Entregável | Checkpoint | Tarefa | Estado |
+|---|---|---|---|---|---|
+| B.1 | Obra × versões | `domain/obras.ts` (rótulos No-Intro/GoodTools → "EUA · Rev 1 · Tradução PT-BR", peso: tradução PT > Brasil > EUA > Mundo > Europa > Japão; beta, hack e cópia ruim no fim); uma linha por obra com "N versões"; "qual versão?" ao jogar (↑↓ Enter Esc), a escolha lembrada (`versao.<obra>`); zip com várias ROMs de cartucho = uma versão por ROM (`file.zip.read` só dela; reabrir abre a mesma) | unit + e2e `biblioteca-obras.spec.ts`; ⏸ ele vê a biblioteca dele | local | ✅ `e72f7c3`; ⏸ ele olha |
+| B.2 | Catálogo | "📖 Catálogo" mostra em cinza os jogos da base (libretro-database, ~19 mil) que ele não tem, com ano/gênero/empresa na busca e nas facetas; sem Jogar, **sem link nem dica de onde baixar** | unit + e2e | local | ✅ `70a8ba3`; ⏸ ele olha |
+| B.3 | Ficha com sinopse e nota | `jogo.sobre` no Rust (Wikidata + Wikipédia pt/en, cache, D39); a ficha mostra a nota (média 0–100 das críticas do Wikidata), a sinopse e a fonte com o link do artigo; "sem internet" e "sem artigo" avisados | unit Rust/TS, teste pela internet (ignorado no CI) e e2e com resposta falsa | local | ✅ (este commit); ⏸ ele olha |
+| B.4 | Capas no catálogo e por obra | a capa oficial (libretro-thumbnails) também pros jogos do catálogo e escolhida pela região da versão principal | print | local | ⬜ (se ele quiser) |
+
 3. **Biblioteca com cara de console.** Jogo (a obra) separado dos arquivos (versões: região, revisão, tradução, hack):
    um zip com várias traduções vira um jogo só, com "qual versão?" ao clicar. Catálogo completo por console (bases
    No-Intro/Redump), os que ele não tem em cinza, com sinopse, nota, ano e gênero (base com API a escolher). Jogo em

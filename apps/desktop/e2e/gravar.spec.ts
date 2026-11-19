@@ -60,6 +60,7 @@ test('sem pasta Kof Games: avisa o erro e não fica gravando', async ({ page }) 
   await page.setInputFiles('#arquivo', { name: 'Som.gb', mimeType: 'application/octet-stream', buffer: romGbSom() });
   await expect(page.locator('#st-jogo')).toHaveText('Som');
   await page.keyboard.press('F10');
-  await expect(page.locator('#aviso.erro')).toContainText('não consegui salvar', { timeout: 5000 });
+  // o erro sai no 1º pedaço que tenta salvar (1 s de vídeo; com a máquina cheia o gravador atrasa)
+  await expect(page.locator('#aviso.erro')).toContainText('não consegui salvar', { timeout: 20000 });
   await expect(page.locator('#gravando')).toHaveCount(0);
 });

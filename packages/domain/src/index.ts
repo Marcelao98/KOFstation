@@ -28,3 +28,4 @@ export * from './opcoes-camadas';
 export * from './som-rebobinar';
 export * from './gravacao';
 export * from './obras';
+export * from './sobre';

@@ -21,6 +21,36 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 · G.2 testada · Fase B (biblioteca com cara de console) B.1–B.3
+
+**Pedido:** "faz biblioteca com cara de console agora", "pode escolher você de onde vem a sinopse e a nota", "me
+envia, vou deitar, pode dar push e commit". Ele foi dormir: máquina livre pra testar.
+**Feito:**
+- **G.2 testada** (`b0eb032`): `processo.rs` liga o `somPraPagina` e recebe `SOM` de verdade (44100 Hz, tamanho
+  certo), desligado para de vir. O mesmo teste esperava o 1º aviso ser o "pronto", mas desde a fase R o aviso do
+  rebobinar pode chegar antes (corrida antiga, independente da G.2): agora espera o "pronto". O `pnpm e2e` inteiro
+  pegou duas contagens da G.1 (F10 no Guia, ⏺ no menu rápido), corrigidas.
+- **B.1** (`e72f7c3`): obra × versões (`domain/obras.ts`), "qual versão?" (`Dialogos.tsx`), zip com várias ROMs =
+  uma versão por ROM (`romsDoZip`, `file.zip.read`, `lerArquivoDeJogo(..., preferida)`).
+- **B.2** (`70a8ba3`): 📖 catálogo do que falta (`BaseDeJogos.todos`, `catalogoQueFalta`), em cinza, sem Jogar e
+  sem link.
+- **B.3**: `jogo.sobre` (`kof-files/src/sobre.rs`), `domain/sobre.ts` (títulos a procurar, nota em 0–100),
+  `app-core/sobre.ts`, `stores/sobre.ts`, `Ficha.tsx`. Decisão **D39** (Wikidata + Wikipédia).
+**Medido:** `pnpm check` ok; `cargo test` 78 ok e o `opengl` instável de sempre; teste pela internet (ignorado no
+CI) ok: Chrono Trigger com sinopse em português, Super Mario World com nota, jogo inexistente lembrado; e2e da
+biblioteca 8/8; `pnpm e2e` inteiro 75 ok + 2 que passam sozinhos (o showcase de temas, instável antigo, e o "sem
+pasta" da gravação, que com a máquina cheia demora mais que 5 s pro 1º pedaço: prazo de 20 s).
+**Deu errado / aprendido:** o Wikidata guarda o nome de muitos jogos no idioma `mul` (não `en`): procurar nos dois.
+O `user_agent` da configuração do ureq não valia (a Wikimedia respondia 429 pro padrão "ureq/…"): vai no cabeçalho
+de cada pedido. O GET do SPARQL pelo ureq ficava sem resposta até o prazo (pelo curl, 0,3 s): POST com formulário
+resolveu. Metade dos códigos de console que eu lembrava "de cabeça" pareciam errados por causa do serviço de nomes;
+conferidos um a um pelo `wbsearchentities`. No e2e, clicar numa linha já selecionada joga (e a lista se refaz quando
+a base carrega): o teste tenta a seleção até pegar.
+**Onde parou:** ⏸ ele olhar a biblioteca dele (B.1–B.3) e gravar um jogo de PS1/PS2 com som (G.2). Próximo possível:
+B.4 (capas no catálogo e por região), se ele quiser.
+
+---
+
 ## 2026-11-19 · G.2 · Som do PS1/PS2 nativos na gravação (código escrito, sem compilar)
 
 **Pedido:** "faz o som" (do PS1/PS2 na gravação), deixar tudo salvo e documentado e ver o que falta da próxima etapa.

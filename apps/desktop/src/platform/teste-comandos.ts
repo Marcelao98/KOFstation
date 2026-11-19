@@ -171,6 +171,13 @@ export function criarComandosTeste(): Record<string, ComandoTeste> {
       }
       return { root: t.raiz, files };
     },
+    // B.3: a ficha (o teste põe em __kofTeste.sobre, pelo primeiro título; sem nada = não achou)
+    'jogo.sobre': (a) => {
+      const ts = a.titulos as string[];
+      const s = (t as { sobre?: Map<string, unknown> }).sobre;
+      for (const x of ts) if (s?.has(x)) return s.get(x);
+      return null;
+    },
     // B.1: uma ROM de dentro de um zip (o backend de teste só tem zip guardado, sem compressão)
     'file.zip.read': (a) => {
       precisaRaiz();

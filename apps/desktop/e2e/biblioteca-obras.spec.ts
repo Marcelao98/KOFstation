@@ -112,3 +112,33 @@ test('catálogo: os jogos que faltam em cinza, sem jogar e sem repetir os que a 
   await page.click('[data-acao="catalogo"]');
   await expect(page.locator('#roms li.cat')).toHaveCount(0);
 });
+
+test('ficha: sinopse e nota (Wikidata/Wikipédia) com o crédito; sem artigo, avisa', async ({ page }) => {
+  await page.evaluate(() => {
+    const t = (
+      globalThis as unknown as { __kofTeste: { arquivos: Map<string, Uint8Array>; sobre?: Map<string, unknown> } }
+    ).__kofTeste;
+    t.arquivos.set('Games/snes/Chrono Trigger (USA).sfc', new Uint8Array(4));
+    t.sobre = new Map([
+      [
+        'Chrono Trigger',
+        {
+          sinopse: 'Um RPG de viagem no tempo.',
+          lingua: 'pt',
+          url: 'https://pt.wikipedia.org/wiki/Chrono_Trigger',
+          wikidata: 'http://www.wikidata.org/entity/Q761815',
+          notas: [{ valor: '97%', por: 'Gen4' }, { valor: '9/10' }],
+        },
+      ],
+    ]);
+  });
+  await page.keyboard.press('Control+KeyL');
+  await selecionar(page, 'Chrono Trigger');
+  const ficha = page.locator('#info-sinopse');
+  await expect(ficha).toContainText('Um RPG de viagem no tempo.');
+  await expect(ficha).toContainText('94/100');
+  await expect(ficha).toContainText('média de 2 críticas (Gen4)');
+  await expect(ficha.locator('a')).toHaveAttribute('href', 'https://pt.wikipedia.org/wiki/Chrono_Trigger');
+  await selecionar(page, 'Jogo Vermelho');
+  await expect(ficha).toContainText('sem sinopse');
+});

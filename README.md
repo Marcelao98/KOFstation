@@ -130,6 +130,7 @@ Medido: 60 fps e nenhuma falta de som, também com a CPU limitada a 4×. O adapt
 | Casca: menus, barra lateral, Início, Guia, 126 temas, showcase, Voltar, atalhos, navegação por controle | ✅ M1 |
 | Jogo: núcleo no Worker, som, imagem com escala/proporção, teclado e controle, pausa, turbo, volume, menu rápido, painel F3, abrir arquivo/.zip/arrastar | ✅ M2 |
 | Biblioteca (busca, facetas, base de jogos, capas, sofá) e pasta Kof Games (organizar com plano) | ✅ M3 |
+| Biblioteca com cara de console: uma linha por jogo com as versões dentro ("qual versão?"), 📖 catálogo do que falta em cinza, sinopse e nota (Wikipédia/Wikidata) | ✅ fase B (B.1–B.3) |
 | Configurações em arquivo (camadas geral → console → jogo) e backup `.kofsave` (abre nos dois apps) | ✅ M4 |
 | Save de bateria, estados (abrem nos dois apps), salvar automático, Continuar, modos de jogo | ✅ M5 |
 | Rebobinar (no Worker; PS1 nativo dentro do processo do jogo; N64 incluído) com a música voltando junto ([docs/REBOBINAR.md](docs/REBOBINAR.md)) | ✅ M6 + fase R |

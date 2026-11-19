@@ -8,4 +8,5 @@ pub mod gravacoes;
 pub mod loja;
 pub mod organizar;
 pub mod raiz;
+pub mod sobre;
 pub mod zip;

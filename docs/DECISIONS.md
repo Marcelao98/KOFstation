@@ -261,3 +261,16 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
 - **T.2** (a última versão do antigo avisando e levando pro novo) continua sendo decisão dele: é o que tira quem ainda
   usa o antigo de lá.
 
+
+## D39. Sinopse e nota da ficha: Wikidata + Wikipédia — **aceita** (o Marcelo deixou o Claude escolher, 19/11)
+- **Fonte:** o jogo é achado no **Wikidata** (CC0) pelo título exato (em inglês ou o `mul`) e o console (`P400`); a
+  sinopse é o resumo do artigo da **Wikipédia** em português, ou em inglês quando não tem (CC BY-SA: a ficha mostra a
+  fonte com o link do artigo); as notas são as "review score" (`P444`) do Wikidata, viradas pra 0–100 e com a média.
+- **Por quê:** grátis, sem chave nem cadastro (IGDB, ScreenScraper, TheGamesDB e MobyGames pedem chave, que não dá pra
+  pôr dentro de um app distribuído), licença aberta e com texto em português. O lado fraco: nota da crítica falta em
+  muito jogo antigo (a ficha diz "sem nota" em vez de inventar).
+- **Como:** só o Rust fala com a rede (`jogo.sobre`, `kof-files/src/sobre.rs`), só com `query.wikidata.org` (POST com
+  formulário: o GET do ureq ficava sem resposta) e `pt|en.wikipedia.org`; manda só o console e os títulos; cache em
+  `<dados>/cache/sobre/`, "não achou" lembrado por 30 dias. User-Agent genérico, sem nome nem contato de ninguém.
+- O **catálogo** (os jogos que a pessoa não tem) vem da base que o app já tinha (libretro-database, ~19 mil títulos
+  sem N64 e PS2) e **nunca** tem link ou dica de onde baixar; o único link da ficha é o do artigo da Wikipédia.

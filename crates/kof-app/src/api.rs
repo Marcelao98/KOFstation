@@ -72,6 +72,13 @@ struct ArgsParte {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
+struct ArgsSobre {
+    sistema: String,
+    titulos: Vec<String>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ArgsGravacao {
     nome: String,
     #[serde(default)]
@@ -333,6 +340,14 @@ impl Estado {
                 };
                 r.map(Saida::Bin)
                     .ok_or_else(|| KofError::NaoEncontrado(format!("capa {}", a.chave)))
+            }
+            // B.3: sinopse e notas (Wikidata + Wikipédia); null = não achou (lembrado por 30 dias)
+            "jogo.sobre" => {
+                let a: ArgsSobre = args(a)?;
+                json(
+                    serde_json::to_value(kof_files::sobre::buscar(&self.pasta_dados, &a.sistema, &a.titulos)?)
+                        .expect("json"),
+                )
             }
             "file.read" => {
                 let a: ArgsLer = args(a)?;
