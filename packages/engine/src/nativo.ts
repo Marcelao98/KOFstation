@@ -35,6 +35,9 @@ export interface OpcoesNativo {
 
 type Espera = { ok: (b: Uint8Array | null) => void; falhou: (e: Error) => void };
 
+/** Consoles nativos sem rebobinar por enquanto (ver `configurarRebobinar`). */
+const SEM_REBOBINAR: ReadonlySet<string> = new Set(['ps1', 'ps2']);
+
 /** Pedido interno: a bateria conferida a cada segundo (o Worker do wasm faz igual). */
 const PEDIDO_SRAM = 0x7fff_0000;
 
@@ -330,7 +333,11 @@ export class JogoNativo {
 
   /** O rebobinar fica dentro do processo do jogo (fase R.3): aqui só as regras e o segura/solta. */
   configurarRebobinar(ligado: boolean, limite: number, recargaX: number, som: SomAoRebobinar = 'fita'): void {
-    this.enviar({ cmd: 'rebobinar', ligado, limite, recargaX, som });
+    // Desligado no PS1 e no PS2 (o Marcelo, 19/11: "desliga o rebobinar no PS1 por enquanto"). No PS2 a foto de 48 MB
+    // a cada 2 quadros derrubava o jogo (CPU do processo de 35% pra 110%, ~1000 engasgos/min e faltas de som, medido
+    // em 19/11); o rebobinar do processo (fase R.3) continua no código pra quando voltar.
+    const pode = ligado && !SEM_REBOBINAR.has(this.o.sistema);
+    this.enviar({ cmd: 'rebobinar', ligado: pode, limite, recargaX, som });
   }
   rebobinar(sim: boolean): void {
     this.enviar({ cmd: 'voltar', sim });

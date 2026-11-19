@@ -21,6 +21,25 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-19 · Regressão da fase R no PS2 (chiado e engasgos); rebobinar desligado no PS1/PS2; 3.4 descartada
+
+**Pedido:** voltar à fase 3 (menos RAM, janela própria do PS2 "só se der pra ficar igualzinho com todos os efeitos"),
+seguir o roadmap até o fim sem perguntar; "tá com chiado que não tava antes"; "desliga o rebobinar no PS1 por enquanto".
+**Decidido:** **3.4 (janela própria) descartada** pelo critério dele: os filtros e as molduras dariam pra levar, mas
+tudo que fica por cima do jogo é página (menu rápido, F3, avisos, ⏺, controle de toque, painel de imagem, molduras
+animadas) e no Wayland a janela não se posiciona; a gravação e o "jogar no PC" também pegam a imagem da página.
+**Achado:** desde o R.3 o processo nativo ligava o rebobinar em **qualquer** jogo, inclusive no PS2 (foto de 48 MB a
+cada 2 quadros). Medido no jogo pesado A (2 rodadas de 60 s, andando): antes fps 50,6–56,7, engasgos 810–1030/min,
+**faltas de som 457–976/min** (o chiado), CPU do processo 103–119%, 134–178 MB na swap; depois de desligar: fps 60,
+engasgos 8–9/min, **faltas 0**, CPU 47%, swap 0. O app instalado dele (de antes da fase R) não tinha isso.
+**Feito:** a página não liga o rebobinar no PS1 nem no PS2 (`SEM_REBOBINAR` em `engine/nativo.ts`); o processo
+recusa sozinho estado maior que 24 MB (`FOTO_MAXIMA` em `filho.rs`, protege núcleo pesado futuro).
+**Aprendido:** toda funcionalidade nova no processo nativo precisa passar pelo banco do PS2 (`medir-ps2.mjs`) antes de
+ir pra frente: o PS2 divide o mesmo processo.
+**Onde parou:** seguindo na 3.2 (menos RAM). ⏸ ele confirmar se o chiado sumiu (e em que console ouviu).
+
+---
+
 ## 2026-11-19 · G.2 testada · Fase B (biblioteca com cara de console) B.1–B.3
 
 **Pedido:** "faz biblioteca com cara de console agora", "pode escolher você de onde vem a sinopse e a nota", "me

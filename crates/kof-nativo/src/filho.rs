@@ -41,6 +41,9 @@ const ALVO_MS: f64 = 60.0;
 
 /// Memória das fotos do rebobinar (o wasm usa 48 MB; aqui o estado é maior e o processo é só do jogo).
 const REBOB_BYTES: usize = 96 << 20;
+/// Estado maior que isso não rebobina (o do PS2 tem 48 MB e leva 35–42 ms pra sair: uma foto a cada 2 quadros derruba
+/// o jogo). O PS1 tem ~4,5 MB e o N64 ~16 MB. A página também não liga no PS2; isto protege qualquer núcleo pesado.
+const FOTO_MAXIMA: usize = 24 << 20;
 
 fn aviso_rebob(s: crate::rebobinar::Situacao) -> Aviso {
     Aviso::Rebob {
@@ -394,6 +397,15 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Canal, rx: &mpsc::Receive
             rodou += 1;
             if rb.hora_da_foto(turbo) {
                 match n.salvar_estado_em(&mut rb.buf) {
+                    Ok(()) if rb.buf.len() > FOTO_MAXIMA => {
+                        tracing::warn!(
+                            "rebobinar desligado: o estado tem {} MB (o máximo é {} MB)",
+                            rb.buf.len() >> 20,
+                            FOTO_MAXIMA >> 20
+                        );
+                        rb.ligado = false;
+                        rb.zerar();
+                    }
                     Ok(()) => rb.gravar(),
                     Err(e) => {
                         tracing::warn!("rebobinar desligado: {e}");
