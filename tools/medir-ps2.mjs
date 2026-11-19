@@ -338,7 +338,7 @@ async function rodada(n) {
     }
 
     // memória: uma amostra por segundo do processo do jogo e da página
-    const mem = { filho: [], pagina: [], trocaFilho: 0 };
+    const mem = { filho: [], pagina: [], chrome: [], trocaFilho: 0 };
     const relogio = setInterval(() => {
       const ps = processos();
       const filho = ps.find((p) => p.cmd.startsWith(exe) && p.cmd.includes('--nativo'));
@@ -351,6 +351,9 @@ async function rodada(n) {
         mem.trocaFilho = Math.max(mem.trocaFilho, filho.troca);
       }
       if (pag) mem.pagina.push(pag.rss + (gpu?.rss ?? 0));
+      // 3.2: o Chrome do app inteiro (principal, renderers, GPU, utilitários, zygote)
+      const todos = ps.filter((p) => p.cmd.includes(`--user-data-dir=${dados}`));
+      if (todos.length) mem.chrome.push(todos.reduce((a, p) => a + p.rss, 0));
     }, 1000);
 
     await dormir(aquecer * 1000);
@@ -557,6 +560,8 @@ async function rodada(n) {
         paginaMb: Math.max(0, ...mem.pagina),
         paginaInicioMb: mem.pagina[0] ?? 0,
         paginaFimMb: mem.pagina.at(-1) ?? 0,
+        chromeMb: Math.max(0, ...mem.chrome),
+        chromeFimMb: mem.chrome.at(-1) ?? 0,
         filhoInicioMb: mem.filho[0] ?? 0,
       },
     };
@@ -577,7 +582,7 @@ const linha = (r) =>
     .map(([k, v]) => `${k} ${v}%`)
     .join(
       ' ',
-    )} · memória jogo ${r.memoria.filhoInicioMb}→${r.memoria.filhoFimMb} (máx ${r.memoria.filhoMb}) MB (troca ${r.memoria.trocaFilhoMb}), página ${r.memoria.paginaInicioMb}→${r.memoria.paginaFimMb} (máx ${r.memoria.paginaMb}) MB`;
+    )} · memória jogo ${r.memoria.filhoInicioMb}→${r.memoria.filhoFimMb} (máx ${r.memoria.filhoMb}) MB (troca ${r.memoria.trocaFilhoMb}), página ${r.memoria.paginaInicioMb}→${r.memoria.paginaFimMb} (máx ${r.memoria.paginaMb}) MB, Chrome inteiro máx ${r.memoria.chromeMb} → fim ${r.memoria.chromeFimMb} MB`;
 
 console.log(
   `${NOME} · ${rotulo} · ${rodadas} rodada(s) · aquece ${aquecer} s, mede ${segundos} s · opções ${JSON.stringify(opcoes)}`,

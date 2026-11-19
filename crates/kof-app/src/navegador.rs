@@ -81,8 +81,29 @@ pub fn argumentos(url: &str, perfil: &Path) -> Vec<String> {
         "--no-default-browser-check".into(),
         "--disable-background-timer-throttling".into(),
         "--autoplay-policy=no-user-gesture-required".into(),
+        // 3.2 (Chrome enxuto): o que o app não usa e ocupa memória e processador. Nada que mexa no isolamento das
+        // páginas (o som e a emulação no Worker dependem dele) nem no WebRTC (jogar no PC)
+        "--disable-extensions".into(),
+        "--disable-component-update".into(),
+        "--disable-background-networking".into(),
+        "--disable-sync".into(),
+        "--disable-default-apps".into(),
+        "--disable-breakpad".into(),
+        format!("--disable-features={}", SEM_RECURSOS.join(",")),
     ]
 }
+
+/// Recursos do Chrome desligados no perfil do app (3.2): tradução, sugestões, rotas de mídia (Chromecast), o renderer
+/// de reserva que ele deixa aberto pra próxima aba, e o cache de página pra "voltar".
+const SEM_RECURSOS: &[&str] = &[
+    "Translate",
+    "OptimizationHints",
+    "MediaRouter",
+    "DialMediaRouteProvider",
+    "AutofillServerCommunication",
+    "SpareRendererForSitePerProcess",
+    "BackForwardCache",
+];
 
 pub fn abrir(n: &Navegador, url: &str, perfil: &Path) -> std::io::Result<Child> {
     match n {
