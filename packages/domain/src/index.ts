@@ -29,3 +29,4 @@ export * from './som-rebobinar';
 export * from './gravacao';
 export * from './obras';
 export * from './sobre';
+export * from './arranjo';

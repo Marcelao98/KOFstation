@@ -25,6 +25,9 @@ import { MOLDURAS, usarMoldura } from '../stores/moldura';
 import { FILTROS, usarVisual } from '../stores/visual';
 import { PALETAS_GB, PALETAS_NES } from '@kof/app-core';
 import { celularOnline, levarProCelular, pararTransmissao, usarTransmissao } from '../stores/transmissao';
+import { ARRANJOS } from '@kof/domain';
+import { arranjoAtual, usarArranjoPronto } from '../stores/arranjo';
+import { usarRede } from '../stores/rede';
 
 export interface Item {
   t: string;
@@ -59,6 +62,17 @@ function itens(): Item[] {
   const p = usarPrefs.getState();
   const l: Item[] = [
     { t: '▶ Continuar', f: fechar },
+    {
+      // N.4: o mesmo 📡 do menu lateral, aqui como ◀▶ (um toque troca, o jogo continua)
+      t: '📡 Aparelhos',
+      so: () => !emModoCelular() && usarRede.getState().aparelhos.some((a) => a.online),
+      v: () => ARRANJOS.find((a) => a.id === arranjoAtual())?.nome ?? 'avulso',
+      aj: (d) => {
+        const i = ARRANJOS.findIndex((a) => a.id === arranjoAtual());
+        const prox = ARRANJOS[(i + d + ARRANJOS.length) % ARRANJOS.length];
+        if (prox) usarArranjoPronto(prox.id);
+      },
+    },
     {
       t: '📱 Levar pro celular',
       so: () => !!j.jogo && !usarTransmissao.getState().ligada && !!celularOnline(),

@@ -4,7 +4,8 @@
 import { ehDeTv, KofVisual, tamanhoNaTela, type Valores } from '@kof/engine';
 import { usarJogo } from '../stores/jogo';
 import { usarTelas } from '../stores/telas';
-import { padDaTransmissaoAgora } from '../stores/celular';
+import { aparelhosCelular, padDaTransmissaoAgora } from '../stores/celular';
+import { usarArranjo } from '../stores/arranjo';
 import { usarRede } from '../stores/rede';
 import { toque } from '../stores/toque';
 import { renderAtual, usarVisual } from '../stores/visual';
@@ -15,6 +16,8 @@ export function ligarGanchosDeTeste() {
   t.somTocado = () => (usarJogo.getState().jogo as { amostrasTocadas?: number } | null)?.amostrasTocadas ?? -1;
   t.medicao = () => usarJogo.getState().medicao; // F3 e a medição do rebobinar (fotoMs)
   t.padDoCelular = padDaTransmissaoAgora;
+  t.padsDaRede = () => aparelhosCelular().map((a) => ({ k: a.k, b: a.b })); // N.3: controles pela rede
+  t.arranjo = () => usarArranjo.getState(); // N: o arranjo e as fichas
   t.redeOk = () => usarRede.getState().ok && usarRede.getState().aparelhos.some((a) => a.online);
   t.toque = toque; // o que os dedos seguram no controle de toque (e2e do celular)
   t.visual = {
