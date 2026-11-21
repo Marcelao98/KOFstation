@@ -1,6 +1,8 @@
 // 📡 Aparelhos (o #aparelhos do antigo, web/rede.js): o nome deste PC, os pareados (online ou quando foram vistos),
 // parear um celular (QR + código de 6 números, 2 minutos) e os aparelhos achados na rede.
 import { quandoFoi } from '@kof/app-core';
+import { textoDaFicha } from '@kof/domain';
+import { usarArranjo } from '../../stores/arranjo';
 import qrcode from 'qrcode-generator';
 import { useEffect, useMemo, useState } from 'react';
 import { acao } from '../../app/acoes';
@@ -54,6 +56,7 @@ function NomeDoAparelho({ nome }: { nome: string }) {
 
 export function Aparelhos() {
   const r = usarRede();
+  const fichas = usarArranjo((x) => x.fichas); // N.2: o que cada aparelho contou de si
   useEffect(() => {
     usarRede.getState().setMsg('');
     usarRede.getState().mandar({ t: 'lista' });
@@ -105,6 +108,7 @@ export function Aparelhos() {
                     ? '🟢 conectado' + (a.ip ? ' · ' + a.ip : '')
                     : '⚪ fora da rede · visto ' + quandoFoi(a.visto)}
                 </small>
+                {a.online && <small className="ap-ficha">{textoDaFicha(fichas[a.id])}</small>}
               </span>
               {emModoCelular() && a.online && a.tipo === 'pc' && (
                 <button

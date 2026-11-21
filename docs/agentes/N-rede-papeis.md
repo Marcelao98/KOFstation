@@ -76,4 +76,29 @@ modelo), do `app-core` (transporte falso) e e2e com 2–3 páginas ligadas pelo 
 
 ## Relatório
 
-*(o agente preenche: o que fez em cada passo, números (atraso da imagem e dos botões), o que ficou de fora, comandos)*
+Feito em 21/11, no modo automático (branch `agente-n/rede`).
+
+- **N.1** `packages/app-core/src/transporte.ts`: `Transporte` (`enviar`/`ouvir` por canal), o `transporteLocal` em cima
+  do `kof-net` e o `transporteFalso` dos testes. `transmissao`, `celular` e `modoControle` falam com ele. Desenho em
+  [CONECTIVIDADE.md](../CONECTIVIDADE.md).
+- **N.2** canal `ficha` (tipo, sistema, núcleos, memória, tela, controles, consoles): cada aparelho manda a sua quando
+  vê o outro na rede e devolve quando recebe. Sem ficha = "ficha desconhecida". Aparece no 📡 do lateral e na tela
+  📡 Aparelhos.
+- **N.3** `stores/arranjo.ts`: a tela vai pra qualquer aparelho pareado pelo `levar` de sempre (o APK antigo entende);
+  o canal novo `papel` manda virar controle (o `entrarModoControle({rede})` agora aceita qualquer núcleo) ou largar o
+  papel. O jogo nunca sai do núcleo.
+- **N.4** `components/BlocoAparelhos.tsx`: o 📡 Aparelhos no pé do menu lateral abre um painel com os 4 arranjos
+  grandes e os aparelhos com chips (🧠 📺 🎮). No ☰ do meio do jogo, "📡 Aparelhos" com ◀▶. Um aparelho caiu → volta
+  sozinho (`semQuemCaiu`) e avisa. Print do e2e em `~/kof-medidas/prints/N4-aparelhos-switch.png`.
+- **N.5** lembra o arranjo por jogo, console e o último (config `arranjo.*`); ao abrir um jogo volta pra ele se os
+  aparelhos estão na rede. `sugerirArranjo` no domain (PS2/Wii/GC → núcleo no PC).
+
+**Testes:** `arranjo.test.ts` (12), `transporte.test.ts` (2), `e2e/rede-papeis.spec.ts` (três páginas: fichas, 📡,
+três aparelhos com imagem no notebook e botões do celular chegando no PC, PC sozinho de volta, a tela caindo). Os e2e
+de rede antigos (`celular-pc`, `jogar-no-pc`, `aparelhos`, `celular`) continuam passando (13).
+
+**Ficou de fora / pra ele:** ⏸ trocar na rede de casa de verdade (PC + notebook/TV + celular) com um jogo rodando;
+o atraso de imagem e botões medido no aparelho de verdade (o ping já aparece no modo controle). O "vire controle"
+precisa do app novo no celular (o APK antigo só entende a tela). O núcleo é sempre o aparelho com o jogo aberto.
+
+**Conferir:** `pnpm --filter @kof/desktop exec playwright test e2e/rede-papeis.spec.ts`
