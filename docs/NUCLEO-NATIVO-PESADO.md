@@ -122,6 +122,23 @@ passa de 16,6 ms, nada do lado do app resolve; mudar opção (resolução, MTVU,
 6. Opções: gerar a lista (seção 4), traduzir, curar as principais, perfis com o ⚖ Equilibrado = padrão do núcleo.
 7. Medir com o banco (generalizar o `medir-ps2.mjs` com `--sistema`) e anotar num diário como o PS2-LISO.
 
+### O que o Dolphin ensinou (21/11, fase W)
+
+- **Núcleo pronto do buildbot** (o do RetroArch) em vez de compilar: baixar, copiar pra uma Release nossa e pôr a URL
+  da cópia + SHA-256 no manifesto (D40). Um dia de trabalho a menos, e o `pnpm nucleos` não quebra quando o "latest"
+  do buildbot muda. A versão exata sai do `retro_get_system_info` no teste.
+- **Teste sem jogo de verdade:** um executável mínimo do próprio console gerado no teste (`.dol` com `b .`) abre o
+  núcleo, declara as opções e mede o estado. Não desenha, mas o caminho todo (OpenGL, opções, estado) roda.
+- **Opções legadas sem rótulo:** o Dolphin declara por `SET_VARIABLES` (o `kof-nativo` não aceita as v2), e os
+  valores vêm como números (`0`/`1`/`2`): os significados saem do código do núcleo (`Common/Options.cpp`), não da
+  documentação (que estava desatualizada em dois padrões).
+- **Arquivos de sistema** que o núcleo procura no `system/` (o `Sys` do Dolphin) vão num `.zip` ao lado do núcleo (o
+  empacotador só copia arquivos soltos da pasta) e o app extrai uma vez.
+- **Ponteiro:** mensagem `PONTEIRO` nova da página pro processo; o núcleo lê `RETRO_DEVICE_POINTER` (posição absoluta
+  de −32767 a 32767) e os botões pelo `RETRO_DEVICE_MOUSE`.
+- **O e2e reaproveita um `vite preview` que sobrou na porta 4173** (`reuseExistingServer`): se um e2e foi interrompido,
+  feche o servidor velho antes, ou a página testada é a do build antigo.
+
 ## 7. O que falta (17/11)
 
 - **A**: reduzir o quadro na placa + YUV 4:2:0 (seção 1). Medir antes se o ✨ Bonito engasga pela volta dos quadros ou
