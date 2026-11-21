@@ -98,4 +98,29 @@ próximo núcleo no `docs/NUCLEO-NATIVO-PESADO.md`. Decisão nova (de onde vem o
 
 ## Relatório
 
-*(o agente preenche: o que fez em cada passo, números, o que ficou de fora, comandos pra conferir)*
+Feito em 21/11, no modo automático (branch `agente-w/wii`). Diário com os números: [WII-LISO.md](../WII-LISO.md).
+
+- **W.1 ✅** `dolphin_libretro` pronto do buildbot (Linux de 21/11, Windows de 20/11), `dolphin-emu
+  2609.0.168+0863ee3700`, copiado pra Release `nucleos-dolphin-0863ee37` (D40, licença no `THIRD_PARTY.md`).
+  `tests/dolphin.rs` abre com OpenGL Core e um `.dol` gerado no teste; estado de 85 MB (sem rebobinar, fora da página).
+- **W.2 ✅** `gc` e `wii` no domain (extensões, `.iso` pela assinatura do disco, pastas `gamecube`/`wii`), só nativos
+  como o PS2, Wikidata, e2e (sem o nativo avisa). Fumaça pelo app de verdade com o `.dol`: abre pela biblioteca,
+  59,5 fps, 0 faltas de som.
+- **W.3 🟡** os arquivos de sistema (`dolphin-sys.zip`, extraídos uma vez) e os saves em
+  `<dados>/nativo/saves/dolphin/User` (NAND, cartões, cache de shaders). **Falta:** o teste "o save mudou depois de
+  fechar" com o jogo de verdade.
+- **W.4 ⏸** a proposta da tarefa: Wiimote + Nunchuk, ponteiro no mouse (mensagem `PONTEIRO` nova →
+  `RETRO_DEVICE_POINTER`), botões do mouse = A/B/chacoalhar, R = chacoalhar; GameCube como o console. Os outros
+  consoles não mudaram. **Ele aprova.**
+- **W.5 🟡** 113 opções declaradas (gerador `tools/opcoes-dolphin.mjs`), 91 no menu, as principais traduzidas e
+  curadas, 4 perfis (⚖ = padrão do núcleo), conferidas contra o núcleo de verdade (`tests/opcoes.rs`).
+  `tools/medir-ps2.mjs --sistema wii|gc`. **Falta:** medir o jogo de teste Wii A.
+
+**Por que parou:** o jogo de teste Wii A ainda estava baixando (~400 MB às 17:30, devagar). Pra terminar: extrair o
+`.7z` pra `<Kof Games>/Games/wii/`, apontar `KOF_JOGO_WII_A` em `~/kof-medidas/ambiente.sh` e rodar:
+
+```bash
+source ~/kof-medidas/ambiente.sh
+KOF_JOGO_WII="$KOF_JOGO_WII_A" cargo test --release -p kof-nativo --test dolphin -- --ignored --nocapture
+KOF_APP=$PWD/target/release/kofstation node tools/medir-ps2.mjs --sistema wii --rodadas 3 --aquecer 60 --segundos 60 --print
+```
