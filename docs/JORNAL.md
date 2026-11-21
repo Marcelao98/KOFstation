@@ -21,6 +21,36 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-21 (noite) · Modo automático N → P → W: **pra você conferir**
+
+### Pra você conferir (passo a passo)
+
+1. **📡 Aparelhos tipo Switch (N, branch `agente-n/rede`)**: abra o app no PC com um jogo rodando, o app novo no
+   celular e (se tiver) num segundo PC/notebook, todos pareados. Menu lateral → **📡 Aparelhos** (o último botão):
+   toque em **PC + celular de controle**, **Portátil** e **Três aparelhos** e veja se o jogo continua de onde estava.
+   Toque nos chips (📺 Tela, 🎮 Controle) de um aparelho pra passar só aquele papel. Desligue o Wi-Fi do aparelho que
+   é a tela: a imagem tem que voltar pro PC sozinha, com aviso. Print do painel: `~/kof-medidas/prints/N4-aparelhos-switch.png`.
+2. **Rebobinar do PS1 (P, branch `agente-p/rebob-ps1`)**: abra o jogo de teste PS1 A, segure o rebobinar no trecho
+   onde você sentiu o tranco e diga se está liso. Se o tranco for "depois de morrer", salve um estado ali (F5) e me
+   diga: dá pra medir exatamente aquele trecho.
+3. **Wii (W, branch `agente-w/wii`)**: ver a entrada de baixo (o jogo de teste Wii A e os números) e a seção
+   "Controles" do `docs/WII-LISO.md`: **aprove ou mude o mapeamento** (setas = Nunchuk, X = A, Z = B, R = chacoalhar,
+   o mouse é o ponteiro, clique esquerdo = A, direito = B). Jogue 10 min e diga se está liso.
+
+**Comando pra abrir o app novo** (da branch da W, que tem tudo):
+
+```bash
+cd ~/Repositórios/KOFstation && git checkout agente-w/wii && pnpm nucleos && pnpm build && cargo build --release -p kof-app && ./target/release/kofstation
+```
+
+(o `cargo` precisa do `export PATH=$HOME/.cargo/bin:$PATH PKG_CONFIG_PATH=$HOME/.local/kof-alsa/usr/lib64/pkgconfig`.)
+As três branches estão no GitHub, uma em cima da outra (N → P → W); não abri PR.
+
+**Decidido sozinho (modo automático):** o desenho do 📡 (painel que sai do menu lateral; pra mudar:
+`components/BlocoAparelhos.tsx`); o núcleo é sempre o aparelho com o jogo aberto; os controles do Wii/GameCube como na
+proposta da tarefa (pra mudar: `domain/entrada.ts`, `NOMES_BOTAO`, e as opções `dolphin_*` no ⚙); o Dolphin pronto do
+buildbot, copiado pra Release `nucleos-dolphin-0863ee37` (D40), junto com os arquivos de sistema dele.
+
 ## 2026-11-21 (tarde) · Tarefa P no modo automático: rebobinar do PS1 nativo religado e medido liso
 
 **Feito:** branch `agente-p/rebob-ps1`. `SEM_REBOBINAR` só com o PS2 (teste trava); `tools/medir-rebob.mjs` com a pasta
