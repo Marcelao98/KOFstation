@@ -16,7 +16,7 @@ Antes de começar: leia o [AGENTS.md](../../AGENTS.md), o [LEIA-ME](LEIA-ME.md) 
   Jogos, BIOS e estados salvos só em variável de ambiente / fora do repo (`~/kof-medidas/`).
 - **Tudo no `kof-nativo` passa pelo banco do PS2** (`tools/medir-ps2.mjs`) antes de ir pra frente: o PS2 divide o mesmo
   processo.
-- **Controles só com o Marcelo** (combine antes de fixar).
+- **Controles só com o Marcelo** (combine antes de fixar; no modo automático, a proposta da tarefa W.4, sem mexer nos outros consoles).
 - Antes de cada push: `pnpm check`, `pnpm check:rust` (se mexeu no Rust), `cargo test --workspace --no-fail-fast` e
   `pnpm e2e` (se mexeu em tela ou jogo). Commits em português, sem nome de modelo de IA.
 
