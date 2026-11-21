@@ -8,7 +8,8 @@
 //   KOF_JOGO_A=<iso>  KOF_JOGO_B=<iso>  KOF_BIOS_PS2=<bios>
 //   --estado <arquivo .bin da loja estados>: começa desse estado (F8); --teclas: no meio da medição aperta F5 (salvar
 //   estado) duas vezes e F8 (carregar) uma, e mede a maior travada da tela depois de cada uma.
-//   node tools/medir-ps2.mjs [--jogo A|B] [--rodadas 3] [--aquecer 60] [--segundos 60] [--rotulo texto] [--print] [--janela] [--opcao chave=valor]...
+//   --sistema wii|gc (tarefa W): o Dolphin, com KOF_JOGO_WII_A (ou KOF_JOGO_GC_A) e sem BIOS
+//   node tools/medir-ps2.mjs [--sistema ps2|wii|gc] [--jogo A|B] [--rodadas 3] [--aquecer 60] [--segundos 60] [--rotulo texto] [--print] [--janela] [--opcao chave=valor]...
 //
 // Saída: uma linha por rodada e a variação entre elas; o JSON completo em <medidas>/resultados/.
 import { spawn } from 'node:child_process';
@@ -34,6 +35,8 @@ const arg = (n, p) => {
 };
 const tem = (n) => process.argv.includes('--' + n);
 const qual = String(arg('jogo', 'A')).toUpperCase();
+const sistema = String(arg('sistema', 'ps2')).toLowerCase();
+const ehPs2 = sistema === 'ps2';
 const rodadas = Number(arg('rodadas', 3));
 const aquecer = Number(arg('aquecer', 60));
 const segundos = Number(arg('segundos', 60));
@@ -49,19 +52,16 @@ const ALVO_MS = 1000 / 59.94; // NTSC
 
 const medidas = process.env.KOF_MEDIDAS || join(homedir(), 'kof-medidas');
 const exe = process.env.KOF_APP;
-const jogo = process.env[`KOF_JOGO_${qual}`];
+const varJogo = ehPs2 ? `KOF_JOGO_${qual}` : `KOF_JOGO_${sistema.toUpperCase()}_${qual}`;
+const jogo = process.env[varJogo];
 const bios = process.env.KOF_BIOS_PS2;
-for (const [n, v] of [
-  ['KOF_APP', exe],
-  [`KOF_JOGO_${qual}`, jogo],
-  ['KOF_BIOS_PS2', bios],
-])
+for (const [n, v] of [['KOF_APP', exe], [varJogo, jogo], ...(ehPs2 ? [['KOF_BIOS_PS2', bios]] : [])])
   if (!v || !existsSync(v)) {
     console.error(`falta ${n} (ou o arquivo não existe)`);
     process.exit(2);
   }
 
-const NOME = `Jogo pesado ${qual}`;
+const NOME = ehPs2 ? `Jogo pesado ${qual}` : `Jogo de teste ${sistema === 'gc' ? 'GameCube' : 'Wii'} ${qual}`;
 const dados = join(medidas, 'dados');
 // o jogo fica onde está: <Kof Games>/Games/ps2/<arquivo>. Na tela (e nos relatórios do 🩺, que ficam fora do
 // repositório) aparece o nome de verdade; o que este programa imprime usa só "Jogo pesado A/B".
@@ -158,7 +158,7 @@ function ligarDiagnostico() {
     // primeira vez: o arquivo ainda não existe
   }
   const emu = { geral: 'equilibrado', consoles: {}, jogos: {} };
-  if (Object.keys(opcoes).length) emu.consoles.ps2 = { opcoes };
+  if (Object.keys(opcoes).length) emu.consoles[sistema] = { opcoes };
   c.valores = { ...c.valores, diagnostico: '1', emuOpcoes: JSON.stringify(emu) };
   mkdirSync(join(dados, 'KOFstation', 'config'), { recursive: true });
   writeFileSync(arq, JSON.stringify(c, null, 2));
@@ -273,23 +273,24 @@ async function rodada(n) {
       );
     // preparo (só muda alguma coisa na primeira vez): pasta dos jogos, BIOS e o modo diagnóstico ligado
     const sis = await api('nativo.disponivel', {});
-    if (!sis.sistemas?.includes('ps2'))
+    if (!sis.sistemas?.includes(sistema))
       throw new Error(
-        `este KOFstation não tem o núcleo do PS2 na pasta nativo/ (${JSON.stringify(sis).slice(0, 200)})`,
+        `este KOFstation não tem o núcleo de ${sistema} na pasta nativo/ (${JSON.stringify(sis).slice(0, 200)})`,
       );
     const pasta0 = await api('library.root.set', { path: raiz });
     if (pasta0?.code) throw new Error(`a pasta dos jogos não foi aceita: ${JSON.stringify(pasta0)}`);
     if (tem('print')) console.log('pasta dos jogos:', JSON.stringify(pasta0).slice(0, 300));
-    const b = readFileSync(bios);
-    await api(
-      'store.put',
-      {
-        store: 'bios',
-        key: 'bios-ps2.bin',
-        meta: { arquivo: 'bios-ps2.bin', sistema: 'ps2', nome: 'bios.bin', tamanho: b.length },
-      },
-      b.toString('base64'),
-    );
+    const b = ehPs2 ? readFileSync(bios) : Buffer.alloc(0);
+    if (ehPs2)
+      await api(
+        'store.put',
+        {
+          store: 'bios',
+          key: 'bios-ps2.bin',
+          meta: { arquivo: 'bios-ps2.bin', sistema: 'ps2', nome: 'bios.bin', tamanho: b.length },
+        },
+        b.toString('base64'),
+      );
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#home', { timeout: 60000 });
     // a tela de abertura ("pressione qualquer botão") e as boas-vindas da primeira vez

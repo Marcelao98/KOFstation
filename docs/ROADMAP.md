@@ -272,11 +272,11 @@ dia, só como projeto particular dele).
 
 | # | Passo | Entregável | Checkpoint | Estado |
 |---|---|---|---|---|
-| W.1 | Núcleo no manifesto, rodando sem janela | `dolphin_libretro` **pronto, do buildbot do libretro** (o do RetroArch), Linux e Windows, copiado pra uma Release nossa (D40), SHA-256 no manifesto, teste `dolphin.rs`, `SET_HW_RENDER` conferido com o `gl.rs`, tamanho do estado medido | teste Rust + números | ⬜ |
-| W.2 | GameCube e Wii no app | sistemas `gc`/`wii`, extensões, biblioteca, `Kof Games/Games/{gamecube,wii}`, disco lido pelo processo do jogo | unit + e2e com casca falsa | ⬜ |
-| W.3 | Saves que não se perdem | cartão do GameCube e NAND do Wii gravados ao fechar o app | teste "o arquivo mudou depois de fechar" | ⬜ |
-| W.4 | Controles | GameCube como o console; Wii com o ponteiro no mouse e o chacoalhar num botão, Nunchuk; combinado com ele antes | ⏸ ele aprova o mapeamento | ⬜ |
-| W.5 | Opções e medição | tudo o que o núcleo declara no menu, em português, 4 perfis; `medir-ps2.mjs --sistema`; `docs/WII-LISO.md` | ⏸ ele joga o jogo A 10 min liso | ⬜ |
+| W.1 | Núcleo no manifesto, rodando sem janela | `dolphin_libretro` **pronto, do buildbot do libretro** (o do RetroArch), Linux e Windows, copiado pra uma Release nossa (D40), SHA-256 no manifesto, teste `dolphin.rs`, `SET_HW_RENDER` conferido com o `gl.rs`, tamanho do estado medido | teste Rust + números | ✅ 21/11 (dolphin-emu 2609.0.168+0863ee3700; estado 85 MB) |
+| W.2 | GameCube e Wii no app | sistemas `gc`/`wii`, extensões, biblioteca, `Kof Games/Games/{gamecube,wii}`, disco lido pelo processo do jogo | unit + e2e com casca falsa | ✅ 21/11 |
+| W.3 | Saves que não se perdem | cartão do GameCube e NAND do Wii gravados ao fechar o app | teste "o arquivo mudou depois de fechar" | 🟡 21/11: Sys e pasta dos saves prontos; falta o teste "mudou depois de fechar" com jogo de verdade |
+| W.4 | Controles | GameCube como o console; Wii com o ponteiro no mouse e o chacoalhar num botão, Nunchuk; combinado com ele antes | ⏸ ele aprova o mapeamento | ⏸ 21/11: a proposta da tarefa feita (modo automático); ele aprova |
+| W.5 | Opções e medição | tudo o que o núcleo declara no menu, em português, 4 perfis; `medir-ps2.mjs --sistema`; `docs/WII-LISO.md` | ⏸ ele joga o jogo A 10 min liso | 🟡 21/11: opções e medidor prontos; ⏸ medir e jogar o jogo A |
 | W.6 | Celular como Wiimote | giroscópio = ponteiro, acelerômetro = chacoalhar, pela rede pareada | ⏸ ele joga apontando o celular | ⬜ depois |
 
 ### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11; C.1–C.4 = tarefa N, 21/11)
