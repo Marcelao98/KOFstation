@@ -71,6 +71,10 @@ export const NOMES_BOTAO: Readonly<Record<string, Readonly<Record<string, string
   ps1: { B: '✕', A: '○', Y: '□', X: '△', L: 'L1', R: 'R1' },
   ps2: { B: '✕', A: '○', Y: '□', X: '△', L: 'L1', R: 'R1' },
   n64: { B: 'A', Y: 'B', X: 'C▲', A: 'C▼', L: 'Z', R: 'R', L2: 'C◀', R2: 'C▶', Select: 'L' },
+  // W.4: o RetroPad do Dolphin (Source/Core/DolphinLibretro/Input.cpp). GameCube: Z no R1, L e R nos gatilhos
+  gc: { R: 'Z', L2: 'L', R2: 'R' },
+  // Wiimote com Nunchuk: C e Z no X e Y, 1 e 2 no Start e Select, − e + nos ombros; chacoalhar no R2 (o Nunchuk no L2)
+  wii: { X: 'C', Y: 'Z', Start: '1', Select: '2', L: '−', R: '+', L2: 'Chacoalhar o Nunchuk', R2: 'Chacoalhar' },
 };
 export const NOMES_ACAO: Readonly<Record<string, string>> = {
   Cima: '↑ direcional',
@@ -105,9 +109,15 @@ export const NOMES_PAD: readonly string[] = [
   '→',
   'Guia',
 ];
-export const COM_ANALOG: readonly string[] = ['ps1', 'ps2', 'n64'];
+export const COM_ANALOG: readonly string[] = ['ps1', 'ps2', 'n64', 'gc', 'wii'];
 /** 'misto' = o analógico aperta o direcional também (PS1); 'puro' = não aperta (PS2, N64). */
-export const ANALOGICO: Readonly<Record<string, 'misto' | 'puro'>> = { ps1: 'misto', ps2: 'puro', n64: 'puro' };
+export const ANALOGICO: Readonly<Record<string, 'misto' | 'puro'>> = {
+  ps1: 'misto',
+  ps2: 'puro',
+  n64: 'puro',
+  gc: 'puro',
+  wii: 'puro',
+};
 export const ehEixo = (n: string): boolean => EIXOS_TECLA.some(([x]) => x === n);
 /** As abas da tela Controles. */
 export const ABAS_CONTROLES = [
@@ -123,6 +133,8 @@ export const ABAS_CONTROLES = [
   'ps1',
   'n64',
   'ps2',
+  'gc',
+  'wii',
 ] as const;
 
 /** As ações que cada console usa ('geral' = os botões do SNES, a base de todos). */
@@ -142,7 +154,7 @@ export function acoesDe(sis: string): string[] {
   const s = so[sis];
   if (s) return dir.concat(s);
   const l = BOTOES_SNES.map(([n]) => n).filter((n) => !/2$/.test(n) || COM_ANALOG.includes(sis));
-  if (sis === 'ps1' || sis === 'ps2') l.push(...EIXOS_TECLA.map(([n]) => n));
+  if (sis === 'ps1' || sis === 'ps2' || sis === 'gc' || sis === 'wii') l.push(...EIXOS_TECLA.map(([n]) => n));
   if (sis === 'n64') l.push(...EIXOS_TECLA.slice(0, 4).map(([n]) => n));
   return l;
 }

@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 
 pub const PASTAS: [&str; 4] = ["Games", "Novos", "Config", "Saves"];
 /// As pastas de console dentro de Games (as mesmas do `PASTA_SIS` do domain).
-pub const CONSOLES: [&str; 12] = [
+pub const CONSOLES: [&str; 14] = [
     "snes",
     "nes",
     "gb",
@@ -20,6 +20,8 @@ pub const CONSOLES: [&str; 12] = [
     "psx",
     "n64",
     "ps2",
+    "gamecube",
+    "wii",
 ];
 const DE_DENTRO: [&str; 5] = ["kofstation", "games", "novos", "config", "saves"];
 

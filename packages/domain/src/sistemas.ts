@@ -2,7 +2,8 @@
 // extensões, NA MESMA ORDEM (a ordem decide quando uma extensão aparece em dois: `.bin` é Mega Drive, `.iso` é PS1 pela
 // extensão; o PS2 por .iso é reconhecido pelo conteúdo, num passo seguinte).
 
-export type SistemaId = 'snes' | 'gb' | 'nes' | 'md' | 'sms' | 'gba' | 'neogeo' | 'gg' | 'ps1' | 'n64' | 'ps2';
+export type SistemaId =
+  'snes' | 'gb' | 'nes' | 'md' | 'sms' | 'gba' | 'neogeo' | 'gg' | 'ps1' | 'n64' | 'ps2' | 'gc' | 'wii';
 
 export interface Sistema {
   readonly id: SistemaId;
@@ -24,6 +25,10 @@ export const SISTEMAS: readonly Sistema[] = [
   { id: 'ps1', nome: 'PlayStation', curto: 'PS1', ext: ['cue', 'chd', 'pbp', 'iso', 'exe'] },
   { id: 'n64', nome: 'Nintendo 64', curto: 'N64', ext: ['z64', 'n64', 'v64'] },
   { id: 'ps2', nome: 'PlayStation 2', curto: 'PS2', ext: ['elf', 'cso', 'isz'] },
+  // Wii e GameCube (tarefa W, o Dolphin): o mesmo núcleo, que descobre sozinho de qual é o disco. O .iso é reconhecido
+  // pelo conteúdo (a assinatura do disco); .rvz/.wia/.ciso servem aos dois e ficam no Wii.
+  { id: 'gc', nome: 'GameCube', curto: 'GC', ext: ['gcm', 'gcz', 'tgc', 'dol'] },
+  { id: 'wii', nome: 'Wii', curto: 'Wii', ext: ['wbfs', 'rvz', 'wia', 'ciso', 'wad'] },
 ];
 
 /** Extensão em minúsculas, sem o ponto ('' se não tiver). */

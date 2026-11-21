@@ -20,6 +20,17 @@ pub struct Entrada {
     pub eixos: [i16; 4],
 }
 
+/// O mouse sobre a área do jogo (W.4, o ponteiro do Wiimote): posição no jeito do libretro (`RETRO_DEVICE_POINTER`,
+/// -0x7fff..0x7fff dos dois lados da imagem) e os botões (bit 0 esquerdo, 1 direito, 2 do meio).
+#[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
+pub struct Ponteiro {
+    pub x: i16,
+    pub y: i16,
+    pub botoes: u8,
+    /// o mouse está sobre a imagem (fora dela o ponteiro "sai da tela", como o Wiimote apontado pra fora da TV)
+    pub dentro: bool,
+}
+
 pub const JOGADORES: usize = 4;
 
 /// Último quadro, já em RGBA (os mesmos bytes que a ponte do antigo entrega à página).
@@ -38,6 +49,7 @@ struct Contexto {
     /// som do quadro (estéreo intercalado)
     som: Vec<i16>,
     entrada: [Entrada; JOGADORES],
+    ponteiro: [Ponteiro; JOGADORES],
     sistema: CString,
     saves: CString,
     variaveis: BTreeMap<String, CString>,
@@ -363,6 +375,29 @@ unsafe extern "C" fn cb_amostras(dados: *const i16, quadros: usize) -> usize {
 
 unsafe extern "C" fn cb_poll() {}
 
+/// O que o núcleo lê do mouse: `POINTER` dá a posição absoluta (X 0, Y 1, apertado 2, fora da tela 3); `MOUSE`, os
+/// botões (esquerdo 2, direito 3, do meio 6). O movimento relativo do `MOUSE` fica em zero (ninguém usa ainda).
+pub fn ponteiro_le(p: &Ponteiro, dispositivo: c_uint, indice: c_uint, id: c_uint) -> i16 {
+    if dispositivo == RETRO_DEVICE_POINTER {
+        if indice > 0 {
+            return 0;
+        }
+        return match id {
+            0 => p.x,
+            1 => p.y,
+            2 => (p.botoes & 1) as i16,
+            3 => (!p.dentro) as i16,
+            _ => 0,
+        };
+    }
+    match id {
+        2 => (p.botoes & 1) as i16,
+        3 => ((p.botoes >> 1) & 1) as i16,
+        6 => ((p.botoes >> 2) & 1) as i16,
+        _ => 0,
+    }
+}
+
 unsafe extern "C" fn cb_input(porta: c_uint, dispositivo: c_uint, indice: c_uint, id: c_uint) -> i16 {
     let g = ctx();
     let Some(c) = g.as_ref() else { return 0 };
@@ -374,6 +409,10 @@ unsafe extern "C" fn cb_input(porta: c_uint, dispositivo: c_uint, indice: c_uint
         RETRO_DEVICE_JOYPAD if id < 16 => ((e.botoes >> id) & 1) as i16,
         RETRO_DEVICE_ANALOG if indice <= RETRO_DEVICE_INDEX_ANALOG_RIGHT && id < 2 => {
             e.eixos[(indice * 2 + id) as usize]
+        }
+        RETRO_DEVICE_POINTER | RETRO_DEVICE_MOUSE => {
+            let p = c.ponteiro.get(porta as usize).copied().unwrap_or_default();
+            ponteiro_le(&p, dispositivo & 0xff, indice, id)
         }
         _ => 0,
     }
@@ -636,6 +675,15 @@ impl Nucleo {
 
     pub fn pediu_gpu(&self) -> bool {
         com(|c| c.pediu_gpu).unwrap_or(false)
+    }
+
+    /// O mouse sobre a imagem (o ponteiro do Wiimote no Dolphin).
+    pub fn ponteiro(&self, jogador: usize, p: Ponteiro) {
+        com(|c| {
+            if let Some(x) = c.ponteiro.get_mut(jogador) {
+                *x = p;
+            }
+        });
     }
 
     pub fn entrada(&self, jogador: usize, e: Entrada) {

@@ -22,7 +22,7 @@ import type { Backend } from './backend';
 import { lerDaKofGames } from './kofgames';
 
 /** Sistemas grandes demais pra guardar uma cópia na loja `roms` (CD/DVD). */
-const GRANDES: SistemaId[] = ['ps1', 'ps2', 'neogeo'];
+const GRANDES: SistemaId[] = ['ps1', 'ps2', 'neogeo', 'gc', 'wii'];
 const MAX_COPIA = 64 << 20;
 
 // gravações do registro de um jogo, uma de cada vez (abrir e salvar automático podem chegar juntos: um não pode
@@ -113,6 +113,8 @@ const CABECA = 64 << 10;
 const CD_PS1 = /\.(cue|bin|img|iso|chd|pbp)$/i;
 /** O que pode ser DVD de PS2 (o .iso/.bin/.chd só pelo conteúdo: SYSTEM.CNF com BOOT2). */
 const DVD_PS2 = /\.(iso|bin|img|chd|cso|isz|elf)$/i;
+/** Discos de Wii/GameCube (o Dolphin lê do disco; a página só vê a cabeça). */
+const DISCO_NIN = /\.(iso|gcm|gcz|tgc|dol|wbfs|rvz|wia|ciso|wad)$/i;
 
 /** Tamanho de um arquivo da Kof Games sem ler (null = não achou). */
 async function tamanhoNaKofGames(b: Backend, path: string): Promise<number | null> {
@@ -157,11 +159,12 @@ export async function cabecaDoCd(b: Backend, path: string, tamanho: number): Pro
  * vem do conteúdo (SYSTEM.CNF com BOOT2, lido aos pedaços pelo Rust). null = não é PS2.
  */
 async function cabecaDoDvd(b: Backend, path: string, nome: string, tamanho: number): Promise<JogoAberto | null> {
-  if (!DVD_PS2.test(nome)) return null;
+  if (!DVD_PS2.test(nome) && !DISCO_NIN.test(nome)) return null;
   const fato = await fatosDe(nome, tamanho, (o, n) => lerDaKofGames(b, path, o, n));
-  if (sistemaDoArquivo(fato) !== 'ps2') return null;
+  const sistema = sistemaDoArquivo(fato);
+  if (sistema !== 'ps2' && sistema !== 'gc' && sistema !== 'wii') return null;
   const rom = await lerDaKofGames(b, path, 0, Math.min(tamanho || CABECA, CABECA));
-  return { nome: baseCd(nome), arquivo: nome, sistema: 'ps2', rom, parcial: true, pesoCd: tamanho, tamanho };
+  return { nome: baseCd(nome), arquivo: nome, sistema, rom, parcial: true, pesoCd: tamanho, tamanho };
 }
 
 /**
@@ -199,7 +202,7 @@ async function cabecaDoZip(b: Backend, path: string, nomeZip: string): Promise<J
 export async function bytesDoJogo(b: Backend, arm: Armazem, j: RegistroJogo, como: ComoLer = {}): Promise<JogoAberto> {
   if (j.path) {
     try {
-      if (como.soCabeca && (j.sistema === 'ps1' || j.sistema === 'ps2')) {
+      if (como.soCabeca && (j.sistema === 'ps1' || j.sistema === 'ps2' || j.sistema === 'gc' || j.sistema === 'wii')) {
         const c = await cabecaDoCd(b, j.path, j.tamanho);
         if (c) return c;
       }

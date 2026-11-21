@@ -1,7 +1,7 @@
 // De qual console é um arquivo e em que pasta da Kof Games ele mora (app.js `sistemaDoNome`/`pastaDoArquivo` do
 // antigo). Puro: quem tem o arquivo (o Rust na varredura, a tela ao abrir) junta os FATOS (nome, tamanho, o que tem
 // dentro do zip, se o começo parece CD) e aqui só se decide.
-import { cdPs1, isoDePs2, type Leitor } from './cd';
+import { cdPs1, discoNintendo, isoDePs2, type Leitor } from './cd';
 import { setNeoGeo, setNeoGeoPorCrcs } from './neogeo';
 import { hex8 } from './rom';
 import { extensao, sistemaPorExtensao, type SistemaId } from './sistemas';
@@ -21,6 +21,8 @@ export const PASTA_SIS: Readonly<Record<SistemaId | 'gbc', string>> = {
   ps1: 'psx',
   n64: 'n64',
   ps2: 'ps2',
+  gc: 'gamecube',
+  wii: 'wii',
 };
 export const PASTAS_KOF = ['Games', 'Novos', 'Config', 'Saves'] as const;
 export const PASTAS_CONSOLE: readonly string[] = [...new Set(Object.values(PASTA_SIS))];
@@ -44,7 +46,7 @@ export interface FatoDeArquivo {
   /** diretório do zip (só nos .zip) */
   zip?: readonly ItemDoZip[];
   /** o conteúdo diz CD: 'ps1' (setor de CD / ISO), 'ps2' (ISO com BOOT2); null = olhou e não é; ausente = não olhou */
-  cd?: 'ps1' | 'ps2' | null;
+  cd?: 'ps1' | 'ps2' | 'gc' | 'wii' | null;
 }
 
 const MB = 1 << 20;
@@ -73,6 +75,7 @@ export function sistemaDoArquivo(f: FatoDeArquivo): SistemaId | null {
   if (['elf', 'cso', 'isz'].includes(ext)) return 'ps2';
   if (ext === 'chd') return f.tamanho > 900e6 ? 'ps2' : 'ps1'; // CD de PS1 cabe em 700 MB
   if ((ext === 'iso' || ext === 'img') && f.cd === 'ps2') return 'ps2';
+  if (ext === 'iso' && (f.cd === 'gc' || f.cd === 'wii')) return f.cd;
   if (ext === 'bin' || ext === 'img') return f.cd === 'ps1' || f.tamanho > 16 * MB ? 'ps1' : 'md';
   if (['iso', 'cue', 'pbp'].includes(ext)) return 'ps1';
   return sistemaDoNome(f.nome);
@@ -99,7 +102,9 @@ export async function fatosDe(nome: string, tamanho: number, ler: Leitor): Promi
       f.zip = []; // zip estragado: não é jogo que dê pra reconhecer
     }
   } else if (['iso', 'img', 'bin'].includes(ext) && tamanho > 0x9000) {
-    if (ext !== 'bin' && (await isoDePs2(ler))) f.cd = 'ps2';
+    const nin = ext === 'iso' ? discoNintendo(await ler(0, 0x20)) : null;
+    if (nin) f.cd = nin;
+    else if (ext !== 'bin' && (await isoDePs2(ler))) f.cd = 'ps2';
     else f.cd = cdPs1(await ler(0, 0x9001)) ? 'ps1' : null;
   }
   return f;

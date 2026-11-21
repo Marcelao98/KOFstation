@@ -33,7 +33,7 @@ export interface ArquivoDoRust {
   size: number;
   modified: number;
   zip?: ItemDoZip[];
-  cd?: 'ps1' | 'ps2' | null;
+  cd?: 'ps1' | 'ps2' | 'gc' | 'wii' | null;
 }
 
 export interface ArquivoKof {
@@ -64,7 +64,7 @@ export function romsDoZip(itens: readonly ItemDoZip[] | undefined): ItemDoZip[] 
   if (!itens || zipTemCd(itens)) return [];
   const roms = itens.filter((i) => {
     const s = sistemaPorExtensao(i.nome);
-    return !!s && s !== 'neogeo' && s !== 'ps1' && s !== 'ps2';
+    return !!s && s !== 'neogeo' && s !== 'ps1' && s !== 'ps2' && s !== 'gc' && s !== 'wii';
   });
   return roms.length > 1 ? roms : [];
 }

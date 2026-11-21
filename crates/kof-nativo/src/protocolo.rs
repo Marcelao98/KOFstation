@@ -8,7 +8,7 @@
 //!   `CARREGAR_ESTADO`/`GRAVAR_BATERIA` `[4|6, 0, 0, 0, pedido u32, tamanho u32]` + bytes.
 //!
 //! Texto (JSON): comandos da página (`Comando`) e avisos do processo (`Aviso`).
-use crate::nucleo::{Entrada, Quadro};
+use crate::nucleo::{Entrada, Ponteiro, Quadro};
 use serde::{Deserialize, Serialize};
 
 pub const QUADRO: u8 = 1;
@@ -20,6 +20,8 @@ pub const GRAVAR_BATERIA: u8 = 6;
 pub const SOM: u8 = 7;
 /// página → processo: um estado no formato da loja (`[8, comprimido, 0, 0, pedido u32, tamanho u32]` + bytes): 3.2
 pub const CARREGAR_PACOTE: u8 = 8;
+/// página → processo: o mouse sobre a imagem (o ponteiro do Wiimote, W.4)
+pub const PONTEIRO: u8 = 9;
 pub const CABECALHO: usize = 12;
 
 /// Comando da página (texto JSON).
@@ -150,6 +152,10 @@ pub enum Binario<'a> {
         jogador: usize,
         entrada: Entrada,
     },
+    Ponteiro {
+        jogador: usize,
+        ponteiro: Ponteiro,
+    },
     CarregarEstado {
         pedido: u32,
         dados: &'a [u8],
@@ -182,6 +188,18 @@ pub fn ler_binario(b: &[u8]) -> Result<Binario<'_>, String> {
                 entrada: Entrada {
                     botoes: u16::from_le_bytes([b[2], b[3]]),
                     eixos: [i16le(4), i16le(6), i16le(8), i16le(10)],
+                },
+            })
+        }
+        PONTEIRO => {
+            let i16le = |i: usize| i16::from_le_bytes([b[i], b[i + 1]]);
+            Ok(Binario::Ponteiro {
+                jogador: b[1] as usize,
+                ponteiro: Ponteiro {
+                    x: i16le(2),
+                    y: i16le(4),
+                    botoes: b[6],
+                    dentro: b[7] != 0,
                 },
             })
         }
@@ -266,6 +284,36 @@ mod testes {
         let b = botoes(2, e);
         assert_eq!(b.len(), CABECALHO);
         assert_eq!(ler_binario(&b), Ok(Binario::Botoes { jogador: 2, entrada: e }));
+    }
+
+    #[test]
+    fn ponteiro_do_mouse_chega_inteiro() {
+        let mut b = vec![PONTEIRO, 1];
+        b.extend_from_slice(&(-1200i16).to_le_bytes());
+        b.extend_from_slice(&(32000i16).to_le_bytes());
+        b.extend_from_slice(&[0b101, 1, 0, 0, 0, 0]);
+        let p = Ponteiro {
+            x: -1200,
+            y: 32000,
+            botoes: 0b101,
+            dentro: true,
+        };
+        assert_eq!(
+            ler_binario(&b),
+            Ok(Binario::Ponteiro {
+                jogador: 1,
+                ponteiro: p
+            })
+        );
+        // o núcleo lê a posição pelo POINTER e os botões pelo MOUSE (esquerdo = A, do meio = chacoalhar no Dolphin)
+        use crate::libretro::{RETRO_DEVICE_MOUSE, RETRO_DEVICE_POINTER};
+        use crate::nucleo::ponteiro_le;
+        assert_eq!(ponteiro_le(&p, RETRO_DEVICE_POINTER, 0, 0), -1200);
+        assert_eq!(ponteiro_le(&p, RETRO_DEVICE_POINTER, 0, 1), 32000);
+        assert_eq!(ponteiro_le(&p, RETRO_DEVICE_POINTER, 0, 3), 0, "dentro da tela");
+        assert_eq!(ponteiro_le(&p, RETRO_DEVICE_MOUSE, 0, 2), 1, "esquerdo");
+        assert_eq!(ponteiro_le(&p, RETRO_DEVICE_MOUSE, 0, 3), 0, "direito solto");
+        assert_eq!(ponteiro_le(&p, RETRO_DEVICE_MOUSE, 0, 6), 1, "do meio");
     }
 
     #[test]

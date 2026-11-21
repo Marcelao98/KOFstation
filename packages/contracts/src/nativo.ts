@@ -12,6 +12,8 @@ export const NATIVO = {
   SOM: 7,
   /** página → processo: um estado no formato da loja; o byte 1 diz se está em gzip (3.2) */
   CARREGAR_PACOTE: 8,
+  /** página → processo: o mouse sobre a imagem, o ponteiro do Wiimote (W.4) */
+  PONTEIRO: 9,
   CABECALHO: 12,
 } as const;
 
@@ -147,6 +149,23 @@ export function botoesNativo(jogador: number, botoes: number, eixos: readonly nu
   u[1] = jogador;
   d.setUint16(2, botoes & 0xffff, true);
   for (let i = 0; i < 4; i++) d.setInt16(4 + i * 2, Math.max(-32768, Math.min(32767, Math.round(eixos[i] ?? 0))), true);
+  return u;
+}
+
+/**
+ * O mouse sobre a imagem (o ponteiro do Wiimote): x e y de -32767 a 32767 dos dois lados da imagem (o
+ * `RETRO_DEVICE_POINTER` do libretro), botões (bit 0 esquerdo, 1 direito, 2 do meio) e se está sobre a imagem.
+ */
+export function ponteiroNativo(jogador: number, x: number, y: number, botoes: number, dentro: boolean): Uint8Array {
+  const u = new Uint8Array(NATIVO.CABECALHO);
+  const d = new DataView(u.buffer);
+  const lim = (v: number) => Math.max(-32767, Math.min(32767, Math.round(v)));
+  u[0] = NATIVO.PONTEIRO;
+  u[1] = jogador;
+  d.setInt16(2, lim(x), true);
+  d.setInt16(4, lim(y), true);
+  u[6] = botoes & 7;
+  u[7] = dentro ? 1 : 0;
   return u;
 }
 

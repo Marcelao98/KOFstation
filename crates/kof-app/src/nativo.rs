@@ -11,7 +11,7 @@ use std::sync::{Arc, Mutex};
 
 /// Sistemas com núcleo nativo na pasta `nativo/` (ou no repositório, rodando do código).
 pub fn sistemas() -> Vec<&'static str> {
-    ["ps1", "ps2"]
+    ["ps1", "ps2", "gc", "wii"]
         .into_iter()
         .filter(|s| crate::pastas::nucleo_nativo(s).is_some())
         .collect()
@@ -81,8 +81,14 @@ impl Nativos {
                 a.sistema
             ))
         })?;
-        let sistema = pasta_dados.join("nativo").join("sistema").join(&a.sistema);
-        let saves = pasta_dados.join("nativo").join("saves").join(&a.sistema);
+        // Wii e GameCube são o mesmo núcleo (o Dolphin): uma pasta só, com a NAND e os cartões dos dois
+        let pasta = if matches!(a.sistema.as_str(), "gc" | "wii") {
+            "dolphin"
+        } else {
+            a.sistema.as_str()
+        };
+        let sistema = pasta_dados.join("nativo").join("sistema").join(pasta);
+        let saves = pasta_dados.join("nativo").join("saves").join(pasta);
         for d in [&sistema, &saves] {
             std::fs::create_dir_all(d).map_err(|e| KofError::de_io(d.display(), e))?;
         }

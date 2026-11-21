@@ -22,9 +22,10 @@ describe('sistemas', () => {
     expect(extensao('a.b.ZIP')).toBe('zip');
   });
 
-  it('tem os 11 sistemas do antigo, ids únicos', () => {
-    expect(SISTEMAS).toHaveLength(11);
-    expect(new Set(SISTEMAS.map((s) => s.id)).size).toBe(11);
+  it('tem os 11 sistemas do antigo e o Wii e o GameCube (tarefa W), ids únicos', () => {
+    expect(SISTEMAS).toHaveLength(13);
+    expect(new Set(SISTEMAS.map((s) => s.id)).size).toBe(13);
     expect(EXTENSOES).toContain('nes');
+    expect(EXTENSOES).toEqual(expect.arrayContaining(['rvz', 'wbfs', 'gcm', 'gcz']));
   });
 });

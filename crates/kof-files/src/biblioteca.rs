@@ -51,6 +51,18 @@ pub fn cd_ps1(b: &[u8]) -> bool {
 }
 
 /// ISO 9660 com SYSTEM.CNF dizendo BOOT2 = DVD de PS2 (o `ehPs2` do antigo).
+/// Disco de Wii ou GameCube pela assinatura do cabeçalho (Wii: 5D1C9EA3 em 0x18; GameCube: C2339F3D em 0x1C).
+pub fn disco_nintendo(b: &[u8]) -> Option<&'static str> {
+    let be = |i: usize| b.get(i..i + 4).map(|x| u32::from_be_bytes([x[0], x[1], x[2], x[3]]));
+    if be(0x18) == Some(0x5D1C_9EA3) {
+        Some("wii")
+    } else if be(0x1C) == Some(0xC233_9F3D) {
+        Some("gc")
+    } else {
+        None
+    }
+}
+
 pub fn iso_de_ps2(f: &mut std::fs::File) -> bool {
     let Some(pvd) = ler_em(f, 16 * 2048, 2048) else {
         return false;
@@ -102,8 +114,15 @@ pub fn fatos(raiz: &Path, p: &Path) -> Option<Arquivo> {
         a.zip = Some(itens(&mut f, m.len()));
     } else if matches!(ext.as_str(), "bin" | "img" | "iso") && m.len() > 0x9000 {
         let mut f = std::fs::File::open(p).ok()?;
-        let ps2 = ext != "bin" && iso_de_ps2(&mut f);
-        a.cd = Some(if ps2 {
+        let nin = if ext == "iso" {
+            ler_em(&mut f, 0, 0x20).and_then(|b| disco_nintendo(&b))
+        } else {
+            None
+        };
+        let ps2 = nin.is_none() && ext != "bin" && iso_de_ps2(&mut f);
+        a.cd = Some(if let Some(n) = nin {
+            Some(n)
+        } else if ps2 {
             Some("ps2")
         } else if ler_em(&mut f, 0, 0x9001).is_some_and(|b| cd_ps1(&b)) {
             Some("ps1")

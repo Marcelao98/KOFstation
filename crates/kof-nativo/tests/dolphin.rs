@@ -86,6 +86,18 @@ fn dolphin_abre_com_opengl_e_um_dol() {
         n.info.nome, n.info.versao, n.av.geometry, n.info.caminho_inteiro, n.info.extensoes
     );
     assert!(n.pediu_gpu(), "o Dolphin desenha pela placa");
+    let declaradas = n.opcoes_declaradas();
+    assert!(!declaradas.is_empty(), "o Dolphin declara as opções dele");
+    eprintln!("o Dolphin declara {} opções", declaradas.len());
+    // KOF_LISTA_OPCOES=<pasta>: grava a lista de verdade (W.5: o catálogo traduzido sai dela)
+    if let Ok(pasta) = std::env::var("KOF_LISTA_OPCOES") {
+        let lista: Vec<_> = declaradas
+            .iter()
+            .map(|d| serde_json::json!({ "chave": d.chave, "descricao": d.descricao, "valores": d.valores }))
+            .collect();
+        let arq = Path::new(&pasta).join("wii.json");
+        std::fs::write(&arq, serde_json::to_string_pretty(&lista).unwrap()).unwrap();
+    }
     assert!(
         n.info.caminho_inteiro,
         "o disco é lido do disco pelo processo: nunca passa inteiro pela memória da página"

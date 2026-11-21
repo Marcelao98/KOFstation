@@ -111,3 +111,27 @@ describe('nomes da capa (nomesCapa do antigo)', () => {
     expect(n).toContain('Super Mario World (USA) (En,Fr)');
   });
 });
+
+describe('Wii e GameCube (tarefa W)', () => {
+  it('o .iso pela assinatura do disco e as extensões que só eles têm', async () => {
+    const { discoNintendo } = await import('./cd');
+    const wii = new Uint8Array(0x20);
+    wii.set([0x5d, 0x1c, 0x9e, 0xa3], 0x18);
+    const gc = new Uint8Array(0x20);
+    gc.set([0xc2, 0x33, 0x9f, 0x3d], 0x1c);
+    expect(discoNintendo(wii)).toBe('wii');
+    expect(discoNintendo(gc)).toBe('gc');
+    expect(discoNintendo(new Uint8Array(0x20))).toBeNull();
+    const ler = (b: Uint8Array) => (o: number, n: number) => Promise.resolve(b.slice(o, o + n));
+    const grande = 0x10000;
+    const disco = new Uint8Array(grande);
+    disco.set(wii.subarray(0, 0x20));
+    const f = await fatosDe('Jogo.iso', grande, ler(disco));
+    expect(f.cd).toBe('wii');
+    expect(sistemaDoArquivo(f)).toBe('wii');
+    expect(pastaDoArquivo(f)).toBe('wii');
+    expect(sistemaDoArquivo({ nome: 'Jogo.rvz', tamanho: 1 })).toBe('wii');
+    expect(sistemaDoArquivo({ nome: 'Jogo.gcz', tamanho: 1 })).toBe('gc');
+    expect(pastaDoArquivo({ nome: 'Jogo.gcm', tamanho: 1 })).toBe('gamecube');
+  });
+});

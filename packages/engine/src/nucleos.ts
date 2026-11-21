@@ -2,7 +2,8 @@
 // `SISTEMAS` do web/nucleo.js do kofstation-old (só o que a engine precisa; nome e extensões ficam no domain).
 import type { SistemaId } from '@kof/domain';
 
-export type NucleoId = 'snes9x' | 'gambatte' | 'fceumm' | 'genplus' | 'mgba' | 'fbneo' | 'pcsx' | 'mupen64' | 'pcsx2';
+export type NucleoId =
+  'snes9x' | 'gambatte' | 'fceumm' | 'genplus' | 'mgba' | 'fbneo' | 'pcsx' | 'mupen64' | 'pcsx2' | 'dolphin';
 
 export interface ConfigNucleo {
   nucleo: NucleoId;
@@ -32,6 +33,9 @@ export interface ConfigNucleo {
   /** só roda no núcleo nativo (PS2: não existe em WebAssembly que aguente) */
   soNativo?: boolean;
 }
+
+/** O padrão do Dolphin pro KOFstation: desenho pela placa e o JIT64 (o ⚖ Equilibrado das opções é o padrão do núcleo). */
+const OPCOES_DOLPHIN = { dolphin_renderer: 'Hardware', dolphin_cpu_core: '1' } as const;
 
 /** Sistemas que rodam no app novo (M2 + M11; o PS2 no núcleo nativo, M12/N.9). */
 export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
@@ -100,6 +104,31 @@ export const NUCLEOS: Partial<Record<SistemaId, ConfigNucleo>> = {
     semRebob: true,
     soNativo: true,
     opcoes: { pcsx2_renderer: 'OpenGL', pcsx2_ee_cycle_skip: 'Mild Underclock', pcsx2_bios: 'bios-ps2.bin' },
+    ext: 'iso',
+  },
+  // Wii e GameCube (o Dolphin do libretro, tarefa W): só nativo, OpenGL sem janela no processo do jogo, disco lido do
+  // disco. Estado de ~85 MB: sem rebobinar. No Wii o Wiimote vem com o Nunchuk e o ponteiro no mouse (W.4)
+  gc: {
+    nucleo: 'dolphin',
+    largura: 640,
+    altura: 528,
+    dinamico: true,
+    tv43: true,
+    caminho: true,
+    semRebob: true,
+    soNativo: true,
+    opcoes: OPCOES_DOLPHIN,
+    ext: 'iso',
+  },
+  wii: {
+    nucleo: 'dolphin',
+    largura: 640,
+    altura: 528,
+    dinamico: true,
+    caminho: true,
+    semRebob: true,
+    soNativo: true,
+    opcoes: { ...OPCOES_DOLPHIN, dolphin_ir_mode: '2', dolphin_wiimote_default_device: 'nunchuk' },
     ext: 'iso',
   },
 };

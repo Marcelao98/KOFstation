@@ -67,6 +67,7 @@ pub fn nucleo_nativo_em(exe: Option<&Path>, repo: &Path, sistema: &str) -> Optio
     let base = match sistema {
         "ps1" => "pcsx_rearmed_libretro",
         "ps2" => "pcsx2_libretro",
+        "gc" | "wii" => "dolphin_libretro",
         _ => return None,
     };
     let arq = format!("{base}.{}", if cfg!(windows) { "dll" } else { "so" });

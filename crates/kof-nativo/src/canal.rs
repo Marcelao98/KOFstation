@@ -19,6 +19,7 @@ pub enum Pedido {
     AppFechou,
     Comando(Comando),
     Entrada(usize, Entrada),
+    Ponteiro(usize, crate::nucleo::Ponteiro),
     CarregarEstado(u32, Vec<u8>),
     GravarBateria(u32, Vec<u8>),
 }
@@ -208,6 +209,7 @@ impl Canal {
                 Ok(Message::Binary(b)) => {
                     let p = match protocolo::ler_binario(&b) {
                         Ok(Binario::Botoes { jogador, entrada }) => Some(Pedido::Entrada(jogador, entrada)),
+                        Ok(Binario::Ponteiro { jogador, ponteiro }) => Some(Pedido::Ponteiro(jogador, ponteiro)),
                         Ok(Binario::CarregarEstado { pedido, dados }) => {
                             Some(Pedido::CarregarEstado(pedido, dados.to_vec()))
                         }

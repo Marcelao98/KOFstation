@@ -20,7 +20,7 @@ import {
   type JogoAberto,
   type LeituraDeDesempenho,
 } from '@kof/app-core';
-import { chaveSramDe, fatosDe, sistemaDoArquivo, SISTEMAS, type RegistroJogo } from '@kof/domain';
+import { chaveSramDe, fatosDe, sistemaDoArquivo, SISTEMAS, SO_NO_PC, type RegistroJogo } from '@kof/domain';
 import {
   Jogo,
   JogoNativo,
@@ -108,6 +108,9 @@ export interface Origem {
   nativoAndroid?: 'ps1' | 'n64';
 }
 
+/** Os que só rodam no núcleo nativo do PC (sem reserva no WebAssembly). */
+const NOME_SO_NATIVO: Record<string, string> = { ps2: 'PS2', gc: 'GameCube', wii: 'Wii' };
+
 /** Sistemas com núcleo nativo neste executável (perguntado uma vez). */
 let nativosDisponiveis: Promise<string[]> | null = null;
 function nativos(): Promise<string[]> {
@@ -120,7 +123,7 @@ function nativos(): Promise<string[]> {
 
 /** O núcleo nativo desse sistema está ligado (Opções de emulação) e existe neste executável? */
 export async function nativoLigado(sistema: string): Promise<boolean> {
-  if (sistema === 'ps2') return (await nativos()).includes('ps2'); // o PS2 só existe nativo
+  if (SO_NO_PC.includes(sistema)) return (await nativos()).includes(sistema); // PS2, Wii e GameCube só existem nativos
   if (sistema === 'n64') return (await nativos()).includes('n64'); // só o APK tem N64 nativo
   if (sistema !== 'ps1' || config().ler('nucleoPs1') === 'wasm') return false;
   return (await nativos()).includes(sistema);
@@ -282,11 +285,12 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
         }
       }
       const nativo = await querNativo(aberto.sistema, origem.path);
-      if (aberto.sistema === 'ps2' && !nativo) {
+      if (SO_NO_PC.includes(aberto.sistema) && !nativo) {
+        const nome = NOME_SO_NATIVO[aberto.sistema] ?? aberto.sistema;
         av.avisarErro(
-          (await nativos()).includes('ps2')
-            ? 'PS2 roda do disco: guarde o jogo na pasta Kof Games (Biblioteca) e abra por lá'
-            : 'PS2 precisa do núcleo nativo (pasta nativo/ do KOFstation): esta versão veio sem ele',
+          (await nativos()).includes(aberto.sistema)
+            ? `${nome} roda do disco: guarde o jogo na pasta Kof Games (Biblioteca) e abra por lá`
+            : `${nome} precisa do núcleo nativo (pasta nativo/ do KOFstation): esta versão veio sem ele`,
         );
         set({ abrindo: false });
         return false;
@@ -363,16 +367,17 @@ export const usarJogo = create<EstadoJogo>()((set, get) => ({
             .catch(() => undefined); // já fechado ou nem abriu: nada a fazer
           const peso = aberto.pesoCd ?? 0;
           // PS2 (só nativo) ou CD grande: o WebAssembly teria que ler ele inteiro na página (estoura a memória)
-          const nomeSis = aberto.sistema === 'ps2' ? 'PS2' : 'PS1';
-          if (aberto.sistema === 'ps2' || peso > MAX_RESERVA_WASM) {
+          const soNativo = SO_NO_PC.includes(aberto.sistema);
+          const nomeSis = NOME_SO_NATIVO[aberto.sistema] ?? 'PS1';
+          if (soNativo || peso > MAX_RESERVA_WASM) {
             registrar(
               'error',
               'nativo',
               `o núcleo nativo não abriu (${textoDoErro(e)}); ${mb(peso)} MB, sem reserva no WebAssembly · ${linhas.join(' | ')}`,
             );
             av.avisarErro(
-              aberto.sistema === 'ps2'
-                ? `PS2 não abriu: ${textoDoErro(e)}. O log do processo foi pro log do app (Ajuda → Reportar bug)`
+              soNativo
+                ? `${nomeSis} não abriu: ${textoDoErro(e)}. O log do processo foi pro log do app (Ajuda → Reportar bug)`
                 : `${nomeSis} nativo não abriu: ${textoDoErro(e)}. O CD tem ${mb(peso)} MB, grande demais pro WebAssembly; ` +
                     'o log do processo foi pro log do app (Ajuda → Reportar bug)',
             );
@@ -513,7 +518,7 @@ async function abrirCdDeFora(arquivo: File, soltos: File[]): Promise<boolean> {
   const fato = await fatosDe(arquivo.name, arquivo.size, ler);
   const sis = sistemaDoArquivo(fato);
   // CD de PS1 (com o nativo ligado) e DVD de PS2 (sempre): pra Kof Games aos pedaços, nunca inteiro na memória
-  if (!(sis === 'ps1' || sis === 'ps2') || !(await nativoLigado(sis))) return false;
+  if (!(sis === 'ps1' || (sis && SO_NO_PC.includes(sis))) || !(await nativoLigado(sis))) return false;
   const { backend } = servicos();
   const av = usarAvisos.getState();
   let g;

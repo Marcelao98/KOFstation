@@ -57,3 +57,20 @@ describe('protocolo do núcleo nativo (mesmas fixtures do Rust)', () => {
     expect(lerAviso('não é json')).toBeNull();
   });
 });
+
+describe('ponteiro do Wiimote (W.4)', () => {
+  it('os mesmos bytes que o Rust lê (protocolo.rs, ponteiro_do_mouse_chega_inteiro)', async () => {
+    const { ponteiroNativo } = await import('./nativo');
+    const u = ponteiroNativo(1, -1200, 32000, 0b101, true);
+    const d = new DataView(u.buffer);
+    expect([u[0], u[1], d.getInt16(2, true), d.getInt16(4, true), u[6], u[7], u.length]).toEqual([
+      NATIVO.PONTEIRO,
+      1,
+      -1200,
+      32000,
+      5,
+      1,
+      NATIVO.CABECALHO,
+    ]);
+  });
+});

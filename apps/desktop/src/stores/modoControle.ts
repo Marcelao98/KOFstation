@@ -85,6 +85,8 @@ const NOME_CONSOLE: Record<string, string> = {
   ps1: 'PlayStation',
   n64: 'Nintendo 64',
   ps2: 'PlayStation 2',
+  gc: 'GameCube',
+  wii: 'Wii',
 };
 
 interface Rodando {

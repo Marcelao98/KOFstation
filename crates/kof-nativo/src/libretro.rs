@@ -6,6 +6,8 @@ pub const RETRO_API_VERSION: c_uint = 1;
 
 pub const RETRO_DEVICE_JOYPAD: c_uint = 1;
 pub const RETRO_DEVICE_ANALOG: c_uint = 5;
+pub const RETRO_DEVICE_MOUSE: c_uint = 2;
+pub const RETRO_DEVICE_POINTER: c_uint = 6;
 pub const RETRO_DEVICE_ID_JOYPAD_MASK: c_uint = 256;
 pub const RETRO_DEVICE_INDEX_ANALOG_LEFT: c_uint = 0;
 pub const RETRO_DEVICE_INDEX_ANALOG_RIGHT: c_uint = 1;

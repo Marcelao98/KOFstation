@@ -50,6 +50,8 @@ fn plataformas(sistema: &str) -> Option<&'static [&'static str]> {
         "ps1" => &["Q10677"],
         "n64" => &["Q184839"],
         "ps2" => &["Q10680"],
+        "gc" => &["Q182172"],
+        "wii" => &["Q8079"],
         _ => return None,
     })
 }

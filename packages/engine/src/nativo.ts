@@ -5,6 +5,7 @@ import {
   NATIVO,
   blocoNativo,
   botoesNativo,
+  ponteiroNativo,
   pacoteNativo,
   lerAviso,
   lerBinario,
@@ -371,6 +372,11 @@ export class JogoNativo {
   private mandarPad(jogador: number) {
     const mascara = this.o.sistema === 'n64' ? mascaraN64 : mascaraLibretro;
     this.enviar(botoesNativo(jogador, mascara(this.botoes[jogador] ?? 0), this.eixos[jogador] ?? [0, 0, 0, 0]));
+  }
+
+  /** O mouse sobre a imagem (o ponteiro do Wiimote no Dolphin; W.4). x e y de -1 a 1 dentro da imagem. */
+  ponteiro(x: number, y: number, botoes: number, dentro: boolean): void {
+    this.enviar(ponteiroNativo(0, x * 32767, y * 32767, botoes, dentro));
   }
 
   botoesDo(jogador: number, bits: number) {

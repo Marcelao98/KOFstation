@@ -70,3 +70,13 @@ export async function isoDePs2(ler: Leitor): Promise<boolean> {
   }
   return false;
 }
+
+/** Disco de Wii ou GameCube pela assinatura do cabeçalho (Wii: 5D1C9EA3 em 0x18; GameCube: C2339F3D em 0x1C). */
+export function discoNintendo(b: Uint8Array): 'wii' | 'gc' | null {
+  if (b.length < 0x20) return null;
+  const be = (i: number) =>
+    (((b[i] ?? 0) << 24) | ((b[i + 1] ?? 0) << 16) | ((b[i + 2] ?? 0) << 8) | (b[i + 3] ?? 0)) >>> 0;
+  if (be(0x18) === 0x5d1c9ea3) return 'wii';
+  if (be(0x1c) === 0xc2339f3d) return 'gc';
+  return null;
+}

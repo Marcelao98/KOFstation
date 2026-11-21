@@ -27,6 +27,7 @@ if (celular.ligarModoCelular()) await celular.ligarVoltarDoAndroid();
 const { App } = await import('./app/App');
 // rede entre aparelhos (M13): liga, religa o celular da última vez e ouve o Jogar no PC desde a abertura
 (await import('./stores/rede')).ligarARede();
+(await import('./stores/ponteiro')).ligarPonteiro(); // W.4: o mouse é o ponteiro do Wiimote
 (await import('./stores/celular')).religarControleNaAbertura();
 await import('./stores/transmissao');
 (await import('./app/ganchosDeTeste')).ligarGanchosDeTeste();
