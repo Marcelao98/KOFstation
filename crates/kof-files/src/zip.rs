@@ -37,6 +37,8 @@ pub fn itens(f: &mut std::fs::File, tamanho: u64) -> Vec<ItemDoZip> {
 struct Entrada {
     /// só o nome (sem as pastas de dentro do zip)
     nome: String,
+    /// o caminho inteiro dentro do zip (com as pastas)
+    caminho: String,
     tamanho: u64,
     comprimido: u64,
     metodo: u16,
@@ -74,11 +76,12 @@ fn entradas(f: &mut std::fs::File, tamanho: u64) -> std::io::Result<Vec<Entrada>
         let Some(nome_b) = dir.get(p + 46..p + 46 + nl) else {
             break;
         };
-        let nome = String::from_utf8_lossy(nome_b);
-        let nome = nome.rsplit(['/', '\\']).next().unwrap_or("").to_string();
+        let caminho = String::from_utf8_lossy(nome_b).into_owned();
+        let nome = caminho.rsplit(['/', '\\']).next().unwrap_or("").to_string();
         if !nome.is_empty() {
             r.push(Entrada {
                 nome,
+                caminho,
                 tamanho: u32le(&dir, p + 24) as u64,
                 comprimido: u32le(&dir, p + 20) as u64,
                 metodo: u16le(&dir, p + 10),
@@ -272,6 +275,50 @@ pub fn extrair_cd(zip: &Path, cache: &Path) -> Result<PathBuf, KofError> {
     Ok(alvo)
 }
 
+/// Extrai o zip inteiro em `destino` (as pastas de dentro viram pastas), conferindo o CRC de cada arquivo. Nome com
+/// `..`, caminho absoluto ou `:` é recusado (não sai da pasta). Extrai numa pasta ao lado e troca no fim: se parar no
+/// meio, não fica meia pasta. Serve pros arquivos de sistema do Dolphin (`dolphin-sys.zip`, W.3).
+pub fn extrair_pasta(zip: &Path, destino: &Path) -> Result<usize, KofError> {
+    let io = |p: &Path, e: std::io::Error| KofError::de_io(p.display(), e);
+    let mut f = std::fs::File::open(zip).map_err(|e| io(zip, e))?;
+    let tamanho = f.metadata().map_err(|e| io(zip, e))?.len();
+    let es = entradas(&mut f, tamanho).map_err(|e| ruim(zip, e))?;
+    let parcial = destino.with_extension("parcial");
+    if parcial.exists() {
+        std::fs::remove_dir_all(&parcial).map_err(|e| io(&parcial, e))?;
+    }
+    let mut n = 0;
+    for e in &es {
+        let partes: Vec<&str> = e.caminho.split(['/', '\\']).filter(|x| !x.is_empty()).collect();
+        if partes.is_empty() {
+            continue; // pasta: nasce com o primeiro arquivo dela
+        }
+        if !partes.iter().all(|x| nome_ok(x)) {
+            return Err(ruim(zip, format!("caminho recusado: {}", e.caminho)));
+        }
+        let alvo = partes.iter().fold(parcial.clone(), |p, x| p.join(x));
+        if let Some(pai) = alvo.parent() {
+            std::fs::create_dir_all(pai).map_err(|x| io(pai, x))?;
+        }
+        let mut saida = std::fs::File::create(&alvo).map_err(|x| io(&alvo, x))?;
+        let mut crc = Crc {
+            h: crc32fast::Hasher::new(),
+            w: &mut saida,
+        };
+        let lidos = std::io::copy(&mut leitor(zip, &mut f, e)?, &mut crc)
+            .map_err(|x| ruim(zip, format!("não consegui extrair {}: {x}", e.nome)))?;
+        if lidos != e.tamanho || crc.h.finalize() != e.crc {
+            return Err(ruim(zip, format!("{} veio estragado", e.nome)));
+        }
+        n += 1;
+    }
+    if destino.exists() {
+        std::fs::remove_dir_all(destino).map_err(|e| io(destino, e))?;
+    }
+    std::fs::rename(&parcial, destino).map_err(|e| io(destino, e))?;
+    Ok(n)
+}
+
 /// Escreve e calcula o CRC32 junto (confere a extração sem ler o arquivo de novo).
 struct Crc<'a, W: Write> {
     h: crc32fast::Hasher,
@@ -345,6 +392,31 @@ pub fn montar(itens: &[(String, Vec<u8>)]) -> std::io::Result<Vec<u8>> {
 
 #[cfg(test)]
 mod testes_montar {
+
+    #[test]
+    fn extrair_pasta_com_subpastas_e_recusa_caminho_pra_fora() {
+        let d = tempfile::tempdir().unwrap();
+        let z = d.path().join("sys.zip");
+        std::fs::write(
+            &z,
+            montar(&[
+                ("dolphin-emu/Sys/GameSettings/X.ini".into(), b"[Core]".to_vec()),
+                ("dolphin-emu/license.txt".into(), b"GPL".to_vec()),
+            ])
+            .unwrap(),
+        )
+        .unwrap();
+        let alvo = d.path().join("sistema");
+        assert_eq!(extrair_pasta(&z, &alvo).unwrap(), 2);
+        assert_eq!(
+            std::fs::read(alvo.join("dolphin-emu/Sys/GameSettings/X.ini")).unwrap(),
+            b"[Core]"
+        );
+        let mau = d.path().join("mau.zip");
+        std::fs::write(&mau, montar(&[("../fora.txt".into(), b"x".to_vec())]).unwrap()).unwrap();
+        assert!(extrair_pasta(&mau, &d.path().join("outro")).is_err());
+        assert!(!d.path().join("fora.txt").exists());
+    }
     use super::*;
 
     #[test]

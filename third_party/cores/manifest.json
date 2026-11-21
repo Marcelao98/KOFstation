@@ -129,6 +129,23 @@
           "sha256": "b8cfdc3a758c4a31a159c1aa277845e217246deec1c6f75386ff0c570890150d"
         }
       }
+    },
+    "dolphin-sys": {
+      "nota": "Os arquivos de sistema do Dolphin (dolphin-emu/Sys: ajustes por jogo, fontes, shaders; GPL-2.0-or-later, licença dentro), o Dolphin.zip do buildbot do libretro (assets/system, 21/11/2026 01:06 GMT) copiado sem mudança pra Release nucleos-dolphin-0863ee37. O app extrai uma vez pra <dados>/nativo/sistema/dolphin/dolphin-emu (W.3)",
+      "plataformas": {
+        "linux-x64": {
+          "arquivo": "dolphin-sys.zip",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-dolphin-0863ee37/dolphin-sys.zip",
+          "tamanho": 3197914,
+          "sha256": "c39632ea5a19e21caee6b12431bfccd56e0f47536ae20d0f81548f9fc053ebef"
+        },
+        "windows-x64": {
+          "arquivo": "dolphin-sys.zip",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-dolphin-0863ee37/dolphin-sys.zip",
+          "tamanho": 3197914,
+          "sha256": "c39632ea5a19e21caee6b12431bfccd56e0f47536ae20d0f81548f9fc053ebef"
+        }
+      }
     }
   }
 }

@@ -103,6 +103,12 @@ fn dolphin_abre_com_opengl_e_um_dol() {
         "o disco é lido do disco pelo processo: nunca passa inteiro pela memória da página"
     );
     let (ms, novos) = rodar(&mut n, 120);
+    // W.3: onde ele grava (NAND do Wii, cartões do GameCube) — as pastas que o núcleo criou
+    let mut pastas = vec![];
+    for e in walk(dir.path(), 4) {
+        pastas.push(e.strip_prefix(dir.path()).unwrap().display().to_string());
+    }
+    eprintln!("pastas do Dolphin: {}", pastas.join(" · "));
     let estado = n.salvar_estado().map(|e| e.len()).unwrap_or(0);
     eprintln!(
         "120 quadros: {ms:.1} ms por quadro, {novos} imagens, quadro {}x{}, estado {} MB",
@@ -133,4 +139,21 @@ fn dolphin_roda_um_jogo_de_verdade() {
     }
     let estado = n.salvar_estado().map(|e| e.len()).unwrap_or(0);
     eprintln!("estado {} MB", estado >> 20);
+}
+
+/// As pastas debaixo de `d`, até `fundo` níveis.
+fn walk(d: &Path, fundo: u32) -> Vec<PathBuf> {
+    let mut r = vec![];
+    if fundo == 0 {
+        return r;
+    }
+    for e in std::fs::read_dir(d).into_iter().flatten().flatten() {
+        let p = e.path();
+        if p.is_dir() {
+            r.push(p.clone());
+            r.extend(walk(&p, fundo - 1));
+        }
+    }
+    r.sort();
+    r
 }

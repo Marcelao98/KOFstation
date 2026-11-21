@@ -92,6 +92,26 @@ impl Nativos {
         for d in [&sistema, &saves] {
             std::fs::create_dir_all(d).map_err(|e| KofError::de_io(d.display(), e))?;
         }
+        // W.3: os arquivos de sistema do Dolphin (ajustes por jogo, fontes, shaders) vão uma vez pra <sistema>/dolphin-emu;
+        // vêm no dolphin-sys.zip ao lado do núcleo. Sem eles o jogo abre, mas sem as correções por jogo.
+        if pasta == "dolphin" {
+            let marca = sistema.join("dolphin-emu").join(".sys-pronto");
+            let zip = nucleo.with_file_name("dolphin-sys.zip");
+            if !marca.is_file() && zip.is_file() {
+                let n = kof_files::zip::extrair_pasta(&zip, &sistema.join("dolphin-emu.novo"))?;
+                let alvo = sistema.join("dolphin-emu");
+                let novo = sistema.join("dolphin-emu.novo").join("dolphin-emu");
+                if alvo.exists() {
+                    std::fs::remove_dir_all(&alvo).map_err(|e| KofError::de_io(alvo.display(), e))?;
+                }
+                std::fs::rename(&novo, &alvo).map_err(|e| KofError::de_io(alvo.display(), e))?;
+                let _ = std::fs::remove_dir_all(sistema.join("dolphin-emu.novo")); // só sobrou a casca vazia
+                std::fs::write(&marca, b"").map_err(|e| KofError::de_io(marca.display(), e))?;
+                tracing::info!(arquivos = n, "arquivos de sistema do Dolphin no lugar");
+            } else if !zip.is_file() {
+                tracing::warn!("sem o dolphin-sys.zip ao lado do núcleo: o Dolphin roda sem os ajustes por jogo");
+            }
+        }
         // o PCSX2 procura a BIOS em <sistema>/pcsx2/bios (o nome vai na opção pcsx2_bios)
         let pasta_bios = if a.sistema == "ps2" {
             sistema.join("pcsx2").join("bios")
