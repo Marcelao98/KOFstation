@@ -6,6 +6,8 @@
 // PS2: além das curadas, TODAS as outras que o núcleo declara (opcoes-lrps2.ts, gerado do cabeçalho do núcleo), em
 // português quando opcoes-lrps2-pt.ts traduz, no Avançado: nada escondido. Fixas pelo app (fora do catálogo, a tela
 // diz por quê): `pcsx2_bios` e `pcsx2_renderer` (FIXAS_PELO_APP).
+import { OPCOES_DOLPHIN } from './opcoes-dolphin';
+import { TRADUCAO_DOLPHIN } from './opcoes-dolphin-pt';
 import { OPCOES_LRPS2, type OpcaoDeclarada } from './opcoes-lrps2';
 import { TRADUCAO_LRPS2, type TraducaoDeOpcao } from './opcoes-lrps2-pt';
 import { GB, GBA, GENPLUS, N64, NES, SNES } from './opcoes-nucleo-wasm';
@@ -585,6 +587,18 @@ export const FIXAS_PELO_APP: Readonly<Record<string, { nome: string; motivo: str
     nome: 'BIOS',
     motivo: 'o app usa a BIOS que você guardou em Sistema → BIOS (sem ela, a do PCSX)',
   },
+  dolphin_renderer: {
+    nome: 'Renderizador',
+    motivo: 'o app desenha com OpenGL pela placa (o único que funciona com a imagem levada pra janela do app)',
+  },
+  dolphin_libretro_vfs_enabled: {
+    nome: 'Sistema de arquivos do libretro',
+    motivo: 'o processo do jogo lê o disco direto do disco',
+  },
+  dolphin_save_load_settings: {
+    nome: 'Configurações salvas pelo Dolphin',
+    motivo: 'quem guarda as opções é o app (perfis, console e jogo)',
+  },
   pcsx_rearmed_memcard1: {
     nome: 'Cartão de memória 1',
     motivo: 'é o cartão que o app guarda como o save do jogo (e leva no backup .kofsave)',
@@ -647,8 +661,162 @@ const PS2: OpcaoDeNucleo[] = [
   ).map((d) => opcaoDeclarada(d)),
 ];
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Wii e GameCube · Dolphin do libretro (dolphin-emu 2609.0.168+0863ee3700, tarefa W.5). ⚖ Equilibrado = o padrão do
+// núcleo; as do controle (ponteiro no mouse, Wiimote com Nunchuk) e o motor JIT64 são o jeito do app nos quatro perfis.
+// O que mais pesa no Dolphin: shader na 1ª vez (engasgo clássico) e o processador (dual core).
+
+const DOLPHIN_CURADO: OpcaoDeNucleo[] = [
+  {
+    chave: 'dolphin_efb_scale',
+    nome: 'Resolução interna',
+    dica: 'Quantas vezes a resolução original o jogo desenha; mais nítido, mas pesa muito na placa de vídeo.',
+    grupo: 'graficos',
+    valores: Array.from({ length: 12 }, (_, i) => v(String(i + 1), i ? `${i + 1}x` : 'Original (1x)')),
+    padrao: '1',
+    naHora: true,
+    perfis: perfis('1', '1', '1', '2'),
+  },
+  {
+    chave: 'dolphin_shader_compilation_mode',
+    nome: 'Shaders (o engasgo da 1ª vez)',
+    dica: 'O Dolphin monta um shader cada vez que vê um efeito novo, e isso dá um tranco. Com os ubershaders o jogo não para, mas pesa mais na placa.',
+    grupo: 'graficos',
+    valores: [
+      v('0', 'Monta e espera (padrão)'),
+      v('1', 'Ubershaders, espera'),
+      v('2', 'Ubershaders sem esperar'),
+      v('3', 'Não desenha até montar'),
+    ],
+    padrao: '0',
+    naHora: true,
+    perfis: perfis('2', '0', '0', '2'),
+  },
+  {
+    chave: 'dolphin_wait_for_shaders',
+    nome: 'Esperar os shaders ao abrir',
+    dica: 'Monta os shaders já conhecidos antes de começar: abre mais devagar e engasga menos depois.',
+    grupo: 'graficos',
+    valores: simNao(),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('disabled', 'disabled', 'disabled', 'enabled'),
+  },
+  {
+    chave: 'dolphin_max_anisotropy',
+    nome: 'Filtro anisotrópico',
+    dica: 'Texturas do chão e das paredes nítidas de longe; pesa um pouco na placa.',
+    grupo: 'graficos',
+    valores: [v('0', '1x (desligado)'), v('1', '2x'), v('2', '4x'), v('3', '8x'), v('4', '16x')],
+    padrao: '0',
+    naHora: true,
+    perfis: perfis('0', '0', '0', '2'),
+  },
+  {
+    chave: 'dolphin_main_cpu_thread',
+    nome: 'Dois núcleos (dual core)',
+    dica: 'O Dolphin usa uma linha pro processador do console e outra pro vídeo: bem mais rápido, mas alguns jogos travam ou piscam.',
+    grupo: 'emulacao',
+    valores: simNao(),
+    padrao: 'enabled',
+    naHora: false,
+    perfis: perfis('enabled', 'enabled', 'disabled', 'enabled'),
+    aviso: 'desligado é mais fiel e bem mais pesado no processador',
+  },
+  {
+    chave: 'dolphin_sync_gpu',
+    nome: 'Sincronizar o vídeo com o processador',
+    dica: 'Com dois núcleos, mantém o vídeo no passo do processador: conserta alguns jogos e pesa.',
+    grupo: 'emulacao',
+    valores: simNao(),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('disabled', 'disabled', 'enabled', 'disabled'),
+  },
+  {
+    chave: 'dolphin_main_mmu',
+    nome: 'MMU (memória completa)',
+    dica: 'Emula a memória do console por inteiro; precisa em poucos jogos e pesa.',
+    grupo: 'emulacao',
+    valores: simNao(),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('disabled', 'disabled', 'enabled', 'disabled'),
+  },
+  {
+    chave: 'dolphin_cpu_clock_rate',
+    nome: 'Velocidade do processador',
+    dica: 'Abaixo de 1,00 alivia jogos pesados (podem ficar lentos); acima tira lentidão que o console já tinha.',
+    grupo: 'emulacao',
+    valores: OPCOES_DOLPHIN.find((d) => d.chave === 'dolphin_cpu_clock_rate')?.valores.map((x) =>
+      v(x.valor, x.valor.replace('.', ',')),
+    ) ?? [v('1.00', '1,00')],
+    padrao: '1.00',
+    naHora: true,
+    perfis: igual('1.00'),
+    avancada: true,
+  },
+  {
+    chave: 'dolphin_fast_disc_speed',
+    nome: 'Disco rápido',
+    dica: 'Lê o disco mais rápido que o console: telas de carregar mais curtas.',
+    grupo: 'emulacao',
+    valores: simNao(),
+    padrao: 'disabled',
+    naHora: false,
+    perfis: perfis('enabled', 'disabled', 'disabled', 'disabled'),
+    aviso: 'alguns jogos contam com o tempo do disco e podem travar',
+  },
+  {
+    chave: 'dolphin_cpu_core',
+    nome: 'Motor do processador',
+    dica: 'JIT64 é o rápido; o interpretador é só pra testar.',
+    grupo: 'emulacao',
+    valores: [v('1', 'JIT64 (rápido)'), v('0', 'Interpretador (lento)'), v('5', 'Interpretador com cache')],
+    padrao: '1',
+    naHora: false,
+    perfis: igual('1'),
+    avancada: true,
+  },
+  {
+    chave: 'dolphin_ir_mode',
+    nome: 'Ponteiro do Wiimote',
+    dica: 'De onde vem a mira do Wii: o mouse sobre a imagem (o jeito do app) ou o analógico direito do controle.',
+    grupo: 'controle',
+    valores: [v('2', 'Mouse'), v('1', 'Analógico direito (absoluto)'), v('0', 'Analógico direito (relativo)')],
+    padrao: '1',
+    naHora: false,
+    perfis: igual('2'),
+  },
+  {
+    chave: 'dolphin_wiimote_default_device',
+    nome: 'Controle do Wii',
+    dica: 'O Wiimote com o Nunchuk serve na maioria; alguns jogos pedem o Wiimote de lado ou o Classic (escolha por jogo).',
+    grupo: 'controle',
+    valores: (OPCOES_DOLPHIN.find((d) => d.chave === 'dolphin_wiimote_default_device')?.valores ?? []).map((x) =>
+      v(x.valor, TRADUCAO_DOLPHIN.dolphin_wiimote_default_device?.valores?.[x.valor] ?? x.valor),
+    ),
+    padrao: 'frontend',
+    naHora: false,
+    perfis: igual('nunchuk'),
+  },
+];
+
+const DOLPHIN: OpcaoDeNucleo[] = [
+  ...DOLPHIN_CURADO,
+  ...OPCOES_DOLPHIN.filter(
+    (d) =>
+      !FIXAS_PELO_APP[d.chave] &&
+      d.valores.length > 1 &&
+      !/^dolphin_(log_|debug_|dsu_)/.test(d.chave) &&
+      !DOLPHIN_CURADO.some((c) => c.chave === d.chave),
+  ).map((d) => opcaoDeclarada(d, TRADUCAO_DOLPHIN[d.chave]?.grupo, TRADUCAO_DOLPHIN)),
+];
+
 export const OPCOES_DE_NUCLEO: Partial<Record<SistemaId, OpcaoDeNucleo[]>> = {
   ps2: PS2,
+  wii: DOLPHIN,
+  gc: DOLPHIN,
   ps1: PS1,
   // núcleos em WebAssembly (opcoes-nucleo-wasm.ts)
   n64: N64,

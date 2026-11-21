@@ -181,6 +181,33 @@ fn catalogo_bate_com_o_que_os_nucleos_declaram() {
         }
         _ => eprintln!("aviso: sem o LRPS2 ou sem o genisoimage; PS2 não conferido"),
     }
+    // Wii/GameCube (o Dolphin, W.5): um .dol mínimo do GameCube (laço parado) basta pro núcleo declarar as opções
+    if let Some(l) = lib("dolphin_libretro.so") {
+        let mut dol = vec![0u8; 0x120];
+        for (o, x) in [
+            (0x00, 0x100u32),
+            (0x48, 0x8000_3100),
+            (0x90, 0x20),
+            (0xE0, 0x8000_3100),
+            (0x100, 0x4800_0000),
+        ] {
+            dol[o..o + 4].copy_from_slice(&x.to_be_bytes());
+        }
+        let arq = d.path().join("laco.dol");
+        std::fs::write(&arq, dol).unwrap();
+        jobs.push((
+            "wii",
+            Abertura {
+                nucleo: l,
+                jogo: Some(arq),
+                sistema: d.path().join("dolphin"),
+                saves: d.path().join("dolphin-saves"),
+                ..Default::default()
+            },
+        ));
+    } else {
+        eprintln!("aviso: sem o Dolphin (rode o pnpm nucleos); Wii não conferido");
+    }
     let mut erros = vec![];
     for (sistema, a) in jobs {
         let n = match Nucleo::carregar(&a) {

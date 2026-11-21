@@ -1766,6 +1766,3754 @@
       }
     }
   ],
+  "wii": [
+    {
+      "chave": "dolphin_efb_scale",
+      "padrao": "1",
+      "naHora": true,
+      "valores": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_shader_compilation_mode",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "perfis": {
+        "rapido": "2",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_wait_for_shaders",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_max_anisotropy",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_main_cpu_thread",
+      "padrao": "enabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "disabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_sync_gpu",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "enabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_main_mmu",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "enabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cpu_clock_rate",
+      "padrao": "1.00",
+      "naHora": true,
+      "valores": [
+        "1.00",
+        "0.05",
+        "0.10",
+        "0.20",
+        "0.30",
+        "0.40",
+        "0.50",
+        "0.60",
+        "0.70",
+        "0.80",
+        "0.90",
+        "1.50",
+        "2.00",
+        "2.50",
+        "3.00"
+      ],
+      "perfis": {
+        "rapido": "1.00",
+        "equilibrado": "1.00",
+        "fiel": "1.00",
+        "bonito": "1.00"
+      }
+    },
+    {
+      "chave": "dolphin_fast_disc_speed",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cpu_core",
+      "padrao": "1",
+      "naHora": false,
+      "valores": [
+        "1",
+        "0",
+        "5"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "1"
+      }
+    },
+    {
+      "chave": "dolphin_ir_mode",
+      "padrao": "1",
+      "naHora": false,
+      "valores": [
+        "2",
+        "1",
+        "0"
+      ],
+      "perfis": {
+        "rapido": "2",
+        "equilibrado": "2",
+        "fiel": "2",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_wiimote_default_device",
+      "padrao": "frontend",
+      "naHora": false,
+      "valores": [
+        "frontend",
+        "upright",
+        "sideways",
+        "nunchuk",
+        "classic",
+        "classic_pro",
+        "motionplus",
+        "motionplus_sideways",
+        "motionplus_nunchuk",
+        "motionplus_classic",
+        "motionplus_classic_pro",
+        "real",
+        "gamecube"
+      ],
+      "perfis": {
+        "rapido": "nunchuk",
+        "equilibrado": "nunchuk",
+        "fiel": "nunchuk",
+        "bonito": "nunchuk"
+      }
+    },
+    {
+      "chave": "dolphin_alt_gc_ports_on_wii",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_anti_aliasing",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_aspect_ratio",
+      "padrao": "3",
+      "naHora": true,
+      "valores": [
+        "3",
+        "0",
+        "1",
+        "2",
+        "4",
+        "5",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "3",
+        "equilibrado": "3",
+        "fiel": "3",
+        "bonito": "3"
+      }
+    },
+    {
+      "chave": "dolphin_bbox_enabled",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_bluetooth_passthrough",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cache_custom_textures",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_call_back_audio_method",
+      "padrao": "1",
+      "naHora": true,
+      "valores": [
+        "1",
+        "0",
+        "2"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "1"
+      }
+    },
+    {
+      "chave": "dolphin_cheats_enabled",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cheats_import",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_crop_overscan",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_default_mouse_bindings_enabled",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_defer_efb_copies",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_disable_copy_filter",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_disable_fog",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_disc_based_games_boot_to_wii_menu",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_dsp_hle",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_dsp_jit",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_early_presentation",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_early_xfb_output",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_access_defer_invalidation",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_access_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_access_tile_size",
+      "padrao": "64",
+      "naHora": true,
+      "valores": [
+        "64",
+        "1",
+        "4",
+        "8",
+        "16",
+        "32"
+      ],
+      "perfis": {
+        "rapido": "64",
+        "equilibrado": "64",
+        "fiel": "64",
+        "bonito": "64"
+      }
+    },
+    {
+      "chave": "dolphin_efb_emulate_format_changes",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_scaled_copy",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_to_texture",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_to_vram",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_emulation_speed",
+      "padrao": "0.0",
+      "naHora": true,
+      "valores": [
+        "0.0",
+        "1.0"
+      ],
+      "perfis": {
+        "rapido": "0.0",
+        "equilibrado": "0.0",
+        "fiel": "0.0",
+        "bonito": "0.0"
+      }
+    },
+    {
+      "chave": "dolphin_enable_gamecube_mic",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_enable_rumble",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_enhance_hdr_output",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_enhance_output_resampling",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_fast_depth_calculation",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_fast_texture_sampling",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_fastmem",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_fastmem_arena",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_force_progressive",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_force_texture_filtering_mode",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_force_true_color",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_gc_sp1",
+      "padrao": "255",
+      "naHora": true,
+      "valores": [
+        "255",
+        "0",
+        "5",
+        "10",
+        "11",
+        "12",
+        "14",
+        "13",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "255",
+        "equilibrado": "255",
+        "fiel": "255",
+        "bonito": "255"
+      }
+    },
+    {
+      "chave": "dolphin_gpu_texture_decoding",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_hotkey_activate_microphone",
+      "padrao": "Disabled",
+      "naHora": true,
+      "valores": [
+        "Disabled",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "Disabled",
+        "equilibrado": "Disabled",
+        "fiel": "Disabled",
+        "bonito": "Disabled"
+      }
+    },
+    {
+      "chave": "dolphin_hotkey_sideways_toggle",
+      "padrao": "L3",
+      "naHora": true,
+      "valores": [
+        "L3",
+        "Disabled",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "L3",
+        "equilibrado": "L3",
+        "fiel": "L3",
+        "bonito": "L3"
+      }
+    },
+    {
+      "chave": "dolphin_hotkey_upright_toggle",
+      "padrao": "Disabled",
+      "naHora": true,
+      "valores": [
+        "Disabled",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "Disabled",
+        "equilibrado": "Disabled",
+        "fiel": "Disabled",
+        "bonito": "Disabled"
+      }
+    },
+    {
+      "chave": "dolphin_immediate_xfb",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_ir_deadzone",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_ir_modifier",
+      "padrao": "None",
+      "naHora": true,
+      "valores": [
+        "None",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "None",
+        "equilibrado": "None",
+        "fiel": "None",
+        "bonito": "None"
+      }
+    },
+    {
+      "chave": "dolphin_ir_offset",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "-50",
+        "-49",
+        "-48",
+        "-47",
+        "-46",
+        "-45",
+        "-44",
+        "-43",
+        "-42",
+        "-41",
+        "-40",
+        "-39",
+        "-38",
+        "-37",
+        "-36",
+        "-35",
+        "-34",
+        "-33",
+        "-32",
+        "-31",
+        "-30",
+        "-29",
+        "-28",
+        "-27",
+        "-26",
+        "-25",
+        "-24",
+        "-23",
+        "-22",
+        "-21",
+        "-20",
+        "-19",
+        "-18",
+        "-17",
+        "-16",
+        "-15",
+        "-14",
+        "-13",
+        "-12",
+        "-11",
+        "-10",
+        "-9",
+        "-8",
+        "-7",
+        "-6",
+        "-5",
+        "-4",
+        "-3",
+        "-2",
+        "-1",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_ir_passthrough",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_ir_pitch",
+      "padrao": "25",
+      "naHora": true,
+      "valores": [
+        "25",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "perfis": {
+        "rapido": "25",
+        "equilibrado": "25",
+        "fiel": "25",
+        "bonito": "25"
+      }
+    },
+    {
+      "chave": "dolphin_ir_yaw",
+      "padrao": "25",
+      "naHora": true,
+      "valores": [
+        "25",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "perfis": {
+        "rapido": "25",
+        "equilibrado": "25",
+        "fiel": "25",
+        "bonito": "25"
+      }
+    },
+    {
+      "chave": "dolphin_language",
+      "padrao": "1",
+      "naHora": true,
+      "valores": [
+        "1",
+        "0",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "1"
+      }
+    },
+    {
+      "chave": "dolphin_load_custom_textures",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_main_accurate_cpu_cache",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_main_load_game_into_memory",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_mipmap_detection",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_mods_enabled",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_osd_enabled",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_pal60",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_per_queries_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_pixel_lighting",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_precision_frame_timing",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_progressive_scan",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_rush_presentation",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_sensor_bar_position",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_skip_dupe_frames",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_skip_gc_bios",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_swing_angle",
+      "padrao": "90",
+      "naHora": true,
+      "valores": [
+        "90",
+        "1",
+        "5",
+        "10",
+        "15",
+        "20",
+        "25",
+        "30",
+        "35",
+        "40",
+        "45",
+        "50",
+        "55",
+        "60",
+        "65",
+        "70",
+        "75",
+        "80",
+        "85",
+        "100",
+        "110",
+        "120",
+        "130",
+        "140",
+        "150",
+        "160",
+        "170",
+        "180"
+      ],
+      "perfis": {
+        "rapido": "90",
+        "equilibrado": "90",
+        "fiel": "90",
+        "bonito": "90"
+      }
+    },
+    {
+      "chave": "dolphin_swing_modifier",
+      "padrao": "Disabled",
+      "naHora": true,
+      "valores": [
+        "Disabled",
+        "None",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "Disabled",
+        "equilibrado": "Disabled",
+        "fiel": "Disabled",
+        "bonito": "Disabled"
+      }
+    },
+    {
+      "chave": "dolphin_texture_cache_accuracy",
+      "padrao": "128",
+      "naHora": true,
+      "valores": [
+        "128",
+        "512",
+        "0"
+      ],
+      "perfis": {
+        "rapido": "128",
+        "equilibrado": "128",
+        "fiel": "128",
+        "bonito": "128"
+      }
+    },
+    {
+      "chave": "dolphin_vertex_rounding",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_vi_skip",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_vr_mode",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "stereo",
+        "immersive"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_widescreen",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_widescreen_hack",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wii_logi_microphone_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wiimote_continuous_scanning",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wiispeak_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wiispeak_muted",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_xfb_to_texture_enable",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    }
+  ],
+  "gc": [
+    {
+      "chave": "dolphin_efb_scale",
+      "padrao": "1",
+      "naHora": true,
+      "valores": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_shader_compilation_mode",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "perfis": {
+        "rapido": "2",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_wait_for_shaders",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_max_anisotropy",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_main_cpu_thread",
+      "padrao": "enabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "disabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_sync_gpu",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "enabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_main_mmu",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "enabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cpu_clock_rate",
+      "padrao": "1.00",
+      "naHora": true,
+      "valores": [
+        "1.00",
+        "0.05",
+        "0.10",
+        "0.20",
+        "0.30",
+        "0.40",
+        "0.50",
+        "0.60",
+        "0.70",
+        "0.80",
+        "0.90",
+        "1.50",
+        "2.00",
+        "2.50",
+        "3.00"
+      ],
+      "perfis": {
+        "rapido": "1.00",
+        "equilibrado": "1.00",
+        "fiel": "1.00",
+        "bonito": "1.00"
+      }
+    },
+    {
+      "chave": "dolphin_fast_disc_speed",
+      "padrao": "disabled",
+      "naHora": false,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cpu_core",
+      "padrao": "1",
+      "naHora": false,
+      "valores": [
+        "1",
+        "0",
+        "5"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "1"
+      }
+    },
+    {
+      "chave": "dolphin_ir_mode",
+      "padrao": "1",
+      "naHora": false,
+      "valores": [
+        "2",
+        "1",
+        "0"
+      ],
+      "perfis": {
+        "rapido": "2",
+        "equilibrado": "2",
+        "fiel": "2",
+        "bonito": "2"
+      }
+    },
+    {
+      "chave": "dolphin_wiimote_default_device",
+      "padrao": "frontend",
+      "naHora": false,
+      "valores": [
+        "frontend",
+        "upright",
+        "sideways",
+        "nunchuk",
+        "classic",
+        "classic_pro",
+        "motionplus",
+        "motionplus_sideways",
+        "motionplus_nunchuk",
+        "motionplus_classic",
+        "motionplus_classic_pro",
+        "real",
+        "gamecube"
+      ],
+      "perfis": {
+        "rapido": "nunchuk",
+        "equilibrado": "nunchuk",
+        "fiel": "nunchuk",
+        "bonito": "nunchuk"
+      }
+    },
+    {
+      "chave": "dolphin_alt_gc_ports_on_wii",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_anti_aliasing",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_aspect_ratio",
+      "padrao": "3",
+      "naHora": true,
+      "valores": [
+        "3",
+        "0",
+        "1",
+        "2",
+        "4",
+        "5",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "3",
+        "equilibrado": "3",
+        "fiel": "3",
+        "bonito": "3"
+      }
+    },
+    {
+      "chave": "dolphin_bbox_enabled",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_bluetooth_passthrough",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cache_custom_textures",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_call_back_audio_method",
+      "padrao": "1",
+      "naHora": true,
+      "valores": [
+        "1",
+        "0",
+        "2"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "1"
+      }
+    },
+    {
+      "chave": "dolphin_cheats_enabled",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_cheats_import",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_crop_overscan",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_default_mouse_bindings_enabled",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_defer_efb_copies",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_disable_copy_filter",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_disable_fog",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_disc_based_games_boot_to_wii_menu",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_dsp_hle",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_dsp_jit",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_early_presentation",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_early_xfb_output",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_access_defer_invalidation",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_access_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_access_tile_size",
+      "padrao": "64",
+      "naHora": true,
+      "valores": [
+        "64",
+        "1",
+        "4",
+        "8",
+        "16",
+        "32"
+      ],
+      "perfis": {
+        "rapido": "64",
+        "equilibrado": "64",
+        "fiel": "64",
+        "bonito": "64"
+      }
+    },
+    {
+      "chave": "dolphin_efb_emulate_format_changes",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_scaled_copy",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_to_texture",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_efb_to_vram",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_emulation_speed",
+      "padrao": "0.0",
+      "naHora": true,
+      "valores": [
+        "0.0",
+        "1.0"
+      ],
+      "perfis": {
+        "rapido": "0.0",
+        "equilibrado": "0.0",
+        "fiel": "0.0",
+        "bonito": "0.0"
+      }
+    },
+    {
+      "chave": "dolphin_enable_gamecube_mic",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_enable_rumble",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_enhance_hdr_output",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_enhance_output_resampling",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_fast_depth_calculation",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_fast_texture_sampling",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_fastmem",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_fastmem_arena",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_force_progressive",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_force_texture_filtering_mode",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_force_true_color",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_gc_sp1",
+      "padrao": "255",
+      "naHora": true,
+      "valores": [
+        "255",
+        "0",
+        "5",
+        "10",
+        "11",
+        "12",
+        "14",
+        "13",
+        "6"
+      ],
+      "perfis": {
+        "rapido": "255",
+        "equilibrado": "255",
+        "fiel": "255",
+        "bonito": "255"
+      }
+    },
+    {
+      "chave": "dolphin_gpu_texture_decoding",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_hotkey_activate_microphone",
+      "padrao": "Disabled",
+      "naHora": true,
+      "valores": [
+        "Disabled",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "Disabled",
+        "equilibrado": "Disabled",
+        "fiel": "Disabled",
+        "bonito": "Disabled"
+      }
+    },
+    {
+      "chave": "dolphin_hotkey_sideways_toggle",
+      "padrao": "L3",
+      "naHora": true,
+      "valores": [
+        "L3",
+        "Disabled",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "L3",
+        "equilibrado": "L3",
+        "fiel": "L3",
+        "bonito": "L3"
+      }
+    },
+    {
+      "chave": "dolphin_hotkey_upright_toggle",
+      "padrao": "Disabled",
+      "naHora": true,
+      "valores": [
+        "Disabled",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "Disabled",
+        "equilibrado": "Disabled",
+        "fiel": "Disabled",
+        "bonito": "Disabled"
+      }
+    },
+    {
+      "chave": "dolphin_immediate_xfb",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_ir_deadzone",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_ir_modifier",
+      "padrao": "None",
+      "naHora": true,
+      "valores": [
+        "None",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "None",
+        "equilibrado": "None",
+        "fiel": "None",
+        "bonito": "None"
+      }
+    },
+    {
+      "chave": "dolphin_ir_offset",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "-50",
+        "-49",
+        "-48",
+        "-47",
+        "-46",
+        "-45",
+        "-44",
+        "-43",
+        "-42",
+        "-41",
+        "-40",
+        "-39",
+        "-38",
+        "-37",
+        "-36",
+        "-35",
+        "-34",
+        "-33",
+        "-32",
+        "-31",
+        "-30",
+        "-29",
+        "-28",
+        "-27",
+        "-26",
+        "-25",
+        "-24",
+        "-23",
+        "-22",
+        "-21",
+        "-20",
+        "-19",
+        "-18",
+        "-17",
+        "-16",
+        "-15",
+        "-14",
+        "-13",
+        "-12",
+        "-11",
+        "-10",
+        "-9",
+        "-8",
+        "-7",
+        "-6",
+        "-5",
+        "-4",
+        "-3",
+        "-2",
+        "-1",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_ir_passthrough",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_ir_pitch",
+      "padrao": "25",
+      "naHora": true,
+      "valores": [
+        "25",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "perfis": {
+        "rapido": "25",
+        "equilibrado": "25",
+        "fiel": "25",
+        "bonito": "25"
+      }
+    },
+    {
+      "chave": "dolphin_ir_yaw",
+      "padrao": "25",
+      "naHora": true,
+      "valores": [
+        "25",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "perfis": {
+        "rapido": "25",
+        "equilibrado": "25",
+        "fiel": "25",
+        "bonito": "25"
+      }
+    },
+    {
+      "chave": "dolphin_language",
+      "padrao": "1",
+      "naHora": true,
+      "valores": [
+        "1",
+        "0",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "perfis": {
+        "rapido": "1",
+        "equilibrado": "1",
+        "fiel": "1",
+        "bonito": "1"
+      }
+    },
+    {
+      "chave": "dolphin_load_custom_textures",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_main_accurate_cpu_cache",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_main_load_game_into_memory",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_mipmap_detection",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_mods_enabled",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_osd_enabled",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_pal60",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_per_queries_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_pixel_lighting",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_precision_frame_timing",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_progressive_scan",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_rush_presentation",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_sensor_bar_position",
+      "padrao": "0",
+      "naHora": true,
+      "valores": [
+        "0",
+        "1"
+      ],
+      "perfis": {
+        "rapido": "0",
+        "equilibrado": "0",
+        "fiel": "0",
+        "bonito": "0"
+      }
+    },
+    {
+      "chave": "dolphin_skip_dupe_frames",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_skip_gc_bios",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_swing_angle",
+      "padrao": "90",
+      "naHora": true,
+      "valores": [
+        "90",
+        "1",
+        "5",
+        "10",
+        "15",
+        "20",
+        "25",
+        "30",
+        "35",
+        "40",
+        "45",
+        "50",
+        "55",
+        "60",
+        "65",
+        "70",
+        "75",
+        "80",
+        "85",
+        "100",
+        "110",
+        "120",
+        "130",
+        "140",
+        "150",
+        "160",
+        "170",
+        "180"
+      ],
+      "perfis": {
+        "rapido": "90",
+        "equilibrado": "90",
+        "fiel": "90",
+        "bonito": "90"
+      }
+    },
+    {
+      "chave": "dolphin_swing_modifier",
+      "padrao": "Disabled",
+      "naHora": true,
+      "valores": [
+        "Disabled",
+        "None",
+        "L3",
+        "R3",
+        "L1",
+        "R1",
+        "L2",
+        "R2",
+        "A",
+        "B",
+        "X",
+        "Y",
+        "Start",
+        "Select"
+      ],
+      "perfis": {
+        "rapido": "Disabled",
+        "equilibrado": "Disabled",
+        "fiel": "Disabled",
+        "bonito": "Disabled"
+      }
+    },
+    {
+      "chave": "dolphin_texture_cache_accuracy",
+      "padrao": "128",
+      "naHora": true,
+      "valores": [
+        "128",
+        "512",
+        "0"
+      ],
+      "perfis": {
+        "rapido": "128",
+        "equilibrado": "128",
+        "fiel": "128",
+        "bonito": "128"
+      }
+    },
+    {
+      "chave": "dolphin_vertex_rounding",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_vi_skip",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_vr_mode",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "stereo",
+        "immersive"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_widescreen",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_widescreen_hack",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wii_logi_microphone_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wiimote_continuous_scanning",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wiispeak_enable",
+      "padrao": "disabled",
+      "naHora": true,
+      "valores": [
+        "disabled",
+        "enabled"
+      ],
+      "perfis": {
+        "rapido": "disabled",
+        "equilibrado": "disabled",
+        "fiel": "disabled",
+        "bonito": "disabled"
+      }
+    },
+    {
+      "chave": "dolphin_wiispeak_muted",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    },
+    {
+      "chave": "dolphin_xfb_to_texture_enable",
+      "padrao": "enabled",
+      "naHora": true,
+      "valores": [
+        "enabled",
+        "disabled"
+      ],
+      "perfis": {
+        "rapido": "enabled",
+        "equilibrado": "enabled",
+        "fiel": "enabled",
+        "bonito": "enabled"
+      }
+    }
+  ],
   "ps1": [
     {
       "chave": "pcsx_rearmed_drc",
