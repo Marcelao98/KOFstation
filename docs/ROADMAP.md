@@ -67,6 +67,9 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 
 ## Divisão de tarefas
 
+> **Agora (21/11), nesta ordem: N → P → W.** O roteiro pro Claude local está em
+> [agentes/PROXIMO.md](agentes/PROXIMO.md).
+
 > Como na migração: um agente **orquestrador** (na nuvem: este roadmap, as decisões, revisar e juntar as branches,
 > JORNAL/SITUACAO, os pacotes da `teste-binarios`) e agentes com **uma tarefa cada**, descrita em
 > `docs/agentes/<letra>-<nome>.md`. Regras pra quem faz tarefa: [agentes/LEIA-ME.md](agentes/LEIA-ME.md).
@@ -79,7 +82,9 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 | **E** | [Cartão, opções completas e gráficos](agentes/E-ps2-cartao-e-opcoes.md) | local | `agente-d/ps2-liso` | F (parte 1), D (perfis) | 2, 4, 5 | partes 1–2 feitas na F; parte 3 (gráficos) adiada |
 | **R** | [Rebobinar no PS1 e N64 com a música voltando junto](agentes/R-rebobinar.md) (fase R inteira) | local | `agente-r/rebobinar` | — | R | ✅ feita 18/11 (o PS1 nativo ficou desligado a pedido dele, 19/11); ⏸ ele ouve |
 | **—** | Fases G (gravar), B (biblioteca) e o resto das fases 2–6 do PS2, feitas direto pelo Claude local sem arquivo de tarefa | local | `gravar` | — | G, B, 2–6 | ✅/⏸ ver cada fase |
-| **W** | [Wii e GameCube (Dolphin)](agentes/W-wii-gamecube.md) | local | `agente-w/wii` | — | W | **próxima** (preparada 19/11) |
+| **N** | [Rede com papéis (Núcleo, Tela, Controle), até 3 aparelhos, menu lateral tipo Switch](agentes/N-rede-papeis.md) | local | `agente-n/rede` | — | C (C.1–C.4) | **1ª** (21/11, obrigatória) |
+| **P** | [Rebobinar no PS1 liso](agentes/P-rebobinar-ps1-liso.md) | local | `agente-p/rebob-ps1` | N | R | **2ª** (21/11, obrigatória) |
+| **W** | [Wii e GameCube com o núcleo do RetroArch](agentes/W-wii-gamecube.md) | local | `agente-w/wii` | P | W | **3ª** |
 | **L** | Todos os consoles lisos (o método das fases 1–3 no PS1, N64 e WebAssembly) | local + nuvem | a definir | D | 6 | a escrever (a 6.3 já andou) |
 | **H** | Celular afinado | local (aparelho) | a definir | 0.2 | 7 | a escrever |
 | **O** | Orquestrador: revisar e juntar, pacotes, docs, fase 8 | nuvem | `claude/busy-ritchie-wrvk8h` | — | 0, 8 | contínua |
@@ -202,8 +207,8 @@ Nada decidido; cada um entra pelo mesmo caminho (manifesto com SHA-256, Linux e 
 O PS2 está "liso liso liso" pra ele no jogo pesado A; feitas as fases R (rebobinar com a música), G.1–G.2 (gravar) e
 B.1–B.4 (biblioteca com cara de console), e da parte do PS2: 2.3 (erro de memória do jogo B), 3.2 (menos RAM), 4.3
 (✨ Bonito), 4.5 (tela larga) e as opções do PS1. **Tudo isso está na branch `gravar`, ainda não na `main`.** O que
-espera ele está no "Pra você testar" do [SITUACAO.md](SITUACAO.md). A próxima é a **fase W** (Wii e GameCube, preparada pro
-Claude local), depois a **fase C** (conectividade em cenários). O guia do que o PS2 ensinou: [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md); o
+espera ele está no "Pra você testar" do [SITUACAO.md](SITUACAO.md). O plano de 21/11: **N** (rede com papéis, menu lateral
+tipo Switch) → **P** (rebobinar no PS1 liso) → **W** (Wii e GameCube), ver [agentes/PROXIMO.md](agentes/PROXIMO.md). O guia do que o PS2 ensinou: [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md); o
 diário: [PS2-LISO.md](PS2-LISO.md); o rebobinar: [REBOBINAR.md](REBOBINAR.md).
 
 ## Próximas funcionalidades (a escolher com o Marcelo, 18/11)
@@ -267,14 +272,14 @@ dia, só como projeto particular dele).
 
 | # | Passo | Entregável | Checkpoint | Estado |
 |---|---|---|---|---|
-| W.1 | Núcleo no manifesto, rodando sem janela | `dolphin_libretro` compilado de um commit fixo no `nucleos.yml` (Windows pelo buildbot copiado, se o mingw não der: D40), SHA-256 no manifesto, teste `dolphin.rs`, `SET_HW_RENDER` conferido com o `gl.rs`, tamanho do estado medido | teste Rust + números | ⬜ |
+| W.1 | Núcleo no manifesto, rodando sem janela | `dolphin_libretro` **pronto, do buildbot do libretro** (o do RetroArch), Linux e Windows, copiado pra uma Release nossa (D40), SHA-256 no manifesto, teste `dolphin.rs`, `SET_HW_RENDER` conferido com o `gl.rs`, tamanho do estado medido | teste Rust + números | ⬜ |
 | W.2 | GameCube e Wii no app | sistemas `gc`/`wii`, extensões, biblioteca, `Kof Games/Games/{gamecube,wii}`, disco lido pelo processo do jogo | unit + e2e com casca falsa | ⬜ |
 | W.3 | Saves que não se perdem | cartão do GameCube e NAND do Wii gravados ao fechar o app | teste "o arquivo mudou depois de fechar" | ⬜ |
 | W.4 | Controles | GameCube como o console; Wii com o ponteiro no mouse e o chacoalhar num botão, Nunchuk; combinado com ele antes | ⏸ ele aprova o mapeamento | ⬜ |
 | W.5 | Opções e medição | tudo o que o núcleo declara no menu, em português, 4 perfis; `medir-ps2.mjs --sistema`; `docs/WII-LISO.md` | ⏸ ele joga o jogo A 10 min liso | ⬜ |
 | W.6 | Celular como Wiimote | giroscópio = ponteiro, acelerômetro = chacoalhar, pela rede pareada | ⏸ ele joga apontando o celular | ⬜ depois |
 
-### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11)
+### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11; C.1–C.4 = tarefa N, 21/11)
 
 **O pedido:** no menu, uma configuração **multiaparelho** fácil de trocar, como o Switch (encaixa na TV, tira e vira
 portátil): quem **processa** o jogo (este PC, o celular), onde fica a **tela** (PC, TV, celular) e quem **controla**

@@ -21,6 +21,20 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-21 · Plano novo: rede com papéis, rebobinar do PS1 liso, Wii (N → P → W)
+
+**Pedido:** "redesenho da camada de rede: configurar aparelhos, no máximo 3, cada um com uma função (aparelho tela,
+aparelho núcleo, aparelho teclado), na rede local, fácil, e no menu lateral tipo Switch: obrigatório. Rebobinar no
+PS1 rodando liso: obrigatório. Depois, Wii: traz o núcleo do RetroArch e faz rodar redondo com as mesmas
+configurações do PS2." E: "salva a instrução no repositório que eu passo pro Claude local".
+**Feito:** `docs/agentes/PROXIMO.md` (a ordem e o texto pra colar), `N-rede-papeis.md` (o modelo de papéis no
+`domain`, arranjos prontos incluindo o de três aparelhos, transporte separado, ficha do aparelho, o bloco 📡 no menu
+lateral; é a fase C, C.1–C.4), `P-rebobinar-ps1-liso.md` (religar só o PS1 e achar o tranco no trecho dele, com o PS2
+medido junto), e a W ajustada: o `dolphin_libretro` **pronto do buildbot** (o do RetroArch), copiado pra uma Release
+nossa com SHA-256 (D40), em vez de compilar. ROADMAP e LEIA-ME dos agentes com N, P e W.
+**Onde parou:** o Marcelo cola o texto do `PROXIMO.md` no Claude Code local. Ainda ⏸: o PR da
+`claude/busy-ritchie-wrvk8h` pra `main`.
+
 ## 2026-11-19 · Próximo emulador: Wii e GameCube (tarefa W preparada)
 
 **Pedido:** "já podemos ir pra novos emuladores, não tem muito mais o que refinar"; "o Dolphin vem primeiro, eu quero

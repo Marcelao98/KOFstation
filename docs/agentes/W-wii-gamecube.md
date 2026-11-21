@@ -20,7 +20,10 @@ chiado; não repetir).
 - **Primeiro jogo de teste: um de Wii que usa o ponteiro do Wiimote e o "chacoalhar"** (ele diz qual na conversa; no
   repositório é o "jogo de teste Wii A").
 - **Celular como Wiimote fica pra depois** (W.6), quando o Wii já rodar com mouse/controle.
-- Ele quer o esquema completo do KOFstation (filtros, molduras, menus, opções, medição), não um atalho pra fora.
+- Ele quer o esquema completo do KOFstation (filtros, molduras, menus, opções, medição), não um atalho pra fora:
+  **"roda redondo, com as mesmas configurações e tudo o que fizemos pro PS2"** (21/11): o mesmo processo nativo,
+  OpenGL sem janela, estado fora da página, fechar com calma, opções geradas e traduzidas com os 4 perfis, medição.
+- **A rede com papéis (tarefa N) já estará pronta:** o Wii entra nos arranjos (núcleo só no PC).
 
 ## O que já se sabe (pesquisa de 19/11)
 
@@ -31,19 +34,20 @@ chiado; não repetir).
 - **Wiimote:** a opção do núcleo `dolphin_ir_mode` põe o ponteiro no **analógico direito** (relativo ou absoluto) ou no
   **mouse** (docs.libretro.com/library/dolphin). Extensões (Nunchuk, Classic) e "de lado" também são opções do núcleo:
   gerar a lista e conferir.
-- **De onde vem o arquivo:** o antigo **não** tem o Dolphin (o PS2 veio pronto dele). Caminho combinado: **compilar
-  nós mesmos de um commit fixo** no workflow `.github/workflows/nucleos.yml` (que já compila o PCSX do PS1 pra Linux e
-  Windows, via `tools/nucleos-nativos.sh`), publicar como anexo da Release `nucleos-<VERSAO>` e pôr o SHA-256 no
-  `third_party/cores/manifest.json`. Se o Windows não compilar com o mingw, **só no Windows** usar o binário do
-  buildbot do libretro de um dia fixo, copiado pra nossa Release, com o SHA-256 (anotar como decisão D40).
+- **De onde vem o arquivo (decidido 21/11: "traz o núcleo do RetroArch"):** o `dolphin_libretro` **pronto, do
+  buildbot do libretro** (o mesmo que o RetroArch baixa), Linux x86_64 e Windows x86_64, de uma data fixa. Não
+  compilar. Pra não depender do buildbot mudar: **copiar os dois arquivos pra uma Release nossa** (como os
+  `nucleos-<VERSAO>`) e pôr no `third_party/cores/manifest.json` a URL da nossa cópia + o SHA-256 + de onde e de quando
+  veio (data, URL original, versão/commit que o núcleo informa em `retro_get_system_info`). Registrar como **D40**. O
+  Dolphin é GPL-2.0+: anotar a licença e o link do código-fonte (github.com/libretro/dolphin) junto, como manda a GPL.
 - **Hardware dele:** Ryzen com vídeo integrado, 7,2 GB de RAM (com o Firefox aberto a máquina vai pra swap: medir com
   ele fechado). Rodou jogos pesados de Switch no Yuzu, então o Wii deve caber; o que pesa é o processador.
 
 ## Os passos (pare e mostre ao Marcelo ao fim de cada um)
 
 ### W.1 · O núcleo no manifesto e rodando sem janela
-1. Compilar o `dolphin_libretro` (Linux primeiro) de um commit fixo; tempo e tamanho anotados; script em
-   `tools/nucleos-nativos.sh` e o workflow; anexo na Release; manifesto com SHA-256; `pnpm nucleos` baixa e confere.
+1. Baixar o `dolphin_libretro` pronto do buildbot do libretro (Linux e Windows, uma data fixa), copiar pra uma Release
+   nossa, manifesto com SHA-256 e a origem anotada (D40); `pnpm nucleos` baixa e confere.
 2. Teste Rust `crates/kof-nativo/tests/dolphin.rs` (copiar o `lrps2.rs`): abre, roda N quadros sem janela, sem jogo de
    verdade no CI (um `.dol`/homebrew gerado pelo teste, ou o núcleo sem jogo se ele aceitar; o de verdade só com
    `KOF_JOGO`, teste ignorado no CI).
