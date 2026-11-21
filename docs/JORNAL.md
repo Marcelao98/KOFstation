@@ -21,6 +21,22 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-21 (tarde) · Tarefa N no modo automático: aparelhos com papéis e o 📡 tipo Switch
+
+**Pedido:** "faça N, P e W em modo automático, push a cada passo, deixe no topo do JORNAL o que eu tenho que conferir".
+**Feito:** branch `agente-n/rede` (a3ca013, ac3562d). Transporte separado (N.1, `app-core/transporte.ts`); ficha de
+cada aparelho pelo canal `ficha` (N.2); papéis (N.3, `stores/arranjo.ts`: tela por qualquer aparelho com o `levar` de
+sempre, canal `papel` pra virar controle); o 📡 no pé do menu lateral com os 4 arranjos grandes e chips 🧠 📺 🎮 por
+aparelho, e no ☰ do jogo (N.4); lembra por jogo/console/último (N.5). Desenho em `docs/CONECTIVIDADE.md`.
+**Decidido (modo automático):** o visual do 📡 é o da tarefa (painel que sai do menu lateral, botões grandes + chips);
+o núcleo é sempre o aparelho com o jogo aberto; a tela reaproveita o `levar` (compatível com o APK antigo); o "vire
+controle" precisa do app novo no celular. Pra mudar: `components/BlocoAparelhos.tsx` e `domain/arranjo.ts`.
+**Medido / conferido:** `pnpm check` ok; e2e novo com três páginas (`rede-papeis.spec.ts`) e os 13 e2e de rede antigos
+passando. Print do painel em `~/kof-medidas/prints/N4-aparelhos-switch.png`.
+**Onde parou:** ⏸ ele trocar os arranjos na rede de casa com um jogo rodando (C.3). Seguindo pra P.
+
+---
+
 ## 2026-11-21 · Plano novo: rede com papéis, rebobinar do PS1 liso, Wii (N → P → W)
 
 **Pedido:** "redesenho da camada de rede: configurar aparelhos, no máximo 3, cada um com uma função (aparelho tela,
