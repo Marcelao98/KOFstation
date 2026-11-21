@@ -4,11 +4,15 @@
 // do jogo vem da linha de comando e não aparece no que é impresso.
 //
 //   node tools/medir-rebob.mjs "<nome como aparece na biblioteca>" [--exe target/release/kofstation]
-//        [--jogar 3] [--voltar 2.5] [--rodadas 3]
+//        [--jogar 3] [--voltar 2.5] [--rodadas 3] [--soltar 1.5]
+//
+// Desde 21/11 (tarefa P) o app abre com os dados da pasta de medidas (KOF_MEDIDAS, padrão ~/kof-medidas/dados), nunca
+// com os de quem joga, e o rebobinar é medido em três momentos: ao apertar (o primeiro meio segundo), voltando (o
+// resto) e ao soltar (o tempo depois de largar a tecla, quando o jogo volta a andar).
 import { spawn } from 'node:child_process';
 import { chmodSync, existsSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { tmpdir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const { chromium } = createRequire(join(import.meta.dirname, '../apps/desktop/package.json'))('@playwright/test');
@@ -25,6 +29,8 @@ const exe = resolve(arg('exe', 'target/release/kofstation'));
 const jogar = Number(arg('jogar', '3'));
 const voltar = Number(arg('voltar', '2.5'));
 const rodadas = Number(arg('rodadas', '3'));
+const soltar = Number(arg('soltar', '1.5'));
+const dados = join(process.env.KOF_MEDIDAS || join(homedir(), 'kof-medidas'), 'dados');
 const PORTA = 9333;
 const navegador = ['/usr/bin/google-chrome-stable', '/usr/bin/google-chrome', '/usr/bin/chromium'].find(existsSync);
 const pasta = mkdtempSync(join(tmpdir(), 'kof-rebob-'));
@@ -95,7 +101,7 @@ function resumo(a) {
 
 async function rodada(n) {
   const app = spawn(exe, [], {
-    env: { ...process.env, KOF_NAVEGADOR: embrulho, KOF_SEM_REDE: '1' },
+    env: { ...process.env, XDG_DATA_HOME: dados, KOF_NAVEGADOR: embrulho, KOF_SEM_REDE: '1' },
     stdio: 'ignore',
     detached: true,
   });
@@ -146,7 +152,12 @@ async function rodada(n) {
             return;
           }
           const u = new Uint8Array(e.data);
-          if (u[0] === 1) w.__chegadas.push([performance.now(), new DataView(e.data).getUint32(8, true)]);
+          if (u[0] === 1) {
+            // assinatura miúda dos pixels: diz se o quadro que chegou é uma imagem nova ou repetida
+            let h = 2166136261;
+            for (let i = 64; i < u.length; i += 509) h = Math.imul(h ^ u[i], 16777619);
+            w.__chegadas.push([performance.now(), new DataView(e.data).getUint32(8, true), h >>> 0]);
+          }
         });
       };
       const send = WebSocket.prototype.send;
@@ -175,10 +186,24 @@ async function rodada(n) {
       });
     await page.keyboard.down('Backspace');
     await dormir(250); // o começo do voltar (fade do som)
-    const voltando = await page.evaluate(sonda, voltar);
+    const voltandoTudo = await page.evaluate(sonda, voltar);
     await page.keyboard.up('Backspace');
+    const soltouEm = await page.evaluate(() => performance.now());
+    // ao soltar, volta a andar e pular como no "jogando" (parado, a tela do jogo quase não muda e pareceria travada)
+    await page.keyboard.down('ArrowUp');
+    const medindoDepois = page.evaluate(sonda, soltar);
+    const fimDepois = Date.now() + soltar * 1000;
+    while (Date.now() < fimDepois) {
+      await page.keyboard.press('KeyZ', { delay: 120 });
+      await dormir(600);
+    }
+    const depois = await medindoDepois;
+    await page.keyboard.up('ArrowUp');
+    const t00 = voltandoTudo[0]?.[0] ?? 0;
+    const apertando = voltandoTudo.filter((x) => x[0] - t00 < 500);
+    const voltando = voltandoTudo.filter((x) => x[0] - t00 >= 500);
     const ch = await page.evaluate(() => window.__chegadas);
-    const t0 = voltando[0]?.[0] ?? 0;
+    const t0 = t00;
     const q = ch.filter((c) => c[1] !== 'rebob');
     const gaps = [];
     for (let i = 1; i < q.length; i++)
@@ -195,9 +220,18 @@ async function rodada(n) {
           .slice(0, 6),
       )}`,
     );
+    // os quadros que chegaram em volta do soltar: ms desde o soltar e se a imagem era nova (N) ou repetida (r)
+    const perto = q.filter((c) => c[0] > soltouEm - 150 && c[0] < soltouEm + 400);
+    console.log(
+      `  chegando ao soltar: ${perto
+        .map((c, i) => `${Math.round(c[0] - soltouEm)}${i && c[2] === perto[i - 1][2] ? 'r' : 'N'}`)
+        .join(' ')}`,
+    );
     console.log(`rodada ${n}`);
     console.log('  jogando:   ', JSON.stringify(resumo(jogando)));
+    console.log('  ao apertar: ', JSON.stringify(resumo(apertando)));
     console.log('  rebobinando:', JSON.stringify(resumo(voltando)));
+    console.log('  ao soltar:  ', JSON.stringify(resumo(depois)));
   } finally {
     await nav?.close().catch(() => {});
     try {

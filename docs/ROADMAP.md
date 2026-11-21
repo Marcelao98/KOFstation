@@ -80,7 +80,7 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 | **F** | [Jogo pesado A liso hoje](agentes/F-ps2-liso-hoje.md): experimentos curtos que apontam o culpado dos engasgos + cartão de memória | local | `agente-d/ps2-liso` | — | 2, 3 (atalho) | ✅ junta em 18/11 (`d2b1d8d`): "liso liso" |
 | **D** | [PS2 liso como o PCSX2](agentes/D-ps2-liso.md): régua de medição, tabela de diferenças, um passo por vez | local | `agente-d/ps2-liso` | F | 1, 3 | sem pressa (o PS2 já está liso pro Marcelo) |
 | **E** | [Cartão, opções completas e gráficos](agentes/E-ps2-cartao-e-opcoes.md) | local | `agente-d/ps2-liso` | F (parte 1), D (perfis) | 2, 4, 5 | partes 1–2 feitas na F; parte 3 (gráficos) adiada |
-| **R** | [Rebobinar no PS1 e N64 com a música voltando junto](agentes/R-rebobinar.md) (fase R inteira) | local | `agente-r/rebobinar` | — | R | ✅ feita 18/11 (o PS1 nativo ficou desligado a pedido dele, 19/11); ⏸ ele ouve |
+| **R** | [Rebobinar no PS1 e N64 com a música voltando junto](agentes/R-rebobinar.md) (fase R inteira) | local | `agente-r/rebobinar` | — | R | ✅ feita 18/11 (o PS1 nativo desligado 19/11, religado 21/11 pela tarefa P); ⏸ ele ouve |
 | **—** | Fases G (gravar), B (biblioteca) e o resto das fases 2–6 do PS2, feitas direto pelo Claude local sem arquivo de tarefa | local | `gravar` | — | G, B, 2–6 | ✅/⏸ ver cada fase |
 | **N** | [Rede com papéis (Núcleo, Tela, Controle), até 3 aparelhos, menu lateral tipo Switch](agentes/N-rede-papeis.md) | local | `agente-n/rede` | — | C (C.1–C.4) | **1ª** (21/11, obrigatória) |
 | **P** | [Rebobinar no PS1 liso](agentes/P-rebobinar-ps1-liso.md) | local | `agente-p/rebob-ps1` | N | R | **2ª** (21/11, obrigatória) |
@@ -233,9 +233,9 @@ soltar.
 |---|---|---|---|---|---|
 | R.1 | Contas do som | funções puras no `domain` (inverter por quadro, curva de fade, crossfade, filtro de "fita"), vetores de teste em fixture | testes amostra a amostra | local | ✅ `82020f3` |
 | R.2 | Som ao rebobinar nos consoles da página | anel com os últimos segundos de som no `worker.ts`, tocado ao contrário em sincronia com a imagem (2× como a imagem), fade ao começar, crossfade ao soltar; opção "Som ao rebobinar: 📼 fita / 🔇 mudo" | e2e: sai som rebobinando; ao soltar, o som é idêntico ao de quem carregou aquele estado; ⏸ ele ouve no SNES | local | ✅ `4ccf8c8`; ⏸ ele ouve |
-| R.3 | Rebobinar no PS1 nativo (**desligado por enquanto**, pedido dele 19/11; o PS2 nunca deveria ter ligado: ver JORNAL 19/11) | `kof-nativo/src/rebobinar.rs` (o algoritmo do `rebobinador.ts` em Rust, dentro do processo do jogo; o estado nunca passa pela página), comando liga/segura/solta | teste Rust (voltar N quadros e rodar de novo dá a mesma imagem) + medido com × sem gravar | local | ✅ `85ebed7` (foto ~1,1 ms); **desligado** desde 19/11 (`SEM_REBOBINAR` em `engine/nativo.ts`) até ele pedir de volta |
+| R.3 | Rebobinar no PS1 nativo (desligado 19/11 a 21/11; o PS2 nunca deveria ter ligado: ver JORNAL 19/11) | `kof-nativo/src/rebobinar.rs` (o algoritmo do `rebobinador.ts` em Rust, dentro do processo do jogo; o estado nunca passa pela página), comando liga/segura/solta | teste Rust (voltar N quadros e rodar de novo dá a mesma imagem) + medido com × sem gravar | local | ✅ `85ebed7` (foto ~1,1 ms); **religado 21/11** (tarefa P, medido liso); ⏸ ele rebobina no trecho que tinha tranco |
 | R.4 | Rebobinar no N64 | o mesmo, com o estado de ~16 MB (fotos mais espaçadas se a medição pedir) | idem | local | ✅ no Worker (no PC o N64 é wasm): foto a cada 6 quadros, ~12 ms cada; ⏸ ele joga |
-| R.5 | Som ao rebobinar no PS1/N64 | o anel e as contas do R.1 no `rebobinar.rs` (mesmos vetores de teste) | ⏸ ele ouve no PS1 e no N64 | local | ✅ junto com o R.3 (no PS1 desligado com ele; N64: o do Worker); ⏸ ele ouve no N64 |
+| R.5 | Som ao rebobinar no PS1/N64 | o anel e as contas do R.1 no `rebobinar.rs` (mesmos vetores de teste) | ⏸ ele ouve no PS1 e no N64 | local | ✅ junto com o R.3 (PS1 religado 21/11; N64: o do Worker); ⏸ ele ouve no PS1 e no N64 |
 
 ### Fase G · Gravar o jogo (pedido 18/11)
 

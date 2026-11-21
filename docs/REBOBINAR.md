@@ -5,10 +5,14 @@ de trás pra frente, com efeito de fita, e ao soltar continua de onde parou. Val
 página (NES, SNES, GB/GBC, GBA, Mega Drive, Master System, Game Gear, Neo Geo, N64 e o PS1 em WebAssembly) e o **PS1
 nativo**. O PS2 não rebobina (fica pra depois).
 
-> **19/11: o rebobinar do PS1 nativo está desligado** a pedido do Marcelo (`SEM_REBOBINAR` em
-> `packages/engine/src/nativo.ts`), depois que o processo nativo ligou o rebobinar também no PS2 e trouxe chiado e
-> engasgos (JORNAL de 19/11). O código e os testes continuam; o processo recusa sozinho estado maior que 24 MB
-> (`FOTO_MAXIMA` em `filho.rs`). Religar é tirar o PS1 do `SEM_REBOBINAR` e medir com o `tools/medir-rebob.mjs`.
+> **21/11: o rebobinar do PS1 nativo voltou** (tarefa P). Esteve desligado de 19/11 a 21/11 a pedido do Marcelo,
+> depois que o processo nativo ligou o rebobinar também no PS2 e trouxe chiado e engasgos. Hoje `SEM_REBOBINAR` (em
+> `packages/engine/src/nativo.ts`) só tem o PS2, um teste trava isso, e o processo recusa sozinho estado maior que
+> 24 MB (`FOTO_MAXIMA` em `filho.rs`). Medido no jogo de teste PS1 A (plataforma a 30 quadros/s) com o
+> `tools/medir-rebob.mjs`, soltando no meio da fita: ao apertar 54 imagens novas/s (maior intervalo 38 ms), voltando
+> 51/s (23 ms), ao soltar 30/s, o ritmo do jogo (41 ms). Quando a fita acaba com o botão ainda apertado (5 s de jogo
+> voltam em 2,5 s), o jogo volta a andar sozinho, igual ao WebAssembly. O PS2 medido no mesmo dia: 59,9 fps, 0 faltas
+> de som.
 
 ```mermaid
 flowchart LR

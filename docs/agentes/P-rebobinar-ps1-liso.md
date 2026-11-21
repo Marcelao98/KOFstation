@@ -43,4 +43,24 @@ REBOBINAR.md e a fase R do ROADMAP atualizados (o PS1 religado).
 
 ## Relatório
 
-*(o agente preenche: o que achou, números antes × depois (PS1 e PS2), o que mudou, comandos)*
+Feito em 21/11, no modo automático (branch `agente-p/rebob-ps1`). Sem resposta dele sobre o momento do tranco: medi
+os momentos que dá pra automatizar.
+
+- **Religado só o PS1** (`SEM_REBOBINAR = new Set(['ps2'])`); teste em `engine/nativo.test.ts` trava PS1 ligado e
+  PS2 desligado.
+- **`tools/medir-rebob.mjs`:** abre com os dados da pasta de medidas (antes usava os de quem joga), mede três
+  momentos (ao apertar, voltando, ao soltar), continua andando depois de soltar (parado, a tela quase não muda e
+  parecia travada) e mostra, quadro a quadro, se a imagem que chega em volta do soltar é nova ou repetida.
+- **Jogo de teste PS1 A** (do save automático dele, copiado pra pasta de medidas), 3 rodadas, soltando no meio da
+  fita: ao apertar 54 imagens novas/s (maior intervalo 38 ms), voltando 51/s (23 ms), ao soltar 30/s (41 ms; o jogo
+  roda a 30). **Nenhum tranco medido.**
+- **A fita acabando com o botão apertado** (5 s de jogo voltam em 2,5 s): a imagem para e o jogo volta a andar sozinho;
+  é o mesmo comportamento do WebAssembly. Primeira suspeita pro que ele sentiu, se não for o momento "depois de morrer".
+- **PS2 no mesmo dia** (`medir-ps2.mjs`, jogo A, 2 rodadas): 59,9 fps, p99 24,5–25 ms, 18–28 engasgos/min, 0 faltas
+  de som (19/11: 61/min).
+
+**Ficou de fora:** ⏸ o momento "depois de morrer" precisa de um estado salvo dele naquele trecho; ⏸ ele rebobinar e
+dizer se está liso.
+
+**Conferir:** `node tools/medir-rebob.mjs "<nome na biblioteca>" --voltar 1.5 --soltar 2` (resultados em
+`~/kof-medidas/resultados/2026-11-21-P-*.txt`).

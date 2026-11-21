@@ -50,10 +50,10 @@ class WsFalsa {
   }
 }
 
-const abrir = (eventos = {}) =>
+const abrir = (eventos = {}, sistema: 'ps1' | 'ps2' = 'ps1') =>
   JogoNativo.abrir(
     {
-      sistema: 'ps1',
+      sistema,
       porta: 1234,
       token: 'abc',
       volume: 0.5,
@@ -65,6 +65,24 @@ const abrir = (eventos = {}) =>
   );
 
 describe('JogoNativo (página ↔ processo nativo)', () => {
+  it('rebobinar: ligado no PS1 (tarefa P, 21/11) e desligado no PS2 (foto de 48 MB)', async () => {
+    for (const [sis, ligado] of [
+      ['ps1', true],
+      ['ps2', false],
+    ] as const) {
+      const j = await abrir({}, sis);
+      j.configurarRebobinar(true, 5, 6, 'fita');
+      expect(WsFalsa.ultima.comandos()).toContainEqual({
+        cmd: 'rebobinar',
+        ligado,
+        limite: 5,
+        recargaX: 6,
+        som: 'fita',
+      });
+      j.fechar();
+    }
+  });
+
   it('conecta com o token, espera o pronto e manda volume e o save', async () => {
     const j = await abrir();
     const ws = WsFalsa.ultima;

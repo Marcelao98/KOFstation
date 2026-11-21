@@ -21,6 +21,19 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-21 (tarde) · Tarefa P no modo automático: rebobinar do PS1 nativo religado e medido liso
+
+**Feito:** branch `agente-p/rebob-ps1`. `SEM_REBOBINAR` só com o PS2 (teste trava); `tools/medir-rebob.mjs` com a pasta
+de medidas, três momentos (apertar, voltando, soltar) e quadro novo/repetido em volta do soltar.
+**Medido / conferido:** jogo de teste PS1 A, soltando no meio da fita: ao apertar 54 imagens novas/s, voltando 51/s
+(maior intervalo 23 ms), ao soltar 30/s (o ritmo do jogo). PS2 no mesmo dia: 59,9 fps, 0 faltas de som, 18–28
+engasgos/min. e2e do rebobinar (5) e `pnpm check` ok.
+**Aprendido:** a 1ª medição saiu "travada" ao soltar, mas era o medidor: segurei mais que a fita (5 s de jogo voltam em
+2,5 s) e ninguém apertava nada depois. O save automático só entra se o registro do jogo tem `temAuto` (copiei o save
+dele pra pasta de medidas e marquei o registro de lá; o dele não foi tocado).
+**Onde parou:** ⏸ ele rebobinar no trecho que tinha tranco (e, se for "depois de morrer", mandar um estado). Seguindo
+pra W.
+
 ## 2026-11-21 (tarde) · Tarefa N no modo automático: aparelhos com papéis e o 📡 tipo Switch
 
 **Pedido:** "faça N, P e W em modo automático, push a cada passo, deixe no topo do JORNAL o que eu tenho que conferir".
