@@ -112,6 +112,23 @@
           "sha256": "31718abedfae144f11f9bea99a53ca15bd81fe4b8269c5df6c474e055f3152d0"
         }
       }
+    },
+    "dolphin": {
+      "nota": "Dolphin do libretro (Wii e GameCube, github.com/libretro/dolphin, GPL-2.0-or-later), dolphin-emu 2609.0.168+0863ee3700 (o que o núcleo informa). Pronto, do buildbot do libretro (o mesmo que o RetroArch baixa: nightly/<plataforma>/latest/dolphin_libretro.*.zip, Linux de 21/11/2026 07:58 GMT e Windows de 20/11/2026 08:59 GMT), copiado sem mudança pra Release nucleos-dolphin-0863ee37 (D40). Desenha com OpenGL Core, dado pelo kof-nativo",
+      "plataformas": {
+        "linux-x64": {
+          "arquivo": "dolphin_libretro.so",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-dolphin-0863ee37/dolphin_libretro-linux-x64.so",
+          "tamanho": 15966184,
+          "sha256": "4e6c023c11f22aad10195f603a21020dd66695d95f71aa25f7c31591ff2f9c45"
+        },
+        "windows-x64": {
+          "arquivo": "dolphin_libretro.dll",
+          "url": "https://github.com/Marcelao98/KOFstation/releases/download/nucleos-dolphin-0863ee37/dolphin_libretro-windows-x64.dll",
+          "tamanho": 18948540,
+          "sha256": "b8cfdc3a758c4a31a159c1aa277845e217246deec1c6f75386ff0c570890150d"
+        }
+      }
     }
   }
 }

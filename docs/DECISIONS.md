@@ -277,3 +277,15 @@ Arquitetura (ARCHITECTURE.md e D1–D16) **aprovada pelo Marcelo em 31/10/2026**
   `<dados>/cache/sobre/`, "não achou" lembrado por 30 dias. User-Agent genérico, sem nome nem contato de ninguém.
 - O **catálogo** (os jogos que a pessoa não tem) vem da base que o app já tinha (libretro-database, ~19 mil títulos
   sem N64 e PS2) e **nunca** tem link ou dica de onde baixar; o único link da ficha é o do artigo da Wikipédia.
+
+## D40. Wii e GameCube: o Dolphin pronto do buildbot do libretro, copiado pra uma Release nossa — **aceita** (Marcelo, 21/11: "traz o núcleo do RetroArch")
+- **O quê:** o `dolphin_libretro` (github.com/libretro/dolphin, GPL-2.0-or-later) **pronto**, o mesmo arquivo que o
+  RetroArch baixa (`buildbot.libretro.com/nightly/<plataforma>/latest/dolphin_libretro.*.zip`), Linux x86_64 de
+  21/11/2026 e Windows x86_64 de 20/11/2026; o núcleo informa `dolphin-emu 2609.0.168+0863ee3700`. Não compilamos.
+- **Onde fica:** copiado sem mudança pra Release `nucleos-dolphin-0863ee37` do KOFstation; o
+  `third_party/cores/manifest.json` aponta pra nossa cópia com o SHA-256 e anota a origem (URL e data). Assim o
+  `pnpm nucleos` não quebra quando o buildbot trocar o "latest".
+- **Licença:** GPL-2.0-or-later; a Release e o `THIRD_PARTY.md` levam o link do código-fonte e o commit.
+- **Como roda:** no mesmo processo nativo do PS2 (`kof-nativo`), OpenGL Core sem janela, disco lido do disco pelo
+  processo (nunca passa pela página). O estado tem ~85 MB: nasce sem rebobinar (o `FOTO_MAXIMA` de 24 MB recusa) e
+  com o estado fora da página, como o PS2.

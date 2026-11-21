@@ -16,6 +16,7 @@ lista cresce conforme cada peça entra no repositório (por enquanto nenhuma ent
 | PCSX-ReARMed | PS1 | GPL-2.0 | |
 | Mupen64Plus-Next | N64 | GPL-2.0 | |
 | LRPS2 (PCSX2 libretro) | PS2 | GPL-3.0 | |
+| Dolphin (libretro) | Wii e GameCube | GPL-2.0-or-later | pronto do buildbot do libretro, copiado sem mudança pra Release `nucleos-dolphin-0863ee37`; fonte: github.com/libretro/dolphin, commit 0863ee3700 (D40) |
 | Play! | PS2 (reserva) | BSD-2-Clause | |
 | Núcleo Kof (SNES) | SNES | **da Mel Santos; licença a definir** | fora do repositório até ela decidir |
 
