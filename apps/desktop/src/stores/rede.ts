@@ -1,7 +1,15 @@
 // 📡 Rede entre aparelhos (o `rede` do web/rede.js do antigo): o estado que a tela Aparelhos e o Início mostram, e os
 // pedidos pro serviço de rede. Liga sozinho na abertura e religa a cada 10 s se cair. Quem quiser ouvir mensagens de
 // um canal (celular como controle, Jogar no PC) usa `ouvirRede`.
-import { ligarRede, type AchadoRede, type AparelhoRede, type EventoRede, type PedidoRede } from '@kof/app-core';
+import {
+  ligarRede,
+  transporteLocal,
+  type AchadoRede,
+  type AparelhoRede,
+  type EventoRede,
+  type PedidoRede,
+  type Transporte,
+} from '@kof/app-core';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { servicos } from './servicos';
@@ -34,6 +42,16 @@ export function ouvirRede(f: (m: EventoRede) => void): () => void {
 }
 
 let mandar: (p: PedidoRede) => boolean = () => false;
+
+/** N.1: por onde os canais passam (hoje o local, o kof-net). Quem usa um canal fala com ele, não com o serviço. */
+let atual: Transporte = transporteLocal((p) => mandar(p), ouvirRede);
+export const transporte = (): Transporte => atual;
+/** Pros testes do app-core/telas: troca o transporte (devolve o anterior). */
+export function trocarTransporte(t: Transporte): Transporte {
+  const era = atual;
+  atual = t;
+  return era;
+}
 
 export const usarRede = create<EstadoRede>()((set) => ({
   ok: false,

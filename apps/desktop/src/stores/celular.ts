@@ -17,7 +17,7 @@ import { usarAvisos } from './avisos';
 import { config } from './config';
 import { vagas } from './jogadores';
 import { usarJogo } from './jogo';
-import { ouvirRede, usarRede } from './rede';
+import { transporte, usarRede } from './rede';
 
 // ---------------------------------------------------------------- pela rede
 const celRede = new Map<string, PadCelular & { quando: number }>();
@@ -36,15 +36,14 @@ export function avisarCelularJogador(so?: string) {
   for (const id of ids) {
     const i = l.findIndex((a) => a.k === 'cel:' + id);
     const dados = JSON.stringify({ jogador: (r.j[i] ?? 0) + 1, sis, nome });
-    usarRede.getState().mandar({ t: 'enviar', para: id, canal: 'pad-ok', dados });
+    transporte().enviar(id, 'pad-ok', dados);
   }
 }
 
-ouvirRede((m) => {
-  if (m.t !== 'msg' || m.canal !== 'pad') return;
-  const era = celRede.has(m.de);
-  celRede.set(m.de, { ...padDaRede(m.dados), quando: performance.now() });
-  if (!era) avisarCelularJogador(m.de);
+transporte().ouvir('pad', (de, dados) => {
+  const era = celRede.has(de);
+  celRede.set(de, { ...padDaRede(dados), quando: performance.now() });
+  if (!era) avisarCelularJogador(de);
 });
 
 // ---------------------------------------------------------------- pelo servidor do APK

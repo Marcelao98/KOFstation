@@ -11,7 +11,7 @@ import { usarAvisos } from './avisos';
 import { config } from './config';
 import { marcarConsole } from './entrada';
 import { aoQuadroNovo, ultimoQuadro, usarJogo } from './jogo';
-import { ouvirRede, usarRede } from './rede';
+import { ouvirRede, transporte, usarRede } from './rede';
 import { soltarToque, toque } from './toque';
 
 type Apk = Record<string, (...a: never[]) => unknown>;
@@ -110,8 +110,7 @@ interface Rodando {
 let m: Rodando | null = null;
 
 const avisar = (t: string, ms?: number) => usarAvisos.getState().avisar(t, ms);
-const mandarJogo = (para: string, o: unknown) =>
-  usarRede.getState().mandar({ t: 'enviar', para, canal: 'jogo', dados: JSON.stringify(o) });
+const mandarJogo = (para: string, o: unknown) => transporte().enviar(para, 'jogo', JSON.stringify(o));
 
 function esperarIce(pc: RTCPeerConnection): Promise<void> {
   if (pc.iceGatheringState === 'complete') return Promise.resolve();
@@ -179,7 +178,7 @@ function enviar() {
   }
   if (m.rede) {
     if (mudou) {
-      usarRede.getState().mandar({ t: 'enviar', para: m.rede, canal: 'pad', dados: b + ',' + e });
+      transporte().enviar(m.rede, 'pad', b + ',' + e);
       m.b = b;
       m.e = e;
       m.quando = agora;
@@ -213,12 +212,17 @@ function enviar() {
   }
 }
 
+/** Com quem o modo controle está falando agora (o núcleo), ou null. */
+export const modoControleCom = (): string | null => m?.pc ?? m?.rede ?? null;
+
 /** Os PCs pareados que estão na rede agora. */
 export const pcOnline = () => usarRede.getState().aparelhos.find((a) => a.online && a.tipo === 'pc') ?? null;
 
-export function entrarModoControle(op: { pc?: string; jogo?: Record<string, string> } = {}): void {
+export function entrarModoControle(op: { pc?: string; rede?: string; jogo?: Record<string, string> } = {}): void {
   const pcId = op.pc ?? null;
-  const pcRede = !pcId ? pcOnline() : null;
+  // N.3: o núcleo pode mandar este aparelho virar controle dele (qualquer aparelho pareado, não só o 1º PC)
+  const pedido = op.rede ? usarRede.getState().aparelhos.find((a) => a.id === op.rede && a.online) : null;
+  const pcRede = !pcId ? (pedido ?? pcOnline()) : null;
   // Jogar no PC e o controle pela rede usam a rede entre aparelhos (do backend); o servidor de endereço e senha é do APK
   if ((pcId ?? pcRede) ? !usarRede.getState().ok : !apk()?.['controleIniciar']) {
     avisar(
@@ -290,7 +294,7 @@ export function sairModoControle(): void {
   clearInterval(x.timer);
   m = null;
   soltarToque();
-  if (x.rede) usarRede.getState().mandar({ t: 'enviar', para: x.rede, canal: 'pad', dados: '0,0' }); // solta tudo no PC
+  if (x.rede) transporte().enviar(x.rede, 'pad', '0,0'); // solta tudo no PC
   if (x.pc) {
     clearTimeout(x.prazo);
     mandarJogo(x.pc, { t: 'fim' });

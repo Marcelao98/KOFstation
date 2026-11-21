@@ -13,7 +13,7 @@ import { continuar } from './auto';
 import { usarAvisos } from './avisos';
 import { padDaTransmissao } from './celular';
 import { aoQuadroNovo, ultimoQuadro, usarJogo } from './jogo';
-import { ouvirRede, usarRede } from './rede';
+import { ouvirRede, transporte, usarRede } from './rede';
 import { servicos } from './servicos';
 import { usarTelas } from './telas';
 
@@ -35,8 +35,7 @@ let t: Transmissao | null = null;
 export const usarTransmissao = create<{ ligada: boolean }>()(() => ({ ligada: false }));
 
 const ipDoAparelho = (id: string) => usarRede.getState().aparelhos.find((x) => x.id === id)?.ip;
-const mandarJogo = (para: string, o: unknown) =>
-  usarRede.getState().mandar({ t: 'enviar', para, canal: 'jogo', dados: JSON.stringify(o) });
+const mandarJogo = (para: string, o: unknown) => transporte().enviar(para, 'jogo', JSON.stringify(o));
 const avisar = (m: string, ms?: number) => usarAvisos.getState().avisar(m, ms);
 
 function esperarIce(pc: RTCPeerConnection): Promise<void> {
@@ -293,6 +292,16 @@ export function levarProCelular() {
   mandarJogo(c.id, { t: 'levar' });
   avisar('📱 mandando pro ' + c.nome + '…', 3000);
 }
+
+/** N.3: manda a imagem e o som pro aparelho `id` (qualquer um pareado, inclusive outro PC). */
+export function transmitirPara(id: string): boolean {
+  if (!usarJogo.getState().jogo) return false;
+  if (t?.de === id) return true;
+  mandarJogo(id, { t: 'levar' });
+  return true;
+}
+/** Pra quem a imagem está indo agora (ou null = fica aqui). */
+export const transmitindoPara = (): string | null => t?.de ?? null;
 
 // atalhos do celular (☰ do Jogar no PC, ou a barrinha do celular como controle pela rede)
 const ACOES_CELULAR = ['salvar-estado', 'carregar-ultimo', 'home'];
