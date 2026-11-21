@@ -4,7 +4,7 @@
 // resto que o núcleo declara): nada escondido. A busca procura em todas as seções.
 import {
   DICA_DO_PERFIL,
-  FIXAS_PELO_APP,
+  fixasDe,
   GRUPOS_DE_OPCAO,
   NOME_DO_PERFIL,
   PERFIS,
@@ -178,10 +178,10 @@ export function PainelDoConsole({ sistema, nome }: { sistema: SistemaId; nome: s
                   {linhas(resolvidas.filter((o) => o.def.grupo === atual && o.def.avancada))}
                 </>
               )}
-              {atual === 'sistema' && sistema === 'ps2' && (
+              {atual === 'sistema' && fixasDe(sistema).length > 0 && (
                 <div id="emu-fixas">
                   <h4 className="emu-mais">Fixas pelo app</h4>
-                  {Object.entries(FIXAS_PELO_APP).map(([chave, f]) => (
+                  {fixasDe(sistema).map(([chave, f]) => (
                     <p key={chave} className="emu-op" data-chave={chave}>
                       <span>{f.nome}</span>
                       <small className="dica">{f.motivo}</small>

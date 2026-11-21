@@ -605,6 +605,13 @@ export const FIXAS_PELO_APP: Readonly<Record<string, { nome: string; motivo: str
   },
 };
 
+/** As fixas de um console (pelo prefixo das chaves do núcleo dele). */
+export function fixasDe(sistema: string): [string, { nome: string; motivo: string }][] {
+  const prefixo: Record<string, string> = { ps2: 'pcsx2_', ps1: 'pcsx_rearmed_', wii: 'dolphin_', gc: 'dolphin_' };
+  const p = prefixo[sistema];
+  return p ? Object.entries(FIXAS_PELO_APP).filter(([k]) => k.startsWith(p)) : [];
+}
+
 const SIM_NAO: Record<string, string> = { enabled: 'Ligado', disabled: 'Desligado' };
 const GRUPO_DA_CATEGORIA: Record<string, GrupoDeOpcao> = {
   system: 'sistema',

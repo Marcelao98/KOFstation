@@ -72,3 +72,17 @@ test('a escolha fica guardada na configuração e volta depois de recarregar', a
   await abrirOpcoes(page, 'ps1');
   await expect(page.locator('#emu-perfil')).toHaveValue('fiel');
 });
+
+test('Wii (o Dolphin): perfis, o ponteiro no mouse, o Nunchuk e as fixas', async ({ page }) => {
+  await abrirOpcoes(page, 'wii');
+  await page.click('#emu-secoes [data-secao="graficos"]');
+  await expect(page.locator('#emuc-dolphin_efb_scale')).toHaveValue('1');
+  await page.click('#emu-perfis [data-perfil="bonito"]');
+  await expect(page.locator('#emuc-dolphin_efb_scale')).toHaveValue('2');
+  await expect(page.locator('#emuc-dolphin_shader_compilation_mode')).toHaveValue('2');
+  await page.click('#emu-secoes [data-secao="controle"]');
+  await expect(page.locator('#emuc-dolphin_ir_mode')).toHaveValue('2');
+  await expect(page.locator('#emuc-dolphin_wiimote_default_device')).toHaveValue('nunchuk');
+  await page.click('#emu-secoes [data-secao="sistema"]');
+  await expect(page.locator('#emu-fixas [data-chave="dolphin_renderer"]')).toContainText('OpenGL');
+});

@@ -94,6 +94,19 @@ test('arquivo que não é jogo, PS2 sem o núcleo nativo e .cue sem os .bin avis
     buffer: Buffer.from('ELF'),
   });
   await expect(page.locator('#aviso')).toContainText('PS2 precisa do núcleo nativo'); // o backend de teste não tem nativo
+  // Wii e GameCube (tarefa W): também só nativos
+  await page.setInputFiles('#arquivo', {
+    name: 'jogo.rvz',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.from('RVZ'),
+  });
+  await expect(page.locator('#aviso')).toContainText('Wii precisa do núcleo nativo');
+  await page.setInputFiles('#arquivo', {
+    name: 'jogo.gcz',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.from('GCZ'),
+  });
+  await expect(page.locator('#aviso')).toContainText('GameCube precisa do núcleo nativo');
   // .cue sozinho, sem os .bin que ele cita: diz o que falta
   await page.setInputFiles('#arquivo', {
     name: 'disco.cue',
