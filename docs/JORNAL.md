@@ -51,6 +51,24 @@ As três branches estão no GitHub, uma em cima da outra (N → P → W); não a
 proposta da tarefa (pra mudar: `domain/entrada.ts`, `NOMES_BOTAO`, e as opções `dolphin_*` no ⚙); o Dolphin pronto do
 buildbot, copiado pra Release `nucleos-dolphin-0863ee37` (D40), junto com os arquivos de sistema dele.
 
+---
+
+## 2026-11-21 (noite) · Tarefa W no modo automático: o Wii abre no KOFstation (sem o jogo de teste ainda)
+
+**Feito:** branch `agente-w/wii`, feita em cima da `agente-p/rebob-ps1`. W.1 núcleo na Release nossa (D40) e teste
+sem janela; W.2 `gc`/`wii` no app, só nativos; W.3 arquivos de sistema e pasta dos saves; W.4 ponteiro no mouse
+(mensagem `PONTEIRO`) e o mapeamento proposto; W.5 opções traduzidas com 4 perfis e o medidor com `--sistema`.
+Detalhes no relatório da tarefa e no `docs/WII-LISO.md`.
+**Medido / conferido:** fumaça pelo app de verdade com um `.dol` gerado (59,5 fps, 0 faltas, 351 MB); `pnpm check`,
+testes Rust (dolphin, opcoes, protocolo, zip) e os 79 e2e ok.
+**Deu errado / aprendido:** um `vite preview` que sobrou de um e2e interrompido fez dois e2e testarem o build velho
+(anotado no guia do núcleo pesado). A documentação do Dolphin estava desatualizada em dois padrões: valeu o código.
+**Onde parou:** ⏸ o jogo de teste Wii A não terminou de baixar a tempo. Falta rodar ele (teste ignorado do
+`dolphin.rs` e o `medir-ps2.mjs --sistema wii`), o teste do save ao fechar (W.3), ele aprovar os controles (W.4) e
+jogar 10 min (W.5). Os comandos estão no relatório da W.
+
+---
+
 ## 2026-11-21 (tarde) · Tarefa P no modo automático: rebobinar do PS1 nativo religado e medido liso
 
 **Feito:** branch `agente-p/rebob-ps1`. `SEM_REBOBINAR` só com o PS2 (teste trava); `tools/medir-rebob.mjs` com a pasta
@@ -63,6 +81,8 @@ engasgos/min. e2e do rebobinar (5) e `pnpm check` ok.
 dele pra pasta de medidas e marquei o registro de lá; o dele não foi tocado).
 **Onde parou:** ⏸ ele rebobinar no trecho que tinha tranco (e, se for "depois de morrer", mandar um estado). Seguindo
 pra W.
+
+---
 
 ## 2026-11-21 (tarde) · Tarefa N no modo automático: aparelhos com papéis e o 📡 tipo Switch
 
