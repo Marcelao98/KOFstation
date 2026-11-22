@@ -73,6 +73,20 @@ export function vagaDe(m: Mesa, id: string): number {
 /** A primeira vaga livre, ou -1. */
 export const vagaLivre = (m: Mesa): number => m.jogadores.findIndex((j) => !j);
 
+/**
+ * O J1 é só o próprio núcleo no teclado (o padrão, ninguém escolheu)? Então ele é de quem chegar: o primeiro aparelho
+ * que entra sem pedir vaga pega o J1 (o teclado do núcleo continua mandando no J1 junto, como antes da Mesa). Sem isso
+ * o celular caía no J2 e o jogo de um jogador (o Wii Sports só ouve o Wiimote 1) não andava (22/11, jogando).
+ */
+const j1DoNucleo = (m: Mesa, eu: string | undefined): boolean =>
+  !!eu && m.jogadores[0]?.aparelho === eu && m.jogadores[0]?.tipo === 'teclado' && !m.jogadores[0]?.nunchuk;
+
+/** A vaga de quem chega sem pedir: o J1 se for só do núcleo no teclado, senão a primeira livre. */
+export function vagaPraQuemChega(m: Mesa, id: string, eu?: string): number {
+  if (id !== eu && j1DoNucleo(m, eu)) return 0;
+  return vagaLivre(m);
+}
+
 /** Os aparelhos distintos que a mesa usa. */
 export function aparelhosDaMesa(m: Mesa): string[] {
   const l = [m.nucleo, m.tela];
@@ -120,7 +134,9 @@ export function mesaDoArranjo(
   const m: Mesa = { nucleo: a.nucleo, tela: a.tela, jogadores: quatro(jogadores) };
   for (const c of a.controles) {
     if (vagaDe(m, c) >= 0) continue;
-    const v = vagaLivre(m);
+    // o núcleo que cedeu o J1 não volta pra outra vaga sozinho: o teclado dele já manda no J1
+    if (c === eu && m.jogadores.some((j) => !!j && j.aparelho !== eu)) continue;
+    const v = vagaPraQuemChega(m, c, eu);
     if (v < 0) break;
     m.jogadores[v] = { aparelho: c, tipo: tipoPadrao(achar(c)?.tipo ?? 'pc', c === eu, sistema) };
   }
@@ -196,6 +212,7 @@ export function entrarNaMesa(
   id: string,
   tipo: TipoControle,
   vaga = -1,
+  eu?: string,
 ): { mesa: Mesa; vaga: number } | { falta: string } {
   const jogadores = [...m.jogadores];
   const era = vagaDe(m, id);
@@ -205,9 +222,10 @@ export function entrarNaMesa(
     jogadores[era] = { ...(j as Jogador), tipo };
     return { mesa: { ...m, jogadores }, vaga: era };
   }
-  const v = vaga >= 0 ? vaga : vagaLivre(m);
+  const v = vaga >= 0 ? vaga : vagaPraQuemChega(m, id, eu);
   if (v < 0 || v >= MAX_JOGADORES) return { falta: `as ${MAX_JOGADORES} vagas estão ocupadas` };
-  if (jogadores[v] && jogadores[v]?.aparelho !== id) return { falta: `o J${v + 1} já tem jogador` };
+  const doNucleo = v === 0 && id !== eu && j1DoNucleo(m, eu); // o J1 do núcleo no teclado cede (o teclado segue no J1)
+  if (jogadores[v] && jogadores[v]?.aparelho !== id && !doNucleo) return { falta: `o J${v + 1} já tem jogador` };
   if (era >= 0) jogadores[era] = null;
   jogadores[v] = { aparelho: id, tipo };
   return { mesa: { ...m, jogadores }, vaga: v };

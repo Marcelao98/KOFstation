@@ -236,3 +236,40 @@ describe('o canal mesa', () => {
     expect(lerMesaGuardada('{')).toBeNull();
   });
 });
+
+describe('o J1 do núcleo no teclado é de quem chegar (22/11: o celular caía no J2 e o Wii Sports não andava)', () => {
+  it('o primeiro celular pega o J1; o teclado do núcleo segue no J1; o segundo vai pro J2', () => {
+    const r = entrarNaMesa(mesaSozinho(EU, 'wii'), 'c1', 'wiimote', -1, EU);
+    if (!('mesa' in r)) throw new Error(r.falta);
+    expect(r.vaga).toBe(0);
+    expect(r.mesa.jogadores[0]).toEqual({ aparelho: 'c1', tipo: 'wiimote' });
+    expect(arranjoDaMesa(r.mesa).controles).toEqual(['c1']);
+    const v: Vagas = { escolha: {}, sessao: {}, mesa: chavesDaMesa(r.mesa, EU) };
+    expect(
+      juntarJogadores(
+        [
+          { k: 'teclado', nome: 'teclado', b: 1, e: null },
+          { k: 'cel:c1', nome: 'Moto', b: 2, e: null },
+        ],
+        v,
+      ).j,
+    ).toEqual([0, 0]);
+    const r2 = entrarNaMesa(r.mesa, 'c2', 'wiimote', -1, EU);
+    if (!('mesa' in r2)) throw new Error(r2.falta);
+    expect(r2.vaga).toBe(1);
+  });
+  it('o núcleo que escolheu outro tipo (controle) fica com o J1; pedir o J1 de propósito também pega', () => {
+    const m = { ...mesaSozinho(EU), jogadores: [{ aparelho: EU, tipo: 'controle' as const }, null, null, null] };
+    const r = entrarNaMesa(m, 'c1', 'toque', -1, EU);
+    if (!('mesa' in r)) throw new Error(r.falta);
+    expect(r.vaga).toBe(1);
+    const r2 = entrarNaMesa(mesaSozinho(EU), 'c1', 'toque', 0, EU);
+    if (!('mesa' in r2)) throw new Error(r2.falta);
+    expect(r2.mesa.jogadores[0]?.aparelho).toBe('c1');
+  });
+  it('pelo arranjo (núcleo + celular nos controles): o celular fica no J1 e o núcleo não volta pro J2', () => {
+    const m = mesaDoArranjo({ nucleo: EU, tela: EU, controles: [EU, 'c1'] }, mesaSozinho(EU, 'wii'), lista, EU, 'wii');
+    expect(m.jogadores[0]?.aparelho).toBe('c1');
+    expect(m.jogadores.slice(1)).toEqual([null, null, null]);
+  });
+});

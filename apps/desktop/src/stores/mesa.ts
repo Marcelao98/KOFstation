@@ -111,7 +111,7 @@ export function trocarMesa(m: Mesa): string {
 export function entrarComoJogador(id: string, tipo?: TipoControle, vaga = -1): string {
   const ap = aparelhosComPapel().find((a) => a.id === id);
   const t = tipo ?? tipoPadrao(ap?.tipo ?? 'pc', id === EU, sistema());
-  const r = entrarNaMesa(usarMesa.getState().mesa, id, t, vaga);
+  const r = entrarNaMesa(usarMesa.getState().mesa, id, t, vaga, EU);
   if ('falta' in r) {
     avisar('🎲 ' + r.falta);
     return r.falta;
