@@ -21,6 +21,19 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-22 · Tarefa M preparada: Mesa de aparelhos, multijogador e calibração do Wiimote
+
+**Pedido:** "melhorar o networking: ver os dispositivos, setar controle, trazer pra tela fácil; controlar dispositivos
+como uma rede, fácil de configurar; core, tela e o resto controles (que podem ser Wiimotes); bom pra multiplayer";
+"um modo de calibração pro Wiimote, não ligar automático quando estiver jogando Wii"; "escreve e deixa pro Claude
+local".
+**Feito (orquestrador):** a `claude/busy-ritchie-wrvk8h` avançou até a `agente-w/wii` (N, P e W já dentro);
+`docs/agentes/M-mesa-de-aparelhos.md` (M.1 a Mesa, M.2 multijogador até 4 com vaga reservada, M.3 a integração do
+Wiimote, M.4 a calibração com assistente e nada ligando sozinho, M.5 robustez e docs); fase M no ROADMAP (W.7–W.9
+passam pra ela); `PROXIMO.md` aponta pra M, com o modo automático.
+**Onde parou:** o Marcelo cola o texto do `PROXIMO.md` no Claude Code local. Ainda ⏸: o PR pra `main` (a `main` está
+em 18/11).
+
 ## 2026-11-22 · W.6 · Prova do celular como Wiimote (jogada no jogo de teste Wii A)
 
 **Pedido:** "o celular como Wiimote, com Nunchuk, pelo Dolphin" (referência: o PepoMote); depois "faz o teste".

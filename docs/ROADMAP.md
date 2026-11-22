@@ -67,8 +67,8 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 
 ## Divisão de tarefas
 
-> **Agora (21/11), nesta ordem: N → P → W.** O roteiro pro Claude local está em
-> [agentes/PROXIMO.md](agentes/PROXIMO.md).
+> **Agora (22/11): tarefa M** (Mesa de aparelhos, multijogador, Wiimote calibrado). N → P → W feitas (21–22/11).
+> O roteiro pro Claude local está em [agentes/PROXIMO.md](agentes/PROXIMO.md).
 
 > Como na migração: um agente **orquestrador** (na nuvem: este roadmap, as decisões, revisar e juntar as branches,
 > JORNAL/SITUACAO, os pacotes da `teste-binarios`) e agentes com **uma tarefa cada**, descrita em
@@ -85,6 +85,7 @@ de jogo, ROM, BIOS ou caminho pessoal no repositório (os jogos de teste são "j
 | **N** | [Rede com papéis (Núcleo, Tela, Controle), até 3 aparelhos, menu lateral tipo Switch](agentes/N-rede-papeis.md) | local | `agente-n/rede` | — | C (C.1–C.4) | **1ª** (21/11, obrigatória) |
 | **P** | [Rebobinar no PS1 liso](agentes/P-rebobinar-ps1-liso.md) | local | `agente-p/rebob-ps1` | N | R | **2ª** (21/11, obrigatória) |
 | **W** | [Wii e GameCube com o núcleo do RetroArch](agentes/W-wii-gamecube.md) | local | `agente-w/wii` | P | W | **3ª** |
+| **M** | [Mesa de aparelhos: multijogador até 4, Wiimote com calibração](agentes/M-mesa-de-aparelhos.md) | local | `agente-m/mesa` | N, W | C, W.7–W.9 | **agora** (22/11) |
 | **L** | Todos os consoles lisos (o método das fases 1–3 no PS1, N64 e WebAssembly) | local + nuvem | a definir | D | 6 | a escrever (a 6.3 já andou) |
 | **H** | Celular afinado | local (aparelho) | a definir | 0.2 | 7 | a escrever |
 | **O** | Orquestrador: revisar e juntar, pacotes, docs, fase 8 | nuvem | `claude/busy-ritchie-wrvk8h` | — | 0, 8 | contínua |
@@ -278,10 +279,25 @@ dia, só como projeto particular dele).
 | W.4 | Controles | GameCube como o console; Wii com o ponteiro no mouse e o chacoalhar num botão, Nunchuk; combinado com ele antes | ⏸ ele aprova o mapeamento | ⏸ 21/11: a proposta da tarefa feita (modo automático); ele aprova |
 | W.5 | Opções e medição | tudo o que o núcleo declara no menu, em português, 4 perfis; `medir-ps2.mjs --sistema`; `docs/WII-LISO.md` | ⏸ ele joga o jogo A 10 min liso | ✅ medido liso 21/11 (59,9 fps, p99 25 ms, 27–46 engasgos/min, 0 faltas); ⏸ ele joga 10 min |
 | W.6 | Celular como Wiimote: prova | sensores do libretro no `kof-nativo` (não DSU), mira por giroscópio ou inclinação, chacoalhar pelo acelerômetro, pela rede pareada | ⏸ ele joga apontando o celular | 🟨 22/11: jogado no jogo A (funciona; mira e Nunchuk corrigidos, ⏸ APK novo) |
-| W.7 | Wiimote: integração | movimento com sequência e hora, Nunchuk em outro celular, desligar sensores quando o celular sai | testes | ⬜ |
-| W.8 | Wiimote: experiência | tela do Wiimote/Nunchuk, recentrar, calibrar, estado, atraso e bateria | ⏸ prints | ⬜ |
-| W.9 | Wiimote: vários e confiável | 4 celulares, religar, atraso e variação medidos | números | ⬜ |
+| W.7 | Wiimote: integração | movimento com sequência e hora, Nunchuk em outro celular, desligar sensores quando o celular sai | testes | ⬜ → tarefa M (M.3) |
+| W.8 | Wiimote: experiência | tela do Wiimote/Nunchuk, recentrar, calibrar, estado, atraso e bateria | ⏸ prints | ⬜ → tarefa M (M.4: calibração) |
+| W.9 | Wiimote: vários e confiável | 4 celulares, religar, atraso e variação medidos | números | ⬜ → tarefa M (M.2/M.3) |
 | W.10 | Wiimote: jogos | jogos de teste Wii A–E, MotionPlus | ⏸ ele joga | ⬜ |
+
+### Fase M · Mesa de aparelhos (pedido 22/11)
+
+"Melhorar o networking: ver os dispositivos, setar controle, trazer pra tela fácil; controlar dispositivos como uma
+rede, fácil de configurar; core, tela e o resto controles (que podem ser Wiimotes); bom pra multiplayer; e um modo de
+calibração pro Wiimote, sem ligar automático." Tarefa: [M-mesa-de-aparelhos.md](agentes/M-mesa-de-aparelhos.md).
+Continua a fase C (feita na N) e absorve W.7–W.9.
+
+| # | Passo | Entregável | Checkpoint | Estado |
+|---|---|---|---|---|
+| M.1 | A Mesa | uma tela (e o painel no 📡/☰) com os aparelhos em cartões, 🧠 Núcleo, 📺 Tela e as vagas J1–J4; "📺 Trazer a imagem pra cá" e "🎮 Entrar como jogador" em qualquer aparelho | ⏸ print/desenho aprovado | ⬜ |
+| M.2 | Multijogador | até 4 jogadores de aparelhos diferentes, entrar no meio, vaga reservada ao cair, atraso por jogador | e2e com 4 páginas | ⬜ |
+| M.3 | Wiimote: integração | sequência e hora, Nunchuk em outro celular, sensores desligam quando o celular sai, até 4 Wiimotes medidos | testes + tabela | ⬜ |
+| M.4 | **Calibração do Wiimote** | nada liga sozinho; assistente (meio, cantos, zona morta, chacoalhar, mão/posição, teste), guardada por aparelho, recentrar num botão | ⏸ ele calibra e joga | ⬜ |
+| M.5 | Robustez e docs | religar sozinho, mesa lembrada, `CONECTIVIDADE.md` | ⏸ ele joga a dois na rede de casa | ⬜ |
 
 ### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11; C.1–C.4 = tarefa N, 21/11)
 

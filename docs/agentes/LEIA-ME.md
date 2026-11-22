@@ -41,7 +41,7 @@ A divisão de tarefas de agora está no [ROADMAP](../ROADMAP.md) ("Divisão de t
 
 ## Tarefas abertas
 
-> **Agora:** [PROXIMO.md](PROXIMO.md) (N → P → W, 21/11).
+> **Agora:** [PROXIMO.md](PROXIMO.md) (tarefa M, 22/11; N → P → W feitas).
 
 | Tarefa | Arquivo | Branch | Situação |
 |---|---|---|---|
@@ -50,6 +50,7 @@ A divisão de tarefas de agora está no [ROADMAP](../ROADMAP.md) ("Divisão de t
 | C · Ritmo dos quadros do PS2/PS1 nativo (PS2 liso) | [C-ritmo-nativo.md](C-ritmo-nativo.md) | `agente-c/ritmo-nativo` | ✅ junta em 09/11 (`d7e57d3`) |
 | D · PS2 liso como o PCSX2 (M16.5; roda no PC do Marcelo, mede sozinho) | [D-ps2-liso.md](D-ps2-liso.md) | `agente-d/ps2-liso` | aberta (17/11) |
 | F · Jogo pesado A liso hoje (o atalho de D e E: engasgos e cartão) | [F-ps2-liso-hoje.md](F-ps2-liso-hoje.md) | `agente-d/ps2-liso` | ✅ junta em 18/11 |
+| M · Mesa de aparelhos: multijogador até 4, Wiimote com calibração | [M-mesa-de-aparelhos.md](M-mesa-de-aparelhos.md) | `agente-m/mesa` | **agora** (22/11) |
 | N · Rede com papéis (Núcleo, Tela, Controle), menu lateral tipo Switch | [N-rede-papeis.md](N-rede-papeis.md) | `agente-n/rede` | **1ª** (21/11) |
 | P · Rebobinar no PS1 liso | [P-rebobinar-ps1-liso.md](P-rebobinar-ps1-liso.md) | `agente-p/rebob-ps1` | **2ª** (21/11) |
 | W · Wii e GameCube com o núcleo do RetroArch | [W-wii-gamecube.md](W-wii-gamecube.md) | `agente-w/wii` | **3ª** (21/11) |
