@@ -6,13 +6,14 @@ import {
   blocoNativo,
   botoesNativo,
   ponteiroNativo,
+  movimentoNativo,
   pacoteNativo,
   lerAviso,
   lerBinario,
   type AvisoNativo,
   type ComandoNativo,
 } from '@kof/contracts';
-import type { SistemaId, SomAoRebobinar } from '@kof/domain';
+import type { MovimentoWii, SistemaId, SomAoRebobinar } from '@kof/domain';
 import { CODIGO_WORKLET_PCM } from './anel';
 import { FilaDeQuadros } from './fila-de-quadros';
 import type { EventosDoJogo } from './jogo';
@@ -378,6 +379,12 @@ export class JogoNativo {
   /** O mouse sobre a imagem (o ponteiro do Wiimote no Dolphin; W.4). x e y de -1 a 1 dentro da imagem. */
   ponteiro(x: number, y: number, botoes: number, dentro: boolean): void {
     this.enviar(ponteiroNativo(0, x * 32767, y * 32767, botoes, dentro));
+  }
+
+  /** W.6: o celular como Wiimote do jogador: os sensores e a mira dele (a mira entra como o ponteiro desse jogador). */
+  movimentoDo(jogador: number, m: MovimentoWii): void {
+    this.enviar(movimentoNativo(jogador, m.acel, m.giro));
+    this.enviar(ponteiroNativo(jogador, m.x * 32767, m.y * 32767, 0, true));
   }
 
   botoesDo(jogador: number, bits: number) {

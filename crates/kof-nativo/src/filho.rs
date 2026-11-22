@@ -281,6 +281,7 @@ fn laco(n: &mut Nucleo, saida: &mut dyn Saida, canal: &Arc<Canal>, rx: &mpsc::Re
                 Pedido::AppFechou => return "o app fechou".into(),
                 Pedido::Entrada(j, e) => n.entrada(j, e),
                 Pedido::Ponteiro(j, p) => n.ponteiro(j, p),
+                Pedido::Movimento(j, m) => n.movimento(j, m),
                 Pedido::CarregarEstado(pedido, d) => {
                     rb.zerar(); // voltou pra outro momento: as fotos de antes não levam mais até aqui
                     canal.avisar(&match n.carregar_estado(&d) {

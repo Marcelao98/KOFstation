@@ -14,6 +14,8 @@ export const NATIVO = {
   CARREGAR_PACOTE: 8,
   /** página → processo: o mouse sobre a imagem, o ponteiro do Wiimote (W.4) */
   PONTEIRO: 9,
+  /** página → processo: o celular como Wiimote, aceleração (g) e giroscópio (rad/s) de um jogador (W.6) */
+  MOVIMENTO: 10,
   CABECALHO: 12,
 } as const;
 
@@ -156,6 +158,18 @@ export function botoesNativo(jogador: number, botoes: number, eixos: readonly nu
  * O mouse sobre a imagem (o ponteiro do Wiimote): x e y de -32767 a 32767 dos dois lados da imagem (o
  * `RETRO_DEVICE_POINTER` do libretro), botões (bit 0 esquerdo, 1 direito, 2 do meio) e se está sobre a imagem.
  */
+/** `[10, jogador, 0, 0, aceleração 3×f32, giroscópio 3×f32]` (28 bytes). */
+export function movimentoNativo(jogador: number, acel: readonly number[], giro: readonly number[]): Uint8Array {
+  const u = new Uint8Array(28);
+  const d = new DataView(u.buffer);
+  u[0] = NATIVO.MOVIMENTO;
+  u[1] = jogador;
+  [...acel.slice(0, 3), ...giro.slice(0, 3)].forEach((v, i) =>
+    d.setFloat32(4 + i * 4, Number.isFinite(v) ? v : 0, true),
+  );
+  return u;
+}
+
 export function ponteiroNativo(jogador: number, x: number, y: number, botoes: number, dentro: boolean): Uint8Array {
   const u = new Uint8Array(NATIVO.CABECALHO);
   const d = new DataView(u.buffer);

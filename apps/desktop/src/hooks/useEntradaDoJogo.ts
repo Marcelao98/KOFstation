@@ -1,7 +1,15 @@
 // Botões dos jogadores 1 a 4 no jogo: o teclado (pelo mapa da tela Controles) é o J1 e cada controle pega a sua vaga
 // (escolha guardada pelo nome). Tab segurado = turbo.
 // Select+Start = menu rápido (combinação do emulador: não chega no jogo); Backspace ou Select+Y = rebobinar.
-import { ANALOGICO, BOTAO, eixosDoTeclado, juntarJogadores, semOpostos, tecladoBits } from '@kof/domain';
+import {
+  ANALOGICO,
+  BOTAO,
+  eixosDoTeclado,
+  juntarJogadores,
+  semOpostos,
+  tecladoBits,
+  type MovimentoWii,
+} from '@kof/domain';
 import { aparelhosDeControle } from '../app/aparelhos';
 import { usarAvisos } from '../stores/avisos';
 import { vagas, vistos } from '../stores/jogadores';
@@ -104,6 +112,13 @@ export function useEntradaDoJogo() {
         if (!combo) usarJogo.getState().abrirRapido();
         combo = true;
       } else if (!(todos & selStart)) combo = false;
+      // W.6: o celular como Wiimote manda os sensores e a mira do jogador dele (só no Wii)
+      if (sis === 'wii') {
+        const comMov = jogo as Partial<{ movimentoDo(j: number, m: MovimentoWii): void }>;
+        aparelhos.forEach((a, n) => {
+          if (a.mov && comMov.movimentoDo) comMov.movimentoDo(r.j[n] ?? 0, a.mov);
+        });
+      }
       for (let n = 0; n < 4; n++) {
         let b = semOpostos(r.b[n] ?? 0);
         if (combo) b &= ~selStart;

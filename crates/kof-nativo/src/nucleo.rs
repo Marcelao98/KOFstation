@@ -11,6 +11,7 @@ use std::ffi::{c_char, c_uint, c_void, CStr, CString};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, MutexGuard};
+use std::time::{Duration, Instant};
 
 /// Botões (máscara do libretro: bit N = `RETRO_DEVICE_ID_JOYPAD_*` N) e analógicos de um jogador.
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
@@ -33,6 +34,38 @@ pub struct Ponteiro {
 
 pub const JOGADORES: usize = 4;
 
+/// W.6, o celular como Wiimote: aceleração em g e giroscópio em rad/s, já nos eixos do Wiimote (X pra esquerda, Y pra
+/// trás, Z pra cima), que é como o Dolphin do libretro lê a interface de sensores.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Movimento {
+    pub acel: [f32; 3],
+    pub giro: [f32; 3],
+}
+
+impl Movimento {
+    /// deitado e parado: só a gravidade, pra cima
+    pub const PARADO: Movimento = Movimento {
+        acel: [0.0, 0.0, 1.0],
+        giro: [0.0; 3],
+    };
+}
+
+/// Sem notícia do celular por mais que isso, o Wiimote fica parado (nada de chacoalhar ou girar preso).
+pub const VIGIA_MOVIMENTO: Duration = Duration::from_millis(150);
+
+/// O que o núcleo lê de um sensor: o último movimento, ou parado se ele é velho (ou nunca veio).
+pub fn sensor_le(m: Option<(Movimento, Instant)>, id: c_uint, agora: Instant) -> f32 {
+    let v = match m {
+        Some((m, quando)) if agora.duration_since(quando) <= VIGIA_MOVIMENTO => m,
+        _ => Movimento::PARADO,
+    };
+    match id {
+        0..=2 => v.acel[id as usize],
+        3..=5 => v.giro[id as usize - 3],
+        _ => 0.0,
+    }
+}
+
 /// Último quadro, já em RGBA (os mesmos bytes que a ponte do antigo entrega à página).
 #[derive(Clone, Default)]
 pub struct Quadro {
@@ -50,6 +83,12 @@ struct Contexto {
     som: Vec<i16>,
     entrada: [Entrada; JOGADORES],
     ponteiro: [Ponteiro; JOGADORES],
+    /// W.6: o último movimento de cada jogador e quando chegou
+    movimento: [Option<(Movimento, Instant)>; JOGADORES],
+    /// as portas com celular-Wiimote: o núcleo só liga os sensores delas (sem celular, o teclado chacoalha)
+    sensores: [bool; JOGADORES],
+    /// portas que ganharam sensor agora: o tipo de controle é mandado de novo pro núcleo religar os sensores dela
+    religar: [bool; JOGADORES],
     sistema: CString,
     saves: CString,
     variaveis: BTreeMap<String, CString>,
@@ -294,6 +333,15 @@ unsafe extern "C" fn cb_environment(cmd: c_uint, data: *mut c_void) -> bool {
             *(data as *mut c_uint) = RETRO_LANGUAGE_PORTUGUESE_BRAZIL;
             true
         }
+        ENV_GET_SENSOR_INTERFACE => {
+            if data.is_null() {
+                return false;
+            }
+            let i = &mut *(data as *mut retro_sensor_interface);
+            i.set_sensor_state = Some(cb_sensor_estado);
+            i.get_sensor_input = Some(cb_sensor);
+            true
+        }
         ENV_GET_INPUT_MAX_USERS => {
             *(data as *mut c_uint) = JOGADORES as c_uint;
             true
@@ -374,6 +422,21 @@ unsafe extern "C" fn cb_amostras(dados: *const i16, quadros: usize) -> usize {
 }
 
 unsafe extern "C" fn cb_poll() {}
+
+/// Ligar um sensor só dá certo nas portas com celular-Wiimote; desligar sempre dá.
+unsafe extern "C" fn cb_sensor_estado(porta: c_uint, acao: c_uint, _taxa: c_uint) -> bool {
+    match acao {
+        RETRO_SENSOR_ACCELEROMETER_ENABLE | RETRO_SENSOR_GYROSCOPE_ENABLE => {
+            com(|c| c.sensores.get(porta as usize).copied().unwrap_or(false)).unwrap_or(false)
+        }
+        _ => true,
+    }
+}
+
+unsafe extern "C" fn cb_sensor(porta: c_uint, id: c_uint) -> f32 {
+    let m = com(|c| c.movimento.get(porta as usize).copied().flatten()).flatten();
+    sensor_le(m, id, Instant::now())
+}
 
 /// O que o núcleo lê do mouse: `POINTER` dá a posição absoluta (X 0, Y 1, apertado 2, fora da tela 3); `MOUSE`, os
 /// botões (esquerdo 2, direito 3, do meio 6). O movimento relativo do `MOUSE` fica em zero (ninguém usa ainda).
@@ -461,6 +524,9 @@ pub struct Nucleo {
     /// inteiro, um quadro deixa o boot da BIOS HLE acontecer, e o estado sobrescreve tudo depois (testes `pcsx.rs` e
     /// `jogo_de_verdade.rs`).
     resetar_antes_do_estado: bool,
+    /// W.6: pra mandar de novo o tipo de controle de uma porta que ganhou sensor
+    set_porta: unsafe extern "C" fn(c_uint, c_uint),
+    dispositivo: c_uint,
     pub info: InfoNucleo,
     pub av: retro_system_av_info,
     /// o conteúdo precisa viver enquanto o jogo está aberto (alguns núcleos guardam o ponteiro)
@@ -636,6 +702,8 @@ impl Nucleo {
         Ok(Nucleo {
             f,
             resetar_antes_do_estado: info.nome.contains("PCSX"),
+            set_porta,
+            dispositivo: a.dispositivo.unwrap_or(RETRO_DEVICE_JOYPAD),
             info,
             av,
             _conteudo: conteudo,
@@ -645,6 +713,12 @@ impl Nucleo {
 
     /// Roda um quadro. Devolve o som dele (estéreo intercalado) e se a imagem mudou.
     pub fn rodar(&mut self, som: &mut Vec<i16>) -> bool {
+        let religar = com(|c| std::mem::take(&mut c.religar)).unwrap_or_default();
+        for (p, _) in religar.iter().enumerate().filter(|(_, r)| **r) {
+            // SAFETY: jogo carregado, fora do lock (o núcleo pergunta dos sensores lá dentro)
+            unsafe { (self.set_porta)(p as c_uint, self.dispositivo) };
+            tracing::info!(porta = p, "sensores ligados (celular como Wiimote)");
+        }
         // SAFETY: jogo carregado; o lock do contexto não está preso (os callbacks pegam)
         unsafe { (self.f.run)() };
         let mut g = ctx();
@@ -682,6 +756,20 @@ impl Nucleo {
         com(|c| {
             if let Some(x) = c.ponteiro.get_mut(jogador) {
                 *x = p;
+            }
+        });
+    }
+
+    /// W.6: o movimento do celular-Wiimote do jogador. O primeiro liga os sensores da porta dele.
+    pub fn movimento(&self, jogador: usize, m: Movimento) {
+        com(|c| {
+            if jogador >= JOGADORES {
+                return;
+            }
+            c.movimento[jogador] = Some((m, Instant::now()));
+            if !c.sensores[jogador] {
+                c.sensores[jogador] = true;
+                c.religar[jogador] = true;
             }
         });
     }

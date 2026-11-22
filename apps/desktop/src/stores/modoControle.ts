@@ -5,13 +5,14 @@
 //  - servidor do APK (`ControleServidor.java`, KOFnesApk.controle*): o PC conecta por endereço e senha (Arquivo → Celular como controle).
 // Os botões vêm do controle de toque (stores/toque), como no antigo.
 import { empacotarEixos } from '@kof/engine';
-import { acoesDe, ANALOGICO, trocarLocal } from '@kof/domain';
+import { acoesDe, ANALOGICO, movPraRede, trocarLocal } from '@kof/domain';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { config } from './config';
 import { marcarConsole } from './entrada';
 import { aoQuadroNovo, ultimoQuadro, usarJogo } from './jogo';
 import { ouvirRede, transporte, usarRede } from './rede';
+import { ligarSensores, movimentoAgora } from './sensores';
 import { soltarToque, toque } from './toque';
 
 type Apk = Record<string, (...a: never[]) => unknown>;
@@ -179,8 +180,12 @@ function enviar() {
     return;
   }
   if (m.rede) {
-    if (mudou) {
-      transporte().enviar(m.rede, 'pad', b + ',' + e);
+    // W.6: com um jogo de Wii no PC, o celular também é o Wiimote (sensores e mira, a cada 8 ms)
+    const wii = usarMC.getState().sis === 'wii';
+    ligarSensores(wii);
+    const mov = wii ? movimentoAgora() : null;
+    if (mudou || mov) {
+      transporte().enviar(m.rede, 'pad', b + ',' + e + (mov ? ',' + movPraRede(mov) : ''));
       m.b = b;
       m.e = e;
       m.quando = agora;
@@ -296,6 +301,7 @@ export function sairModoControle(): void {
   clearInterval(x.timer);
   m = null;
   soltarToque();
+  ligarSensores(false);
   if (x.rede) transporte().enviar(x.rede, 'pad', '0,0'); // solta tudo no PC
   if (x.pc) {
     clearTimeout(x.prazo);

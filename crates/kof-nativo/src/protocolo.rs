@@ -8,7 +8,7 @@
 //!   `CARREGAR_ESTADO`/`GRAVAR_BATERIA` `[4|6, 0, 0, 0, pedido u32, tamanho u32]` + bytes.
 //!
 //! Texto (JSON): comandos da página (`Comando`) e avisos do processo (`Aviso`).
-use crate::nucleo::{Entrada, Ponteiro, Quadro};
+use crate::nucleo::{Entrada, Movimento, Ponteiro, Quadro};
 use serde::{Deserialize, Serialize};
 
 pub const QUADRO: u8 = 1;
@@ -22,6 +22,9 @@ pub const SOM: u8 = 7;
 pub const CARREGAR_PACOTE: u8 = 8;
 /// página → processo: o mouse sobre a imagem (o ponteiro do Wiimote, W.4)
 pub const PONTEIRO: u8 = 9;
+/// página → processo: o celular como Wiimote (W.6): `[10, jogador, 0, 0, aceleração 3×f32 (g), giroscópio 3×f32 (rad/s)]`
+pub const MOVIMENTO: u8 = 10;
+pub const TAMANHO_MOVIMENTO: usize = 28;
 pub const CABECALHO: usize = 12;
 
 /// Comando da página (texto JSON).
@@ -156,6 +159,10 @@ pub enum Binario<'a> {
         jogador: usize,
         ponteiro: Ponteiro,
     },
+    Movimento {
+        jogador: usize,
+        movimento: Movimento,
+    },
     CarregarEstado {
         pedido: u32,
         dados: &'a [u8],
@@ -200,6 +207,23 @@ pub fn ler_binario(b: &[u8]) -> Result<Binario<'_>, String> {
                     y: i16le(4),
                     botoes: b[6],
                     dentro: b[7] != 0,
+                },
+            })
+        }
+        MOVIMENTO => {
+            if b.len() < TAMANHO_MOVIMENTO {
+                return Err(format!("movimento curto demais ({} bytes)", b.len()));
+            }
+            let f = |i: usize| f32::from_le_bytes([b[i], b[i + 1], b[i + 2], b[i + 3]]);
+            let v = [f(4), f(8), f(12), f(16), f(20), f(24)];
+            if v.iter().any(|x| !x.is_finite()) {
+                return Err("movimento com número inválido".into());
+            }
+            Ok(Binario::Movimento {
+                jogador: b[1] as usize,
+                movimento: Movimento {
+                    acel: [v[0], v[1], v[2]],
+                    giro: [v[3], v[4], v[5]],
                 },
             })
         }
@@ -284,6 +308,39 @@ mod testes {
         let b = botoes(2, e);
         assert_eq!(b.len(), CABECALHO);
         assert_eq!(ler_binario(&b), Ok(Binario::Botoes { jogador: 2, entrada: e }));
+    }
+
+    #[test]
+    fn movimento_do_celular_chega_inteiro_e_vigia_solta() {
+        use crate::nucleo::{sensor_le, VIGIA_MOVIMENTO};
+        use std::time::{Duration, Instant};
+        let mut b = vec![MOVIMENTO, 2, 0, 0];
+        for v in [0.5f32, -0.25, 1.0, 3.0, -2.0, 0.125] {
+            b.extend_from_slice(&v.to_le_bytes());
+        }
+        let m = Movimento {
+            acel: [0.5, -0.25, 1.0],
+            giro: [3.0, -2.0, 0.125],
+        };
+        assert_eq!(
+            ler_binario(&b),
+            Ok(Binario::Movimento {
+                jogador: 2,
+                movimento: m
+            })
+        );
+        assert!(ler_binario(&b[..20]).is_err(), "curto");
+        let agora = Instant::now();
+        assert_eq!(sensor_le(Some((m, agora)), 1, agora), -0.25, "aceleração Y");
+        assert_eq!(sensor_le(Some((m, agora)), 3, agora), 3.0, "giroscópio X");
+        let tarde = agora + VIGIA_MOVIMENTO + Duration::from_millis(1);
+        assert_eq!(
+            sensor_le(Some((m, agora)), 2, tarde),
+            1.0,
+            "calado: parado, só a gravidade"
+        );
+        assert_eq!(sensor_le(Some((m, agora)), 3, tarde), 0.0, "calado: sem girar");
+        assert_eq!(sensor_le(None, 2, agora), 1.0, "nunca veio: parado");
     }
 
     #[test]

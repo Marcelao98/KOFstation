@@ -126,6 +126,26 @@ pub type InputPollFn = unsafe extern "C" fn();
 pub type InputStateFn = unsafe extern "C" fn(port: c_uint, device: c_uint, index: c_uint, id: c_uint) -> i16;
 
 pub const ENV_GET_PREFERRED_HW_RENDER: c_uint = 56;
+
+/// W.6: o núcleo pede os sensores (aceleração e giroscópio) de cada porta: o celular como Wiimote.
+pub const ENV_GET_SENSOR_INTERFACE: c_uint = 25 | EXP;
+pub const RETRO_SENSOR_ACCELEROMETER_ENABLE: c_uint = 0;
+pub const RETRO_SENSOR_ACCELEROMETER_DISABLE: c_uint = 1;
+pub const RETRO_SENSOR_GYROSCOPE_ENABLE: c_uint = 2;
+pub const RETRO_SENSOR_GYROSCOPE_DISABLE: c_uint = 3;
+/// ids do `get_sensor_input`: aceleração X, Y, Z (em g) e giroscópio X, Y, Z (rad/s)
+pub const RETRO_SENSOR_ACCELEROMETER_X: c_uint = 0;
+pub const RETRO_SENSOR_GYROSCOPE_Z: c_uint = 5;
+
+pub type SetSensorStateFn = unsafe extern "C" fn(port: c_uint, action: c_uint, rate: c_uint) -> bool;
+pub type GetSensorInputFn = unsafe extern "C" fn(port: c_uint, id: c_uint) -> f32;
+
+/// `struct retro_sensor_interface`
+#[repr(C)]
+pub struct retro_sensor_interface {
+    pub set_sensor_state: Option<SetSensorStateFn>,
+    pub get_sensor_input: Option<GetSensorInputFn>,
+}
 pub const RETRO_HW_CONTEXT_OPENGL: c_uint = 1;
 pub const RETRO_HW_CONTEXT_OPENGL_CORE: c_uint = 3;
 

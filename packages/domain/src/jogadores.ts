@@ -1,15 +1,17 @@
 // Jogadores 2 a 4 (web/jogadores.js do antigo): cada aparelho (teclado, cada controle) vai pra um jogador. A escolha fica
 // guardada pelo nome do controle (sem o número do slot); sem escolha, o que já pegou nesta sessão; senão a primeira vaga
 // livre. O teclado é sempre do Jogador 1 (se não escolher outro) e não ocupa vaga.
+import type { MovimentoWii } from './wiimote';
 
 export const JOG_CORES = ['#e84545', '#3d8bfd', '#27c26c', '#f2b632'] as const;
-
 export interface Aparelho {
   /** 'teclado' ou 'pad:<id>#<índice>' */
   k: string;
   nome: string;
   b: number;
   e: number[] | null;
+  /** W.6: o celular como Wiimote (aceleração, giroscópio e mira), só quando chegou agora */
+  mov?: MovimentoWii | null;
 }
 
 export interface Vagas {

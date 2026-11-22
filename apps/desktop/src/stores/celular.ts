@@ -7,9 +7,11 @@ import {
   enderecoDoControle,
   juntarJogadores,
   linhaDoJogo,
+  movDaRede,
   padDaRede,
   padDoServidor,
   type Aparelho,
+  type MovimentoWii,
   type PadCelular,
 } from '@kof/domain';
 import { create } from 'zustand';
@@ -20,7 +22,7 @@ import { usarJogo } from './jogo';
 import { transporte, usarRede } from './rede';
 
 // ---------------------------------------------------------------- pela rede
-const celRede = new Map<string, PadCelular & { quando: number }>();
+const celRede = new Map<string, PadCelular & { quando: number; mov?: MovimentoWii | null }>();
 
 function jogoAgora() {
   const j = usarJogo.getState();
@@ -42,7 +44,8 @@ export function avisarCelularJogador(so?: string) {
 
 transporte().ouvir('pad', (de, dados) => {
   const era = celRede.has(de);
-  celRede.set(de, { ...padDaRede(dados), quando: performance.now() });
+  // W.6: o 3º campo é o movimento do celular-Wiimote (os PCs mais velhos só leem os dois primeiros)
+  celRede.set(de, { ...padDaRede(dados), quando: performance.now(), mov: movDaRede(String(dados).split(',')[2]) });
   if (!era) avisarCelularJogador(de);
 });
 
@@ -205,6 +208,9 @@ export function padDaTransmissao(ativa: boolean, pad?: PadCelular) {
 export const padDaTransmissaoAgora = (): PadCelular => transmissao.pad;
 
 // ---------------------------------------------------------------- pros jogadores
+/** W.6: sem movimento novo por mais que isso, o PC para de mandar (o processo do jogo também para sozinho em 150 ms). */
+const VIGIA_MOVIMENTO_MS = 150;
+
 /** Os celulares ligados agora, como aparelhos de controle (o celular sem mandar nada por 5 s sai). */
 export function aparelhosCelular(agora = performance.now()): Aparelho[] {
   const l: Aparelho[] = [];
@@ -219,7 +225,13 @@ export function aparelhosCelular(agora = performance.now()): Aparelho[] {
       continue;
     }
     const a = usarRede.getState().aparelhos.find((x) => x.id === id);
-    l.push({ k: 'cel:' + id, nome: '📱 ' + (a?.nome || 'Celular'), b: agora - c.quando > 1500 ? 0 : c.b, e: c.e });
+    l.push({
+      k: 'cel:' + id,
+      nome: '📱 ' + (a?.nome || 'Celular'),
+      b: agora - c.quando > 1500 ? 0 : c.b,
+      e: c.e,
+      mov: agora - c.quando > VIGIA_MOVIMENTO_MS ? null : (c.mov ?? null), // calado: o Wiimote para logo
+    });
   }
   return l;
 }
