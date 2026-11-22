@@ -85,9 +85,10 @@ struct Contexto {
     ponteiro: [Ponteiro; JOGADORES],
     /// W.6: o último movimento de cada jogador e quando chegou
     movimento: [Option<(Movimento, Instant)>; JOGADORES],
-    /// as portas com celular-Wiimote: o núcleo só liga os sensores delas (sem celular, o teclado chacoalha)
+    /// as portas com celular-Wiimote: o núcleo só liga os sensores delas (sem celular, o teclado chacoalha). Quem
+    /// liga e desliga é a página (`SENSORES`, tarefa M.4): nada liga sozinho no primeiro movimento.
     sensores: [bool; JOGADORES],
-    /// portas que ganharam sensor agora: o tipo de controle é mandado de novo pro núcleo religar os sensores dela
+    /// portas que ganharam ou perderam sensor agora: o tipo de controle é mandado de novo pro núcleo religar
     religar: [bool; JOGADORES],
     sistema: CString,
     saves: CString,
@@ -717,7 +718,8 @@ impl Nucleo {
         for (p, _) in religar.iter().enumerate().filter(|(_, r)| **r) {
             // SAFETY: jogo carregado, fora do lock (o núcleo pergunta dos sensores lá dentro)
             unsafe { (self.set_porta)(p as c_uint, self.dispositivo) };
-            tracing::info!(porta = p, "sensores ligados (celular como Wiimote)");
+            let ligado = com(|c| c.sensores[p]).unwrap_or(false);
+            tracing::info!(porta = p, ligado, "sensores da porta (celular como Wiimote)");
         }
         // SAFETY: jogo carregado; o lock do contexto não está preso (os callbacks pegam)
         unsafe { (self.f.run)() };
@@ -760,16 +762,26 @@ impl Nucleo {
         });
     }
 
-    /// W.6: o movimento do celular-Wiimote do jogador. O primeiro liga os sensores da porta dele.
+    /// W.6: o movimento do celular-Wiimote do jogador (só vale com os sensores da porta ligados, ver `sensores`).
     pub fn movimento(&self, jogador: usize, m: Movimento) {
         com(|c| {
-            if jogador >= JOGADORES {
+            if let Some(x) = c.movimento.get_mut(jogador) {
+                *x = Some((m, Instant::now()));
+            }
+        });
+    }
+
+    /// M.4: liga ou desliga os sensores da porta (a página decide: vaga Wiimote, celular calibrado e na rede). O tipo
+    /// de controle vai de novo pro núcleo no próximo quadro, pra ele perguntar de novo dos sensores.
+    pub fn sensores(&self, jogador: usize, ligado: bool) {
+        com(|c| {
+            if jogador >= JOGADORES || c.sensores[jogador] == ligado {
                 return;
             }
-            c.movimento[jogador] = Some((m, Instant::now()));
-            if !c.sensores[jogador] {
-                c.sensores[jogador] = true;
-                c.religar[jogador] = true;
+            c.sensores[jogador] = ligado;
+            c.religar[jogador] = true;
+            if !ligado {
+                c.movimento[jogador] = None; // desligado: o teclado volta a inclinar e chacoalhar
             }
         });
     }

@@ -16,6 +16,8 @@ export const NATIVO = {
   PONTEIRO: 9,
   /** página → processo: o celular como Wiimote, aceleração (g) e giroscópio (rad/s) de um jogador (W.6) */
   MOVIMENTO: 10,
+  /** M.4: liga/desliga os sensores da porta (`[11, jogador, ligado, 0, …]`, 12 bytes) */
+  SENSORES: 11,
   CABECALHO: 12,
 } as const;
 
@@ -167,6 +169,15 @@ export function movimentoNativo(jogador: number, acel: readonly number[], giro: 
   [...acel.slice(0, 3), ...giro.slice(0, 3)].forEach((v, i) =>
     d.setFloat32(4 + i * 4, Number.isFinite(v) ? v : 0, true),
   );
+  return u;
+}
+
+/** M.4: os sensores da porta ligam (vaga Wiimote, celular calibrado) ou desligam (o celular saiu). */
+export function sensoresNativo(jogador: number, ligado: boolean): Uint8Array {
+  const u = new Uint8Array(NATIVO.CABECALHO);
+  u[0] = NATIVO.SENSORES;
+  u[1] = jogador;
+  u[2] = ligado ? 1 : 0;
   return u;
 }
 
