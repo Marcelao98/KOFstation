@@ -384,7 +384,7 @@ mod testes {
             })
         );
         assert!(ler_binario(&b[..13]).is_err());
-        assert!(ler_binario(&[9; 12]).is_err());
+        assert!(ler_binario(&[99; 12]).is_err(), "tipo que não existe");
     }
 
     #[test]
