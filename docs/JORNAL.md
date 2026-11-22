@@ -21,6 +21,24 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-22 · Tarefa M voltada inteira (quebrou no aparelho de verdade)
+
+**Pedido:** continuar a M depois da queda do PC; testando com o celular no Wii Sports, nada funcionou; "volta como
+estava antes e vê onde está o erro".
+**Feito:** o trabalho da M (f4eea1d..a0e5b4c) ficou guardado na branch `agente-m/mesa-v1`; a `agente-m/mesa` voltou ao
+código de antes (40f5a31, igual à 8f1e458). PC e APK remontados nessa versão.
+**Onde estava o erro:**
+1. **Celular no J2:** a Mesa punha o PC (teclado) no J1 e o 1º celular caía no J2; o jogo de um jogador só ouve o
+   Wiimote 1, então nenhum botão andava. (Corrigido na a0e5b4c, mas foi junto na volta.)
+2. **"Ver o jogo do PC" e "Trazer a imagem" pararam:** suspeita (não confirmada) na sincronia Mesa ↔ arranjo
+   (`stores/mesa.ts`: a Mesa ouve o arranjo e, a cada `lista` da rede, reaplica o arranjo dela, podendo puxar a imagem
+   de volta).
+3. **Wiimote "não liga":** por desenho, só depois de vaga Wiimote + calibração: passos demais pro usuário.
+**Deu errado / aprendido:** os testes eram só páginas simuladas (o "cabo" do e2e); passaram e o app real quebrou. Dei
+por "pronto" sem testar com o app de verdade. Refazer a M só com teste no app real (dois KOFstation pela rede de
+verdade) e em partes pequenas, cada uma jogada.
+**Onde parou:** versão de antes da M rodando. A M fica pra refazer por partes (a partir da `agente-m/mesa-v1`).
+
 ## 2026-11-22 · Tarefa M preparada: Mesa de aparelhos, multijogador e calibração do Wiimote
 
 **Pedido:** "melhorar o networking: ver os dispositivos, setar controle, trazer pra tela fácil; controlar dispositivos
