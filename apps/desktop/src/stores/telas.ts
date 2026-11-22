@@ -14,7 +14,6 @@ export type TelaId =
   | 'bios-tela'
   | 'aparelhos'
   | 'jogadores'
-  | 'mesa'
   | 'emulacao';
 
 export interface Telas {

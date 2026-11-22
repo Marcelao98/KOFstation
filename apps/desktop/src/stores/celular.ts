@@ -8,7 +8,6 @@ import {
   juntarJogadores,
   linhaDoJogo,
   movDaRede,
-  OrdemDoMovimento,
   padDaRede,
   padDoServidor,
   type Aparelho,
@@ -43,30 +42,12 @@ export function avisarCelularJogador(so?: string) {
   }
 }
 
-/** M.3: a ordem do movimento de cada celular (descarta o atrasado e o fora de ordem; mede a variação) */
-const ordem = new Map<string, OrdemDoMovimento>();
-
 transporte().ouvir('pad', (de, dados) => {
-  const antes = celRede.get(de);
-  const agora = performance.now();
+  const era = celRede.has(de);
   // W.6: o 3º campo é o movimento do celular-Wiimote (os PCs mais velhos só leem os dois primeiros)
-  const mov = movDaRede(String(dados).split(',')[2]);
-  let o = ordem.get(de);
-  if (!o) ordem.set(de, (o = new OrdemDoMovimento()));
-  const vale = !mov || o.aceitar(mov, agora);
-  celRede.set(de, { ...padDaRede(dados), quando: agora, mov: vale ? mov : null }); // descartado: o processo segura o último por 150 ms
-  if (!antes) avisarCelularJogador(de);
+  celRede.set(de, { ...padDaRede(dados), quando: performance.now(), mov: movDaRede(String(dados).split(',')[2]) });
+  if (!era) avisarCelularJogador(de);
 });
-
-/** M.3: a variação da chegada do movimento de cada celular (ms) e quantos foram descartados (pro F3 e o WII-LISO). */
-export function variacaoDoMovimento(): { id: string; ms: number; descartados: number; recebidos: number }[] {
-  return [...ordem].map(([id, o]) => ({
-    id,
-    ms: Math.round(o.variacao() * 10) / 10,
-    descartados: o.descartados,
-    recebidos: o.recebidos,
-  }));
-}
 
 // ---------------------------------------------------------------- pelo servidor do APK
 interface Remoto {
@@ -241,7 +222,6 @@ export function aparelhosCelular(agora = performance.now()): Aparelho[] {
   for (const [id, c] of celRede) {
     if (agora - c.quando > 5000) {
       celRede.delete(id);
-      ordem.delete(id); // voltou depois: a sequência dele recomeça
       continue;
     }
     const a = usarRede.getState().aparelhos.find((x) => x.id === id);

@@ -1,14 +1,12 @@
 // A tela "Controle do PC" do celular (#modo-controle do antigo): barra com o estado, a "telinha" com o console e o jogo que o
 // PC abriu, o endereço e a senha (só enquanto nunca conectou, ou no ⓘ), os atalhos ⏪ 💾 📂 🏠 ☰ e, no Jogar no PC, o vídeo,
 // o ping e o menu do PC. O controle de toque (ControleDeToque) fica por baixo, como no antigo.
-import { ehWiimote } from '@kof/domain';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   alternarFiltroRemoto,
   atalhoPc,
   itemDoMenuPc,
   menuDoPc,
-  modoControleCom,
   mostrarInfoDoControle,
   puxarVideo,
   rebobinarNoPc,
@@ -16,18 +14,9 @@ import {
   usarMC,
 } from '../stores/modoControle';
 import { acao } from '../app/acoes';
-import { abrirCalibracao } from '../stores/calibracao';
-import { minhaVista, usarMinhaVaga } from '../stores/minhaVaga';
-import { recentrarMira } from '../stores/sensores';
-import { PainelMesa } from './PainelMesa';
 
 export function ModoControle() {
   const s = usarMC();
-  // M: a vaga deste celular na 🎲 Mesa do PC (o PC conta pelo canal `mesa`)
-  usarMinhaVaga((v) => v.quando);
-  const vista = minhaVista(modoControleCom());
-  const [mesaAberta, setMesaAberta] = useState(false);
-  const wiimote = !!vista && vista.sistema === 'wii' && ehWiimote(vista.tipo || undefined) && !vista.nunchuk;
   const video = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const v = video.current;
@@ -63,26 +52,6 @@ export function ModoControle() {
       <div className="mc-barra">
         <i className="mc-luz" />
         <span className="mc-status">{s.status}</span>
-        {vista && (
-          <button
-            className="mc-mesa"
-            aria-label="mesa"
-            aria-pressed={mesaAberta}
-            onClick={() => setMesaAberta(!mesaAberta)}
-          >
-            🎲 {vista.voce >= 0 ? 'J' + (vista.voce + 1) : ''}
-          </button>
-        )}
-        {wiimote && (
-          <>
-            <button className="mc-calibrar" aria-label="calibrar o Wiimote" onClick={abrirCalibracao}>
-              🎯
-            </button>
-            <button className="mc-recentrar" aria-label="recentrar a mira" onClick={recentrarMira}>
-              ⊕
-            </button>
-          </>
-        )}
         <button className="mc-info" aria-label="endereço e senha" onClick={mostrarInfoDoControle}>
           ⓘ
         </button>
@@ -90,11 +59,6 @@ export function ModoControle() {
           ✕
         </button>
       </div>
-      {mesaAberta && vista && (
-        <div className="mc-painel-mesa">
-          <PainelMesa compacto />
-        </div>
-      )}
       <div className="mc-tela">
         <small className="mc-sis">{s.sisNome}</small>
         <b className="mc-jogo">{s.jogoNome}</b>

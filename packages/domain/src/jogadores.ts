@@ -19,27 +19,22 @@ export interface Vagas {
   escolha: Record<string, number>;
   /** o que cada aparelho pegou nesta sessão */
   sessao: Record<string, number>;
-  /** tarefa M: as vagas que a 🎲 Mesa deu (chave → jogador); valem antes de tudo e ninguém mais pega essas vagas */
-  mesa?: Record<string, number>;
 }
 
 const base = (k: string) => k.replace(/#\d+$/, '');
 
 /** De que jogador (0..3) é o aparelho `k`, com os `ligados` agora. Pode anotar em `v.sessao`. */
 export function jogadorDe(k: string, ligados: readonly string[], v: Vagas): number {
-  const daMesa = v.mesa?.[k];
-  if (daMesa !== undefined) return daMesa;
   if (k === 'teclado') return v.escolha.teclado ?? 0;
   const e = v.escolha[base(k)];
   if (e !== undefined) return e;
   const s = v.sessao[k];
   if (s !== undefined) return s;
-  const usados = new Set([
-    ...ligados
+  const usados = new Set(
+    ligados
       .filter((x) => x !== k && x !== 'teclado' && (v.sessao[x] !== undefined || v.escolha[base(x)] !== undefined))
       .map((x) => v.escolha[base(x)] ?? v.sessao[x]),
-    ...Object.values(v.mesa ?? {}), // a vaga da Mesa fica com o dono dela, mesmo com ele fora (reservada)
-  ]);
+  );
   let j = 0;
   while (usados.has(j) && j < 3) j++;
   v.sessao[k] = j;

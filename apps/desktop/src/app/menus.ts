@@ -21,7 +21,6 @@ export const MENUS: Menu[] = [
       { a: 'importar-saves', t: '📥 Trazer backup…' },
       { a: 'controle-celular', t: '📱 Celular como controle…' },
       { a: 'aparelhos', t: '📡 Aparelhos (PC e celular)…' },
-      { a: 'mesa', t: '🎲 Mesa de aparelhos (rede e jogadores)…' },
       { a: 'jogadores', t: '🎮 Jogadores (2 a 4 controles)…' },
       'hr',
       { a: 'reiniciar', t: 'Reiniciar', k: 'F1' },

@@ -21,28 +21,6 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
-## 2026-11-22 · Tarefa M (M.1–M.5) · a Mesa, multijogador até 4 e a calibração do Wiimote
-
-**Pedido:** fazer a tarefa M ([docs/agentes/M-mesa-de-aparelhos.md](agentes/M-mesa-de-aparelhos.md)); o PC caiu no
-meio e o Marcelo pediu pra "continuar de onde estava".
-**Feito:** o trabalho sem commit que sobrou da queda foi conferido e commitado em partes: `f4eea1d` (domain:
-`mesa.ts` com núcleo, tela, J1–J4, vaga reservada, tipos por console, canal `mesa`; `calibracao.ts` com meio, cantos,
-zona morta, chacoalhar, mão/posição; `wiimote.ts` com sequência e hora do movimento), `45d716c` (Rust: mensagem
-`SENSORES` = 11 liga/desliga os sensores por porta; o 1º movimento não liga mais nada), `90959f1` (a tela 🎲 Mesa, o
-painel no 📡 e no ☰, "📺 Trazer a imagem pra cá", "🎮 Entrar como jogador", o assistente de calibração no celular, ⊕
-recentrar, pior atraso no F3, `e2e/mesa.spec.ts`, `CONECTIVIDADE.md`). Os e2e de menu foram ajustados: o item novo
-🎲 Mesa entrou no menu Arquivo (14 itens) e no menu rápido (23).
-**Medido / conferido:** `pnpm check` ok; `pnpm check:rust` e `cargo test -p kof-nativo` ok, exceto `tests/opengl.rs`
-(63–64 de 120 quadros entregues), que **falha igual sem as mudanças da M** (testei com o código da `8f1e458`): é da
-placa/driver daqui depois da queda, não da M. `pnpm e2e` 78 ok (2 instáveis com a máquina carregada passaram
-sozinhos).
-**Deu errado / aprendido:** com tudo sem commit, a queda quase levou ~3000 linhas: commitar a cada ~500 vale também no
-modo automático.
-**Onde parou:** o código da M está pronto; faltam os ⏸ com o Marcelo e aparelhos de verdade: ver os prints da Mesa
-(`~/kof-medidas/prints/M1-*.png`), calibrar e jogar Wii com celulares como Wiimote, a tabela de atraso/variação com
-até 4 celulares no `WII-LISO.md` (M.3) e jogar a dois na rede de casa (M.5). Ver também por que o `opengl.rs` entrega
-só metade dos quadros nesta máquina. Ainda ⏸: o PR pra `main`.
-
 ## 2026-11-22 · Tarefa M preparada: Mesa de aparelhos, multijogador e calibração do Wiimote
 
 **Pedido:** "melhorar o networking: ver os dispositivos, setar controle, trazer pra tela fácil; controlar dispositivos

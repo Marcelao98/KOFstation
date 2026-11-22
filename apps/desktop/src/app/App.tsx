@@ -23,8 +23,6 @@ import { ModoTela } from '../screens/Modo/ModoTela';
 import { Visual } from '../screens/Visual/Visual';
 import { Teclas } from '../screens/Teclas/Teclas';
 import { Jogadores } from '../screens/Jogadores/Jogadores';
-import { Mesa } from '../screens/Mesa/Mesa';
-import { Calibracao } from '../components/Calibracao';
 import { Aparelhos } from '../screens/Aparelhos/Aparelhos';
 import { Jukebox } from '../screens/Jukebox/Jukebox';
 import { Abertura } from '../screens/Abertura/Abertura';
@@ -69,7 +67,6 @@ const PRONTAS: string[] = [
   'estados',
   'teclas',
   'jogadores',
-  'mesa',
   'aparelhos',
   'jukebox',
   'estatisticas',
@@ -273,7 +270,6 @@ export function App({ backend }: { backend: Backend }) {
       <Menu />
       <ControleDeToque />
       <ModoControle />
-      <Calibracao />
       <Lateral />
       <main id="palco">
         {atual === 'home' && <Inicio />}
@@ -282,7 +278,6 @@ export function App({ backend }: { backend: Backend }) {
         {atual === 'estados' && <Estados />}
         {atual === 'teclas' && <Teclas />}
         {atual === 'jogadores' && <Jogadores />}
-        {atual === 'mesa' && <Mesa />}
         {atual === 'aparelhos' && <Aparelhos />}
         {atual === 'jukebox' && <Jukebox />}
         {atual === 'estatisticas' && <Estatisticas />}

@@ -7,7 +7,6 @@ import {
   botoesNativo,
   ponteiroNativo,
   movimentoNativo,
-  sensoresNativo,
   pacoteNativo,
   lerAviso,
   lerBinario,
@@ -386,11 +385,6 @@ export class JogoNativo {
   movimentoDo(jogador: number, m: MovimentoWii): void {
     this.enviar(movimentoNativo(jogador, m.acel, m.giro));
     this.enviar(ponteiroNativo(jogador, m.x * 32767, m.y * 32767, 0, true));
-  }
-
-  /** M.4: liga/desliga os sensores da porta do jogador (só a vaga Wiimote com o celular calibrado liga). */
-  sensoresDo(jogador: number, ligado: boolean): void {
-    this.enviar(sensoresNativo(jogador, ligado));
   }
 
   botoesDo(jogador: number, bits: number) {

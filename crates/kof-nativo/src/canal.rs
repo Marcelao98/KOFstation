@@ -21,7 +21,6 @@ pub enum Pedido {
     Entrada(usize, Entrada),
     Ponteiro(usize, crate::nucleo::Ponteiro),
     Movimento(usize, crate::nucleo::Movimento),
-    Sensores(usize, bool),
     CarregarEstado(u32, Vec<u8>),
     GravarBateria(u32, Vec<u8>),
 }
@@ -213,7 +212,6 @@ impl Canal {
                         Ok(Binario::Botoes { jogador, entrada }) => Some(Pedido::Entrada(jogador, entrada)),
                         Ok(Binario::Ponteiro { jogador, ponteiro }) => Some(Pedido::Ponteiro(jogador, ponteiro)),
                         Ok(Binario::Movimento { jogador, movimento }) => Some(Pedido::Movimento(jogador, movimento)),
-                        Ok(Binario::Sensores { jogador, ligado }) => Some(Pedido::Sensores(jogador, ligado)),
                         Ok(Binario::CarregarEstado { pedido, dados }) => {
                             Some(Pedido::CarregarEstado(pedido, dados.to_vec()))
                         }

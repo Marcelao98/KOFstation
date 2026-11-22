@@ -36,7 +36,6 @@ const TELAS: Partial<Record<string, TelaId>> = {
   'bios-tela': 'bios-tela',
   aparelhos: 'aparelhos',
   jogadores: 'jogadores',
-  mesa: 'mesa',
 };
 
 /** Etapa em que cada ação ainda não feita chega. */
@@ -162,7 +161,6 @@ export function acao(nome: string, valor?: string): boolean {
       return true;
     }
     case 'jogadores-fechar':
-    case 'mesa-fechar':
     case 'fechar-teclas':
       telas.sair();
       return true;

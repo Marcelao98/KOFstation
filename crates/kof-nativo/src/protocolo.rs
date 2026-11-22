@@ -25,9 +25,6 @@ pub const PONTEIRO: u8 = 9;
 /// página → processo: o celular como Wiimote (W.6): `[10, jogador, 0, 0, aceleração 3×f32 (g), giroscópio 3×f32 (rad/s)]`
 pub const MOVIMENTO: u8 = 10;
 pub const TAMANHO_MOVIMENTO: usize = 28;
-/// página → processo: liga ou desliga os sensores da porta (tarefa M.4: o Wiimote só liga quando a vaga da Mesa é
-/// Wiimote e o celular está calibrado; o celular saiu, desliga): `[11, jogador, ligado, 0, …]` (12 bytes)
-pub const SENSORES: u8 = 11;
 pub const CABECALHO: usize = 12;
 
 /// Comando da página (texto JSON).
@@ -166,10 +163,6 @@ pub enum Binario<'a> {
         jogador: usize,
         movimento: Movimento,
     },
-    Sensores {
-        jogador: usize,
-        ligado: bool,
-    },
     CarregarEstado {
         pedido: u32,
         dados: &'a [u8],
@@ -234,10 +227,6 @@ pub fn ler_binario(b: &[u8]) -> Result<Binario<'_>, String> {
                 },
             })
         }
-        SENSORES => Ok(Binario::Sensores {
-            jogador: b[1] as usize,
-            ligado: b[2] != 0,
-        }),
         t @ (CARREGAR_ESTADO | GRAVAR_BATERIA) => {
             let pedido = u32le(b, 4);
             let n = u32le(b, 8) as usize;
@@ -352,28 +341,6 @@ mod testes {
         );
         assert_eq!(sensor_le(Some((m, agora)), 3, tarde), 0.0, "calado: sem girar");
         assert_eq!(sensor_le(None, 2, agora), 1.0, "nunca veio: parado");
-    }
-
-    #[test]
-    fn sensores_ligam_e_desligam_por_porta() {
-        let mut b = vec![SENSORES, 3, 1, 0];
-        b.resize(CABECALHO, 0);
-        assert_eq!(
-            ler_binario(&b),
-            Ok(Binario::Sensores {
-                jogador: 3,
-                ligado: true
-            })
-        );
-        b[2] = 0;
-        assert_eq!(
-            ler_binario(&b),
-            Ok(Binario::Sensores {
-                jogador: 3,
-                ligado: false
-            })
-        );
-        assert!(ler_binario(&[SENSORES, 0, 1]).is_err(), "curta demais");
     }
 
     #[test]

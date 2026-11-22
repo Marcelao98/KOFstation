@@ -131,7 +131,6 @@ function itens(): Item[] {
     { t: '🐞 Reportar bug', f: depois(() => acao('bug')) },
     { t: '🗂 Estados salvos', f: depois(() => acao('estados')) },
     { t: '☕ Biblioteca', f: depois(() => acao('biblioteca')) },
-    { t: '🎲 Mesa de aparelhos', f: depois(() => acao('mesa')) },
     { t: '🎮 Jogadores (2 a 4)', f: depois(() => acao('jogadores')) },
     { t: '⌨ Controles e teclas', f: depois(() => acao('teclas')) },
     {
