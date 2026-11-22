@@ -199,7 +199,11 @@ async function conferir(page, sis, pasta) {
       .locator('#aviso.erro')
       .allTextContents()
       .catch(() => []);
-    for (const x of t) if (!vistos.has(x)) (vistos.add(x), erros.push(x.slice(0, 160)));
+    for (const x of t) {
+      if (vistos.has(x)) continue;
+      vistos.add(x);
+      erros.push(x.slice(0, 160));
+    }
   };
   page.on('pageerror', (e) => erros.push('erro na página: ' + e.message.slice(0, 160)));
   let n = 0;
