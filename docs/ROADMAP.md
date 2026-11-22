@@ -277,7 +277,11 @@ dia, só como projeto particular dele).
 | W.3 | Saves que não se perdem | cartão do GameCube e NAND do Wii gravados ao fechar o app | teste "o arquivo mudou depois de fechar" | 🟡 21/11: Sys e pasta dos saves prontos; falta o teste "mudou depois de fechar" com um save do jogo |
 | W.4 | Controles | GameCube como o console; Wii com o ponteiro no mouse e o chacoalhar num botão, Nunchuk; combinado com ele antes | ⏸ ele aprova o mapeamento | ⏸ 21/11: a proposta da tarefa feita (modo automático); ele aprova |
 | W.5 | Opções e medição | tudo o que o núcleo declara no menu, em português, 4 perfis; `medir-ps2.mjs --sistema`; `docs/WII-LISO.md` | ⏸ ele joga o jogo A 10 min liso | ✅ medido liso 21/11 (59,9 fps, p99 25 ms, 27–46 engasgos/min, 0 faltas); ⏸ ele joga 10 min |
-| W.6 | Celular como Wiimote | giroscópio = ponteiro, acelerômetro = chacoalhar, pela rede pareada | ⏸ ele joga apontando o celular | ⬜ depois |
+| W.6 | Celular como Wiimote: prova | sensores do libretro no `kof-nativo` (não DSU), mira por giroscópio ou inclinação, chacoalhar pelo acelerômetro, pela rede pareada | ⏸ ele joga apontando o celular | 🟨 22/11: jogado no jogo A (funciona; mira e Nunchuk corrigidos, ⏸ APK novo) |
+| W.7 | Wiimote: integração | movimento com sequência e hora, Nunchuk em outro celular, desligar sensores quando o celular sai | testes | ⬜ |
+| W.8 | Wiimote: experiência | tela do Wiimote/Nunchuk, recentrar, calibrar, estado, atraso e bateria | ⏸ prints | ⬜ |
+| W.9 | Wiimote: vários e confiável | 4 celulares, religar, atraso e variação medidos | números | ⬜ |
+| W.10 | Wiimote: jogos | jogos de teste Wii A–E, MotionPlus | ⏸ ele joga | ⬜ |
 
 ### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11; C.1–C.4 = tarefa N, 21/11)
 

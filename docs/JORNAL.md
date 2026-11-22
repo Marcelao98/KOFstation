@@ -21,6 +21,28 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-22 · W.6 · Prova do celular como Wiimote (jogada no jogo de teste Wii A)
+
+**Pedido:** "o celular como Wiimote, com Nunchuk, pelo Dolphin" (referência: o PepoMote); depois "faz o teste".
+**Feito:** o Dolphin do libretro já lê sensores por porta (`RETRO_ENVIRONMENT_GET_SENSOR_INTERFACE`), então não
+precisou de servidor DSU nem de app extra. `kof-nativo`: interface de sensores, mensagem `MOVIMENTO` (10: aceleração
+em g e giroscópio em rad/s, eixos do Wiimote), vigia de 150 ms; no 1º movimento a porta liga os sensores (manda de novo
+o tipo de controle pro núcleo religar). `domain/wiimote.ts`: eixos do celular → Wiimote, a mira (giroscópio, ou a
+inclinação quando o celular não tem; vale em pé ou deitado; parada enquanto chacoalha) e o 3º campo do canal `pad`
+("botões,eixos,movimento"; PC velho ignora). O celular (`stores/sensores.ts`, `devicemotion`) manda junto dos botões
+quando o PC está num jogo de Wii; a mira entra como o ponteiro do jogador. Controle de toque no modo controle: no
+Wii/GC o direcional vira o analógico (antes só apertava o D-pad: o Nunchuk não andava). Commit a5ae5a2.
+**Decidido:** caminho dos sensores do libretro, não o DSU (o DSU do núcleo troca o aparelho padrão do Wiimote e só
+pega reiniciando; fica pra quem usa PepoMote). Falta virar o D41 quando ele aprovar.
+**Medido / conferido:** `pnpm check` e o teste Rust novo ✓. Ele jogou (Galaxy A05s, sem giroscópio, pelo notebook):
+funcionou; a 1ª versão da mira só andava na horizontal com o celular em pé e o Nunchuk não andava (os dois
+corrigidos, APK novo ainda não jogado). APK montado com podman (ubuntu:24.04, os pacotes do CI); servido na rede.
+**Deu errado / aprendido:** o KDE Connect acha o celular mas não está pareado (não manda arquivo). Depois que o
+celular conecta, a porta fica com os sensores até fechar o jogo: inclinar/chacoalhar do teclado param (reabrir).
+O PS2 pelo celular tem o mesmo defeito do direcional (só D-pad); não mexido (controles só quando ele pedir).
+**Onde parou:** ⏸ ele joga o APK novo (mira nos dois eixos, Nunchuk andando, chacoalhar, o surf inclinando).
+Depois: desligar os sensores quando o celular sai; recentrar num botão; tarefa própria pros passos W.7–W.10.
+
 ## 2026-11-22 · O Wii com a experiência dos outros consoles (em andamento)
 
 **Pedido:** "deixa o Wii igualzinho aos outros: mesmas configurações, opções de emulação, menus, filtros; testa".
