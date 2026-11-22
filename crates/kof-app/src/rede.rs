@@ -29,7 +29,12 @@ impl Rede {
             if std::env::var_os("KOF_SEM_REDE").is_some() {
                 return Err("rede desligada (KOF_SEM_REDE)".into());
             }
-            let s = Servico::abrir(Config::nova(pasta_dados.join("rede"))).map_err(|e| e.to_string())?;
+            let mut cfg = Config::nova(pasta_dados.join("rede"));
+            // só pro tools/testar-mesa.mjs: um 2º KOFstation que se apresenta como celular (o APK diz `celular`)
+            if std::env::var("KOF_REDE_TIPO").as_deref() == Ok("celular") {
+                cfg.tipo = "celular".into();
+            }
+            let s = Servico::abrir(cfg).map_err(|e| e.to_string())?;
             let mut b = [0u8; 16];
             getrandom::fill(&mut b).map_err(|e| format!("sem números aleatórios: {e}"))?;
             let token: String = b.iter().map(|x| format!("{x:02x}")).collect();

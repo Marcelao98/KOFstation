@@ -29,6 +29,9 @@ pub struct Config {
     pub porta_udp: u16,
     /// pra onde o "achar" pergunta (`ip` ou `ip:porta`; nos testes, 127.0.0.1:porta)
     pub alvo_achar: String,
+    /// o que este aparelho diz que é na ficha e no "achar" (`pc` ou `celular`; o desktop é sempre `pc`, o
+    /// `testar-mesa` sobe um 2º KOFstation que finge ser o celular, como o APK)
+    pub tipo: String,
 }
 
 impl Config {
@@ -39,6 +42,7 @@ impl Config {
             porta_tcp: 8650,
             porta_udp: 8650,
             alvo_achar: "255.255.255.255".into(),
+            tipo: "pc".into(),
         }
     }
 }
@@ -654,7 +658,7 @@ impl Servico {
         let Some(id) = self.guardar_ficha(&ficha[4..], ip) else {
             return recusar(&mut s, "lista de aparelhos cheia");
         };
-        let minha = can.cifrar(&self.minha_ficha("pc"));
+        let minha = can.cifrar(&self.minha_ficha(&self.cfg.tipo));
         mandar_quadro(&mut s, &[&minha]);
         tracing::info!(target: "rede", "pareado: {id}");
         self.fechar_janela(None);
@@ -727,7 +731,7 @@ impl Servico {
             .cliente2(APP, &q[1..49].try_into().expect("48"))
             .ok_or_else(errado)?;
         mandar_quadro(&mut s, &[b"F", &m3]);
-        let minha = can.cifrar(&self.minha_ficha("pc"));
+        let minha = can.cifrar(&self.minha_ficha(&self.cfg.tipo));
         mandar_quadro(&mut s, &[&minha]);
         let ficha = ler_quadro(&mut s)
             .filter(|q| q.len() >= MAC + 36 && q.len() <= 400)
@@ -785,8 +789,7 @@ impl Servico {
             if !visivel || &b[..n] != pedido.as_bytes() || !casa {
                 continue;
             }
-            let f =
-                json!({"app": APP, "v": VERSAO, "id": self.id, "porta": self.porta_tcp(), "tipo": "pc", "nome": nome});
+            let f = json!({"app": APP, "v": VERSAO, "id": self.id, "porta": self.porta_tcp(), "tipo": self.cfg.tipo, "nome": nome});
             let _ = s.send_to(format!("KOFR!{f}").as_bytes(), de); // não chegou: quem perguntou pergunta de novo
         }
     }

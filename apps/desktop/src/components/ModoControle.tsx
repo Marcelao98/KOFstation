@@ -13,6 +13,7 @@ import {
   sairModoControle,
   usarMC,
 } from '../stores/modoControle';
+import { usarTelas } from '../stores/telas';
 import { acao } from '../app/acoes';
 
 export function ModoControle() {
@@ -27,6 +28,15 @@ export function ModoControle() {
   }, [s.stream]);
   useEffect(() => {
     document.body.classList.toggle('remoto-filtro', s.remoto && s.filtro);
+    if (!(s.remoto && s.filtro)) return;
+    // com o filtro, a imagem do PC é desenhada no #tela, que só aparece na tela do jogo: sem isso o celular via o
+    // Início por baixo (achado no tools/testar-mesa.mjs, 22/11). Ao sair, volta pro Início se não tem jogo aqui.
+    const t = usarTelas.getState();
+    if (t.atual !== 'jogo') t.abrir('jogo');
+    return () => {
+      const u = usarTelas.getState();
+      if (u.atual === 'jogo' && !u.temJogo) u.abrir('home');
+    };
   }, [s.remoto, s.filtro]);
   if (!s.ativo) return null;
   const cls = [
