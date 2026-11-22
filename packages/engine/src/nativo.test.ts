@@ -50,7 +50,7 @@ class WsFalsa {
   }
 }
 
-const abrir = (eventos = {}, sistema: 'ps1' | 'ps2' = 'ps1') =>
+const abrir = (eventos = {}, sistema: 'ps1' | 'ps2' | 'wii' | 'gc' = 'ps1') =>
   JogoNativo.abrir(
     {
       sistema,
@@ -65,10 +65,12 @@ const abrir = (eventos = {}, sistema: 'ps1' | 'ps2' = 'ps1') =>
   );
 
 describe('JogoNativo (página ↔ processo nativo)', () => {
-  it('rebobinar: ligado no PS1 (tarefa P, 21/11) e desligado no PS2 (foto de 48 MB)', async () => {
+  it('rebobinar: ligado no PS1 (tarefa P, 21/11) e desligado no PS2 (48 MB) e no Wii/GameCube (105 MB)', async () => {
     for (const [sis, ligado] of [
       ['ps1', true],
       ['ps2', false],
+      ['wii', false],
+      ['gc', false],
     ] as const) {
       const j = await abrir({}, sis);
       j.configurarRebobinar(true, 5, 6, 'fita');
