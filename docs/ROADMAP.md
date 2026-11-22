@@ -293,11 +293,11 @@ Continua a fase C (feita na N) e absorve W.7–W.9.
 
 | # | Passo | Entregável | Checkpoint | Estado |
 |---|---|---|---|---|
-| M.1 | A Mesa | uma tela (e o painel no 📡/☰) com os aparelhos em cartões, 🧠 Núcleo, 📺 Tela e as vagas J1–J4; "📺 Trazer a imagem pra cá" e "🎮 Entrar como jogador" em qualquer aparelho | ⏸ print/desenho aprovado | ⬜ |
-| M.2 | Multijogador | até 4 jogadores de aparelhos diferentes, entrar no meio, vaga reservada ao cair, atraso por jogador | e2e com 4 páginas | ⬜ |
-| M.3 | Wiimote: integração | sequência e hora, Nunchuk em outro celular, sensores desligam quando o celular sai, até 4 Wiimotes medidos | testes + tabela | ⬜ |
-| M.4 | **Calibração do Wiimote** | nada liga sozinho; assistente (meio, cantos, zona morta, chacoalhar, mão/posição, teste), guardada por aparelho, recentrar num botão | ⏸ ele calibra e joga | ⬜ |
-| M.5 | Robustez e docs | religar sozinho, mesa lembrada, `CONECTIVIDADE.md` | ⏸ ele joga a dois na rede de casa | ⬜ |
+| M.1 | A Mesa | uma tela (e o painel no 📡/☰) com os aparelhos em cartões, 🧠 Núcleo, 📺 Tela e as vagas J1–J4; "📺 Trazer a imagem pra cá" e "🎮 Entrar como jogador" em qualquer aparelho | ⏸ print/desenho aprovado | 🟡 feito (prints em `~/kof-medidas/prints/M1-*`), esperando ele ver |
+| M.2 | Multijogador | até 4 jogadores de aparelhos diferentes, entrar no meio, vaga reservada ao cair, atraso por jogador | e2e com 4 páginas | ✅ `e2e/mesa.spec.ts` |
+| M.3 | Wiimote: integração | sequência e hora, Nunchuk em outro celular, sensores desligam quando o celular sai, até 4 Wiimotes medidos | testes + tabela | 🟡 código e testes feitos (sequência, Nunchuk, SENSORES por porta); falta a tabela com celulares de verdade |
+| M.4 | **Calibração do Wiimote** | nada liga sozinho; assistente (meio, cantos, zona morta, chacoalhar, mão/posição, teste), guardada por aparelho, recentrar num botão | ⏸ ele calibra e joga | 🟡 feito (assistente, ⊕ recentrar, nada liga sozinho); esperando ele calibrar e jogar |
+| M.5 | Robustez e docs | religar sozinho, mesa lembrada, `CONECTIVIDADE.md` | ⏸ ele joga a dois na rede de casa | 🟡 vaga reservada, mesa lembrada e `CONECTIVIDADE.md` feitos; esperando ele jogar a dois |
 
 ### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11; C.1–C.4 = tarefa N, 21/11)
 
