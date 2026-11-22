@@ -21,6 +21,36 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-22 · M refeita do jeito novo: teste com dois KOFstation, imagem pro celular de volta, Wiimote calibrável
+
+**Pedido:** refazer a M pela seção "Refazer" (teste de verdade primeiro, um pedaço por vez); depois, com o celular na
+mão: "a imagem não transferiu pro celular" (funcionava antes das otimizações), o analógico do PS2 pelo celular, a
+música do Início tocando por baixo do jogo no APK, som com qualidade e a calibração do Wiimote "se a pessoa quiser".
+Meta do dia: ele e a irmã jogarem Wii Sports com dois celulares como Wiimote.
+**Feito:**
+- `tools/testar-mesa.mjs` (04fe01e): dois `kofstation` reais pela rede (kof-net), o B fingindo o celular (`?celular=1`
+  e `KOF_REDE_TIPO=celular`, novo `Config.tipo` no kof-net); confere B no J1 com o teclado dividindo o J1, ver o jogo
+  do PC, levar/voltar, olhando o que está no meio da tela (não só se o vídeo tem tamanho) e com o vsync do PC parado.
+- a) J1 pra quem chega (8301ac3): já valia; travado em teste do domain e no testar-mesa.
+- **Imagem preta no celular** (10e1541): desde a fila de quadros por vsync (08/11), com a janela do PC escondida,
+  coberta ou com a tela apagada o navegador para o `requestAnimationFrame` e nenhum quadro saía (wasm e nativo); o
+  celular conectava (ping ok) e ficava preto. Agora, sem vsync há mais de 100 ms, o quadro vai direto.
+- No celular, com o filtro: a imagem do PC aparece na tela do jogo (o Início ficava na frente), maior (escala cheia) e
+  o Início não aparece por trás do controle deitado (8301ac3).
+- 7e470b8: analógico vale o console do jogo do PC (PS2, PS1, N64; antes só Wii/GC); 🎯 calibrar a mira do Wiimote
+  (opcional, oferecido num aviso: "aqui é o meio" e sensibilidade guardada no celular; `Mira.sensibilidade`); a música
+  do Início para no celular ao sair dele e ao entrar no modo controle; Opus estéreo até 256 kbps na transmissão
+  (`opusComQualidade`, só jogos do navegador: o nativo não manda som pro celular).
+**Medido / conferido:** testar-mesa passa (sem a correção do vsync o vídeo nunca chega no B; com ela ~50 quadros/s);
+`pnpm check`, e2e de celular/rede/jukebox/abertura. Ele confirmou no celular: **o vídeo voltou**. O teste `opengl` do
+kof-nativo falha igual sem as mudanças (placa ocupada com o jogo dele aberto).
+**Deu errado / aprendido:** 1ª correção da imagem passou no teste e não no celular: o headless nunca esconde a janela
+(aba de trás continua `visible`); o print dele mostrou o ping ok com vídeo preto e aí a causa apareceu. Li errado "deu
+certo" (era do vídeo, não do Wiimote). Matei o próprio shell com `pkill -f` contendo o caminho: usar `pgrep -x`.
+**Onde parou:** ⏸ ele testa o APK novo (http://192.168.0.109:8099/KOFstation-novo.apk) com dois celulares no Wii
+Sports, o 🎯 e o analógico do PS2. Falta: "Jogar no PC / Jogar aqui" volta pro menu e trava; mapeamento dos botões do
+Wii (ele diz qual está ruim); aviso "não consegui guardar a pasta de ROMs" no celular; depois b) a Mesa só mostrando.
+
 ## 2026-11-22 · Tarefa M voltada inteira (quebrou no aparelho de verdade)
 
 **Pedido:** continuar a M depois da queda do PC; testando com o celular no Wii Sports, nada funcionou; "volta como

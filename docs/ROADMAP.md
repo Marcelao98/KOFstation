@@ -296,7 +296,7 @@ Continua a fase C (feita na N) e absorve W.7–W.9.
 | M.1 | A Mesa | uma tela (e o painel no 📡/☰) com os aparelhos em cartões, 🧠 Núcleo, 📺 Tela e as vagas J1–J4; "📺 Trazer a imagem pra cá" e "🎮 Entrar como jogador" em qualquer aparelho | ⏸ print/desenho aprovado | ⬜ |
 | M.2 | Multijogador | até 4 jogadores de aparelhos diferentes, entrar no meio, vaga reservada ao cair, atraso por jogador | e2e com 4 páginas | ⬜ |
 | M.3 | Wiimote: integração | sequência e hora, Nunchuk em outro celular, sensores desligam quando o celular sai, até 4 Wiimotes medidos | testes + tabela | ⬜ |
-| M.4 | **Calibração do Wiimote** | nada liga sozinho; assistente (meio, cantos, zona morta, chacoalhar, mão/posição, teste), guardada por aparelho, recentrar num botão | ⏸ ele calibra e joga | ⬜ |
+| M.4 | **Calibração do Wiimote** | nada liga sozinho; assistente (meio, cantos, zona morta, chacoalhar, mão/posição, teste), guardada por aparelho, recentrar num botão | ⏸ ele calibra e joga | 🟨 22/11: 🎯 opcional (meio + sensibilidade, guardada no celular); falta o assistente completo |
 | M.5 | Robustez e docs | religar sozinho, mesa lembrada, `CONECTIVIDADE.md` | ⏸ ele joga a dois na rede de casa | ⬜ |
 
 ### Fase C · Conectividade: aparelhos em cenários, como um Switch (pedido 18/11; C.1–C.4 = tarefa N, 21/11)

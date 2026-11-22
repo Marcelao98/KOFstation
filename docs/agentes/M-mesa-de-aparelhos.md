@@ -124,5 +124,8 @@ calibração (passos demais). **Regras novas:**
 
 ## Relatório
 
-*(o agente preenche: o que fez em cada passo, números (atraso por jogador, variação do Wiimote), prints, o que ficou
-de fora, comandos)*
+**22/11 (refazer):** linha de base pronta (`node tools/testar-mesa.mjs [--prints dir] [--ficar]`, depois de `pnpm build
+&& cargo build -p kof-app`). a) feita (já valia; travada em teste). Fora da lista, pedidos dele com o celular: imagem
+pro celular de volta (vsync parado com a janela escondida), analógico do PS2, música do Início, som, e o 🎯 de calibrar
+(meio + sensibilidade, opcional) — uma parte da d)/e). Próximos: b) a Mesa só mostrando; o resto da d)/e) depois que
+ele jogar a dois. Detalhes no JORNAL de 22/11.
