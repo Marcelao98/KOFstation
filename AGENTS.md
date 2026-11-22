@@ -48,6 +48,13 @@ núcleo Kof do SNES.
 
 ## Regras que não mudam
 
+- **Console novo = a experiência inteira do KOFstation** (o Marcelo, 22/11): menus (lateral, menu rápido no botão
+  direito, F2), filtros, molduras, proporção e escala, estados (F5/F8), salvar automático, opções de emulação com os
+  4 perfis, controles na tela de teclas, capas, celular como controle, tela cheia. Antes de dar a integração por
+  pronta, rode o roteiro com o jogo de verdade e mostre os prints:
+  `node tools/medir-ps2.mjs --sistema <sis> --conferir --janela` (lista em [EXPANDIR.md](docs/EXPANDIR.md), "Um
+  sistema novo"). Console pesado: medir liso como o PS2 ([NUCLEO-NATIVO-PESADO.md](docs/NUCLEO-NATIVO-PESADO.md)).
+
 - **Nunca** commitar, distribuir ou indicar onde baixar ROM, BIOS ou jogo (nem em teste ou doc). ROMs de teste são
   geradas pelos próprios testes.
 - **Não mexer no `kofstation-old`** (só leitura; nem apagar). **Nunca criar um repositório chamado `KOFSnes`** (os atualizadores

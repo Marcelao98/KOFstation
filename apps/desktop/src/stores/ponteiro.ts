@@ -1,6 +1,6 @@
 // 🖱 O mouse vira o ponteiro do Wiimote (tarefa W.4): com um jogo de Wii aberto, o mouse sobre a imagem manda a
-// posição (de -1 a 1 dos dois lados) e os botões (esquerdo = A, direito = B, do meio = chacoalhar, como no Dolphin).
-// No Wii o clique direito é o B: o ☰ menu rápido continua no F2 e no Select+Start.
+// posição (de -1 a 1 dos dois lados) e os botões (esquerdo = A, do meio = chacoalhar). O direito continua abrindo o
+// menu, como em todo console (o Marcelo, 22/11): o B do Wiimote fica no teclado/controle.
 import { usarJogo } from './jogo';
 
 interface ComPonteiro {
@@ -30,8 +30,8 @@ export function posicaoNaImagem(
   };
 }
 
-// botões do mouse (MouseEvent.buttons: 1 esquerdo, 2 direito, 4 do meio) → bits do ponteiro (0 esq, 1 dir, 2 meio)
-const bits = (b: number) => (b & 1) | (b & 2) | (b & 4);
+// botões do mouse (MouseEvent.buttons: 1 esquerdo, 4 do meio) → bits do ponteiro (0 esq, 2 meio); o direito fica pro menu
+const bits = (b: number) => (b & 1) | (b & 4);
 
 let ultimo = { x: 0, y: 0, b: 0, dentro: false };
 function mandar(e: MouseEvent) {
@@ -53,15 +53,4 @@ export function ligarPonteiro(): void {
     if (mandar(e) && e.button === 1) e.preventDefault(); // o do meio não vira "rolar a página"
   });
   addEventListener('mouseup', mandar);
-  // no Wii, o direito sobre a imagem é o B: não abre o menu rápido
-  addEventListener(
-    'contextmenu',
-    (e) => {
-      if (querPonteiro() && (e.target as Element | null)?.closest?.('#tela')) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-      }
-    },
-    { capture: true },
-  );
 }

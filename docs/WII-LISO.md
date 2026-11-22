@@ -15,8 +15,8 @@
 - **Saves:** `<dados>/nativo/saves/dolphin/User` (NAND do Wii em `Wii/`, cartões do GameCube em `GC/<região>/`, cache
   de shaders em `Cache/Shaders`, que fica de uma vez pra outra).
 - **Controles (W.4, a proposta):** Wiimote com Nunchuk; o mouse sobre a imagem é o ponteiro (`dolphin_ir_mode` = 2, a
-  página manda `PONTEIRO`, o processo responde `RETRO_DEVICE_POINTER`), clique esquerdo = A, direito = B, do meio =
-  chacoalhar; no teclado setas = Nunchuk, X = A, Z = B, S = C, A = Z, R = chacoalhar, Enter = 1, Shift = 2, Q = −,
+  página manda `PONTEIRO`, o processo responde `RETRO_DEVICE_POINTER`), clique esquerdo = A, do meio = chacoalhar, o direito abre o menu (como nos
+  outros consoles); no teclado setas = Nunchuk, X = A, Z = B, S = C, A = Z, R = chacoalhar, Enter = 1, Shift = 2, Q = −,
   W = +. GameCube como o console (W = Z, E/R = L/R, I J K L = C-stick).
 
 ## Como medir

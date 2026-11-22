@@ -64,6 +64,18 @@ apps/desktop (telas React, stores Zustand)  →  packages/app-core (casos de uso
    adaptador do antigo quadro a quadro).
 5. Núcleo nativo pesado (PS2, GameCube/Wii…): leia antes [NUCLEO-NATIVO-PESADO.md](NUCLEO-NATIVO-PESADO.md)
    (caminho do quadro, estados grandes, cartão de memória, opções geradas, como medir).
+6. **A experiência inteira, conferida** (regra do AGENTS.md): o console novo tem tudo o que os outros têm. Confira a
+   lista, uma por uma:
+   - capas (`domain/capas.ts`), nome e pasta na biblioteca, Wikidata (`kof-files/src/sobre.rs`);
+   - rótulos dos botões na tela de teclas (`domain/entrada.ts`) e no controle de toque/celular
+     (`ControleDeToque.tsx`, `celular.css`);
+   - opções de emulação com os 4 perfis (`domain/opcoes-nucleo.ts`) e as fixas (`fixasDe`);
+   - `semRebob` **e** o `SEM_REBOBINAR` do `engine/nativo.ts` se o estado passar de ~24 MB;
+   - o botão direito abre o menu rápido (nada do jogo pode tomar o botão direito);
+   - e o roteiro com o jogo de verdade, que passa por filtros, proporção, escala, molduras, painel de imagem, menu
+     rápido, F5/F8, estados salvos, opções, controles, voltar ao jogo, tela cheia e pausa, com um print de cada:
+     `KOF_JOGO_<SIS>_A=<jogo> KOF_APP=<kofstation> node tools/medir-ps2.mjs --sistema <sis> --conferir --janela`
+     (prints em `~/kof-medidas/prints/conferir-<sis>-*.png`).
 
 ### Filtro de imagem ou moldura
 

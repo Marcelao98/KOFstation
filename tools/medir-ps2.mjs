@@ -67,6 +67,8 @@ const dados = join(medidas, 'dados');
 // repositório) aparece o nome de verdade; o que este programa imprime usa só "Jogo pesado A/B".
 const raiz = resolve(jogo, '..', '..', '..');
 const NA_TELA = basename(jogo).replace(/\.[^.]+$/, '');
+// a biblioteca pode mostrar o título limpo (sem as tags "(USA) (En,Fr,Es)"): procura e clica por ele
+const BUSCA = NA_TELA.replace(/\s*[([].*$/, '');
 mkdirSync(join(medidas, 'resultados'), { recursive: true });
 
 // O app abre o navegador dele; este embrulho só acrescenta a porta de depuração pra gente olhar a página.
@@ -443,16 +445,20 @@ async function rodada(n) {
     await page.keyboard.press('Control+KeyL');
     await page.waitForSelector('#roms li', { timeout: 30000 }).catch(() => {});
     // a lista mostra só os primeiros 150: procura pelo nome
-    await page.locator('input[placeholder^="procure"]').first().fill(NA_TELA);
+    await page.locator('input[placeholder^="procure"]').first().fill(BUSCA);
     await dormir(800);
     await print(`${rotulo}-${qual}-${n}-0-biblioteca`);
-    await page.locator('#roms li', { hasText: NA_TELA }).first().click();
+    await page.locator('#roms li', { hasText: BUSCA }).first().click();
     await page.keyboard.press('Enter');
     await dormir(4000);
     await print(`${rotulo}-${qual}-${n}-1-abrindo`);
-    await page.waitForFunction((nome) => document.querySelector('#st-jogo')?.textContent === nome, NA_TELA, {
-      timeout: 90000,
-    });
+    await page.waitForFunction(
+      (nome) => (document.querySelector('#st-jogo')?.textContent ?? '').includes(nome),
+      BUSCA,
+      {
+        timeout: 90000,
+      },
+    );
     const aberto = Date.now();
     await dormir(1500);
     const modo = page.locator('#modo-tela button').first();
