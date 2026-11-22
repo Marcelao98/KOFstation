@@ -102,6 +102,26 @@ imagem pra outro aparelho com um toque, **dois ou mais celulares entram como Wii
 nada ligou sozinho), um sai e volta pra mesma vaga, e ninguém perde o jogo. Testes unit (modelo e calibração), do
 `app-core` (transporte falso), e2e com 3–4 páginas e o teste Rust dos sensores por porta.
 
+## Refazer (22/11, depois da 1ª tentativa voltada)
+
+A 1ª versão (branch `agente-m/mesa-v1`, só pra consulta) passou nos e2e simulados e quebrou no celular: o PC ficava
+no J1 e o celular caía no J2 (o Wii Sports só ouve o Wiimote 1); "📺 ver o jogo do PC" e "trazer a imagem" pararam
+(suspeita: `stores/mesa.ts` reaplicando o arranjo a cada `lista` da rede); o Wiimote só ligava depois de vaga +
+calibração (passos demais). **Regras novas:**
+
+1. **Primeiro o teste de verdade**, antes de qualquer código da M: `tools/testar-mesa.mjs`, no molde do
+   `tools/testar-aparelhos.mjs`: **dois `kofstation --sem-navegador` reais** (cada um com o seu `XDG_DATA_HOME`; o 2º
+   pega a porta TCP seguinte sozinho), as páginas no Chromium, pareando pelo código da tela, com um jogo gerado pelo
+   teste aberto em A. O B faz o papel do celular (ver como o app decide "é celular": se precisar, o B finge a ponte do
+   APK com `addInitScript`). Confere, **na versão de hoje (sem M)**: o B como controle chega no **J1** e os botões
+   andam; "ver o jogo do PC" no B mostra a imagem; "trazer a imagem" leva e volta. Isso é a linha de base: tem que
+   continuar passando a cada passo.
+2. **Um pedaço por vez**, cada um no teste de verdade e jogado pelo Marcelo antes do próximo:
+   a) J1 pra quem chega (o teclado do PC divide o J1); b) a Mesa só **mostra** (sem mandar no arranjo); c) trocar tipo
+   e vaga pela Mesa; d) Wiimote: sensores ligam quando a vaga é Wiimote, **com "calibrar agora" oferecido sozinho**
+   (não exigido); e) o assistente de calibração; f) multijogador (2º celular no J2, cair e voltar).
+3. **Fácil pro usuário final:** contar os toques; o celular que conecta num jogo de Wii já é o Wiimote do J1.
+
 ## Relatório
 
 *(o agente preenche: o que fez em cada passo, números (atraso por jogador, variação do Wiimote), prints, o que ficou

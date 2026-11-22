@@ -6,6 +6,9 @@
 |---|---|---|
 | [M · Mesa de aparelhos: ver, configurar e trocar tudo num lugar só; multijogador até 4; Wiimote com calibração](M-mesa-de-aparelhos.md) | `agente-m/mesa` (da `claude/busy-ritchie-wrvk8h`, que já tem N, P e W) | "controlar dispositivos como uma rede, fácil; core, tela e o resto controles (que podem ser Wiimotes); bom pra multiplayer; e um modo de calibração pro Wiimote, sem ligar automático" |
 
+**22/11, refazer:** a 1ª versão quebrou no celular e foi voltada. Comece pela seção "Refazer" da tarefa (o teste com
+dois KOFstation de verdade antes de qualquer código) e **não** use o modo automático: um pedaço por vez, jogado.
+
 Pare e mostre ao Marcelo ao fim de cada passo (ou siga no modo automático, abaixo); no fim, preencha o Relatório da
 tarefa, atualize o ROADMAP e o JORNAL e faça push da branch. Não abra PR (ele pede ao orquestrador).
 
