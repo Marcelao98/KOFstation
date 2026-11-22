@@ -49,10 +49,10 @@ describe('arranjos prontos', () => {
 });
 
 describe('validar', () => {
-  it('no máximo 3 aparelhos e todos na rede', () => {
-    const quatro = { nucleo: EU, tela: 'note', controles: ['cel1', 'cel2'] };
-    expect(aparelhosDoArranjo(quatro)).toHaveLength(4);
-    expect(validarArranjo(quatro, lista, EU)).toEqual({ ok: false, motivo: 'no máximo 3 aparelhos de cada vez' });
+  it('no máximo 6 aparelhos (núcleo, tela e 4 jogadores) e todos na rede', () => {
+    const sete = { nucleo: EU, tela: 'note', controles: ['cel1', 'cel2', 'c3', 'c4', 'c5'] };
+    expect(aparelhosDoArranjo(sete)).toHaveLength(7);
+    expect(validarArranjo(sete, lista, EU)).toEqual({ ok: false, motivo: 'no máximo 6 aparelhos de cada vez' });
     expect(validarArranjo({ nucleo: EU, tela: 'cel2', controles: [EU] }, lista, EU)).toEqual({
       ok: false,
       motivo: 'Galaxy não está na rede agora',

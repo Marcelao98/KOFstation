@@ -43,8 +43,15 @@ export const PAPEIS: readonly { p: Papel; i: string; t: string }[] = [
   { p: 'controle', i: '🎮', t: 'Controle' },
 ];
 
-/** No máximo 3 aparelhos distintos num arranjo (o pedido de 21/11). */
-export const MAX_APARELHOS = 3;
+/** Os papéis de imagem (🧠 Núcleo e 📺 Tela): no máximo dois aparelhos. */
+export const MAX_PAPEIS_IMAGEM = 2;
+/** Até quatro jogadores, cada um do seu aparelho (tarefa M, 22/11). */
+export const MAX_JOGADORES = 4;
+/**
+ * No máximo 6 aparelhos distintos: núcleo e tela + os quatro jogadores. Era 3 (o pedido de 21/11), que não dava pra
+ * quatro jogadores (tarefa M); os arranjos prontos da tarefa N continuam com até 3.
+ */
+export const MAX_APARELHOS = MAX_PAPEIS_IMAGEM + MAX_JOGADORES;
 
 /** Consoles que precisam do PC pra rodar (núcleo nativo pesado). */
 export const SO_NO_PC: readonly string[] = ['ps2', 'wii', 'gc'];
