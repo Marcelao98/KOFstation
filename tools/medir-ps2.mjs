@@ -164,6 +164,27 @@ function ligarDiagnostico() {
   writeFileSync(arq, JSON.stringify(c, null, 2));
 }
 
+/** Resumo do 🩺 da última sessão (segundos.csv, quadros.csv, engasgos.csv), depois de `pula` segundos. */
+function resumoDoDiagnostico(pula) {
+  const raizDiag = join(dados, 'KOFstation', 'diagnostico');
+  if (!existsSync(raizDiag)) return 'sem diagnóstico';
+  const ult = readdirSync(raizDiag)
+    .map((n) => join(raizDiag, n))
+    .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0];
+  const seg = lerCsv(join(ult, 'segundos.csv')).filter((r) => r.t_s > pula);
+  const q = lerCsv(join(ult, 'quadros.csv')).filter((r) => r.t_ms / 1000 > pula);
+  const eng = lerCsv(join(ult, 'engasgos.csv')).filter((r) => r.t_ms / 1000 > pula);
+  const dur = seg.length || 1;
+  const iv = q.map((r) => r.intervalo_ms);
+  const nu = q.map((r) => r.nucleo_ms);
+  const faltas = (q.at(-1)?.faltas ?? 0) - (q[0]?.faltas ?? 0);
+  return (
+    `${seg.length} s · fps ${r1(media(seg.map((r) => r.fps)))} · quadro p50/p95/p99 ${r1(percentil(iv, 50))}/` +
+    `${r1(percentil(iv, 95))}/${r1(percentil(iv, 99))} ms · engasgos ${Math.round((eng.length * 60) / dur)}/min · ` +
+    `núcleo p50/p99 ${r1(percentil(nu, 50))}/${r1(percentil(nu, 99))} ms · faltas de som ${faltas}`
+  );
+}
+
 const estado = arg('estado', '');
 const TECLAS = tem('teclas')
   ? [
@@ -418,6 +439,8 @@ async function rodada(n) {
         if (s < segundos) await dormir(10000);
       }
       console.log('sem CDP (RAM+swap MB):\n  ' + linhas.join('\n  '));
+      // o ritmo vem do 🩺 diagnóstico que o app grava sozinho (não depende da depuração): só o trecho medido
+      console.log('ritmo (do 🩺, sem o aquecimento): ' + resumoDoDiagnostico(aquecer));
       clearInterval(relogio);
       return;
     }

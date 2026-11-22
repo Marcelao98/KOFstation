@@ -21,6 +21,19 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-21 (madrugada) · O Wii A liso (o caminho do PS2 já servia)
+
+**Pedido:** "tá rodando mas travando muito; replica o que a gente fez no PS2 liso, não inventa moda".
+**Feito:** `SEM_REBOBINAR` com `gc` e `wii` (a3ba9c3; o processo tirava uma foto de 105 MB antes de recusar, o mesmo
+erro do PS2 em 19/11); `medir-ps2.mjs --sem-cdp` agora resume o ritmo pelo 🩺 diagnóstico. Nenhuma opção mudou.
+**Medido:** jogo de teste Wii A pelo app, Firefox fechado, `--sem-cdp`: **59,9 fps, p99 24,7–25,2 ms, 27–46
+engasgos/min, 0 faltas de som**, núcleo p50/p99 5,1/7,7 ms (PS2 A: 59,9 fps, p99 24,5, 18–61/min). Tabela no
+`docs/WII-LISO.md`.
+**Aprendido:** o "travando" era memória: Firefox aberto + a depuração do medidor guardando cada quadro de 1,35 MB; o
+sistema matou o app duas vezes (OOM no log do kernel). Ubershaders assíncronos pioraram (vídeo integrado).
+**Onde parou:** ⏸ ele jogar 10 min (com o Firefox fechado) e aprovar os controles; W.3 (save depois de fechar) falta
+conferir com um save do jogo.
+
 ## 2026-11-21 (noite) · Modo automático N → P → W: **pra você conferir**
 
 ### Pra você conferir (passo a passo)

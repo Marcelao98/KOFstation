@@ -136,6 +136,9 @@ passa de 16,6 ms, nada do lado do app resolve; mudar opção (resolução, MTVU,
   empacotador só copia arquivos soltos da pasta) e o app extrai uma vez.
 - **Ponteiro:** mensagem `PONTEIRO` nova da página pro processo; o núcleo lê `RETRO_DEVICE_POINTER` (posição absoluta
   de −32767 a 32767) e os botões pelo `RETRO_DEVICE_MOUSE`.
+- **Medir sem a depuração do Chrome (`--sem-cdp`)** num console de quadro grande: o CDP guarda cada quadro e o sistema
+  matou o app por falta de memória (21/11). O ritmo sai do 🩺 diagnóstico. E **conferir o `SEM_REBOBINAR`** ao pôr
+  console novo de estado grande (o Wii repetiu o erro de 19/11 do PS2 até 21/11).
 - **O e2e reaproveita um `vite preview` que sobrou na porta 4173** (`reuseExistingServer`): se um e2e foi interrompido,
   feche o servidor velho antes, ou a página testada é a do build antigo.
 
