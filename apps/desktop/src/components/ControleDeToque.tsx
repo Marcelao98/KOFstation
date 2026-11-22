@@ -119,10 +119,10 @@ export function ControleDeToque() {
       el.style.setProperty('--kx', String(r.ax));
       el.style.setProperty('--ky', String(r.ay));
       el.dataset.dir = r.nome;
-      // no modo controle o jogo está no PC (o celular não tem jogo aberto): no Wii e no GameCube vale o console do PC,
-      // senão o direcional nunca vira o analógico (o Nunchuk) e o personagem não anda
+      // no modo controle o jogo está no PC (o celular não tem jogo aberto): vale o console do jogo do PC, senão o
+      // direcional nunca vira o analógico e o personagem não anda (W.6 fez no Wii/GC; 22/11 o PS2 e os outros também)
       const mc = usarMC.getState();
-      const doPc = mc.ativo && (mc.sis === 'wii' || mc.sis === 'gc');
+      const doPc = mc.ativo && !!mc.sis;
       const an = ANALOGICO[doPc ? mc.sis : (usarJogo.getState().info?.sistema ?? 'snes')];
       if (an) {
         toque.eixos[0] = r.ax;

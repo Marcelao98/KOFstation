@@ -57,6 +57,24 @@ describe('celular como Wiimote (W.6)', () => {
     expect(p.x).toBe(-1);
   });
 
+  it('calibração: a sensibilidade 2 anda o dobro pro mesmo giro; recentrar volta pro meio', () => {
+    const giro = giroDoCelular(10, 0, 0); // 10°/s por 0,5 s = 5°
+    const normal = new Mira();
+    const dobro = new Mira();
+    dobro.sensibilidade(2);
+    let a = { x: 0, y: 0 };
+    let b = { x: 0, y: 0 };
+    for (let i = 0; i < 50; i++) {
+      a = normal.atualizar(PARADO.acel, giro, 0.01);
+      b = dobro.atualizar(PARADO.acel, giro, 0.01);
+    }
+    expect(b.x).toBeCloseTo(a.x * 2, 5);
+    dobro.recentrar();
+    expect(dobro.atualizar(PARADO.acel, [0, 0, 0], 0.01)).toEqual({ x: 0, y: 0 });
+    dobro.sensibilidade(Number.NaN); // lixo volta pro padrão
+    dobro.sensibilidade(99);
+  });
+
   it('vai e volta pela rede; lixo é ignorado', () => {
     const m = {
       acel: [0.1, -0.2, 0.98] as [number, number, number],

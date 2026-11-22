@@ -556,3 +556,9 @@ usarJogo.subscribe((s, a) => {
 usarJogo.subscribe((s, a) => {
   if (s.jogo && s.jogo !== a.jogo) usarJukebox.getState().pararInicio();
 });
+// no celular (APK), a música do Início é só do Início: saiu dele, para (22/11, o Marcelo: "ao entrar em qualquer tela
+// isso devia parar"; jogando o PC pelo celular ela continuava por baixo do jogo)
+usarTelas.subscribe((s, a) => {
+  if (a.atual === 'home' && s.atual !== 'home' && document.documentElement.classList.contains('celular'))
+    usarJukebox.getState().pararInicio();
+});

@@ -289,6 +289,8 @@ export function entrarModoControle(op: { pc?: string; rede?: string; jogo?: Reco
   });
   consoleDoControle('', '');
   marcar();
+  // a música do Início não toca por baixo do controle nem do jogo do PC (import tardio: a jukebox puxa o jogo)
+  void import('./jukebox').then((j) => j.usarJukebox.getState().pararInicio());
   if (pcRede) usarMC.setState({ status: 'chamando ' + pcRede.nome + '…' });
   m.timer = setInterval(enviar, 8) as unknown as number;
   window.dispatchEvent(new Event('resize'));

@@ -1,7 +1,7 @@
 // A tela "Controle do PC" do celular (#modo-controle do antigo): barra com o estado, a "telinha" com o console e o jogo que o
 // PC abriu, o endereço e a senha (só enquanto nunca conectou, ou no ⓘ), os atalhos ⏪ 💾 📂 🏠 ☰ e, no Jogar no PC, o vídeo,
 // o ping e o menu do PC. O controle de toque (ControleDeToque) fica por baixo, como no antigo.
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   alternarFiltroRemoto,
   atalhoPc,
@@ -14,10 +14,12 @@ import {
   usarMC,
 } from '../stores/modoControle';
 import { usarTelas } from '../stores/telas';
+import { guardarSensibilidadeMira, recentrarMira, sensibilidadeMira } from '../stores/sensores';
 import { acao } from '../app/acoes';
 
 export function ModoControle() {
   const s = usarMC();
+  const [calibrar, setCalibrar] = useState(false);
   const video = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const v = video.current;
@@ -122,7 +124,13 @@ export function ModoControle() {
         <button data-at="menu" aria-label="menu" onClick={menuDoPc}>
           ☰
         </button>
+        {s.sis === 'wii' && (
+          <button data-at="mira" aria-label="calibrar a mira do Wiimote" onClick={() => setCalibrar((c) => !c)}>
+            🎯
+          </button>
+        )}
       </div>
+      {calibrar && s.sis === 'wii' && <CalibrarMira fechar={() => setCalibrar(false)} />}
       {s.remoto && (
         <>
           <video className="mc-video" ref={video} playsInline autoPlay />
@@ -168,6 +176,42 @@ export function ModoControle() {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/** Calibração do Wiimote (opcional, 22/11): o meio da tela e a sensibilidade da mira, guardada neste celular. */
+function CalibrarMira({ fechar }: { fechar: () => void }) {
+  const [sens, setSens] = useState(sensibilidadeMira);
+  const [meio, setMeio] = useState(false);
+  const mudar = (d: number) => setSens(guardarSensibilidadeMira(sens + d));
+  return (
+    <div className="mc-calibrar" role="dialog" aria-label="calibrar a mira">
+      <b>🎯 Calibrar a mira (opcional)</b>
+      <small>Aponte o celular pro meio da TV e toque:</small>
+      <button
+        className="grande"
+        data-r="meio"
+        onClick={() => {
+          recentrarMira();
+          setMeio(true);
+        }}
+      >
+        {meio ? '✅ Meio marcado (toque de novo se quiser)' : '🎯 Aqui é o meio'}
+      </button>
+      <small>Sensibilidade: mais alta = a mira anda mais com menos movimento</small>
+      <div className="mc-sens">
+        <button data-r="sens-menos" onClick={() => mudar(-0.25)}>
+          −
+        </button>
+        <b>{sens.toFixed(2).replace('.', ',')}×</b>
+        <button data-r="sens-mais" onClick={() => mudar(0.25)}>
+          +
+        </button>
+      </div>
+      <button className="grande sec" data-r="pronto" onClick={fechar}>
+        Pronto
+      </button>
     </div>
   );
 }

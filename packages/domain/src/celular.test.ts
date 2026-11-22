@@ -40,4 +40,16 @@ describe('Jogar no PC', () => {
     expect(acharJogoPedido(l, { arquivo: 'sonic.bin', sistema: 'md' })?.nome).toBe('Sonic');
     expect(acharJogoPedido(l, { nome: 'Zelda', sistema: 'snes' })).toBeUndefined();
   });
+
+  it('o Opus do som ganha estéreo e banda de música; sem Opus, nada muda', async () => {
+    const { opusComQualidade } = await import('./celular');
+    const sdp =
+      'm=audio 9 UDP/TLS/RTP/SAVPF 111\r\na=rtpmap:111 opus/48000/2\r\na=fmtp:111 minptime=10;useinbandfec=1\r\n';
+    const r = opusComQualidade(sdp);
+    expect(r).toContain('a=fmtp:111 minptime=10;useinbandfec=1;stereo=1;sprop-stereo=1;maxaveragebitrate=256000\r\n');
+    expect(opusComQualidade(r)).toBe(r); // de novo: igual
+    const sem = 'm=audio 9 UDP/TLS/RTP/SAVPF 111\r\na=rtpmap:111 opus/48000/2\r\n';
+    expect(opusComQualidade(sem)).toContain('a=rtpmap:111 opus/48000/2\r\na=fmtp:111 stereo=1;');
+    expect(opusComQualidade('m=video 9 x 96\r\n')).toBe('m=video 9 x 96\r\n');
+  });
 });

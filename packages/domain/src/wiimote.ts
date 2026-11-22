@@ -53,6 +53,13 @@ export class Mira {
   private y = 0;
   private neutro: { lado: number; frente: number } | null = null;
   private filtro: { lado: number; frente: number } | null = null;
+  /** calibração (opcional): quanto a mira anda pro mesmo movimento (1 = padrão; 2 = o dobro, mexe menos o braço) */
+  private sens = 1;
+
+  /** A sensibilidade da calibração, entre 0,25 e 3. */
+  sensibilidade(s: number): void {
+    this.sens = Number.isFinite(s) ? Math.max(0.25, Math.min(3, s)) : 1;
+  }
 
   recentrar(): void {
     this.x = 0;
@@ -66,8 +73,8 @@ export class Mira {
     if (giro) {
       const d = Math.min(Math.max(dt, 0), 0.1);
       // +Z gira o nariz pra esquerda (mira pra esquerda); +X abaixa o nariz (mira pra baixo)
-      this.x = lim(this.x - ((giro[2] ?? 0) * d) / GIRO_X, 1);
-      this.y = lim(this.y + ((giro[0] ?? 0) * d) / GIRO_Y, 1);
+      this.x = lim(this.x - ((giro[2] ?? 0) * d * this.sens) / GIRO_X, 1);
+      this.y = lim(this.y + ((giro[0] ?? 0) * d * this.sens) / GIRO_Y, 1);
       return { x: this.x, y: this.y };
     }
     const [ax = 0, ay = 0, az = 1] = acel;
@@ -86,8 +93,8 @@ export class Mira {
       : { lado, frente };
     this.filtro = f;
     this.neutro ??= f;
-    this.x = lim((f.lado - this.neutro.lado) / INCLINA_X, 1);
-    this.y = lim(-delta(f.frente, this.neutro.frente) / INCLINA_Y, 1);
+    this.x = lim(((f.lado - this.neutro.lado) * this.sens) / INCLINA_X, 1);
+    this.y = lim((-delta(f.frente, this.neutro.frente) * this.sens) / INCLINA_Y, 1);
     return { x: this.x, y: this.y };
   }
 }

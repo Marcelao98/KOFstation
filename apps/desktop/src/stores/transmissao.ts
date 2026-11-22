@@ -4,7 +4,7 @@
 // (o PC fica mudo), botões = canal de dados sem fila (os 6 bytes do celular como controle). Só rede de casa: sem
 // STUN/TURN. Também: 📱 Levar pro celular / 📺 Voltar pra TV no menu rápido e os atalhos do celular (💾 ⟲ 🏠 e o menu).
 import { listarJogos } from '@kof/app-core';
-import { acharJogoPedido, escalaTransmissao, padDoServidor, trocarLocal } from '@kof/domain';
+import { acharJogoPedido, escalaTransmissao, opusComQualidade, padDoServidor, trocarLocal } from '@kof/domain';
 import { Jogo } from '@kof/engine';
 import { create } from 'zustand';
 import { acao } from '../app/acoes';
@@ -91,7 +91,7 @@ async function pedidoDoCelular(de: string, p: { t?: string; jogo?: Record<string
   } else if (p.t === 'resposta' && t && t.de === de) {
     const pc = t.pc;
     await pc
-      .setRemoteDescription({ type: 'answer', sdp: trocarLocal(p.sdp ?? '', ipDoAparelho(de)) })
+      .setRemoteDescription({ type: 'answer', sdp: opusComQualidade(trocarLocal(p.sdp ?? '', ipDoAparelho(de))) })
       .catch((e: Error) => pararTransmissao('resposta inválida: ' + e.message));
   } else if (p.t === 'fim' && t?.de === de) {
     pararTransmissao();
@@ -148,6 +148,7 @@ async function comecarTransmissao(de: string) {
   const jogo = usarJogo.getState().jogo;
   const som = jogo instanceof Jogo ? jogo.somPraTransmitir() : null; // o nativo toca no processo dele (sem som no celular)
   const somTrilha = som?.stream.getAudioTracks()[0];
+  if (somTrilha) somTrilha.contentHint = 'music'; // não é voz: sem cortar silêncio nem "limpar" o som
   if (som && somTrilha) pc.addTransceiver(somTrilha, { direction: 'sendonly', streams: [video] });
   const dc = pc.createDataChannel('botoes', { ordered: false, maxRetransmits: 0 });
   dc.binaryType = 'arraybuffer';

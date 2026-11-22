@@ -52,6 +52,38 @@ export function escalaTransmissao(l: number, a: number): number {
   return Math.max(1, Math.min(4, Math.floor(1280 / Math.max(l, a, 1))));
 }
 
+/**
+ * O som do jogo com qualidade de música (22/11): por padrão o Opus do WebRTC sai como voz (mono, ~32 kbps). Na
+ * resposta do celular, o Opus ganha estéreo e até 256 kbps (o PC, que manda, obedece o que a resposta pede).
+ */
+export function opusComQualidade(sdp: string): string {
+  const pt = /a=rtpmap:(\d+) opus\/48000\/2/i.exec(sdp)?.[1];
+  if (!pt) return sdp;
+  const extra = { stereo: '1', 'sprop-stereo': '1', maxaveragebitrate: '256000', useinbandfec: '1' };
+  const linha = new RegExp(`^a=fmtp:${pt} (.*)$`, 'm');
+  const m = linha.exec(sdp);
+  if (!m) {
+    const pos = sdp.search(new RegExp(`a=rtpmap:${pt} opus[^\r\n]*\r?\n`, 'i'));
+    const fim = sdp.indexOf('\n', pos) + 1;
+    const nl = sdp.includes('\r\n') ? '\r\n' : '\n';
+    const fmtp =
+      `a=fmtp:${pt} ` +
+      Object.entries(extra)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(';');
+    return sdp.slice(0, fim) + fmtp + nl + sdp.slice(fim);
+  }
+  const atuais = new Map(
+    (m[1] ?? '')
+      .trim()
+      .split(';')
+      .filter(Boolean)
+      .map((kv) => kv.split('=') as [string, string]),
+  );
+  for (const [k, v] of Object.entries(extra)) atuais.set(k, v);
+  return sdp.replace(linha, `a=fmtp:${pt} ` + [...atuais].map(([k, v]) => `${k}=${v}`).join(';'));
+}
+
 /** O Chrome esconde o IP da rede de casa atrás de um nome .local: troca pelo IP que a rede já conhece. */
 export function trocarLocal(sdp: string, ip?: string): string {
   return ip ? sdp.replace(/[0-9a-f-]{36}\.local/gi, ip) : sdp;

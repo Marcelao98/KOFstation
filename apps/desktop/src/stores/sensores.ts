@@ -2,6 +2,8 @@
 // APK é segura, então o navegador entrega sem pedir) e calcula a mira. O modo controle manda junto dos botões, no
 // canal `pad`, só quando o jogo aberto no PC é de Wii.
 import { acelDoCelular, giroDoCelular, Mira, type MovimentoWii } from '@kof/domain';
+import { usarAvisos } from './avisos';
+import { config } from './config';
 
 const mira = new Mira();
 let ligado = false;
@@ -32,7 +34,10 @@ export function ligarSensores(sim: boolean): void {
   if (sim === ligado || typeof window === 'undefined') return;
   ligado = sim;
   if (sim) {
+    mira.sensibilidade(sensibilidadeMira());
     mira.recentrar();
+    // calibrar é opcional: só oferece (o 🎯 da barra do controle)
+    usarAvisos.getState().avisar('🎮 Este celular é o Wiimote. Quer calibrar a mira? Toque no 🎯 (opcional)', 5000);
     antes = 0;
     addEventListener('devicemotion', aoMexer);
   } else {
@@ -51,3 +56,19 @@ export const temGiroscopio = (): boolean | null => giroscopio;
 
 /** Recentrar a mira (o meio da tela é pra onde o celular aponta agora). */
 export const recentrarMira = (): void => mira.recentrar();
+
+/** Calibração (opcional): a sensibilidade da mira deste celular (1 = padrão), guardada nele. */
+export function sensibilidadeMira(): number {
+  const v = Number(config().ler('wiiSensibilidade') ?? '1');
+  return Number.isFinite(v) && v > 0 ? v : 1;
+}
+
+export function guardarSensibilidadeMira(v: number): number {
+  const s = Math.round(Math.max(0.25, Math.min(3, v)) * 100) / 100;
+  config().guardar('wiiSensibilidade', String(s));
+  mira.sensibilidade(s);
+  return s;
+}
+
+/** Os sensores estão ligados (o celular é o Wiimote agora)? */
+export const sensoresLigados = (): boolean => ligado;
