@@ -3,7 +3,9 @@
 // dos últimos 600 quadros (barras empilhadas por etapa, como o do PCSX2).
 import { intervalos, LIMITE_ENGASGO, NOME_DA_ETAPA, type RegistroQuadro } from '@kof/domain';
 import { useEffect, useRef } from 'react';
+import { variacaoDoMovimento } from '../stores/celular';
 import { medidorDoJogo, usarJogo } from '../stores/jogo';
+import { piorAtraso } from '../stores/mesa';
 
 /** Cores das etapas no gráfico (fixas: o painel é sempre preto, como o do antigo). */
 export const CORES_DAS_ETAPAS = {
@@ -67,6 +69,8 @@ export function Desempenho() {
   if (!desempenho || !jogo || !medicao) return null;
   const m = medicao;
   const r = leitura?.resumo;
+  const pior = piorAtraso(); // M.2: o jogador da rede mais atrasado
+  const mov = variacaoDoMovimento();
   return (
     <div id="desempenho">
       <div>
@@ -75,6 +79,8 @@ export function Desempenho() {
         {m.leituraMs !== undefined ? ` · leitura da placa ${m.leituraMs} ms` : ''}
         {m.imagemMs !== undefined ? ` · imagem pra página ${m.imagemMs} ms` : ''}
         {jogo.comSom ? '' : ' · sem som'}
+        {pior ? ` · pior atraso da rede ${pior.ms} ms (${pior.quem})` : ''}
+        {mov.length ? ` · Wiimote: variação ${mov.map((x) => x.ms).join('/')} ms` : ''}
       </div>
       {r && (
         <div id="desempenho-quadros">

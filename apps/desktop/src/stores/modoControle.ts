@@ -5,14 +5,15 @@
 //  - servidor do APK (`ControleServidor.java`, KOFnesApk.controle*): o PC conecta por endereço e senha (Arquivo → Celular como controle).
 // Os botões vêm do controle de toque (stores/toque), como no antigo.
 import { empacotarEixos } from '@kof/engine';
-import { acoesDe, ANALOGICO, movPraRede, trocarLocal } from '@kof/domain';
+import { acoesDe, ANALOGICO, ehWiimote, movPraRede, trocarLocal } from '@kof/domain';
 import { create } from 'zustand';
 import { usarAvisos } from './avisos';
 import { config } from './config';
 import { marcarConsole } from './entrada';
 import { aoQuadroNovo, ultimoQuadro, usarJogo } from './jogo';
 import { ouvirRede, transporte, usarRede } from './rede';
-import { ligarSensores, movimentoAgora } from './sensores';
+import { minhaVista } from './minhaVaga';
+import { calibracaoAtual, ligarSensores, movimentoAgora } from './sensores';
 import { soltarToque, toque } from './toque';
 
 type Apk = Record<string, (...a: never[]) => unknown>;
@@ -155,6 +156,17 @@ function marcar() {
   });
 }
 
+/** M.3: o número de cada movimento mandado (o PC descarta o repetido e o fora de ordem) */
+let seqMovimento = 0;
+
+/** A vaga deste celular na Mesa do núcleo `de` pede o Wiimote (e ele pode: calibrado ou de propósito)? */
+export function querSerWiimote(de: string | null): boolean {
+  const v = minhaVista(de);
+  return (
+    !!v && v.sistema === 'wii' && ehWiimote(v.tipo || undefined) && !v.nunchuk && (!!calibracaoAtual() || v.semCalibrar)
+  );
+}
+
 const deadzone = (v: number) => (Math.abs(v) < 0.15 ? 0 : Math.round(Math.max(-1, Math.min(1, v)) * 32767));
 
 /** A cada 8 ms: manda o que os dedos seguram (só quando muda, ou a cada 250 ms). */
@@ -180,12 +192,14 @@ function enviar() {
     return;
   }
   if (m.rede) {
-    // W.6: com um jogo de Wii no PC, o celular também é o Wiimote (sensores e mira, a cada 8 ms)
-    const wii = usarMC.getState().sis === 'wii';
+    // W.6 + M.4: o celular é o Wiimote (sensores e mira, a cada 8 ms) só quando a vaga dele na 🎲 Mesa é Wiimote e
+    // ele está calibrado (ou "usar sem calibrar"): nada liga sozinho
+    const wii = querSerWiimote(m.rede);
     ligarSensores(wii);
     const mov = wii ? movimentoAgora() : null;
     if (mudou || mov) {
-      transporte().enviar(m.rede, 'pad', b + ',' + e + (mov ? ',' + movPraRede(mov) : ''));
+      const t = mov ? ',' + movPraRede(mov, ++seqMovimento, agora) : '';
+      transporte().enviar(m.rede, 'pad', b + ',' + e + t);
       m.b = b;
       m.e = e;
       m.quando = agora;

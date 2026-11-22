@@ -7,7 +7,10 @@ import {
   eixosDoTeclado,
   juntarJogadores,
   semOpostos,
+  querMovimento,
   tecladoBits,
+  textoDoJogador,
+  vagaDe,
   type MovimentoWii,
 } from '@kof/domain';
 import { aparelhosDeControle } from '../app/aparelhos';
@@ -15,6 +18,7 @@ import { usarAvisos } from '../stores/avisos';
 import { vagas, vistos } from '../stores/jogadores';
 import { useEffect } from 'react';
 import { usarEntrada } from '../stores/entrada';
+import { calibrado, nomeNaMesa, usarMesa } from '../stores/mesa';
 import { usarJogo } from '../stores/jogo';
 import { usarModo } from '../stores/modo';
 import { conferirRebobinar, usarRebob } from '../stores/rebob';
@@ -22,6 +26,9 @@ import { usarTelas } from '../stores/telas';
 import { toque } from '../stores/toque';
 
 let apertadasAgora: Set<string> = new Set();
+/** M.4: as portas com os sensores ligados agora (pra só mandar quando muda) */
+const sensoresLigados = [false, false, false, false];
+let jogoDosSensores: unknown = null;
 
 /** Os aparelhos ligados agora, com o teclado pelo mapa (a tela Jogadores usa, com ou sem jogo). */
 export function lerAparelhosAgora() {
@@ -73,6 +80,10 @@ export function useEntradaDoJogo() {
     const t = setInterval(() => {
       const jogo = usarJogo.getState().jogo;
       if (!jogo) return;
+      if (jogo !== jogoDosSensores) {
+        jogoDosSensores = jogo; // jogo novo, processo novo: as portas começam desligadas
+        sensoresLigados.fill(false);
+      }
       conferirRebobinar(noJogo());
       if (!noJogo()) {
         for (let n = 0; n < 4; n++) jogo.botoesDo(n, 0);
@@ -101,7 +112,16 @@ export function useEntradaDoJogo() {
       aparelhos.forEach((a, n) => {
         if (a.k === 'teclado' || vistos.has(a.k)) return;
         vistos.add(a.k);
-        usarAvisos.getState().avisar(`🎮 ${a.nome} = Jogador ${(r.j[n] ?? 0) + 1}`, 2500);
+        // da 🎲 Mesa: "Jogador 2: Moto, Wiimote"; os do PC, como sempre
+        const id = a.k.startsWith('cel:') ? a.k.slice(4) : '';
+        const m = usarMesa.getState().mesa;
+        const v = id ? vagaDe(m, id) : -1;
+        usarAvisos
+          .getState()
+          .avisar(
+            v >= 0 ? '🎮 ' + textoDoJogador(m, v, nomeNaMesa) : `🎮 ${a.nome} = Jogador ${(r.j[n] ?? 0) + 1}`,
+            2500,
+          );
       });
       const todos = semOpostos(r.b.reduce((x, y) => x | y, 0));
       const selY = BOTAO.Select | BOTAO.Y; // Select+Y segurado = rebobinar (como no antigo)
@@ -112,13 +132,29 @@ export function useEntradaDoJogo() {
         if (!combo) usarJogo.getState().abrirRapido();
         combo = true;
       } else if (!(todos & selStart)) combo = false;
-      // W.6: o celular como Wiimote manda os sensores e a mira do jogador dele (só no Wii)
+      // W.6 + M.4: o celular como Wiimote manda os sensores e a mira do jogador dele (só no Wii). Nada liga sozinho:
+      // só o Wiimote da vaga da 🎲 Mesa, calibrado (ou "usar sem calibrar"); o celular saiu, a porta desliga.
       if (sis === 'wii') {
-        const comMov = jogo as Partial<{ movimentoDo(j: number, m: MovimentoWii): void }>;
+        const comMov = jogo as Partial<{
+          movimentoDo(j: number, m: MovimentoWii): void;
+          sensoresDo(j: number, l: boolean): void;
+        }>;
+        const mesa = usarMesa.getState().mesa;
+        const portas = [false, false, false, false];
         aparelhos.forEach((a, n) => {
-          if (a.mov && comMov.movimentoDo) comMov.movimentoDo(r.j[n] ?? 0, a.mov);
+          const id = a.k.startsWith('cel:') ? a.k.slice(4) : '';
+          if (!id || !querMovimento(mesa, id, calibrado(id))) return;
+          const j = r.j[n] ?? 0;
+          portas[j] = true;
+          if (a.mov && comMov.movimentoDo) comMov.movimentoDo(j, a.mov);
         });
-      }
+        if (comMov.sensoresDo)
+          portas.forEach((l, j) => {
+            if (sensoresLigados[j] === l) return;
+            sensoresLigados[j] = l;
+            comMov.sensoresDo?.(j, l);
+          });
+      } else sensoresLigados.fill(false);
       for (let n = 0; n < 4; n++) {
         let b = semOpostos(r.b[n] ?? 0);
         if (combo) b &= ~selStart;

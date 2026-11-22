@@ -299,3 +299,332 @@ html.celular #painel-aparelhos {
   bottom: 64px;
   width: auto;
 }
+
+/* 🎲 A Mesa de aparelhos (tarefa M): cartões, núcleo e tela, J1..J4 */
+.painel-mesa {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.painel-mesa button {
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.painel-mesa button:focus-visible,
+.calibracao button:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+.pm-cartoes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+}
+.pm-cartoes li {
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pm-cartoes li.off {
+  opacity: 0.5;
+  border-style: dashed;
+}
+.pm-ficha {
+  font-size: 11px;
+  opacity: 0.7;
+}
+.pm-rede {
+  font-size: 11px;
+}
+.pm-cartoes li.on .pm-rede::before {
+  content: '● ';
+  color: #27c26c;
+}
+.pm-imagem {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pm-papel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 2px solid var(--borda);
+  background: var(--sel, rgba(255, 255, 255, 0.05));
+  text-align: left;
+}
+.pm-papel small {
+  opacity: 0.7;
+  font-size: 11px;
+}
+.pm-vagas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pm-vagas li {
+  border: 2px solid var(--cor, var(--borda));
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.pm-vagas li[data-estado='livre'] {
+  border-style: dashed;
+  opacity: 0.6;
+}
+.pm-vagas li[data-estado='esperando'] {
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+.pm-vagas li[data-estado='calibrar'] {
+  box-shadow: 0 0 0 2px #f2b632 inset;
+}
+.pm-vagas li.voce {
+  box-shadow: 0 0 0 3px var(--cor) inset;
+}
+.pm-j {
+  font-weight: 800;
+  color: var(--cor);
+  min-width: 26px;
+}
+.pm-aparelho {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 4px 2px;
+  font-weight: 600;
+}
+.pm-ms {
+  opacity: 0.7;
+  font-weight: 400;
+}
+.pm-tipo {
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  border: 1px solid var(--borda);
+  background: transparent;
+}
+.pm-calibrar {
+  flex-basis: 100%;
+  font-size: 11px;
+}
+.pm-calibrar button {
+  font-size: 11px;
+  border: 1px solid #f2b632;
+  border-radius: 999px;
+  background: transparent;
+  padding: 2px 8px;
+}
+.pm-botoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pm-grande {
+  padding: 12px 8px;
+  border-radius: 12px;
+  border: 2px solid var(--destaque);
+  background: var(--sel, rgba(255, 255, 255, 0.05));
+  font-weight: 700;
+}
+.pm-grande:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pm-pequeno {
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px dashed var(--borda);
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pm-dica {
+  font-size: 12px;
+  opacity: 0.75;
+  margin: 0;
+}
+.painel-mesa.compacto .pm-vagas {
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+.painel-mesa.compacto .pm-vagas li {
+  padding: 4px 8px;
+}
+.painel-mesa.compacto .pm-grande {
+  padding: 8px 4px;
+  font-size: 12px;
+}
+.ba-mesa {
+  margin-top: 12px;
+}
+#mesa {
+  width: min(760px, 96vw);
+}
+#mesa .titulo-j small {
+  opacity: 0.6;
+  font-weight: 400;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+/* 🎲 no modo controle do celular */
+.mc-painel-mesa {
+  position: absolute;
+  top: 44px;
+  left: 8px;
+  right: 8px;
+  z-index: 40;
+  background: var(--fundo, #111);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: var(--brilho);
+}
+.mc-mesa,
+.mc-calibrar,
+.mc-recentrar {
+  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  color: inherit;
+  padding: 2px 10px;
+}
+
+/* 🎯 o assistente de calibração do Wiimote (no celular, por cima de tudo) */
+.calibracao {
+  position: fixed;
+  inset: 8px;
+  z-index: 90;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cal-passos {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+}
+.cal-passos li {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--borda);
+  opacity: 0.5;
+}
+.cal-passos li.agora {
+  opacity: 1;
+  border-color: var(--destaque);
+}
+.cal-passos li.feito {
+  opacity: 0.8;
+}
+.cal-area {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-height: 40vh;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+.cal-mira,
+.cal-alvo {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+}
+.cal-mira {
+  background: var(--destaque);
+  box-shadow: 0 0 8px var(--destaque);
+  z-index: 2;
+}
+.cal-alvo {
+  width: 15%;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  border: 3px dashed #f2b632;
+}
+.cal-canto {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 4px solid #f2b632;
+}
+.cal-canto.tl {
+  left: 6px;
+  top: 6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.cal-canto.br {
+  right: 6px;
+  bottom: 6px;
+  border-left: 0;
+  border-top: 0;
+}
+.cal-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cal-texto label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+.cal-opcoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.cal-opcoes button {
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 2px solid var(--borda);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.cal-opcoes button.ativo {
+  border-color: var(--destaque);
+}
+.cal-erro {
+  color: #f2b632;
+  margin: 0;
+  font-size: 13px;
+}
+.calibracao .pm-grande,
+.calibracao .pm-pequeno {
+  color: inherit;
+  cursor: pointer;
+}

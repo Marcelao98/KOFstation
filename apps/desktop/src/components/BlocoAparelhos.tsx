@@ -5,6 +5,7 @@ import { ARRANJOS, MAX_APARELHOS, PAPEIS, textoDaFicha, type Papel } from '@kof/
 import { acao } from '../app/acoes';
 import { aparelhosComPapel, arranjoAtual, trocarPapelAvulso, usarArranjo, usarArranjoPronto } from '../stores/arranjo';
 import { usarRede } from '../stores/rede';
+import { PainelMesa } from './PainelMesa';
 
 export function BlocoAparelhos({ fechar }: { fechar?: () => void }) {
   // re-desenha quando a lista, as fichas ou o arranjo mudam
@@ -56,6 +57,20 @@ export function BlocoAparelhos({ fechar }: { fechar?: () => void }) {
           </button>
         ))}
       </div>
+      <div className="ba-titulo">🎲 Mesa</div>
+      <PainelMesa compacto />
+      <button
+        type="button"
+        className="ba-parear"
+        data-abrir="mesa"
+        onClick={() => {
+          fechar?.();
+          acao('mesa');
+        }}
+      >
+        🎲 abrir a Mesa inteira (cartões, Nunchuk, calibração)
+      </button>
+      <div className="ba-titulo ba-mesa">📡 Na rede</div>
       <ul className="ba-lista">
         {visiveis.map((a) => (
           <li key={a.id} data-aparelho={a.id}>
