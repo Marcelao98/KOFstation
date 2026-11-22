@@ -21,6 +21,20 @@ commits citados pelo hash curto quando ajudarem.
 
 ---
 
+## 2026-11-22 · O Wii com a experiência dos outros consoles (em andamento)
+
+**Pedido:** "deixa o Wii igualzinho aos outros: mesmas configurações, opções de emulação, menus, filtros; testa".
+**Feito:** capas (libretro-thumbnails) pra Wii, GameCube e o PS2 (que também faltava); rótulos e gatilhos do controle
+de toque e do celular como controle; disco de Wii/GC sem título interno nem patch de cartucho (cb3b50b). Roteiro
+`medir-ps2.mjs --sistema wii --conferir`: abre o jogo e passa por filtros, proporção, escala, molduras, painel de
+imagem, menu rápido, F5/F8, estados salvos, opções de emulação, controles, voltar ao jogo, tela cheia e pausa, com um
+print de cada em `~/kof-medidas/prints/conferir-wii-*.png`.
+**Conferido:** jogando, filtro TV de tubo e filtro fliperama ✓. O resto não chegou a rodar: na 1ª vez o sistema matou
+o app (a depuração guardava os quadros; agora o roteiro desliga a rede dela), nas outras a tela do PC bloqueou.
+**Onde parou:** ⏸ rodar o roteiro com o Firefox fechado e a tela sem bloquear (Configurações do KDE → Bloqueio de
+tela → desligar por enquanto), e corrigir o que der ✗:
+`source ~/kof-medidas/ambiente.sh; KOF_APP=$PWD/target/release/kofstation node tools/medir-ps2.mjs --sistema wii --conferir --janela`
+
 ## 2026-11-21 (madrugada) · O Wii A liso (o caminho do PS2 já servia)
 
 **Pedido:** "tá rodando mas travando muito; replica o que a gente fez no PS2 liso, não inventa moda".
