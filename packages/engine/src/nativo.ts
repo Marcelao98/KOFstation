@@ -15,7 +15,7 @@ import {
 } from '@kof/contracts';
 import type { MovimentoWii, SistemaId, SomAoRebobinar } from '@kof/domain';
 import { CODIGO_WORKLET_PCM } from './anel';
-import { FilaDeQuadros } from './fila-de-quadros';
+import { FilaDeQuadros, vsyncParado } from './fila-de-quadros';
 import type { EventosDoJogo } from './jogo';
 import type { InfoDoJogo } from './libretro';
 import type { ReplayDoBug } from './mensagens';
@@ -71,6 +71,13 @@ export class JogoNativo {
   /** ⏺ gravar (G.2): onde a cópia do som que chega do processo toca (só pro gravador, não sai no alto-falante) */
   private somGravando: AudioWorkletNode | null = null;
   private pedidoDoLaco = 0;
+  /**
+   * Quando o vsync rodou por último. Com a janela do PC escondida, coberta ou com a tela apagada o navegador para o
+   * requestAnimationFrame e a fila nunca era tirada: nenhum quadro saía e o celular ("ver o jogo do PC", "levar pro
+   * celular") ficava no preto (22/11; antes da fila, 08/11, funcionava). Parado há mais de VSYNC_PARADO_MS, o quadro
+   * vai direto, como antes.
+   */
+  private ultimoVsync = 0;
   /** quadros que ficaram pra trás na fila (a página engasgou) e foram jogados fora */
   get descartados(): number {
     return this.fila.descartados;
@@ -174,6 +181,7 @@ export class JogoNativo {
   /** A cada vsync: solta um quadro da fila (ver `FilaDeQuadros`). */
   private laco = (agora: number) => {
     this.pedidoDoLaco = requestAnimationFrame(this.laco);
+    this.ultimoVsync = agora;
     const q = this.fila.tirar(agora);
     if (q) this.eventos.quadro?.(q.pixels, q.largura, q.altura);
   };
@@ -218,8 +226,9 @@ export class JogoNativo {
     if (b.tipo === 'quadro') {
       // o RGBA começa no byte 12 (múltiplo de 4): vira Uint32Array sem cópia
       const px = new Uint32Array(b.rgba.buffer, b.rgba.byteOffset, b.largura * b.altura);
-      if (this.pedidoDoLaco)
-        this.fila.empurrar({ pixels: px, largura: b.largura, altura: b.altura, chegou: performance.now() });
+      const agora = performance.now();
+      if (this.pedidoDoLaco && !vsyncParado(agora, this.ultimoVsync))
+        this.fila.empurrar({ pixels: px, largura: b.largura, altura: b.altura, chegou: agora });
       else this.eventos.quadro?.(px, b.largura, b.altura);
     } else if (b.pedido === PEDIDO_SRAM) {
       if (b.dados.length && !iguais(this.sramAntes, b.dados)) {

@@ -2,7 +2,7 @@
 // Sem React: a tela do jogo só recebe callbacks (o laço não passa pelo render).
 import type { SistemaId, SomAoRebobinar } from '@kof/domain';
 import { CODIGO_WORKLET, CODIGO_WORKLET_PCM } from './anel';
-import { FilaDeQuadros } from './fila-de-quadros';
+import { FilaDeQuadros, vsyncParado } from './fila-de-quadros';
 import type { ExtrasDoJogo, InfoDoJogo } from './libretro';
 import type { DoWorker, Medicao, ParaWorker, Pedido, ReplayDoBug, SituacaoRebob } from './mensagens';
 import { NUCLEOS } from './nucleos';
@@ -58,6 +58,13 @@ export class Jogo {
   /** Quadros que o Worker mandou e ainda não foram pra tela: saem um por vsync (ver `FilaDeQuadros`). */
   private fila = new FilaDeQuadros();
   private pedidoDoLaco = 0;
+  /**
+   * Quando o vsync rodou por último. Com a janela do PC escondida, coberta ou com a tela apagada o navegador para o
+   * requestAnimationFrame e a fila nunca era tirada: nenhum quadro saía e o celular ("ver o jogo do PC", "levar pro
+   * celular") ficava no preto (22/11; antes da fila, 08/11, funcionava). Parado há mais de VSYNC_PARADO_MS, o quadro
+   * vai direto, como antes.
+   */
+  private ultimoVsync = 0;
   /** quadros que ficaram pra trás na fila (a página engasgou ou o turbo está ligado) e foram jogados fora */
   get descartados(): number {
     return this.fila.descartados;
@@ -171,20 +178,19 @@ export class Jogo {
   /** A cada vsync: solta um quadro da fila. */
   private laco = (agora: number) => {
     this.pedidoDoLaco = requestAnimationFrame(this.laco);
+    this.ultimoVsync = agora;
     const q = this.fila.tirar(agora);
     if (q) this.eventos.quadro?.(q.pixels, q.largura, q.altura);
   };
 
   private receber(m: DoWorker) {
     if (m.tipo === 'pcm') this.saidaSom?.port.postMessage(m.dados, [m.dados.buffer]);
-    else if (m.tipo === 'quadro')
-      this.fila.empurrar({
-        pixels: new Uint32Array(m.pixels),
-        largura: m.largura,
-        altura: m.altura,
-        chegou: performance.now(),
-      });
-    else if (m.tipo === 'medicao') this.eventos.medicao?.(m.m);
+    else if (m.tipo === 'quadro') {
+      const agora = performance.now();
+      const pixels = new Uint32Array(m.pixels);
+      if (vsyncParado(agora, this.ultimoVsync)) this.eventos.quadro?.(pixels, m.largura, m.altura);
+      else this.fila.empurrar({ pixels, largura: m.largura, altura: m.altura, chegou: agora });
+    } else if (m.tipo === 'medicao') this.eventos.medicao?.(m.m);
     else if (m.tipo === 'erro') this.eventos.erro?.(m.mensagem, m.log);
     else if (m.tipo === 'sram') this.eventos.sram?.(m.bytes);
     else if (m.tipo === 'rebob') this.eventos.rebob?.(m.r);

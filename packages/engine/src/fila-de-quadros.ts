@@ -8,6 +8,10 @@ export const MAX_NA_FILA = 3;
 /** Um quadro sozinho na fila espera o próximo por até isso (2 vsyncs); depois sai (pausa, estado carregado, 30 fps). */
 export const ESPERA_DA_FOLGA_MS = 34;
 
+/** Sem vsync há mais que isso (janela escondida/coberta, tela apagada): o quadro não espera a fila, vai direto. */
+export const VSYNC_PARADO_MS = 100;
+export const vsyncParado = (agora: number, ultimoVsync: number): boolean => agora - ultimoVsync > VSYNC_PARADO_MS;
+
 export interface QuadroNaFila {
   pixels: Uint32Array;
   largura: number;

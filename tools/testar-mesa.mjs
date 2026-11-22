@@ -107,7 +107,7 @@ const browser = await chromium.launch({
 const erros = [];
 let a, b;
 try {
-  a = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+  a = await (await browser.newContext({ viewport: { width: 1100, height: 800 } })).newPage();
   const ctxB = await browser.newContext({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
   await ctxB.addInitScript(espiarRede);
   b = await ctxB.newPage();
@@ -189,10 +189,22 @@ try {
   await b.click('#modo-controle .mc-sair');
   await b.locator('#modo-controle').waitFor({ state: 'detached', timeout: 10000 });
 
-  // ---- 2. 📺 ver o jogo do PC no B
+  // ---- 2. 📺 ver o jogo do PC no B, com a janela do PC escondida (outra aba na frente): o navegador para o vsync do A
+  // e os quadros tinham que continuar indo (22/11: no celular de verdade ficava preto, com o ping funcionando)
+  // (o headless não esconde a aba de trás: aqui o vsync do A para do mesmo jeito que o Chrome faz com a janela escondida)
+  await a.evaluate(() => {
+    globalThis.__rafDeVerdade = requestAnimationFrame;
+    globalThis.requestAnimationFrame = () => 0;
+  });
+  await espera(300);
   await b.locator('[data-acao="rede-ver-jogo"]').first().click({ timeout: 15000 });
   await b.waitForFunction(() => (document.querySelector('.mc-video')?.videoWidth ?? 0) > 0, null, { timeout: 30000 });
-  await espera(1000);
+  const quadrosNoB = () =>
+    b.evaluate(() => document.querySelector('.mc-video')?.getVideoPlaybackQuality().totalVideoFrames ?? 0);
+  const q0 = await quadrosNoB();
+  await espera(2000);
+  const q1 = await quadrosNoB();
+  ok(q1 - q0 > 20, `com a janela do PC escondida, os quadros continuam chegando no B (${q1 - q0} em 2 s)`);
   const meio = await noMeio(b);
   ok(/^(canvas#tela|video\.mc-video)/.test(meio), `ver o jogo do PC (com o filtro): a imagem aparece no B (${meio})`);
   await b.evaluate(() => document.querySelector('.mc-menu [data-r="filtro"]').click());
@@ -207,6 +219,7 @@ try {
   await b.locator('#modo-controle').waitFor({ state: 'detached', timeout: 10000 });
   await espera(1000);
 
+  await a.evaluate(() => (globalThis.requestAnimationFrame = globalThis.__rafDeVerdade));
   // ---- 3. 📱 levar pro celular (no A) e 📺 voltar pra TV
   const rapido = async (texto) => {
     await a.keyboard.press('F2');
