@@ -185,6 +185,108 @@ function resumoDoDiagnostico(pula) {
   );
 }
 
+/** O roteiro do --conferir: cada passo devolve ok/erro; os prints vão pra `<medidas>/prints/conferir-<sis>-NN-<passo>.png`. */
+async function conferir(page, sis, pasta) {
+  mkdirSync(pasta, { recursive: true });
+  // a parte de rede da depuração guarda cada quadro que passa pela WebSocket (1,35 MB no Wii): desligada, o Chrome
+  // não incha e o sistema não mata o app por falta de memória
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Network.disable').catch(() => {});
+  const erros = [];
+  const vistos = new Set();
+  const olharAvisos = async () => {
+    const t = await page
+      .locator('#aviso.erro')
+      .allTextContents()
+      .catch(() => []);
+    for (const x of t) if (!vistos.has(x)) (vistos.add(x), erros.push(x.slice(0, 160)));
+  };
+  page.on('pageerror', (e) => erros.push('erro na página: ' + e.message.slice(0, 160)));
+  let n = 0;
+  const passo = async (nome, f) => {
+    n++;
+    let ok = true;
+    try {
+      await f();
+      await dormir(1200);
+    } catch (e) {
+      ok = false;
+      erros.push(
+        `${nome}: ${String(e.message ?? e)
+          .split('\n')[0]
+          .slice(0, 160)}`,
+      );
+    }
+    await page
+      .screenshot({ path: join(pasta, `conferir-${sis}-${String(n).padStart(2, '0')}-${nome}.png`) })
+      .catch(() => {});
+    await olharAvisos();
+    console.log(`${ok ? '✓' : '✗'} ${nome}`);
+  };
+  const menu = async (topo, acao, texto) => {
+    await page.click(`#menu >> text=${topo}`);
+    const item = page.locator(`#menu [data-acao="${acao}"]`, texto ? { hasText: texto } : {});
+    await item.first().click({ timeout: 4000 });
+  };
+  const jogo = async () => {
+    const t = await page.locator('#st-jogo').textContent();
+    if (!t) throw new Error('o jogo não está aberto');
+  };
+  await dormir(8000); // o jogo assenta
+  await passo('jogando', jogo);
+  await passo('filtro-tv', () => menu('Imagem', 'filtro', 'TV de tubo'));
+  await passo('filtro-fliperama', () => menu('Imagem', 'filtro', 'fliperama'));
+  await passo('filtro-original', () => menu('Imagem', 'filtro', 'Original'));
+  await passo('proporcao-esticar', () => menu('Imagem', 'prop', 'Esticar'));
+  await passo('proporcao-tv', () => menu('Imagem', 'prop', 'como na TV'));
+  await passo('escala-encaixar', () => menu('Imagem', 'escala', 'Encaixar'));
+  await passo('molduras', async () => {
+    await menu('Imagem', 'molduras');
+    await page.waitForTimeout(800);
+  });
+  await page.keyboard.press('Escape');
+  await passo('painel-de-imagem', () => menu('Imagem', 'visual'));
+  await page.keyboard.press('Escape');
+  await passo('menu-rapido', async () => {
+    await page.keyboard.press('F2');
+    await page.locator('#rapido').waitFor({ state: 'visible', timeout: 4000 });
+  });
+  await page.keyboard.press('Escape');
+  await passo('salvar-estado', async () => {
+    await page.keyboard.press('F5');
+    await page.locator('#aviso').waitFor({ state: 'visible', timeout: 15000 });
+  });
+  await dormir(2000);
+  await passo('carregar-estado', async () => {
+    await page.keyboard.press('F8');
+    await page.locator('#aviso').waitFor({ state: 'visible', timeout: 15000 });
+  });
+  await passo('estados-salvos', () => menu('Emulação', 'estados'));
+  await page.keyboard.press('Escape');
+  await passo('opcoes-de-emulacao', async () => {
+    await menu('Emulação', 'emu-opcoes');
+    await page.click(`#emu-abas [data-sis="${sis}"]`, { timeout: 4000 });
+  });
+  await page.keyboard.press('Escape');
+  await passo('controles', async () => {
+    await menu('Emulação', 'teclas');
+    await page.click(`[data-sis="${sis}"]`, { timeout: 4000 });
+  });
+  await page.keyboard.press('Escape');
+  await passo('voltar-ao-jogo', async () => {
+    await page.click('#lat-jogo', { timeout: 4000 });
+    await jogo();
+  });
+  await passo('tela-cheia', async () => {
+    await page.keyboard.press('F11');
+  });
+  await page.keyboard.press('F11');
+  await passo('pausar', () => menu('Emulação', 'pausar'));
+  await passo('continuar', () => menu('Emulação', 'pausar'));
+  console.log(erros.length ? 'avisos/erros:\n  ' + erros.join('\n  ') : 'sem avisos de erro');
+  console.log(`prints em ${pasta}/conferir-${sis}-*.png`);
+}
+
 const estado = arg('estado', '');
 const TECLAS = tem('teclas')
   ? [
@@ -357,6 +459,14 @@ async function rodada(n) {
     if (estado) {
       await dormir(3000);
       await page.keyboard.press('F8');
+    }
+
+    // --conferir: em vez de medir, passa por cada função do KOFstation com o jogo aberto (menus, filtros, molduras,
+    // proporção, estados, tela cheia, opções, controles) e tira um print de cada; anota todo aviso de erro. Curto
+    // (< 90 s) porque a depuração do Chrome guarda os quadros e enche a memória.
+    if (tem('conferir')) {
+      await conferir(page, sistema, join(medidas, 'prints'));
+      return;
     }
 
     // memória: uma amostra por segundo do processo do jogo e da página

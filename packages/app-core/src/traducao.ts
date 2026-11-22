@@ -25,7 +25,7 @@ export async function lerPatch(nome: string, bytes: Uint8Array): Promise<{ nome:
   return { nome: e.nome.split(/[\\/]/).pop() ?? e.nome, patch };
 }
 
-const SO_CARTUCHO = new Set(['neogeo', 'ps1', 'ps2']);
+const SO_CARTUCHO = new Set(['neogeo', 'ps1', 'ps2', 'gc', 'wii']);
 
 /** A ROM traduzida (outro nome de arquivo) e de onde veio. */
 export function traduzir(

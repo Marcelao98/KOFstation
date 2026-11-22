@@ -50,7 +50,7 @@ const CURTO: Partial<Record<SistemaId, string>> = { sms: 'SMS', gg: 'GG' };
  * vêm do nome do arquivo (devolve '').
  */
 export function tituloInterno(rom: Uint8Array, sis: SistemaId): string {
-  if (sis === 'neogeo' || sis === 'ps1' || sis === 'ps2' || sis === 'n64') return '';
+  if (sis === 'neogeo' || sis === 'ps1' || sis === 'ps2' || sis === 'n64' || sis === 'gc' || sis === 'wii') return '';
   if (sis === 'gba') {
     const t = texto(rom, 0xa0, 12).trim();
     return /[A-Za-z0-9]{2}/.test(t) ? t : 'GBA ' + crcMaiusculo(rom, 0);

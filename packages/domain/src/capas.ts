@@ -15,6 +15,9 @@ export const ACERVO: Readonly<Record<string, string>> = {
   neogeo: 'FBNeo_-_Arcade_Games',
   ps1: 'Sony_-_PlayStation',
   n64: 'Nintendo_-_Nintendo_64',
+  ps2: 'Sony_-_PlayStation_2',
+  gc: 'Nintendo_-_GameCube',
+  wii: 'Nintendo_-_Wii',
 };
 
 const REGIOES: Record<string, string> = {

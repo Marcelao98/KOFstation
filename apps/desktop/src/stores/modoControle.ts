@@ -134,7 +134,7 @@ function consoleDoControle(sis: string, nome: string) {
   // como o consoleDoControle do antigo (android.js 356–360): sem jogo no PC = controle completo, com analógico
   document.body.classList.toggle('analogico', !NOME_CONSOLE[base] || !!ANALOGICO[base]);
   document.body.classList.toggle('so-ab', !!NOME_CONSOLE[base] && !acoesDe(base).includes('X'));
-  if (m) m.an = sis === 'n64' || sis === 'ps2' ? 'puro' : 'misto';
+  if (m) m.an = sis === 'n64' || sis === 'ps2' || sis === 'gc' || sis === 'wii' ? 'puro' : 'misto';
   usarMC.setState({
     sis: sis ? base : '',
     sisNome: sis ? (NOME_CONSOLE[sis] ?? sis) : 'nenhum jogo aberto',

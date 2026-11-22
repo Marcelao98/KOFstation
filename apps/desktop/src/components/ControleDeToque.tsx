@@ -34,6 +34,8 @@ export const ROTULOS: Record<string, Record<string, string>> = {
   ps1: { B: '✕', A: '○', Y: '□', X: '△', L: 'L1', R: 'R1' },
   ps2: { B: '✕', A: '○', Y: '□', X: '△', L: 'L1', R: 'R1' },
   n64: { B: 'A', Y: 'B', X: 'C▲', A: 'C▼', L: 'Z', R: 'R', L2: 'C◀', R2: 'C▶', Select: 'L' },
+  gc: { R: 'Z', L2: 'L', R2: 'R' },
+  wii: { X: 'C', Y: 'Z', Start: '1', Select: '2', L: '−', R: '+', L2: '🤚', R2: '〰' },
 };
 
 export const rotuloDe = (sistema: string, b: string): string =>
