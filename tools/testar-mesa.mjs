@@ -18,6 +18,8 @@ const { chromium } = createRequire(join(import.meta.dirname, '../apps/desktop/pa
 const RAIZ = join(import.meta.dirname, '..');
 const tmp = mkdtempSync(join(tmpdir(), 'kof-mesa-'));
 const procs = [];
+// os dois KOFstation morrem junto com o teste, saia ele como sair (Ctrl+C no --ficar, erro, fim)
+process.on('exit', () => procs.forEach((p) => p.kill()));
 const arg = (n) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : undefined);
 const prints = arg('--prints');
 if (prints) mkdirSync(prints, { recursive: true });
@@ -175,6 +177,8 @@ try {
   await print(a, 'A-jogadores');
   await print(b, 'B-controle');
   ok(jog === 'J1', `o A recebe o A do B no ${jog} (tem que ser J1)`);
+  const jogTeclado = await a.locator('#jog-lista li', { hasText: 'Teclado' }).locator('button.ativo').textContent();
+  ok(jogTeclado === 'J1', `a): o teclado do A continua no ${jogTeclado} junto com o B (divide o J1)`);
   await apertar('pointerup');
   await a
     .locator('#jog-lista li.apertando')

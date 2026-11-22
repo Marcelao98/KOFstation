@@ -33,9 +33,12 @@ export function ModoControle() {
     // Início por baixo (achado no tools/testar-mesa.mjs, 22/11). Ao sair, volta pro Início se não tem jogo aqui.
     const t = usarTelas.getState();
     if (t.atual !== 'jogo') t.abrir('jogo');
+    window.dispatchEvent(new Event('resize')); // o tamanho da imagem muda com o remoto-filtro
     return () => {
+      document.body.classList.remove('remoto-filtro');
       const u = usarTelas.getState();
       if (u.atual === 'jogo' && !u.temJogo) u.abrir('home');
+      window.dispatchEvent(new Event('resize'));
     };
   }, [s.remoto, s.filtro]);
   if (!s.ativo) return null;

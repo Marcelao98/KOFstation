@@ -357,6 +357,8 @@ html.celular #biblioteca .bib-botoes [data-acao="do-zero"]:not([hidden]) { grid-
 .mc-parear code { font-size: 28px; font-weight: 800; letter-spacing: 1px; color: var(--destaque); background: var(--painel); border: 1px solid var(--borda); border-radius: 12px; padding: 8px 16px; }
 .mc-parear em { color: var(--fraco); font-size: 12px; font-style: normal; padding: 0 12px; }
 body.modo-controle #tela, body.modo-controle #moldura { visibility: hidden; }
+/* o celular como controle: o Início não aparece por trás do controle de toque (deitado, o #modo-controle é transparente) */
+body.modo-controle #home { visibility: hidden; }
 @media (orientation: landscape) { #modo-controle { height: auto; top: 0; bottom: 0; left: 24%; right: 24%; background: transparent; padding-top: 56px; } .mc-jogo { font-size: 20px; } }
 /* cores dos botões como no controle de cada console (só no modelo clássico, que é o "como o original") */
 html.celular body[data-sis="ps1"] #ctl.skin-classico :is([data-b="A"], [data-b="B"], [data-b="X"], [data-b="Y"]) { --c: #2b2d33; --fs: 10; }

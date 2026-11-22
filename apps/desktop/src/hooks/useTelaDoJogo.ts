@@ -48,7 +48,8 @@ export function useTelaDoJogo(canvas: React.RefObject<HTMLCanvasElement | null>)
       const palco = document.getElementById('palco');
       const t = tela.current;
       if (!palco || !t) return;
-      const cheia = document.body.classList.contains('cheia');
+      // ver o jogo do PC no celular (com filtro): a tela é pequena, a escala inteira dava 1× (298×224 em 844×390)
+      const cheia = document.body.classList.contains('cheia') || document.body.classList.contains('remoto-filtro');
       const folga = cheia ? 0 : 16;
       const largura = ultimoQuadro.largura || info?.largura || t.telaL;
       const altura = ultimoQuadro.altura || info?.altura || t.telaA;
