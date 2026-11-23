@@ -12,6 +12,12 @@ let quando = 0;
 let antes = 0;
 /** null = ainda não sabe; false = o celular não tem giroscópio (a mira vai pela inclinação) */
 let giroscopio: boolean | null = null;
+/** 22/11: o meio da mira é marcado no 1º botão apertado (não mais na posição em que o celular estava ao ligar) */
+let esperandoBotao = false;
+/** pra depuração: leituras do sensor no último segundo */
+let leituras = 0;
+let hz = 0;
+let contouEm = 0;
 
 function aoMexer(ev: DeviceMotionEvent) {
   const a = ev.accelerationIncludingGravity;
@@ -22,6 +28,12 @@ function aoMexer(ev: DeviceMotionEvent) {
     r && r.alpha != null && r.beta != null && r.gamma != null ? giroDoCelular(r.alpha, r.beta, r.gamma) : null;
   giroscopio = !!giro;
   const agora = performance.now();
+  leituras++;
+  if (agora - contouEm >= 1000) {
+    hz = Math.round((leituras * 1000) / Math.max(1, agora - contouEm));
+    leituras = 0;
+    contouEm = agora;
+  }
   const dt = antes ? (agora - antes) / 1000 : 0;
   antes = agora;
   const p = mira.atualizar(acel, giro, dt);
@@ -36,8 +48,14 @@ export function ligarSensores(sim: boolean): void {
   if (sim) {
     mira.sensibilidade(sensibilidadeMira());
     mira.recentrar();
+    esperandoBotao = true;
+    leituras = 0;
+    hz = 0;
+    contouEm = performance.now();
     // calibrar é opcional: só oferece (o 🎯 da barra do controle)
-    usarAvisos.getState().avisar('🎮 Este celular é o Wiimote. Quer calibrar a mira? Toque no 🎯 (opcional)', 5000);
+    usarAvisos
+      .getState()
+      .avisar('🎮 Este celular é o Wiimote. Aponte pra TV e aperte um botão: ali é o meio da mira (🎯 calibra)', 6000);
     antes = 0;
     addEventListener('devicemotion', aoMexer);
   } else {
@@ -72,3 +90,30 @@ export function guardarSensibilidadeMira(v: number): number {
 
 /** Os sensores estão ligados (o celular é o Wiimote agora)? */
 export const sensoresLigados = (): boolean => ligado;
+
+/** O 1º botão apertado depois de ligar marca o meio da mira (o celular está apontado pra TV nessa hora). */
+export function centrarNoBotao(botoes: number): void {
+  if (!esperandoBotao || !botoes) return;
+  esperandoBotao = false;
+  mira.recentrar();
+}
+
+/** Mira pelo dedo (dx, dy em fração da área de arrastar). */
+export function arrastarMira(dx: number, dy: number): void {
+  const p = mira.arrastar(dx, dy);
+  if (ultimo) ultimo = { ...ultimo, x: p.x, y: p.y };
+}
+
+/** Pra tela de depuração do Wiimote. */
+export function depuracaoWiimote() {
+  return {
+    ligado,
+    giroscopio,
+    hz,
+    forca: mira.forca,
+    chacoalhando: mira.chacoalhando,
+    meioMarcado: !esperandoBotao,
+    sens: sensibilidadeMira(),
+    mov: movimentoAgora(),
+  };
+}

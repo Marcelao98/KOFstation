@@ -12,7 +12,7 @@ import { config } from './config';
 import { marcarConsole } from './entrada';
 import { aoQuadroNovo, ultimoQuadro, usarJogo } from './jogo';
 import { ouvirRede, transporte, usarRede } from './rede';
-import { ligarSensores, movimentoAgora } from './sensores';
+import { centrarNoBotao, ligarSensores, movimentoAgora } from './sensores';
 import { soltarToque, toque } from './toque';
 
 type Apk = Record<string, (...a: never[]) => unknown>;
@@ -183,6 +183,7 @@ function enviar() {
     // W.6: com um jogo de Wii no PC, o celular também é o Wiimote (sensores e mira, a cada 8 ms)
     const wii = usarMC.getState().sis === 'wii';
     ligarSensores(wii);
+    if (wii) centrarNoBotao(b);
     const mov = wii ? movimentoAgora() : null;
     if (mudou || mov) {
       transporte().enviar(m.rede, 'pad', b + ',' + e + (mov ? ',' + movPraRede(mov) : ''));

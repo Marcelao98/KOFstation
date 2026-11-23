@@ -14,7 +14,13 @@ import {
   usarMC,
 } from '../stores/modoControle';
 import { usarTelas } from '../stores/telas';
-import { guardarSensibilidadeMira, recentrarMira, sensibilidadeMira } from '../stores/sensores';
+import {
+  arrastarMira,
+  depuracaoWiimote,
+  guardarSensibilidadeMira,
+  recentrarMira,
+  sensibilidadeMira,
+} from '../stores/sensores';
 import { acao } from '../app/acoes';
 
 export function ModoControle() {
@@ -74,10 +80,14 @@ export function ModoControle() {
           ✕
         </button>
       </div>
-      <div className="mc-tela">
-        <small className="mc-sis">{s.sisNome}</small>
-        <b className="mc-jogo">{s.jogoNome}</b>
-      </div>
+      {s.sis === 'wii' && !s.remoto ? (
+        <PainelWiimote />
+      ) : (
+        <div className="mc-tela">
+          <small className="mc-sis">{s.sisNome}</small>
+          <b className="mc-jogo">{s.jogoNome}</b>
+        </div>
+      )}
       <div className="mc-parear">
         <b>📱 Conectar ao PC</b>
         <span>
@@ -212,6 +222,68 @@ function CalibrarMira({ fechar }: { fechar: () => void }) {
       <button className="grande sec" data-r="pronto" onClick={fechar}>
         Pronto
       </button>
+    </div>
+  );
+}
+
+const n2 = (v: number) => (v >= 0 ? ' ' : '') + v.toFixed(2);
+
+/**
+ * O celular como Wiimote (22/11): o quadro da mira (o ponto = pra onde o Wiimote aponta; arrastar o dedo aqui move a
+ * mira, junto com a inclinação: o jeito de mirar bem em celular sem giroscópio) e a depuração ao vivo, que aparece
+ * sozinha e esconde no ✕.
+ */
+function PainelWiimote() {
+  const [d, setD] = useState(depuracaoWiimote);
+  const [dep, setDep] = useState(true);
+  const ultimo = useRef<{ id: number; x: number; y: number } | null>(null);
+  useEffect(() => {
+    const t = setInterval(() => setD(depuracaoWiimote()), 100);
+    return () => clearInterval(t);
+  }, []);
+  const mov = d.mov;
+  const x = mov?.x ?? 0;
+  const y = mov?.y ?? 0;
+  return (
+    <div className="mc-wii">
+      <div
+        className="mc-mira"
+        aria-label="mira: arraste o dedo pra mirar"
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          e.currentTarget.setPointerCapture(e.pointerId);
+          ultimo.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+        }}
+        onPointerMove={(e) => {
+          const u = ultimo.current;
+          if (!u || u.id !== e.pointerId) return;
+          const r = e.currentTarget.getBoundingClientRect();
+          arrastarMira((e.clientX - u.x) / r.width, (e.clientY - u.y) / r.height);
+          ultimo.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+        }}
+        onPointerUp={() => (ultimo.current = null)}
+        onPointerCancel={() => (ultimo.current = null)}
+      >
+        <i className="mc-ponto" style={{ left: `${(x + 1) * 50}%`, top: `${(y + 1) * 50}%` }} />
+        <small>{d.meioMarcado ? '👆 arraste pra mirar' : '📺 aponte pra TV e aperte um botão'}</small>
+      </div>
+      {dep ? (
+        <pre className="mc-dep">
+          <button className="mc-dep-x" aria-label="esconder a depuração" onClick={() => setDep(false)}>
+            ✕
+          </button>
+          {`🧪 Wiimote · ${d.ligado ? 'ligado' : 'desligado'} · ${d.hz} leituras/s
+giroscópio: ${d.giroscopio === null ? '?' : d.giroscopio ? 'sim' : 'não (mira pela inclinação + dedo)'}
+aceleração (g): ${mov ? mov.acel.map(n2).join(' ') : '—'}
+força: ${d.forca.toFixed(2)} g${d.chacoalhando ? ' · CHACOALHANDO' : ''}
+mira: x ${n2(x)}  y ${n2(y)} · meio ${d.meioMarcado ? 'marcado' : 'esperando um botão'}
+sensibilidade: ${d.sens.toFixed(2)}× · mandando: ${mov ? 'sim' : 'não'}`}
+        </pre>
+      ) : (
+        <button className="mc-dep-abrir" aria-label="mostrar a depuração" onClick={() => setDep(true)}>
+          🧪
+        </button>
+      )}
     </div>
   );
 }

@@ -24,7 +24,7 @@ describe('celular como Wiimote (W.6)', () => {
     const m2 = new Mira();
     m2.atualizar(acelDoCelular(0, 0, 9.8), null, 0.01);
     for (let i = 0; i < 40; i++) p = m2.atualizar(acelDoCelular(-9.8 * Math.sin(s), 0, 9.8 * Math.cos(s)), null, 0.01);
-    expect(p.x).toBeGreaterThan(0.5); // lado direito pra baixo = mira à direita
+    expect(p.x).toBeGreaterThan(0.45); // lado direito pra baixo = mira à direita (20° de 40° até a borda)
   });
 
   it('em pé (tela pra quem joga, no notebook): inclinar mexe a mira nos dois eixos', () => {
@@ -40,7 +40,7 @@ describe('celular como Wiimote (W.6)', () => {
     const m2 = new Mira();
     m2.atualizar(emPe(0, 0), null, 0.01);
     for (let i = 0; i < 40; i++) p = m2.atualizar(emPe(0, s), null, 0.01);
-    expect(p.x).toBeGreaterThan(0.5);
+    expect(p.x).toBeGreaterThan(0.45); // 20° de 40° até a borda
   });
 
   it('chacoalhando, a mira fica onde estava', () => {
@@ -73,6 +73,21 @@ describe('celular como Wiimote (W.6)', () => {
     expect(dobro.atualizar(PARADO.acel, [0, 0, 0], 0.01)).toEqual({ x: 0, y: 0 });
     dobro.sensibilidade(Number.NaN); // lixo volta pro padrão
     dobro.sensibilidade(99);
+  });
+
+  it('mira pelo dedo: arrastar soma à inclinação; recentrar zera os dois', () => {
+    const m = new Mira();
+    m.atualizar(PARADO.acel, null, 0.01); // o meio
+    expect(m.arrastar(0.25, -0.1)).toEqual({ x: 0.5, y: -0.2 });
+    // a inclinação continua contando a partir do que o dedo deixou
+    const p = m.atualizar(PARADO.acel, null, 0.01);
+    expect(p.x).toBeCloseTo(0.5, 5);
+    expect(p.y).toBeCloseTo(-0.2, 5);
+    expect(m.arrastar(5, 0).x).toBe(1); // para na borda
+    m.recentrar();
+    m.atualizar(PARADO.acel, null, 0.01);
+    expect(m.atualizar(PARADO.acel, null, 0.01)).toEqual({ x: 0, y: 0 });
+    expect(m.arrastar(Number.NaN, 0)).toEqual({ x: 0, y: 0 });
   });
 
   it('vai e volta pela rede; lixo é ignorado', () => {

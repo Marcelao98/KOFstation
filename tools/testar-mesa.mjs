@@ -77,6 +77,16 @@ function espiarRede() {
     constructor(...a) {
       super(...a);
       this.addEventListener('message', (e) => {
+        // 4.: o B "acha" que o PC está num jogo de Wii (troca o console no pad-ok que chega do A)
+        if (globalThis.__fingirWii && !e.__trocado && typeof e.data === 'string' && e.data.includes('pad-ok')) {
+          e.stopImmediatePropagation();
+          const n = new MessageEvent('message', {
+            data: e.data.replace(/\\"sis\\":\\"[a-z0-9]+\\"/, '\\"sis\\":\\"wii\\"'),
+          });
+          n.__trocado = true;
+          this.dispatchEvent(n);
+          return;
+        }
         try {
           const m = JSON.parse(e.data);
           if (m && typeof m.t === 'string' && ['lista', 'pareado', 'achados', 'parear'].includes(m.t)) {
@@ -238,6 +248,46 @@ try {
   await a.locator('#st-jogo', { hasText: 'Teste Vermelho' }).waitFor();
   await print(a, 'A-voltou');
   ok(true, 'voltar pra TV: o B largou a imagem e o jogo continua no A');
+
+  // ---- 4. 📱 o B como Wiimote (PC "num jogo de Wii", sensor fingido): o quadro da mira, o meio no 1º botão, o dedo
+  await b.evaluate(() => {
+    globalThis.__fingirWii = true;
+    globalThis.__sensor = setInterval(
+      () =>
+        dispatchEvent(
+          new DeviceMotionEvent('devicemotion', {
+            accelerationIncludingGravity: { x: 0, y: 0, z: 9.8 },
+            rotationRate: null,
+            interval: 16,
+          }),
+        ),
+      16,
+    );
+  });
+  await b.locator('[data-acao="rede-controle"]').first().click({ timeout: 15000 });
+  await b.locator('.mc-wii .mc-mira').waitFor({ timeout: 15000 });
+  await b.locator('.mc-dep', { hasText: 'ligado' }).waitFor({ timeout: 10000 });
+  ok(true, 'Wiimote: o quadro da mira e a depuração aparecem sozinhos');
+  await b.locator('.mc-dep', { hasText: 'esperando um botão' }).waitFor({ timeout: 5000 });
+  await apertar('pointerdown');
+  await b.locator('.mc-dep', { hasText: 'meio marcado' }).waitFor({ timeout: 5000 });
+  await apertar('pointerup');
+  ok(true, 'Wiimote: o meio da mira é marcado no 1º botão');
+  const caixa = await b.locator('.mc-mira').boundingBox();
+  const cx = caixa.x + caixa.width / 2;
+  const cy = caixa.y + caixa.height / 2;
+  await b.mouse.move(cx, cy);
+  await b.mouse.down();
+  await b.mouse.move(cx + caixa.width / 4, cy, { steps: 5 });
+  await b.mouse.up();
+  await espera(300);
+  const dep = await b.textContent('.mc-dep');
+  const mx = Number(dep.match(/mira: x\s+(-?[\d.]+)/)?.[1]);
+  await print(b, 'B-wiimote');
+  ok(mx > 0.4, `Wiimote: arrastar o dedo ¼ da largura leva a mira pra direita (x ${mx})`);
+  ok(/mandando: sim/.test(dep) && /\d+ leituras\/s/.test(dep), 'Wiimote: o sensor está sendo lido e mandado');
+  await b.evaluate(() => clearInterval(globalThis.__sensor));
+  await b.click('#modo-controle .mc-sair');
 
   ok(erros.length === 0, 'nenhum erro nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   console.log('\nmesa (linha de base): tudo certo');

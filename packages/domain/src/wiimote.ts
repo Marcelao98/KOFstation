@@ -35,8 +35,11 @@ export const giroDoCelular = (alfa: number, beta: number, gama: number): [number
 /** Quanto mexer o celular pra mira ir de um lado ao outro da tela. */
 const GIRO_X = (25 * Math.PI) / 180; // girar 25° pra um lado = borda da tela
 const GIRO_Y = (18 * Math.PI) / 180;
-const INCLINA_X = (30 * Math.PI) / 180; // sem giroscópio: deitar o celular 30° pro lado = borda
-const INCLINA_Y = (25 * Math.PI) / 180;
+// sem giroscópio: deitar o celular 40° pro lado = borda (era 30°/25°: com pouco já travava na beirada, 22/11)
+const INCLINA_X = (40 * Math.PI) / 180;
+const INCLINA_Y = (35 * Math.PI) / 180;
+/** quanto do valor novo entra a cada leitura (era 0,2: a mira ficava atrasada) */
+const SUAVE = 0.35;
 const lim = (v: number, m: number) => Math.max(-m, Math.min(m, v));
 
 /** Diferença de dois ângulos, sempre entre −π e π. */
@@ -55,6 +58,25 @@ export class Mira {
   private filtro: { lado: number; frente: number } | null = null;
   /** calibração (opcional): quanto a mira anda pro mesmo movimento (1 = padrão; 2 = o dobro, mexe menos o braço) */
   private sens = 1;
+  /** mira pelo dedo (22/11): o quanto o dedo arrastou, somado à da inclinação (sem giroscópio) */
+  private ox = 0;
+  private oy = 0;
+  /** pra tela de depuração: a força medida na última leitura (g) e se estava chacoalhando */
+  forca = 1;
+  chacoalhando = false;
+
+  /**
+   * Mira pelo dedo: arrastar numa área da tela (dx, dy em fração da área, 1 = a largura toda) move a mira junto com a
+   * inclinação. A área inteira = a tela inteira do jogo (a mira vai de −1 a 1).
+   */
+  arrastar(dx: number, dy: number): { x: number; y: number } {
+    if (!Number.isFinite(dx) || !Number.isFinite(dy)) return { x: this.x, y: this.y };
+    this.ox = lim(this.ox + dx * 2, 2);
+    this.oy = lim(this.oy + dy * 2, 2);
+    this.x = lim(this.x + dx * 2, 1);
+    this.y = lim(this.y + dy * 2, 1);
+    return { x: this.x, y: this.y };
+  }
 
   /** A sensibilidade da calibração, entre 0,25 e 3. */
   sensibilidade(s: number): void {
@@ -64,6 +86,8 @@ export class Mira {
   recentrar(): void {
     this.x = 0;
     this.y = 0;
+    this.ox = 0;
+    this.oy = 0;
     this.neutro = null;
     this.filtro = null;
   }
@@ -79,22 +103,24 @@ export class Mira {
     }
     const [ax = 0, ay = 0, az = 1] = acel;
     const forca = Math.hypot(ax, ay, az);
+    this.forca = forca;
     // longe de 1 g é o celular sendo chacoalhado: a "gravidade" medida é mentira, a mira não mexe
-    if (forca < 0.75 || forca > 1.25) return { x: this.x, y: this.y };
+    this.chacoalhando = forca < 0.75 || forca > 1.25;
+    if (this.chacoalhando) return { x: this.x, y: this.y };
     // lado: quanto da gravidade foi pro X (deitar o lado direito = +X); frente: o giro em torno do X (levantar a
     // ponta deitado, ou incliná-la pra trás em pé), que não trava em nenhuma das duas posições
     const lado = Math.asin(lim(ax / forca, 1));
     const frente = Math.atan2(-ay, az);
     const f = this.filtro
       ? {
-          lado: this.filtro.lado + (lado - this.filtro.lado) * 0.2,
-          frente: this.filtro.frente + delta(frente, this.filtro.frente) * 0.2,
+          lado: this.filtro.lado + (lado - this.filtro.lado) * SUAVE,
+          frente: this.filtro.frente + delta(frente, this.filtro.frente) * SUAVE,
         }
       : { lado, frente };
     this.filtro = f;
     this.neutro ??= f;
-    this.x = lim(((f.lado - this.neutro.lado) * this.sens) / INCLINA_X, 1);
-    this.y = lim((-delta(f.frente, this.neutro.frente) * this.sens) / INCLINA_Y, 1);
+    this.x = lim(((f.lado - this.neutro.lado) * this.sens) / INCLINA_X + this.ox, 1);
+    this.y = lim((-delta(f.frente, this.neutro.frente) * this.sens) / INCLINA_Y + this.oy, 1);
     return { x: this.x, y: this.y };
   }
 }
