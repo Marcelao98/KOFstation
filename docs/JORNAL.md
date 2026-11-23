@@ -47,8 +47,14 @@ kof-nativo falha igual sem as mudanças (placa ocupada com o jogo dele aberto).
 **Deu errado / aprendido:** 1ª correção da imagem passou no teste e não no celular: o headless nunca esconde a janela
 (aba de trás continua `visible`); o print dele mostrou o ping ok com vídeo preto e aí a causa apareceu. Li errado "deu
 certo" (era do vídeo, não do Wiimote). Matei o próprio shell com `pkill -f` contendo o caminho: usar `pgrep -x`.
+**Depois (b20e400):** Wiimote em celular sem giroscópio: quadro da mira (arrastar o dedo), meio marcado no 1º botão,
+inclinação mais tolerante (40°/35°, suavização 0,35) e depuração ao vivo na tela; testar-mesa ganhou o passo 4 (B
+como Wiimote com sensor fingido). No S23 do cunhado (com giroscópio) a mira ficou boa. O Wii Sports reclamou "unplug
+the extension controller" (o padrão do Wii é Wiimote + Nunchuk): troquei só nesse jogo (Opções de emulação → Wii →
+"Só este jogo" → Controle do Wii) pra "Wiimote + MotionPlus" — ainda não jogado (os celulares descarregaram). Ideia:
+o app escolher sozinho o controle certo por jogo (Wii Sports/Resort).
 **Onde parou:** ⏸ ele testa o APK novo (http://192.168.0.109:8099/KOFstation-novo.apk) com dois celulares no Wii
-Sports, o 🎯 e o analógico do PS2. Falta: "Jogar no PC / Jogar aqui" volta pro menu e trava; mapeamento dos botões do
+Sports (com o MotionPlus), o 🎯 e o analógico do PS2. Falta: "Jogar no PC / Jogar aqui" volta pro menu e trava; mapeamento dos botões do
 Wii (ele diz qual está ruim); aviso "não consegui guardar a pasta de ROMs" no celular; depois b) a Mesa só mostrando.
 
 ## 2026-11-22 · Tarefa M voltada inteira (quebrou no aparelho de verdade)
